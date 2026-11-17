@@ -234,12 +234,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   });
 
-  // Active Tenant
+  // Active Tenant (detectado por ID ou Slug na URL)
   const [currentTenantId, setCurrentTenantIdState] = useState<string>(() => {
     try {
       if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
-        const tenantFromUrl = urlParams.get('tenant');
+        const tenantFromUrl = urlParams.get('loja') || urlParams.get('vitrine') || urlParams.get('painel') || urlParams.get('tenant');
         if (tenantFromUrl) return tenantFromUrl;
       }
       const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_TENANT_ID);
@@ -249,9 +249,31 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   });
 
-  // Current view role: 'super_admin' | 'tenant_admin' | 'storefront'
+  // Current view role: 'super_admin' | 'tenant_admin' | 'storefront' | 'login_tenant' | 'register_tenant'
   const [viewRole, setViewRoleState] = useState<ViewRole>(() => {
     try {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('vitrine') || (urlParams.has('loja') && !urlParams.has('painel'))) {
+          return 'storefront';
+        }
+        if (urlParams.has('painel')) {
+          return 'tenant_admin';
+        }
+        if (urlParams.has('cadastro')) {
+          return 'register_tenant';
+        }
+        if (urlParams.has('login_lojista')) {
+          return 'login_tenant';
+        }
+        if (urlParams.get('portal') === 'master' || urlParams.get('portal') === 'admin') {
+          return 'super_admin';
+        }
+        if (urlParams.get('portal') === 'tenant') {
+          return 'tenant_admin';
+        }
+      }
+
       const portal = detectPortalMode();
       if (portal === 'master') return 'super_admin';
 
@@ -259,7 +281,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (saved && saved !== 'super_admin') return saved;
       return 'tenant_admin';
     } catch {
-      return 'tenant_admin';
+      return 'super_admin';
     }
   });
 
@@ -419,8 +441,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     localStorage.setItem(STORAGE_KEYS.VIEW_ROLE, role);
   };
 
-  // Safe current tenant lookup
-  const currentTenant = tenants.find((t) => t.id === currentTenantId) || tenants[0];
+  // Safe current tenant lookup (localiza por id ou por slug amigável da URL)
+  const currentTenant = tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId) || tenants[0];
 
   // Estado reativo persistido para o tema da vitrine e do painel do lojista
   const [tenantThemeMode, setTenantThemeMode] = useState<'dark' | 'light'>(() => {

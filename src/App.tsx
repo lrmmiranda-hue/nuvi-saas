@@ -12,6 +12,7 @@ import { OnboardingWizardModal } from './components/tenant/OnboardingWizardModal
 import { NewTenantModal } from './components/superadmin/NewTenantModal';
 import { Tenant } from './types';
 import { detectPortalMode } from './utils/portalEnvironment';
+import { ArrowLeft, ShieldCheck } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const {
@@ -84,9 +85,11 @@ const AppContent: React.FC = () => {
     document.documentElement.style.setProperty('--brand-accent', accentColor);
   }, [primaryColor, accentColor]);
 
-  // Se estiver na porta 3005 (Master) e NÃO estiver autenticado:
-  // Renderiza a página de login limpa e profissional, sem cabeçalhos ou controles duplicados!
-  if (portalMode === 'master' && !isMasterAuthenticated) {
+  // Se for visão do Master e NÃO estiver autenticado:
+  // Renderiza a página de login limpa e profissional
+  const isMasterView = viewRole === 'super_admin';
+
+  if (isMasterView && !isMasterAuthenticated) {
     return (
       <div className={`min-h-screen ${adminThemeMode === 'light' ? 'light' : 'dark'}`}>
         <MasterLoginView />
@@ -107,8 +110,26 @@ const AppContent: React.FC = () => {
       }}
     >
       
-      {/* Cabeçalho Dedicado Conforme a Porta / Ambiente */}
-      {portalMode === 'master' ? (
+      {/* Barra de Supervisão do Dono do SaaS (ao inspecionar qualquer loja) */}
+      {isMasterAuthenticated && !isMasterView && (
+        <div className="bg-neutral-900 text-white px-4 py-2 border-b border-neutral-800 flex items-center justify-between text-xs sticky top-0 z-50 shadow-md">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0" />
+            <span className="font-bold">Supervisão Master:</span>
+            <span className="text-slate-300">Você está gerenciando a loja <strong>{currentTenant?.name}</strong></span>
+          </div>
+          <button
+            onClick={() => setViewRole('super_admin')}
+            className="btn-graphite px-3 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Voltar ao Painel Master</span>
+          </button>
+        </div>
+      )}
+
+      {/* Cabeçalho Dedicado Conforme o Modo Ativo */}
+      {isMasterView ? (
         <MasterHeader />
       ) : (
         <TenantHeader
@@ -119,16 +140,14 @@ const AppContent: React.FC = () => {
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         
-        {/* Visão do Master (Porta 3005) */}
-        {portalMode === 'master' && (
+        {/* Visão do Master Geral */}
+        {isMasterView ? (
           <SuperAdminDashboard
             onOpenNewTenantModal={() => setIsNewTenantModalOpen(true)}
             onOpenOnboardingForTenant={handleOpenOnboardingForTenant}
           />
-        )}
-
-        {/* Visões do Lojista e Vitrine (Porta 3006) */}
-        {portalMode === 'tenant' && (
+        ) : (
+          /* Visões da Loja Selecionada (Painel, Vitrine ou Login do Lojista) */
           <>
             {viewRole === 'tenant_admin' && (
               <TenantDashboard
