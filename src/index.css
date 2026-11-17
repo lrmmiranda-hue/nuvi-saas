@@ -1,0 +1,329 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+}
+
+/* Modo Claro Adaptativo para o Painel e Telas do SaaS */
+.light {
+  color-scheme: light;
+}
+
+.light,
+.light body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Remover borda e outline forçados ao focar campos */
+.no-focus-outline:focus,
+.no-focus-outline:focus-visible,
+.no-focus-outline:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Fundo limpo para cards e superfícies no modo claro */
+.light div.bg-neutral-950,
+.light div.bg-neutral-900,
+.light div.bg-neutral-850,
+.light div.bg-neutral-800:not(.btn-graphite):not([role="tab"]):not(button) {
+  background-color: #ffffff !important;
+}
+
+/* Fundo Grafite / Chumbo Padronizado e Idêntico ao Hover (#262626) para Botões Selecionados e Abas Ativas */
+button.bg-neutral-800,
+a.bg-neutral-800,
+.bg-neutral-800.text-white,
+.btn-graphite,
+.light button.bg-neutral-800,
+.light a.bg-neutral-800,
+.light .bg-neutral-800.text-white,
+.light .btn-graphite {
+  background-color: #262626 !important; /* Exatamente rgb(38, 38, 38) - idêntico ao hover! */
+  color: #ffffff !important;
+  border-color: #404040 !important;
+}
+
+button.bg-neutral-800:hover,
+a.bg-neutral-800:hover,
+.btn-graphite:hover,
+.light button.bg-neutral-800:hover,
+.light a.bg-neutral-800:hover,
+.light .btn-graphite:hover {
+  background-color: #262626 !important;
+  color: #ffffff !important;
+  border-color: #404040 !important;
+}
+
+button.bg-neutral-800 *,
+a.bg-neutral-800 *,
+.bg-neutral-800.text-white *,
+.btn-graphite * {
+  color: #ffffff !important;
+}
+
+.light .bg-neutral-700,
+.light .bg-neutral-600 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Evita que classes com opacidade no Tailwind fiquem em tom cinza-escuro chumbo no modo claro em containers */
+.light div[class*="bg-neutral-950/"],
+.light div[class*="bg-neutral-900/"],
+.light div[class*="bg-neutral-850/"],
+.light div[class*="bg-neutral-800/"]:not(button):not(a) {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light [class*="bg-neutral-700/"],
+.light [class*="bg-neutral-600/"],
+.light [class*="bg-neutral-500/"] {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Cabeçalhos de tabela limpos e de alto contraste no modo claro */
+.light thead,
+.light thead tr,
+.light th {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light tbody tr {
+  border-color: #f1f5f9 !important;
+}
+
+/* Textos com alto contraste no modo claro */
+.light .text-neutral-100 {
+  color: #0f172a !important;
+}
+
+.light .text-neutral-200 {
+  color: #1e293b !important;
+}
+
+.light .text-neutral-300 {
+  color: #334155 !important;
+}
+
+.light .text-neutral-400 {
+  color: #475569 !important;
+}
+
+.light .text-neutral-500 {
+  color: #64748b !important;
+}
+
+/* Bordas suaves e nítidas no modo claro */
+.light .border-neutral-800,
+.light .border-neutral-700 {
+  border-color: #e2e8f0 !important;
+}
+
+.light input[type="text"],
+.light input[type="number"],
+.light input[type="email"],
+.light input[type="tel"],
+.light input[type="password"],
+.light textarea,
+.light select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+  color-scheme: light !important;
+}
+
+/* Proteção global para selects nativos no Windows/Chrome em tema escuro e claro */
+select {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background-color: #171717 !important;
+  color: #f5f5f5 !important;
+}
+
+.light select option,
+.light select optgroup {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Dinâmica de Cores Primária e Secundária da Marca */
+.brand-primary-bg {
+  background-color: var(--brand-primary, #D97706) !important;
+  color: #ffffff !important;
+}
+
+.brand-primary-text {
+  color: var(--brand-primary, #D97706) !important;
+}
+
+.brand-primary-border {
+  border-color: var(--brand-primary, #D97706) !important;
+}
+
+.brand-accent-bg {
+  background-color: var(--brand-accent, #F59E0B) !important;
+  color: #ffffff !important;
+}
+
+.brand-accent-text {
+  color: var(--brand-accent, #F59E0B) !important;
+}
+
+.brand-accent-border {
+  border-color: var(--brand-accent, #F59E0B) !important;
+}
+
+/* Preserva texto branco apenas em botões e elementos que usam fundo primário preenchido */
+.light .btn-primary,
+.light .text-white-always,
+.light .text-white-force {
+  color: #ffffff !important;
+}
+
+/* Neutraliza gradientes escuros em modo claro */
+.light .bg-gradient-to-r.from-neutral-900,
+.light .bg-gradient-to-r.from-neutral-950,
+.light [class*="from-neutral-900"],
+.light [class*="from-neutral-950"] {
+  background-image: none !important;
+  background-color: #ffffff !important;
+}
+
+/* Preserva cards coloridos especiais com tons pastéis no modo claro */
+.light .bg-amber-950\/20 {
+  background-color: rgba(254, 243, 199, 0.7) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+.light .bg-sky-950\/20 {
+  background-color: rgba(224, 242, 254, 0.7) !important;
+  border-color: rgba(14, 165, 233, 0.4) !important;
+}
+
+.light .bg-emerald-950\/20 {
+  background-color: rgba(209, 250, 229, 0.7) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+.light .bg-purple-950\/20 {
+  background-color: rgba(243, 232, 255, 0.7) !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
+}
+
+.light .bg-rose-950\/20,
+.light .bg-red-950\/20 {
+  background-color: rgba(255, 228, 230, 0.7) !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+
+/* Custom scrollbars for clean e-commerce feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.45);
+}
+
+/* Animação Cinematográfica Suave para Banners de Cardápios Eletrônicos */
+@keyframes kenburnsBanner {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: scale(1.06) translate3d(-0.8%, -0.8%, 0);
+  }
+
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+.animate-banner-kenburns {
+  animation: kenburnsBanner 20s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Efeito de Feixe de Luz / Varredura de Luz Cinematográfica (Light Sweep) */
+@keyframes bannerLightSweep {
+  0% {
+    transform: translateX(-150%) skewX(-25deg);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.85;
+  }
+
+  35% {
+    transform: translateX(250%) skewX(-25deg);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(250%) skewX(-25deg);
+    opacity: 0;
+  }
+}
+
+.animate-banner-light-sweep {
+  animation: bannerLightSweep 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+/* Efeito de Spotlight de Luz Pulsante (Lens Flare & Estúdio) */
+@keyframes bannerSpotlightPulse {
+
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+
+  50% {
+    opacity: 0.95;
+    transform: scale(1.18) translate3d(1.5%, -1.5%, 0);
+  }
+}
+
+.animate-banner-spotlight {
+  animation: bannerSpotlightPulse 5s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
