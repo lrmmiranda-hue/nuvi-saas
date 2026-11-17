@@ -113,11 +113,9 @@ const AppContent: React.FC = () => {
         ['--brand-accent' as any]: accentColor,
       }}
     >
-      {/* Cabeçalho Dedicado Conforme o Modo Ativo (Oculto em telas públicas de cadastro/login) */}
+      {/* Cabeçalho Dedicado Conforme o Modo Ativo (Oculto em telas de cadastro, login e no painel despoluído do lojista) */}
       {isMasterView ? (
         <MasterHeader onOpenSettings={() => setIsMasterSettingsOpen(true)} />
-      ) : showTenantHeader ? (
-        <TenantHeader />
       ) : null}
 
       {/* Main Container */}

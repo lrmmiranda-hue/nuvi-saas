@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Tenant } from '../../types';
 import { buildStoreUrl } from '../../utils/routes';
+import { getSegmentById } from '../../data/businessSegments';
 import { MasterSettingsModal } from './MasterSettingsModal';
 import { 
   Building2, 
@@ -27,7 +28,11 @@ import {
   Copy,
   Share2,
   Link2,
-  Sliders
+  Sliders,
+  List,
+  LayoutGrid,
+  Phone,
+  MapPin
 } from 'lucide-react';
 
 interface SuperAdminDashboardProps {
@@ -55,6 +60,23 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
+  // Modo de Exibição das Lojas: 'grid_4' (Miniaturas em 4 Colunas) ou 'list' (Lista)
+  const [viewMode, setViewMode] = useState<'grid_4' | 'list'>(() => {
+    try {
+      const saved = localStorage.getItem('nuvi_master_stores_view_mode');
+      return saved === 'list' || saved === 'grid_4' ? saved : 'grid_4';
+    } catch {
+      return 'grid_4';
+    }
+  });
+
+  const handleSetViewMode = (mode: 'grid_4' | 'list') => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('nuvi_master_stores_view_mode', mode);
+    } catch {}
+  };
 
   // SaaS KPIs
   const totalStores = tenants.length;
@@ -278,13 +300,47 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         
         {/* Search & Filter Toolbar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <h2 className={`text-lg font-bold ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
-              Lojas de Clientes
-            </h2>
-            <span className={`text-xs ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
-              ({filteredTenants.length} exibidas)
-            </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <h2 className={`text-lg font-bold ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                Lojas de Clientes
+              </h2>
+              <span className={`text-xs ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                ({filteredTenants.length} exibidas)
+              </span>
+            </div>
+
+            {/* Alternador de Modo: Miniaturas com 4 Colunas vs Lista */}
+            <div className="flex items-center p-1 rounded-xl bg-slate-200/80 dark:bg-[#151D24] border border-slate-300/80 dark:border-[#222E3A]">
+              <button
+                type="button"
+                onClick={() => handleSetViewMode('grid_4')}
+                title="Exibir em Miniaturas com 4 Colunas"
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === 'grid_4'
+                    ? 'bg-neutral-800 text-white shadow-xs border border-neutral-700'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Miniaturas (4 Colunas)</span>
+                <span className="sm:hidden">4 Colunas</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSetViewMode('list')}
+                title="Exibir em Lista"
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === 'list'
+                    ? 'bg-neutral-800 text-white shadow-xs border border-neutral-700'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <List className="w-3.5 h-3.5" />
+                <span>Lista</span>
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -322,213 +378,395 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Tenant Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredTenants.map((tenant) => {
-            const planBadgeColor: Record<string, string> = {
-              starter: 'bg-neutral-800 text-neutral-300',
-              pro: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
-              enterprise: 'bg-purple-500/15 text-purple-400 border border-purple-500/30',
-            };
+        {/* ============================================================== */}
+        {/* MODO 1: MINIATURAS COM 4 COLUNAS                               */}
+        {/* ============================================================== */}
+        {viewMode === 'grid_4' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredTenants.map((tenant) => {
+              const segConfig = tenant.businessSegment ? getSegmentById(tenant.businessSegment) : undefined;
+              const planBadgeColor: Record<string, string> = {
+                starter: 'bg-neutral-800 text-neutral-300',
+                pro: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+                enterprise: 'bg-purple-500/15 text-purple-400 border border-purple-500/30',
+              };
 
-            return (
-              <div
-                key={tenant.id}
-                className={`rounded-2xl border transition-all flex flex-col justify-between overflow-hidden group shadow-sm ${
-                  themeMode === 'light'
-                    ? 'bg-white border-slate-200 hover:border-blue-300 shadow-xs'
-                    : 'bg-[#11161B] border-[#1C2631] hover:border-blue-500/40'
-                }`}
-              >
-                {/* Store Visual Header - Padronizado em Azul / Cinza Gelo / Black Carbon */}
-                <div 
-                  className={`h-20 p-4 relative flex items-center justify-between border-b ${
+              return (
+                <div
+                  key={tenant.id}
+                  className={`rounded-2xl border transition-all flex flex-col justify-between overflow-hidden group shadow-sm ${
                     themeMode === 'light'
-                      ? 'bg-gradient-to-r from-slate-100 via-slate-100 to-slate-200/60 border-slate-200'
-                      : 'bg-gradient-to-r from-[#0B0F12] via-[#11161B] to-[#161D24] border-[#1C2631]'
+                      ? 'bg-white border-slate-200 hover:border-sky-300 shadow-xs'
+                      : 'bg-[#11161B] border-[#1C2631] hover:border-sky-500/40'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    {tenant.branding.logoUrl ? (
-                      <div className={`w-10 h-10 rounded-xl border p-1 flex items-center justify-center shrink-0 shadow-xs overflow-hidden ${
-                        themeMode === 'light' ? 'bg-white border-slate-200' : 'bg-neutral-950 border-neutral-800'
-                      }`}>
-                        <img
-                          src={tenant.branding.logoUrl}
-                          alt={tenant.name}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-xl bg-blue-600 border border-blue-500/40 flex items-center justify-center font-bold text-white text-base shadow-xs shrink-0">
-                        {tenant.name.charAt(0)}
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <h3 className={`font-bold text-sm truncate max-w-[170px] ${
-                        themeMode === 'light' ? 'text-slate-900' : 'text-white'
-                      }`}>
-                        {tenant.name}
-                      </h3>
-                      <p className={`text-[11px] truncate max-w-[180px] ${
-                        themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'
-                      }`}>
-                        {tenant.address.city} - {tenant.address.neighborhood}
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${planBadgeColor[tenant.plan] || 'bg-neutral-800 text-white'}`}>
-                    {tenant.plan}
-                  </span>
-                </div>
-
-                {/* Store Body Data */}
-                <div className="p-5 space-y-4 flex-1">
-                  
-                  {/* Slogan */}
-                  <p className={`text-xs line-clamp-2 min-h-[32px] ${
-                    themeMode === 'light' ? 'text-neutral-600' : 'text-neutral-400'
-                  }`}>
-                    {tenant.slogan || 'Sem slogan cadastrado'}
-                  </p>
-
-                  {/* Owner & WhatsApp */}
-                  <div className={`space-y-1.5 text-xs border-t pt-3 ${
-                    themeMode === 'light' ? 'text-neutral-700 border-neutral-200' : 'text-neutral-300 border-neutral-800/80'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <span className={themeMode === 'light' ? 'text-neutral-500' : 'text-neutral-500'}>Responsável:</span>
-                      <span className={`font-medium ${themeMode === 'light' ? 'text-neutral-800' : 'text-neutral-200'}`}>{tenant.ownerName}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className={themeMode === 'light' ? 'text-neutral-500' : 'text-neutral-500'}>WhatsApp:</span>
-                      <span className={`font-mono ${themeMode === 'light' ? 'text-neutral-800' : 'text-neutral-200'}`}>{tenant.whatsapp.phoneNumber}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className={themeMode === 'light' ? 'text-neutral-500' : 'text-neutral-500'}>Taxa de Entrega:</span>
-                      <span className={`font-mono ${themeMode === 'light' ? 'text-neutral-800' : 'text-neutral-200'}`}>R$ {tenant.address.standardDeliveryFee.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  {/* Metrics */}
-                  <div className={`grid grid-cols-2 gap-2 p-3 rounded-xl border text-xs ${
-                    themeMode === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-[#0B0F12] border-[#1C2631]'
-                  }`}>
-                    <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-semibold">Vendas Totais</span>
-                      <p className={`font-bold tabular-nums mt-0.5 ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
-                        R$ {(tenant.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-semibold">Pedidos</span>
-                      <p className="font-bold text-emerald-500 tabular-nums mt-0.5">
-                        {tenant.ordersCount || 0} feitos
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Onboarding Status */}
-                  {!tenant.onboardingCompleted ? (
-                    <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 text-emerald-500">
-                        <Clock className="w-3.5 h-3.5 shrink-0" />
-                        <span className="text-[11px] font-medium">Onboarding Pendente</span>
-                      </div>
-                      <button
-                        onClick={() => onOpenOnboardingForTenant(tenant)}
-                        className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 underline hover:opacity-80"
-                      >
-                        Iniciar
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-[11px] text-emerald-500 font-medium">
-                      <CheckCircle className="w-3.5 h-3.5" />
-                      <span>Configuração inicial concluída</span>
-                    </div>
-                  )}
-
-                </div>
-
-                {/* Links Rápidos de Compartilhamento da Loja */}
-                <div className={`px-4 py-2 border-t flex items-center justify-between gap-2 text-xs ${
-                  themeMode === 'light' ? 'bg-slate-100/70 border-slate-200' : 'bg-[#0B0F12]/80 border-[#1C2631]'
-                }`}>
-                  <button
-                    onClick={() => handleCopyStorefrontUrl(tenant)}
-                    title="Copiar link da vitrine/cardápio para mandar aos clientes"
-                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold text-[11px] transition-all cursor-pointer"
-                  >
-                    <Link2 className="w-3 h-3" />
-                    <span>Link Vitrine</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleCopyDashboardUrl(tenant)}
-                    title="Copiar link do painel e PDV para o lojista"
-                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-bold text-[11px] transition-all cursor-pointer"
-                  >
-                    <Copy className="w-3 h-3" />
-                    <span>Link Painel</span>
-                  </button>
-                </div>
-
-                {/* Card Actions Footer */}
-                <div className={`p-3 border-t flex items-center gap-2 ${
-                  themeMode === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-[#0B0F12] border-[#1C2631]'
-                }`}>
-                  <button
-                    onClick={() => handleImpersonateTenant(tenant.id)}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 text-blue-600 dark:text-blue-400 border border-blue-500/30 font-bold text-xs transition-all shadow-2xs cursor-pointer"
-                  >
-                    <Settings className="w-3.5 h-3.5" />
-                    <span>Acessar Painel</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleOpenStorefront(tenant.id)}
-                    title="Abrir Vitrine Pública da Adega"
-                    className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                      themeMode === 'light' 
-                        ? 'bg-neutral-200/70 hover:bg-neutral-300 text-neutral-700' 
-                        : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white'
+                  {/* Store Visual Header Compacto */}
+                  <div 
+                    className={`p-3 relative flex items-center justify-between border-b ${
+                      themeMode === 'light'
+                        ? 'bg-gradient-to-r from-slate-100 via-slate-100 to-slate-200/60 border-slate-200'
+                        : 'bg-gradient-to-r from-[#0B0F12] via-[#11161B] to-[#161D24] border-[#1C2631]'
                     }`}
                   >
-                    <Eye className="w-3.5 h-3.5" />
-                  </button>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {tenant.branding.logoUrl ? (
+                        <div className={`w-8 h-8 rounded-lg border p-0.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden ${
+                          themeMode === 'light' ? 'bg-white border-slate-200' : 'bg-neutral-950 border-neutral-800'
+                        }`}>
+                          <img
+                            src={tenant.branding.logoUrl}
+                            alt={tenant.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div 
+                          className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white text-xs shadow-xs shrink-0"
+                          style={{ backgroundColor: tenant.branding?.primaryColor || '#0284C7' }}
+                        >
+                          {segConfig?.emoji || tenant.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h3 className={`font-bold text-xs truncate ${
+                          themeMode === 'light' ? 'text-slate-900' : 'text-white'
+                        }`} title={tenant.name}>
+                          {tenant.name}
+                        </h3>
+                        <p className={`text-[10px] truncate ${
+                          themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'
+                        }`}>
+                          {segConfig?.shortLabel || 'Comércio'} • {tenant.address.city}
+                        </p>
+                      </div>
+                    </div>
 
-                  <button
-                    onClick={() => onOpenOnboardingForTenant(tenant)}
-                    title="Editar Passo a Passo / Configurações"
-                    className="p-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors cursor-pointer"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-                  </button>
+                    <span className={`text-[9px] uppercase font-black px-1.5 py-0.5 rounded-full shrink-0 ${planBadgeColor[tenant.plan] || 'bg-neutral-800 text-white'}`}>
+                      {tenant.plan}
+                    </span>
+                  </div>
 
-                  <button
-                    onClick={() => {
-                      showConfirm({
-                        title: 'Excluir Estabelecimento',
-                        message: `Deseja realmente excluir a loja "${tenant.name}"?\nTodos os produtos e pedidos deste estabelecimento serão apagados permanentemente.`,
-                        confirmText: 'Sim, excluir loja',
-                        cancelText: 'Cancelar',
-                        variant: 'danger',
-                        onConfirm: () => deleteTenant(tenant.id),
-                      });
-                    }}
-                    title="Excluir Estabelecimento"
-                    className="p-2 rounded-lg bg-neutral-800 hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  {/* Store Body Data Compacto */}
+                  <div className="p-3.5 space-y-3 flex-1 text-xs">
+                    
+                    {/* Responsável & WhatsApp */}
+                    <div className="space-y-1 text-[11px]">
+                      <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                        <span>Dono:</span>
+                        <span className={`font-semibold truncate max-w-[130px] ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-200'}`}>
+                          {tenant.ownerName}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                        <span>WhatsApp:</span>
+                        <a 
+                          href={`https://wa.me/55${tenant.whatsapp.phoneNumber.replace(/\D/g, '')}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="font-mono font-medium text-sky-600 dark:text-sky-400 hover:underline"
+                        >
+                          {tenant.whatsapp.phoneNumber}
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Metrics Grid Compacto */}
+                    <div className={`grid grid-cols-2 gap-1.5 p-2 rounded-xl border text-[11px] ${
+                      themeMode === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-[#0B0F12] border-[#1C2631]'
+                    }`}>
+                      <div>
+                        <span className="text-[9px] text-slate-400 uppercase font-semibold block">Vendas</span>
+                        <p className={`font-black tabular-nums ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                          R$ {(tenant.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-slate-400 uppercase font-semibold block">Pedidos</span>
+                        <p className="font-black text-emerald-500 tabular-nums">
+                          {tenant.ordersCount || 0}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Onboarding Status */}
+                    {!tenant.onboardingCompleted ? (
+                      <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-[10px]">
+                        <span className="text-emerald-500 font-medium">Config Inicial Pendente</span>
+                        <button
+                          onClick={() => onOpenOnboardingForTenant(tenant)}
+                          className="font-bold text-emerald-600 dark:text-emerald-400 underline cursor-pointer"
+                        >
+                          Iniciar
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-[10px] text-emerald-500 font-medium">
+                        <CheckCircle className="w-3 h-3" />
+                        <span>Loja configurada</span>
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* Links Rápidos de Compartilhamento */}
+                  <div className={`px-2.5 py-1.5 border-t flex items-center justify-between gap-1.5 text-xs ${
+                    themeMode === 'light' ? 'bg-slate-100/70 border-slate-200' : 'bg-[#0B0F12]/80 border-[#1C2631]'
+                  }`}>
+                    <button
+                      onClick={() => handleCopyStorefrontUrl(tenant)}
+                      title="Copiar link da vitrine/cardápio para WhatsApp"
+                      className="flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold text-[10px] transition-all cursor-pointer"
+                    >
+                      <Link2 className="w-2.5 h-2.5" />
+                      <span>Vitrine</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleCopyDashboardUrl(tenant)}
+                      title="Copiar link do painel e PDV para o lojista"
+                      className="flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-bold text-[10px] transition-all cursor-pointer"
+                    >
+                      <Copy className="w-2.5 h-2.5" />
+                      <span>Painel</span>
+                    </button>
+                  </div>
+
+                  {/* Card Actions Footer Compacto */}
+                  <div className={`p-2 border-t flex items-center gap-1.5 ${
+                    themeMode === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-[#0B0F12] border-[#1C2631]'
+                  }`}>
+                    <button
+                      onClick={() => handleImpersonateTenant(tenant.id)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 text-blue-600 dark:text-blue-400 border border-blue-500/30 font-bold text-[11px] transition-all cursor-pointer"
+                    >
+                      <Settings className="w-3 h-3" />
+                      <span>Acessar</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleOpenStorefront(tenant.id)}
+                      title="Abrir Vitrine Pública"
+                      className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                        themeMode === 'light' 
+                          ? 'bg-neutral-200/70 hover:bg-neutral-300 text-neutral-700' 
+                          : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white'
+                      }`}
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      onClick={() => onOpenOnboardingForTenant(tenant)}
+                      title="Configurações e Cores"
+                      className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        showConfirm({
+                          title: 'Excluir Estabelecimento',
+                          message: `Deseja realmente excluir a loja "${tenant.name}"?\nTodos os produtos e pedidos deste estabelecimento serão apagados permanentemente.`,
+                          confirmText: 'Sim, excluir loja',
+                          cancelText: 'Cancelar',
+                          variant: 'danger',
+                          onConfirm: () => deleteTenant(tenant.id),
+                        });
+                      }}
+                      title="Excluir Loja"
+                      className="p-1.5 rounded-lg bg-neutral-800 hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
                 </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* ============================================================== */
+          /* MODO 2: LISTA DE LOJAS DOS CLIENTES                            */
+          /* ============================================================== */
+          <div className={`rounded-2xl border overflow-hidden shadow-sm ${
+            themeMode === 'light' ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+          }`}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className={`border-b text-[11px] font-bold uppercase tracking-wider ${
+                    themeMode === 'light' 
+                      ? 'bg-slate-100/80 border-slate-200 text-slate-500' 
+                      : 'bg-[#0E1318] border-[#1C2631] text-slate-400'
+                  }`}>
+                    <th className="py-3 px-4">Estabelecimento / Ramo</th>
+                    <th className="py-3 px-4">Responsável & WhatsApp</th>
+                    <th className="py-3 px-4">Plano & Status</th>
+                    <th className="py-3 px-4">Vendas & Pedidos</th>
+                    <th className="py-3 px-4 text-center">Links Rápidos</th>
+                    <th className="py-3 px-4 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className={`divide-y ${
+                  themeMode === 'light' ? 'divide-slate-200' : 'divide-[#1C2631]'
+                }`}>
+                  {filteredTenants.map((tenant) => {
+                    const segConfig = tenant.businessSegment ? getSegmentById(tenant.businessSegment) : undefined;
+                    const planBadgeColor: Record<string, string> = {
+                      starter: 'bg-neutral-800 text-neutral-300',
+                      pro: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+                      enterprise: 'bg-purple-500/15 text-purple-400 border border-purple-500/30',
+                    };
 
-              </div>
-            );
-          })}
-        </div>
+                    return (
+                      <tr 
+                        key={tenant.id}
+                        className={`transition-colors ${
+                          themeMode === 'light' 
+                            ? 'hover:bg-slate-50/80 text-slate-800' 
+                            : 'hover:bg-[#161D24] text-slate-200'
+                        }`}
+                      >
+                        {/* Loja & Segmento */}
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm shrink-0 shadow-xs"
+                              style={{ backgroundColor: tenant.branding?.primaryColor || '#0284C7' }}
+                            >
+                              {segConfig?.emoji || tenant.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className={`font-bold text-xs truncate max-w-[180px] ${
+                                themeMode === 'light' ? 'text-slate-900' : 'text-white'
+                              }`}>
+                                {tenant.name}
+                              </p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[180px]">
+                                {segConfig?.shortLabel || 'Comércio'} • {tenant.address.city} - {tenant.address.neighborhood}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Dono & WhatsApp */}
+                        <td className="py-3.5 px-4">
+                          <p className="font-semibold text-xs">{tenant.ownerName}</p>
+                          <a 
+                            href={`https://wa.me/55${tenant.whatsapp.phoneNumber.replace(/\D/g, '')}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-[11px] font-mono text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 mt-0.5"
+                          >
+                            <Phone className="w-3 h-3" />
+                            <span>{tenant.whatsapp.phoneNumber}</span>
+                          </a>
+                        </td>
+
+                        {/* Plano & Status */}
+                        <td className="py-3.5 px-4">
+                          <div className="space-y-1">
+                            <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-full inline-block ${planBadgeColor[tenant.plan] || 'bg-neutral-800 text-white'}`}>
+                              {tenant.plan}
+                            </span>
+                            <div className="flex items-center gap-1 text-[10px] text-emerald-500">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              <span className="capitalize">{tenant.status}</span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Vendas & Pedidos */}
+                        <td className="py-3.5 px-4 tabular-nums">
+                          <p className={`font-black text-xs ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                            R$ {(tenant.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </p>
+                          <p className="text-[11px] text-emerald-500 font-semibold">
+                            {tenant.ordersCount || 0} pedidos
+                          </p>
+                        </td>
+
+                        {/* Links Rápidos */}
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              onClick={() => handleCopyStorefrontUrl(tenant)}
+                              title="Copiar link da vitrine para mandar aos clientes"
+                              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <Link2 className="w-3 h-3" />
+                              <span>Vitrine</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleCopyDashboardUrl(tenant)}
+                              title="Copiar link do painel do lojista"
+                              className="px-2.5 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <Copy className="w-3 h-3" />
+                              <span>Painel</span>
+                            </button>
+                          </div>
+                        </td>
+
+                        {/* Ações */}
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              onClick={() => handleImpersonateTenant(tenant.id)}
+                              className="px-2.5 py-1.5 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 text-blue-600 dark:text-blue-400 border border-blue-500/30 font-bold text-xs transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <Settings className="w-3.5 h-3.5" />
+                              <span className="hidden md:inline">Acessar</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleOpenStorefront(tenant.id)}
+                              title="Ver Vitrine"
+                              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                                themeMode === 'light' ? 'hover:bg-slate-200 text-slate-700' : 'hover:bg-neutral-800 text-slate-300'
+                              }`}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+
+                            <button
+                              onClick={() => onOpenOnboardingForTenant(tenant)}
+                              title="Configurações e Cores"
+                              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                                themeMode === 'light' ? 'hover:bg-slate-200 text-sky-600' : 'hover:bg-neutral-800 text-sky-400'
+                              }`}
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                showConfirm({
+                                  title: 'Excluir Estabelecimento',
+                                  message: `Deseja realmente excluir a loja "${tenant.name}"?\nTodos os produtos e pedidos deste estabelecimento serão apagados permanentemente.`,
+                                  confirmText: 'Sim, excluir loja',
+                                  cancelText: 'Cancelar',
+                                  variant: 'danger',
+                                  onConfirm: () => deleteTenant(tenant.id),
+                                });
+                              }}
+                              title="Excluir Loja"
+                              className="p-1.5 rounded-lg hover:bg-rose-500/20 text-rose-500 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {filteredTenants.length === 0 && (
           <div className="p-12 text-center rounded-2xl bg-[#11161B] border border-[#1C2631] space-y-3">

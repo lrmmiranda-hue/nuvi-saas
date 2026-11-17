@@ -58,7 +58,8 @@ import {
   List,
   CheckCircle2,
   ArrowRight,
-  Megaphone
+  Megaphone,
+  LogOut
 } from 'lucide-react';
 
 interface TenantDashboardProps {
@@ -84,6 +85,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     themeMode,
     setThemeMode,
     toggleThemeMode,
+    logoutTenant,
     isFeatureAllowed,
     globalConfig,
   } = useStore();
@@ -470,29 +472,68 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
   return (
     <div className="space-y-6 pb-20">
       
-      {/* Banner de Divulgação de Promoções de Vendas do SaaS Nuvi (Configurado pelo Master) */}
+      {/* Banner de Divulgação de Promoções de Vendas do SaaS Nuvi com Efeito de Luz Azul */}
       {globalConfig?.promoBanner?.enabled && (
-        <div className="rounded-2xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 text-white p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-300" />
-              <h3 className="font-extrabold text-sm sm:text-base">
-                {globalConfig.promoBanner.title}
-              </h3>
-            </div>
-            <p className="text-xs text-sky-100 max-w-3xl">
-              {globalConfig.promoBanner.message}
-            </p>
+        <div className="relative rounded-3xl overflow-hidden border border-sky-400/40 shadow-2xl shadow-sky-950/60 transition-all p-5 sm:p-6 bg-gradient-to-r from-[#031424] via-[#062444] to-[#0A3966] text-white">
+          
+          {/* Luzes Difusas de Fundo Criativas */}
+          <div className="absolute -top-12 -left-12 w-52 h-52 rounded-full bg-sky-500/30 blur-3xl pointer-events-none animate-pulse" />
+          <div className="absolute -bottom-10 right-28 w-60 h-60 rounded-full bg-cyan-400/25 blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-48 h-48 rounded-full bg-blue-600/20 blur-3xl pointer-events-none" />
+          
+          {/* Padrão Sutil de Grade Geométrica */}
+          <div 
+            className="absolute inset-0 opacity-[0.07] pointer-events-none bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]"
+          />
+
+          {/* Feixe de Luz Azul/Ciano Animado (Passando e Sumindo em Loop Suave) */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="nuvi-sweep-light absolute top-0 bottom-0 w-48 bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent skew-x-[-22deg]" />
           </div>
-          <a
-            href={globalConfig.promoBanner.ctaUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2.5 rounded-xl bg-white text-blue-700 hover:bg-sky-50 active:scale-[0.98] font-extrabold text-xs shadow-md transition-all inline-flex items-center gap-2 shrink-0 cursor-pointer"
-          >
-            <span>{globalConfig.promoBanner.ctaText}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
+
+          <style>{`
+            @keyframes nuviSweepAnim {
+              0% { transform: translateX(-180%); opacity: 0; }
+              20% { opacity: 1; }
+              55% { transform: translateX(650%); opacity: 0.9; }
+              70% { opacity: 0; }
+              100% { transform: translateX(650%); opacity: 0; }
+            }
+            .nuvi-sweep-light {
+              animation: nuviSweepAnim 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            }
+          `}</style>
+
+          {/* Conteúdo do Banner */}
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+            <div className="space-y-1.5 max-w-3xl">
+              <div className="flex items-center gap-2">
+                <span className="p-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-400/30">
+                  <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                </span>
+                <span className="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-400/20 text-sky-200 border border-sky-300/30">
+                  Oferta Exclusiva Nuvi
+                </span>
+                <h3 className="font-black text-sm sm:text-base text-white tracking-tight">
+                  {globalConfig.promoBanner.title}
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm text-sky-100/90 leading-relaxed font-medium">
+                {globalConfig.promoBanner.message}
+              </p>
+            </div>
+
+            <a
+              href={globalConfig.promoBanner.ctaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-400 to-cyan-300 hover:from-sky-300 hover:to-cyan-200 text-slate-950 font-black text-xs shadow-lg shadow-cyan-500/30 active:scale-[0.98] transition-all inline-flex items-center gap-2 shrink-0 cursor-pointer"
+            >
+              <span>{globalConfig.promoBanner.ctaText}</span>
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+
         </div>
       )}
 
@@ -576,45 +617,92 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            {/* Open / Closed Toggle */}
-            <button
-              onClick={handleToggleOpen}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                currentTenant.isOpen
-                  ? isLight
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100'
-                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
-                  : isLight
-                    ? 'bg-rose-50 border-rose-300 text-rose-700 hover:bg-rose-100'
-                    : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
-              }`}
-            >
-              <Power className="w-3.5 h-3.5" />
-              <span>{currentTenant.isOpen ? 'Loja Aberta p/ Pedidos' : 'Loja Fechada'}</span>
-            </button>
-
-            {/* View Live Storefront (Only when Online Sales is enabled) */}
-            {isOnlineEnabled ? (
+          {/* Controles do Estabelecimento: Layout e Sair posicionados logo acima de Ver Minha Vitrine */}
+          <div className="flex flex-col sm:items-end gap-2.5 shrink-0">
+            
+            {/* Linha Superior: Alternar Layout (Claro/Escuro) e Sair do Painel */}
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => setViewRole('storefront')}
-                className="btn-graphite flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
-              >
-                <Store className="w-3.5 h-3.5 text-slate-300" />
-                <span>Ver Minha Vitrine</span>
-                <ExternalLink className="w-3 h-3 text-slate-300" />
-              </button>
-            ) : (
-              <div 
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] ${
-                  isLight ? 'bg-slate-100 border-slate-200 text-slate-600' : 'bg-neutral-950 border-neutral-800 text-neutral-400'
+                onClick={handleToggleThemeMode}
+                title={isLight ? 'Alternar para Modo Escuro' : 'Alternar para Modo Claro'}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                  isLight 
+                    ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 shadow-2xs' 
+                    : 'bg-[#151D24] hover:bg-[#1E2933] border-[#222E3A] text-slate-200'
                 }`}
-                title="Vendas online e vitrine pública desativadas nas configurações"
               >
-                <Store className="w-3.5 h-3.5 text-neutral-400" />
-                <span>Loja Física (Sem Vitrine)</span>
-              </div>
-            )}
+                {isLight ? (
+                  <>
+                    <Moon className="w-3.5 h-3.5 text-slate-700" />
+                    <span>Modo Escuro</span>
+                  </>
+                ) : (
+                  <>
+                    <Sun className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Modo Claro</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  logoutTenant();
+                  setViewRole('login_tenant');
+                }}
+                title="Encerrar sessão do lojista"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                  isLight
+                    ? 'bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-700 shadow-2xs'
+                    : 'bg-rose-950/30 hover:bg-rose-900/40 border-rose-900/50 text-rose-400'
+                }`}
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sair</span>
+              </button>
+            </div>
+
+            {/* Linha Inferior: Status da Loja e Botão Ver Minha Vitrine */}
+            <div className="flex items-center gap-2.5">
+              {/* Open / Closed Toggle */}
+              <button
+                onClick={handleToggleOpen}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                  currentTenant.isOpen
+                    ? isLight
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100'
+                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                    : isLight
+                      ? 'bg-rose-50 border-rose-300 text-rose-700 hover:bg-rose-100'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20'
+                }`}
+              >
+                <Power className="w-3.5 h-3.5" />
+                <span>{currentTenant.isOpen ? 'Loja Aberta' : 'Loja Fechada'}</span>
+              </button>
+
+              {/* View Live Storefront (Only when Online Sales is enabled) */}
+              {isOnlineEnabled ? (
+                <button
+                  onClick={() => setViewRole('storefront')}
+                  className="btn-graphite flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
+                >
+                  <Store className="w-3.5 h-3.5 text-slate-300" />
+                  <span>Ver Minha Vitrine</span>
+                  <ExternalLink className="w-3 h-3 text-slate-300" />
+                </button>
+              ) : (
+                <div 
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] ${
+                    isLight ? 'bg-slate-100 border-slate-200 text-slate-600' : 'bg-neutral-950 border-neutral-800 text-neutral-400'
+                  }`}
+                  title="Vendas online e vitrine pública desativadas nas configurações"
+                >
+                  <Store className="w-3.5 h-3.5 text-neutral-400" />
+                  <span>Loja Física (Sem Vitrine)</span>
+                </div>
+              )}
+            </div>
+
           </div>
 
         </div>
