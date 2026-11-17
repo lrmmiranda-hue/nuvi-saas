@@ -5,6 +5,7 @@ import { ConfirmModal, ConfirmDialogOptions, AlertDialogOptions, DialogVariant }
 import { getSegmentById, getTenantCategories } from '../data/businessSegments';
 import { getStarterProductsForSegment } from '../data/segmentProducts';
 import { detectPortalMode } from '../utils/portalEnvironment';
+import { parseCurrentRoute } from '../utils/routes';
 
 interface StoreContextType {
   tenants: Tenant[];
@@ -234,13 +235,16 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   });
 
-  // Active Tenant (detectado por ID ou Slug na URL)
+  // Active Tenant (detectado de forma inteligente por Rota Limpa ou Parâmetro)
   const [currentTenantId, setCurrentTenantIdState] = useState<string>(() => {
     try {
       if (typeof window !== 'undefined') {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tenantFromUrl = urlParams.get('loja') || urlParams.get('vitrine') || urlParams.get('painel') || urlParams.get('tenant');
-        if (tenantFromUrl) return tenantFromUrl;
+        const route = parseCurrentRoute(INITIAL_TENANTS);
+        if (route.tenantSlugOrId) {
+          const match = INITIAL_TENANTS.find(t => t.id === route.tenantSlugOrId || (t.slug && t.slug.toLowerCase() === route.tenantSlugOrId?.toLowerCase()));
+          if (match) return match.id;
+          return route.tenantSlugOrId;
+        }
       }
       const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_TENANT_ID);
       return saved || 'adega-imperial';
@@ -253,35 +257,14 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [viewRole, setViewRoleState] = useState<ViewRole>(() => {
     try {
       if (typeof window !== 'undefined') {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('vitrine') || (urlParams.has('loja') && !urlParams.has('painel'))) {
-          return 'storefront';
-        }
-        if (urlParams.has('painel')) {
-          return 'tenant_admin';
-        }
-        if (urlParams.has('cadastro')) {
-          return 'register_tenant';
-        }
-        if (urlParams.has('login_lojista')) {
-          return 'login_tenant';
-        }
-        if (urlParams.get('portal') === 'master' || urlParams.get('portal') === 'admin') {
-          return 'super_admin';
-        }
-        if (urlParams.get('portal') === 'tenant') {
-          return 'tenant_admin';
-        }
+        const route = parseCurrentRoute(INITIAL_TENANTS);
+        return route.role;
       }
-
       const portal = detectPortalMode();
       if (portal === 'master') return 'super_admin';
-
-      const saved = localStorage.getItem(STORAGE_KEYS.VIEW_ROLE) as ViewRole;
-      if (saved && saved !== 'super_admin') return saved;
-      return 'tenant_admin';
+      return 'register_tenant';
     } catch {
-      return 'super_admin';
+      return 'register_tenant';
     }
   });
 
@@ -439,6 +422,29 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const setViewRole = (role: ViewRole) => {
     setViewRoleState(role);
     localStorage.setItem(STORAGE_KEYS.VIEW_ROLE, role);
+
+    try {
+      if (typeof window !== 'undefined' && window.history) {
+        const port = window.location.port;
+        // Não altera rotas em portas separadas locais 3005 e 3006
+        if (port === '3005' || port === '3006') return;
+
+        const tenant = tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId);
+        const slug = tenant?.slug || tenant?.id || 'loja';
+
+        if (role === 'super_admin') {
+          window.history.pushState({}, '', '/acesso_master');
+        } else if (role === 'login_tenant') {
+          window.history.pushState({}, '', '/acesso_lojista');
+        } else if (role === 'register_tenant') {
+          window.history.pushState({}, '', '/');
+        } else if (role === 'storefront') {
+          window.history.pushState({}, '', `/${slug}/cardapio`);
+        } else if (role === 'tenant_admin') {
+          window.history.pushState({}, '', `/${slug}/painel`);
+        }
+      }
+    } catch {}
   };
 
   // Safe current tenant lookup (localiza por id ou por slug amigável da URL)

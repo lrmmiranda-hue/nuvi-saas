@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Tenant } from '../../types';
+import { buildStoreUrl } from '../../utils/routes';
 import { 
   Building2, 
   Store, 
@@ -23,7 +24,8 @@ import {
   Moon,
   LogOut,
   Copy,
-  Share2
+  Share2,
+  Link2
 } from 'lucide-react';
 
 interface SuperAdminDashboardProps {
@@ -75,6 +77,28 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   const handleOpenStorefront = (tenantId: string) => {
     setCurrentTenantId(tenantId);
     setViewRole('storefront');
+  };
+
+  const handleCopyStorefrontUrl = (tenant: Tenant) => {
+    const slug = tenant.slug || tenant.id;
+    const url = buildStoreUrl('cardapio', slug);
+    navigator.clipboard?.writeText(url);
+    showAlert({
+      title: 'Link da Vitrine Copiado!',
+      message: `O link oficial do cardápio de "${tenant.name}" foi copiado:\n\n${url}\n\nEnvie este link para os clientes comprarem pelo WhatsApp e cardápio online!`,
+      variant: 'success'
+    });
+  };
+
+  const handleCopyDashboardUrl = (tenant: Tenant) => {
+    const slug = tenant.slug || tenant.id;
+    const url = buildStoreUrl('painel', slug);
+    navigator.clipboard?.writeText(url);
+    showAlert({
+      title: 'Link do Painel Copiado!',
+      message: `O link do painel e PDV de "${tenant.name}" foi copiado:\n\n${url}\n\nEnvie este link para o dono/gerente do estabelecimento acessar o sistema!`,
+      variant: 'success'
+    });
   };
 
   // Cores fixas oficiais da marca Nuvi para a Gestão do Painel Master
@@ -415,6 +439,29 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                     </div>
                   )}
 
+                </div>
+
+                {/* Links Rápidos de Compartilhamento da Loja */}
+                <div className={`px-4 py-2 border-t flex items-center justify-between gap-2 text-xs ${
+                  themeMode === 'light' ? 'bg-slate-100/70 border-slate-200' : 'bg-[#0B0F12]/80 border-[#1C2631]'
+                }`}>
+                  <button
+                    onClick={() => handleCopyStorefrontUrl(tenant)}
+                    title="Copiar link da vitrine/cardápio para mandar aos clientes"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold text-[11px] transition-all cursor-pointer"
+                  >
+                    <Link2 className="w-3 h-3" />
+                    <span>Link Vitrine</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleCopyDashboardUrl(tenant)}
+                    title="Copiar link do painel e PDV para o lojista"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-bold text-[11px] transition-all cursor-pointer"
+                  >
+                    <Copy className="w-3 h-3" />
+                    <span>Link Painel</span>
+                  </button>
                 </div>
 
                 {/* Card Actions Footer */}

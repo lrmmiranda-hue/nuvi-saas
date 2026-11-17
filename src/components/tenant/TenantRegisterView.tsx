@@ -522,16 +522,26 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 Ao criar sua loja, você ganha 7 dias de acesso completo sem compromisso.
               </p>
 
-              <div className="pt-3 border-t border-slate-200 dark:border-[#1C2631] text-center">
-                <span className={`text-xs ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                  Já possui uma loja cadastrada?{' '}
-                </span>
+              <div className="pt-3 border-t border-slate-200 dark:border-[#1C2631] flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div>
+                  <span className={`text-xs ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                    Já possui loja?{' '}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setViewRole('login_tenant')}
+                    className="text-xs font-bold text-slate-800 dark:text-slate-200 hover:underline cursor-pointer ml-1"
+                  >
+                    Entrar no Painel do Lojista
+                  </button>
+                </div>
+
                 <button
                   type="button"
-                  onClick={() => setViewRole('login_tenant')}
-                  className="text-xs font-bold text-slate-800 dark:text-slate-200 hover:underline cursor-pointer ml-1"
+                  onClick={() => setViewRole('super_admin')}
+                  className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
                 >
-                  Entrar no Painel do Lojista
+                  🔒 Acesso Master
                 </button>
               </div>
 
