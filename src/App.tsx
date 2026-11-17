@@ -52,10 +52,10 @@ const AppContent: React.FC = () => {
   const accentColor = currentTenant?.branding?.accentColor || '#38BDF8';
 
   // Separação de temas padronizada:
-  // No Painel Master (porta 3005): utiliza adminThemeMode
-  // No Portal do Lojista / Vitrine (porta 3006): utiliza themeMode
+  // No Painel Master: utiliza adminThemeMode
+  // No Painel do Lojista / Vitrine / Cadastro: utiliza themeMode
   const effectiveThemeMode = 
-    portalMode === 'master' || viewRole === 'super_admin'
+    viewRole === 'super_admin'
       ? adminThemeMode
       : themeMode;
 

@@ -85,11 +85,15 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
     setPlansState(prev => prev.map(p => p.id === planId ? { ...p, price: numericValue } : p));
   };
 
+  const handleTogglePlanActive = (planId: string) => {
+    setPlansState(prev => prev.map(p => p.id === planId ? { ...p, active: !p.active } : p));
+  };
+
   const handleSavePlans = () => {
     updateGlobalConfig({ plans: plansState });
     showAlert({
       title: 'Planos Atualizados!',
-      message: 'Os preços e condições das 4 opções de assinatura foram atualizados com sucesso.',
+      message: 'Os preços e ativações das opções de assinatura foram atualizados. Apenas os planos ativos aparecerão na tela de cadastro.',
       variant: 'success'
     });
   };
@@ -499,13 +503,33 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                     }`}
                   >
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 uppercase tracking-wider">
                           Opção {index + 1} • {plan.badge || 'Plano'}
                         </span>
-                        <span className="text-xs font-bold text-slate-400">
-                          {plan.active ? 'Ativo para Venda' : 'Inativo'}
-                        </span>
+                        
+                        {/* Botão Chave Liga/Desliga de Ativação do Plano */}
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[11px] font-bold ${
+                            plan.active 
+                              ? 'text-emerald-600 dark:text-emerald-400' 
+                              : 'text-slate-400 dark:text-slate-500'
+                          }`}>
+                            {plan.active ? 'Ativo no Cadastro' : 'Desativado'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePlanActive(plan.id)}
+                            title={plan.active ? 'Clique para desativar esta opção no cadastro' : 'Clique para ativar esta opção no cadastro'}
+                            className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                              plan.active ? 'bg-emerald-600' : 'bg-slate-400 dark:bg-neutral-700'
+                            }`}
+                          >
+                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                              plan.active ? 'translate-x-5' : 'translate-x-0'
+                            }`} />
+                          </button>
+                        </div>
                       </div>
 
                       <div>
@@ -558,14 +582,17 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
               </div>
 
               {/* Botão de Salvar Planos */}
-              <div className="flex justify-end pt-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-[#1C2631]">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  💡 Apenas os planos com a chave <strong>Ativo no Cadastro</strong> serão exibidos para os novos comerciantes na tela de cadastro.
+                </p>
                 <button
                   type="button"
                   onClick={handleSavePlans}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-lg shadow-sky-500/25 active:scale-[0.98] transition-all cursor-pointer"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-lg shadow-sky-500/25 active:scale-[0.98] transition-all cursor-pointer shrink-0"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Salvar Preços dos 4 Planos</span>
+                  <span>Salvar Configurações dos Planos</span>
                 </button>
               </div>
 

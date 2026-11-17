@@ -3,7 +3,21 @@ import { useStore } from '../../context/StoreContext';
 import { Tenant, BusinessSegmentType } from '../../types';
 import { BUSINESS_SEGMENTS, getSegmentById } from '../../data/businessSegments';
 import { PRESET_THEMES, PRESET_BANNERS } from '../tenant/OnboardingWizardModal';
-import { X, Building2, Store, Sparkles, Check, Lock, Eye, EyeOff } from 'lucide-react';
+import { 
+  X, 
+  Building2, 
+  Store, 
+  Sparkles, 
+  Check, 
+  Lock, 
+  Eye, 
+  EyeOff,
+  Copy,
+  ExternalLink,
+  CheckCircle2,
+  MessageCircle,
+  ShieldCheck
+} from 'lucide-react';
 
 interface NewTenantModalProps {
   isOpen: boolean;
@@ -34,7 +48,25 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
   const [plan, setPlan] = useState<'starter' | 'pro' | 'enterprise'>('pro');
   const [selectedThemeIndex, setSelectedThemeIndex] = useState(0);
 
+  // Tela de confirmação e credenciais após a criação
+  const [createdTenantResult, setCreatedTenantResult] = useState<Tenant | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
   if (!isOpen) return null;
+
+  const handleCopyText = (text: string, fieldName: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldName);
+    setTimeout(() => setCopiedField(null), 2500);
+  };
+
+  const handleFinishSuccess = () => {
+    if (createdTenantResult) {
+      onTenantCreated(createdTenantResult);
+    }
+    setCreatedTenantResult(null);
+    onClose();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,14 +80,22 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
     }
 
     const theme = PRESET_THEMES[selectedThemeIndex];
+    const cleanSlug = name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
 
     const newTenant = createTenant({
-      name,
+      name: name.trim(),
+      slug: cleanSlug,
       businessSegment: selectedSegment,
       slogan: slogan || segmentConfig.sloganExample,
       ownerName: ownerName || 'Proprietário',
       ownerEmail: ownerEmail || 'contato@cliente.com.br',
       ownerPhone: ownerPhone || '11999990000',
+      adminPassword: password.trim() || '123456',
       plan,
       branding: {
         logoUrl: '',
@@ -91,8 +131,7 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
       onboardingCompleted: false, // will require onboarding
     });
 
-    onTenantCreated(newTenant);
-    onClose();
+    setCreatedTenantResult(newTenant);
   };
 
   const inputClass = `w-full px-3 py-2 rounded-lg text-xs outline-none transition-all ${
@@ -119,15 +158,15 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
             </div>
             <div>
               <h2 className={`text-base font-bold ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                Cadastrar Novo Estabelecimento / Lojista
+                {createdTenantResult ? 'Acesso Criado com Sucesso' : 'Cadastrar Novo Estabelecimento / Lojista'}
               </h2>
               <p className={`text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                Crie um novo ambiente isolado para qualquer segmento de comércio
+                {createdTenantResult ? 'Compartilhe o link do cardápio e os dados de login com o cliente' : 'Crie um novo ambiente isolado para qualquer segmento de comércio'}
               </p>
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={createdTenantResult ? handleFinishSuccess : onClose}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               isLight ? 'text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
             }`}
@@ -136,8 +175,121 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
+        {/* Se acabou de criar, exibe tela de credenciais com link da vitrine e senha */}
+        {createdTenantResult ? (
+          <div className="p-6 space-y-4 text-xs max-h-[75vh] overflow-y-auto">
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400">
+              <CheckCircle2 className="w-6 h-6 shrink-0 text-emerald-500" />
+              <div>
+                <h3 className="font-black text-sm">Loja Cadastrada com Sucesso!</h3>
+                <p className="text-xs text-emerald-600 dark:text-emerald-300">
+                  O comércio <strong>{createdTenantResult.name}</strong> já está ativo no sistema.
+                </p>
+              </div>
+            </div>
+
+            {/* Links e Acessos Oficiais */}
+            <div className="space-y-3">
+              {/* Link da Vitrine Online / Cardápio */}
+              <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#151D24] border-[#222E3A]'
+              }`}>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Link Oficial da Vitrine / Cardápio</span>
+                  <p className="font-mono font-bold text-xs text-sky-600 dark:text-sky-400 truncate">
+                    {`https://nuvi-saas.vercel.app/${createdTenantResult.slug}/cardapio`}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleCopyText(`https://nuvi-saas.vercel.app/${createdTenantResult.slug}/cardapio`, 'vitrine')}
+                    className="p-2 rounded-lg border text-xs font-semibold hover:bg-slate-200 dark:hover:bg-neutral-700 transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedField === 'vitrine' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedField === 'vitrine' ? 'Copiado!' : 'Copiar'}</span>
+                  </button>
+                  <a
+                    href={`/${createdTenantResult.slug}/cardapio`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 rounded-lg border text-xs font-semibold hover:bg-slate-200 dark:hover:bg-neutral-700 transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Abrir</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Link do Painel do Lojista */}
+              <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#151D24] border-[#222E3A]'
+              }`}>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Link de Acesso do Lojista</span>
+                  <p className="font-mono font-bold text-xs text-sky-600 dark:text-sky-400 truncate">
+                    {`https://nuvi-saas.vercel.app/acesso_lojista`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopyText(`https://nuvi-saas.vercel.app/acesso_lojista`, 'painel')}
+                  className="p-2 rounded-lg border text-xs font-semibold hover:bg-slate-200 dark:hover:bg-neutral-700 transition-all flex items-center gap-1 cursor-pointer shrink-0"
+                >
+                  {copiedField === 'painel' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedField === 'painel' ? 'Copiado!' : 'Copiar'}</span>
+                </button>
+              </div>
+
+              {/* Credenciais de Login */}
+              <div className={`p-3.5 rounded-xl border grid grid-cols-2 gap-3 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#151D24] border-[#222E3A]'
+              }`}>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">WhatsApp de Login:</span>
+                  <span className="font-mono font-bold text-xs text-slate-900 dark:text-white">
+                    {createdTenantResult.ownerPhone || 'Não informado'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Senha de Acesso:</span>
+                  <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400">
+                    {createdTenantResult.adminPassword || '123456'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Ações de Compartilhamento */}
+            <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 dark:border-neutral-800">
+              <a
+                href={`https://wa.me/55${(createdTenantResult.ownerPhone || '').replace(/\D/g, '')}?text=${encodeURIComponent(
+                  `Olá ${createdTenantResult.ownerName}! Seu estabelecimento ${createdTenantResult.name} está liberado no Nuvi SaaS:\n\n` +
+                  `🌐 Sua Vitrine / Cardápio: https://nuvi-saas.vercel.app/${createdTenantResult.slug}/cardapio\n` +
+                  `📱 Seu Painel de Gestão: https://nuvi-saas.vercel.app/acesso_lojista\n` +
+                  `🔑 Login (WhatsApp): ${createdTenantResult.ownerPhone}\n` +
+                  `🔒 Senha: ${createdTenantResult.adminPassword || '123456'}`
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20be5a] text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+              >
+                <MessageCircle className="w-4 h-4 fill-white" />
+                <span>Enviar Acesso no WhatsApp</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={handleFinishSuccess}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-md cursor-pointer"
+              >
+                Concluir & Abrir Gestão
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Form Body */
+          <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
           
           {/* Segmento de Comércio */}
           <div className="space-y-1.5">
@@ -393,6 +545,7 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
           </div>
 
         </form>
+        )}
 
       </div>
     </div>

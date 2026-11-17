@@ -59,7 +59,9 @@ import {
   CheckCircle2,
   ArrowRight,
   Megaphone,
-  LogOut
+  LogOut,
+  X,
+  MessageCircle
 } from 'lucide-react';
 
 interface TenantDashboardProps {
@@ -96,6 +98,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
   // Orders filter
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('todos');
+
+  // Promo banner dismiss state
+  const [isPromoDismissed, setIsPromoDismissed] = useState(false);
 
   // Product modal state
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -473,9 +478,19 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     <div className="space-y-6 pb-20">
       
       {/* Banner de Divulgação de Promoções de Vendas do SaaS Nuvi com Efeito de Luz Azul */}
-      {globalConfig?.promoBanner?.enabled && (
+      {globalConfig?.promoBanner?.enabled && !isPromoDismissed && (
         <div className="relative rounded-3xl overflow-hidden border border-sky-400/40 shadow-2xl shadow-sky-950/60 transition-all p-5 sm:p-6 bg-gradient-to-r from-[#031424] via-[#062444] to-[#0A3966] text-white">
           
+          {/* Botão de Fechar / Dispensar Banner no Painel do Lojista */}
+          <button
+            type="button"
+            onClick={() => setIsPromoDismissed(true)}
+            className="absolute top-3.5 right-3.5 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all cursor-pointer z-20"
+            title="Fechar aviso promocional"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+
           {/* Luzes Difusas de Fundo Criativas */}
           <div className="absolute -top-12 -left-12 w-52 h-52 rounded-full bg-sky-500/30 blur-3xl pointer-events-none animate-pulse" />
           <div className="absolute -bottom-10 right-28 w-60 h-60 rounded-full bg-cyan-400/25 blur-3xl pointer-events-none" />
@@ -505,7 +520,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
           `}</style>
 
           {/* Conteúdo do Banner */}
-          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 pr-6 sm:pr-8">
             <div className="space-y-1.5 max-w-3xl">
               <div className="flex items-center gap-2">
                 <span className="p-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-400/30">
@@ -523,14 +538,16 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               </p>
             </div>
 
+            {/* Botão de Contato WhatsApp com Tonalidade Verde Oficial, Ícone e Fonte Branca */}
             <a
               href={globalConfig.promoBanner.ctaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-400 to-cyan-300 hover:from-sky-300 hover:to-cyan-200 text-slate-950 font-black text-xs shadow-lg shadow-cyan-500/30 active:scale-[0.98] transition-all inline-flex items-center gap-2 shrink-0 cursor-pointer"
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#25D366] via-[#20bd5a] to-[#128C7E] hover:from-[#22c35e] hover:to-[#0f7a6e] text-white font-extrabold text-xs shadow-xl shadow-emerald-950/50 active:scale-[0.98] transition-all inline-flex items-center gap-2 shrink-0 cursor-pointer border border-emerald-300/40"
             >
-              <span>{globalConfig.promoBanner.ctaText}</span>
-              <ArrowRight className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 text-white fill-white shrink-0" />
+              <span className="text-white font-extrabold text-xs tracking-tight">{globalConfig.promoBanner.ctaText}</span>
+              <ArrowRight className="w-4 h-4 text-white shrink-0" />
             </a>
           </div>
 

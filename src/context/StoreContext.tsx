@@ -361,13 +361,29 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   });
 
-  // Active Tenant (detectado de forma inteligente por Rota Limpa ou Parâmetro)
+  // Active Tenant (detectado de forma inteligente por Rota Limpa ou Parâmetro em todos os tenants criados)
   const [currentTenantId, setCurrentTenantIdState] = useState<string>(() => {
     try {
       if (typeof window !== 'undefined') {
-        const route = parseCurrentRoute(INITIAL_TENANTS);
+        const allLoadedTenants = (() => {
+          try {
+            const saved = localStorage.getItem(STORAGE_KEYS.TENANTS);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) return parsed as Tenant[];
+            }
+          } catch {}
+          return INITIAL_TENANTS;
+        })();
+
+        const route = parseCurrentRoute(allLoadedTenants);
         if (route.tenantSlugOrId) {
-          const match = INITIAL_TENANTS.find(t => t.id === route.tenantSlugOrId || (t.slug && t.slug.toLowerCase() === route.tenantSlugOrId?.toLowerCase()));
+          const match = allLoadedTenants.find(t => 
+            t.id.toLowerCase() === route.tenantSlugOrId?.toLowerCase() || 
+            (t.slug && t.slug.toLowerCase() === route.tenantSlugOrId?.toLowerCase()) ||
+            t.id.toLowerCase().replace(/[^a-z0-9]/g, '') === route.tenantSlugOrId?.toLowerCase().replace(/[^a-z0-9]/g, '') ||
+            (t.slug && t.slug.toLowerCase().replace(/[^a-z0-9]/g, '') === route.tenantSlugOrId?.toLowerCase().replace(/[^a-z0-9]/g, ''))
+          );
           if (match) return match.id;
           return route.tenantSlugOrId;
         }
@@ -383,7 +399,18 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [viewRole, setViewRoleState] = useState<ViewRole>(() => {
     try {
       if (typeof window !== 'undefined') {
-        const route = parseCurrentRoute(INITIAL_TENANTS);
+        const allLoadedTenants = (() => {
+          try {
+            const saved = localStorage.getItem(STORAGE_KEYS.TENANTS);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) return parsed as Tenant[];
+            }
+          } catch {}
+          return INITIAL_TENANTS;
+        })();
+
+        const route = parseCurrentRoute(allLoadedTenants);
         return route.role;
       }
       const portal = detectPortalMode();
@@ -456,42 +483,44 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
 
   const loginTenant = (identifier: string, pass: string): boolean => {
-    const cleanId = identifier.trim().toLowerCase().replace(/\D/g, '');
-    const cleanRaw = identifier.trim().toLowerCase();
+    const rawInput = identifier.trim().toLowerCase();
+    const cleanDigits = identifier.replace(/\D/g, '');
 
-    // Localiza a adega por telefone, e-mail, slug ou nome
+    // Localiza a loja por telefone/WhatsApp, e-mail, slug ou nome
     const found = tenants.find((t) => {
-      const tenantPhone = t.whatsapp.phoneNumber.replace(/\D/g, '');
+      const tenantPhone = (t.whatsapp?.phoneNumber || '').replace(/\D/g, '');
       const ownerPhone = (t.ownerPhone || '').replace(/\D/g, '');
       const email = (t.ownerEmail || '').toLowerCase();
-      const slug = t.slug.toLowerCase();
-      const name = t.name.toLowerCase();
+      const slug = (t.slug || '').toLowerCase();
+      const name = (t.name || '').toLowerCase();
 
-      return (
-        (cleanId && (tenantPhone.includes(cleanId) || ownerPhone.includes(cleanId))) ||
-        (cleanRaw && (email === cleanRaw || slug === cleanRaw || name.includes(cleanRaw) || t.id === cleanRaw))
+      const phoneMatch = cleanDigits.length >= 8 && (
+        tenantPhone.endsWith(cleanDigits.slice(-8)) || 
+        ownerPhone.endsWith(cleanDigits.slice(-8)) ||
+        cleanDigits.endsWith(tenantPhone.slice(-8))
       );
+
+      const textMatch = rawInput.length >= 3 && (
+        email === rawInput || 
+        slug === rawInput || 
+        name === rawInput || 
+        t.id === rawInput
+      );
+
+      return phoneMatch || textMatch;
     });
 
     if (found) {
-      // Se a adega tiver senha cadastrada e o lojista forneceu senha, valida
-      if (found.adminPassword && pass.trim() && found.adminPassword !== pass.trim()) {
+      // Valida a senha cadastrada pelo lojista (ou padrão '123456' se não definida)
+      const expectedPassword = (found.adminPassword && found.adminPassword.trim()) ? found.adminPassword.trim() : '123456';
+      if (pass.trim() && pass.trim() !== expectedPassword) {
         return false;
       }
       setCurrentTenantId(found.id);
       setIsTenantAuthenticated(true);
       try {
         localStorage.setItem(STORAGE_KEYS.TENANT_AUTH, 'true');
-      } catch {}
-      return true;
-    }
-
-    // Se não encontrou por dados específicos, mas tem tenants, seleciona o primeiro para não travar o lojista
-    if (tenants.length > 0) {
-      setCurrentTenantId(tenants[0].id);
-      setIsTenantAuthenticated(true);
-      try {
-        localStorage.setItem(STORAGE_KEYS.TENANT_AUTH, 'true');
+        localStorage.setItem(STORAGE_KEYS.CURRENT_TENANT_ID, found.id);
       } catch {}
       return true;
     }
@@ -810,18 +839,21 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Tenant CRUD
   const createTenant = (tenantData: Partial<Tenant>): Tenant => {
-    const slug = (tenantData.name || 'novo-comercio')
+    const generatedSlug = (tenantData.name || 'novo-comercio')
       .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    const id = `${slug}-${Date.now().toString().slice(-4)}`;
+    const finalSlug = (tenantData.slug && tenantData.slug.trim()) ? tenantData.slug.trim() : generatedSlug;
+    const id = `${finalSlug}-${Date.now().toString().slice(-4)}`;
     const segment = tenantData.businessSegment || 'adega';
     const segmentConfig = getSegmentById(segment);
 
     const newTenant: Tenant = {
       id,
-      slug,
+      slug: finalSlug,
       name: tenantData.name || `Novo ${segmentConfig.shortLabel}`,
       slogan: tenantData.slogan || segmentConfig.sloganExample,
       businessSegment: segment,
@@ -829,6 +861,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       ownerEmail: tenantData.ownerEmail || 'contato@loja.com.br',
       ownerPhone: tenantData.ownerPhone || '11999990000',
       document: tenantData.document || '00.000.000/0001-00',
+      adminPassword: (tenantData.adminPassword && tenantData.adminPassword.trim()) ? tenantData.adminPassword.trim() : '123456',
       branding: {
         logoUrl: tenantData.branding?.logoUrl || '',
         bannerUrl: tenantData.branding?.bannerUrl || segmentConfig.bannerUrl,
@@ -886,7 +919,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       ordersCount: 0,
     };
 
-    setTenants((prev) => [newTenant, ...prev]);
+    setTenants((prev) => {
+      const updatedList = [newTenant, ...prev];
+      try {
+        localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(updatedList));
+      } catch {}
+      return updatedList;
+    });
 
     // Populate com catálogo inicial temático correspondente ao segmento do comércio criado
     const starterProducts = getStarterProductsForSegment(segment, id);

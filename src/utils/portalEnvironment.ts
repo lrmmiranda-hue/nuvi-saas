@@ -21,8 +21,17 @@ export function detectPortalMode(): PortalMode {
   if (port === '3005') return 'master';
   if (port === '3006') return 'tenant';
 
-  // 3. Em produção (Vercel ou domínio próprio), a raiz principal é SEMPRE o Portal Master do Dono do SaaS!
-  return 'master';
+  // 3. Detecção baseada na rota da URL (tanto local quanto em produção na Vercel)
+  const pathname = window.location.pathname.toLowerCase();
+  if (pathname === '/acesso_master' || pathname === '/admin' || pathname === '/master') {
+    return 'master';
+  }
+  if (pathname === '/acesso_lojista' || pathname.includes('/cardapio') || pathname.includes('/painel') || pathname.includes('/vitrine')) {
+    return 'tenant';
+  }
+
+  // Fallback padrão
+  return 'tenant';
 }
 
 export function getOtherPortalUrl(target: PortalMode, tenantId?: string): string {
