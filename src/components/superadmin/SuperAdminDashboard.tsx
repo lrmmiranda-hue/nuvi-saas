@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Tenant } from '../../types';
 import { buildStoreUrl } from '../../utils/routes';
+import { MasterSettingsModal } from './MasterSettingsModal';
 import { 
   Building2, 
   Store, 
@@ -25,7 +26,8 @@ import {
   LogOut,
   Copy,
   Share2,
-  Link2
+  Link2,
+  Sliders
 } from 'lucide-react';
 
 interface SuperAdminDashboardProps {
@@ -52,6 +54,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   // SaaS KPIs
   const totalStores = tenants.length;
@@ -136,7 +139,15 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <button
+              onClick={() => setIsSettingsModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border transition-all active:scale-[0.98] cursor-pointer bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 border-sky-500/30 shadow-xs"
+            >
+              <Settings className="w-4 h-4 text-sky-500 animate-[spin_12s_linear_infinite]" />
+              <span>Configurações & Permissões</span>
+            </button>
+
             <button
               onClick={onOpenNewTenantModal}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl !text-white font-extrabold text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400"
@@ -573,6 +584,12 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Modal de Configurações Master (Permissões, Preços dos 4 Planos e Promoções) */}
+      <MasterSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
     </div>
   );
 };

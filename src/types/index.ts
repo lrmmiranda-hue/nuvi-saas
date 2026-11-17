@@ -230,7 +230,9 @@ export type BusinessSegmentType =
   | 'mercadinho_emporio' 
   | 'petshop' 
   | 'tabacaria' 
-  | 'cosmeticos_farmacia';
+  | 'cosmeticos_farmacia'
+  | 'pesqueiro'
+  | 'pastelaria';
 
 export interface TenantCategory {
   id: string;
@@ -266,3 +268,39 @@ export interface Tenant {
 }
 
 export type ViewRole = 'super_admin' | 'tenant_admin' | 'storefront' | 'register_tenant' | 'login_tenant';
+
+export interface SaaSFeaturePermissions {
+  enableStorefront: boolean;        // Cardápio & Vitrine Online
+  enablePDVBalcao: boolean;         // Vendas no Balcão (PDV Frente de Caixa)
+  enableStockControl: boolean;      // Controle de Estoque & Reposição
+  enableDeliveryRadius: boolean;    // Delivery & Taxa por Raio / WhatsApp
+  enableFinancialMetrics: boolean;  // Relatórios & Métricas Financeiras
+  enableBarcodeScanner: boolean;    // Leitor de Código de Barras USB / Bluetooth
+}
+
+export interface SaaSSubscriptionPlan {
+  id: string;
+  name: string;
+  tagline: string;
+  price: number;
+  period: string; // ex: '/mês'
+  description: string;
+  badge?: string; // ex: 'Mais Popular', 'Econômico', 'Completo'
+  features: string[];
+  active: boolean;
+}
+
+export interface SaaSPromoBanner {
+  enabled: boolean;
+  title: string;
+  message: string;
+  ctaText: string;
+  ctaUrl: string; // Link de contato ou WhatsApp do Master
+}
+
+export interface GlobalSaaSConfig {
+  defaultPermissions: SaaSFeaturePermissions;
+  segmentPermissions?: Partial<Record<BusinessSegmentType, Partial<SaaSFeaturePermissions>>>;
+  plans: SaaSSubscriptionPlan[];
+  promoBanner: SaaSPromoBanner;
+}

@@ -183,6 +183,54 @@ export const BUSINESS_SEGMENTS: BusinessSegmentConfig[] = [
       { id: 'skincare', label: 'Cuidados com a Pele (Skincare)' },
       { id: 'kits_presente', label: 'Kits & Presentes' },
     ]
+  },
+  {
+    id: 'pesqueiro',
+    title: 'Pesqueiro, Pesque-Pague & Petiscaria',
+    shortLabel: 'Pesqueiro & Petiscaria',
+    emoji: '🎣',
+    description: 'Porções de tilápia fresca, peixes fritos, cervejas geladas, iscas, massas e artigos de pesca.',
+    pitch: 'Atenda clientes nos quiosques e lago com agilidade. Controle de porções de peixe, bebidas trincando e iscas no balcão.',
+    namePlaceholder: 'Ex: Pesqueiro Rancho Fundo, Pesque-Pague Lago Azul',
+    sloganExample: 'O melhor dia de lazer, pesca esportiva e as porções mais crocantes',
+    badgeNotice: 'Tilápia frita na hora, cerveja trincando e pescaria garantida',
+    primaryColor: '#0284C7', // Azul Céu & Água
+    accentColor: '#38BDF8', // Ciano Luminoso
+    themeStyle: 'clean_light',
+    bannerUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Porções & Iscas',
+    suggestedCategories: [
+      { id: 'porcoes_peixe', label: 'Porções de Peixe & Petiscos' },
+      { id: 'bebidas_geladas', label: 'Cervejas & Bebidas Geladas' },
+      { id: 'iscas_massas', label: 'Iscas, Massas & Atrativos' },
+      { id: 'artigos_pesca', label: 'Artigos de Pesca & Varas' },
+      { id: 'pratos_almoco', label: 'Almoço & Pratos Executivos' },
+      { id: 'sobremesas', label: 'Sobremesas & Picolés' },
+    ]
+  },
+  {
+    id: 'pastelaria',
+    title: 'Pastelaria, Salgados & Caldo de Cana',
+    shortLabel: 'Pastelaria & Caldos',
+    emoji: '🥟',
+    description: 'Pastéis fritos na hora com massa crocante, salgados artesanais, caldo de cana gelado e sucos.',
+    pitch: 'Frente de Caixa (PDV) ultra-rápido para balcão e delivery no WhatsApp com cardápio digital sem taxas abusivas.',
+    namePlaceholder: 'Ex: Pastel do Japonês, Pastelaria Central Gourmet',
+    sloganExample: 'Massa crocante e sequinha, recheio generoso e caldo de cana gelado',
+    badgeNotice: 'Pastel frito na hora com recheio de verdade e massa crocante',
+    primaryColor: '#D97706', // Âmbar Dourado Crocante
+    accentColor: '#F59E0B', // Amarelo Pastel
+    themeStyle: 'amber_pub',
+    bannerUrl: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Combos & Pastéis',
+    suggestedCategories: [
+      { id: 'pasteis_tradicionais', label: 'Pastéis Tradicionais' },
+      { id: 'pasteis_especiais', label: 'Pastéis Especiais & Gourmet' },
+      { id: 'pasteis_doces', label: 'Pastéis Doces' },
+      { id: 'salgados', label: 'Salgados Fritos & Assados' },
+      { id: 'caldo_de_cana', label: 'Caldo de Cana & Sucos Naturais' },
+      { id: 'refrigerantes_bebidas', label: 'Refrigerantes & Bebidas' },
+    ]
   }
 ];
 

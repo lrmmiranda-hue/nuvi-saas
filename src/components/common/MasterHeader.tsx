@@ -9,10 +9,15 @@ import {
   Moon, 
   LogOut,
   Store,
-  Layers
+  Layers,
+  Settings
 } from 'lucide-react';
 
-export const MasterHeader: React.FC = () => {
+interface MasterHeaderProps {
+  onOpenSettings?: () => void;
+}
+
+export const MasterHeader: React.FC<MasterHeaderProps> = ({ onOpenSettings }) => {
   const {
     adminThemeMode,
     toggleAdminThemeMode,
@@ -72,6 +77,22 @@ export const MasterHeader: React.FC = () => {
             </span>
             <ExternalLink className="w-3 h-3 text-slate-400" />
           </a>
+
+          {/* Botão de Configurações Master com Ícone de Engrenagem */}
+          {onOpenSettings && (
+            <button
+              onClick={onOpenSettings}
+              title="Configurações Globais (Permissões de Módulos, Preços de Planos e Promoções)"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                isLight 
+                  ? 'bg-sky-50 hover:bg-sky-100 border-sky-300 text-sky-700 shadow-xs' 
+                  : 'bg-sky-950/40 hover:bg-sky-900/50 border-sky-800/60 text-sky-300'
+              }`}
+            >
+              <Settings className="w-4 h-4 text-sky-500 animate-[spin_12s_linear_infinite]" />
+              <span className="hidden sm:inline">Configurações & Planos</span>
+            </button>
+          )}
 
           {/* Alternador de Tema Claro / Escuro do Master */}
           <button

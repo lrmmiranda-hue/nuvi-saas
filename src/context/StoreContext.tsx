@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Tenant, Product, Order, OrderItem, ViewRole, OrderStatus, StockMovement, PaymentMethod } from '../types';
+import { Tenant, Product, Order, OrderItem, ViewRole, OrderStatus, StockMovement, PaymentMethod, GlobalSaaSConfig, SaaSFeaturePermissions, SaaSSubscriptionPlan, SaaSPromoBanner, BusinessSegmentType } from '../types';
 import { INITIAL_TENANTS, INITIAL_PRODUCTS, INITIAL_ORDERS } from '../data/mockData';
 import { ConfirmModal, ConfirmDialogOptions, AlertDialogOptions, DialogVariant } from '../components/common/ConfirmModal';
 import { getSegmentById, getTenantCategories } from '../data/businessSegments';
@@ -88,6 +88,13 @@ interface StoreContextType {
   isTenantAuthenticated: boolean;
   loginTenant: (identifier: string, pass: string) => boolean;
   logoutTenant: () => void;
+  // Configurações Globais do SaaS Nuvi (Permissões de Módulos, Preços de Planos e Promoções)
+  globalConfig: GlobalSaaSConfig;
+  updateGlobalConfig: (newConfig: Partial<GlobalSaaSConfig>) => void;
+  updatePlanPrice: (planId: string, newPrice: number) => void;
+  updateSegmentPermissions: (segment: BusinessSegmentType, perms: Partial<SaaSFeaturePermissions>) => void;
+  updatePromoBanner: (banner: Partial<SaaSPromoBanner>) => void;
+  isFeatureAllowed: (feature: keyof SaaSFeaturePermissions, tenant?: Tenant) => boolean;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -103,6 +110,121 @@ const STORAGE_KEYS = {
   ADMIN_THEME_MODE: 'adegasaas_admin_theme_v2',
   MASTER_AUTH: 'adegasaas_master_auth_v2',
   TENANT_AUTH: 'adegasaas_tenant_auth_v2',
+  GLOBAL_CONFIG: 'nuvi_saas_global_config_v1',
+};
+
+export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
+  defaultPermissions: {
+    enableStorefront: true,
+    enablePDVBalcao: true,
+    enableStockControl: true,
+    enableDeliveryRadius: true,
+    enableFinancialMetrics: true,
+    enableBarcodeScanner: true,
+  },
+  segmentPermissions: {
+    adega: {
+      enableStorefront: true,
+      enablePDVBalcao: true,
+      enableStockControl: true,
+      enableDeliveryRadius: true,
+      enableFinancialMetrics: true,
+      enableBarcodeScanner: true,
+    },
+    pesqueiro: {
+      enableStorefront: true,
+      enablePDVBalcao: true,
+      enableStockControl: true,
+      enableDeliveryRadius: true,
+      enableFinancialMetrics: true,
+      enableBarcodeScanner: false,
+    },
+    pastelaria: {
+      enableStorefront: true,
+      enablePDVBalcao: true,
+      enableStockControl: false,
+      enableDeliveryRadius: true,
+      enableFinancialMetrics: true,
+      enableBarcodeScanner: false,
+    },
+  },
+  plans: [
+    {
+      id: 'plan_cardapio',
+      name: 'Cardápio Digital & Pedidos',
+      tagline: 'Ideal para iniciar sem custos elevados',
+      price: 49.90,
+      period: '/mês',
+      description: 'Vitrine digital com fotos, descrições e pedidos no WhatsApp sem taxas de comissão.',
+      badge: 'Iniciante',
+      features: [
+        'Vitrine Web Exclusiva com link próprio',
+        'Cardápio Digital com QR Code para mesas e balcão',
+        'Pedidos formatados direto no WhatsApp',
+        'Banners promocionais e fotos ilimitadas',
+        'Suporte técnico via WhatsApp'
+      ],
+      active: true,
+    },
+    {
+      id: 'plan_balcao_pdv',
+      name: 'Balcão & PDV Caixa Rápido',
+      tagline: 'Para quem vende no balcão físico',
+      price: 89.90,
+      period: '/mês',
+      description: 'Frente de Caixa (PDV) ultra-rápida no toque e leitor de código de barras.',
+      badge: 'Mais Vendido',
+      features: [
+        'Tudo do Plano Cardápio Digital',
+        'Frente de Caixa Balcão (PDV Ágil)',
+        'Venda avulsa ou em fardos/caixas',
+        'Bipe com leitor USB / Bluetooth',
+        'Fechamento de caixa diário'
+      ],
+      active: true,
+    },
+    {
+      id: 'plan_delivery_estoque',
+      name: 'Delivery & Estoque Profissional',
+      tagline: 'Autonomia total de entregas e estoque',
+      price: 139.90,
+      period: '/mês',
+      description: 'Controle de estoque em tempo real com baixa automática e cálculo de frete por raio.',
+      badge: 'Profissional',
+      features: [
+        'Tudo do Plano Balcão & PDV',
+        'Controle de Estoque e Alertas de Reposição',
+        'Cálculo de taxa de entrega dinâmica por raio (KM)',
+        'Importação de planilhas Excel prontas',
+        'Controle de pedidos em tempo real (Separando / A Caminho)'
+      ],
+      active: true,
+    },
+    {
+      id: 'plan_nuvi_pro',
+      name: 'Nuvi Pro Total (Completo)',
+      tagline: 'A solução definitiva sem limites',
+      price: 199.90,
+      period: '/mês',
+      description: 'Todos os módulos liberados com margem de lucro, múltiplos caixas e atendimento VIP.',
+      badge: 'Completo VIP',
+      features: [
+        'Acesso Ilimitado a Todos os Recursos e Módulos',
+        'Relatórios Financeiros e Margem de Lucro Bruta',
+        'Múltiplos Caixas e Usuários Simultâneos',
+        'Backup Diário em Nuvem Garantido',
+        'Atendimento e Consultoria VIP Prioritária'
+      ],
+      active: true,
+    }
+  ],
+  promoBanner: {
+    enabled: true,
+    title: '🔥 Promoção Exclusiva de Lançamento Nuvi SaaS',
+    message: 'Assine o Plano Completo neste mês com 30% de desconto e garanta suporte prioritário de implantação!',
+    ctaText: 'Falar com Consultor no WhatsApp',
+    ctaUrl: 'https://wa.me/5511999999999?text=Ol%C3%A1!%20Tenho%20interesse%20na%20promo%C3%A7%C3%A3o%20do%20Nuvi%20SaaS.'
+  }
 };
 
 // Garante que bebidas de adega (como cervejas e refrigerantes) possuam fardos padrão de 12 e 18 habilitados
@@ -125,8 +247,12 @@ export const enrichProductsWithDefaultPacks = (products: Product[]): Product[] =
       prod.category?.includes('hot_roll') ||
       prod.category?.includes('combinados') ||
       prod.category?.includes('pratos_quentes') ||
+      prod.category?.includes('pastel') ||
+      prod.category?.includes('salgado') ||
       prod.id?.includes('-pz-') ||
       prod.id?.includes('-jp-') ||
+      prod.id?.includes('-pas-') ||
+      (prod.id?.includes('-pq-') && prod.category !== 'bebidas_geladas' && prod.category !== 'iscas_massas') ||
       (prod.id?.includes('-lc-') && prod.category !== 'bebidas_lanche')
     );
 
@@ -378,6 +504,104 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       localStorage.removeItem(STORAGE_KEYS.TENANT_AUTH);
     } catch {}
+  };
+
+  // Configurações Globais do SaaS Nuvi (Permissões, 4 Planos de Venda e Promoções)
+  const [globalConfig, setGlobalConfigState] = useState<GlobalSaaSConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.GLOBAL_CONFIG);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...DEFAULT_GLOBAL_CONFIG,
+          ...parsed,
+          defaultPermissions: {
+            ...DEFAULT_GLOBAL_CONFIG.defaultPermissions,
+            ...(parsed.defaultPermissions || {})
+          },
+          plans: parsed.plans && parsed.plans.length === 4 ? parsed.plans : DEFAULT_GLOBAL_CONFIG.plans,
+          promoBanner: {
+            ...DEFAULT_GLOBAL_CONFIG.promoBanner,
+            ...(parsed.promoBanner || {})
+          }
+        };
+      }
+      return DEFAULT_GLOBAL_CONFIG;
+    } catch {
+      return DEFAULT_GLOBAL_CONFIG;
+    }
+  });
+
+  const updateGlobalConfig = (newConfig: Partial<GlobalSaaSConfig>) => {
+    setGlobalConfigState((prev) => {
+      const updated = { ...prev, ...newConfig };
+      try {
+        localStorage.setItem(STORAGE_KEYS.GLOBAL_CONFIG, JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+  };
+
+  const updatePlanPrice = (planId: string, newPrice: number) => {
+    setGlobalConfigState((prev) => {
+      const updatedPlans = prev.plans.map((p) => (p.id === planId ? { ...p, price: newPrice } : p));
+      const updated = { ...prev, plans: updatedPlans };
+      try {
+        localStorage.setItem(STORAGE_KEYS.GLOBAL_CONFIG, JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+  };
+
+  const updateSegmentPermissions = (segment: BusinessSegmentType, perms: Partial<SaaSFeaturePermissions>) => {
+    setGlobalConfigState((prev) => {
+      const currentSegmentPerms = prev.segmentPermissions?.[segment] || {};
+      const updatedSegmentPermissions = {
+        ...(prev.segmentPermissions || {}),
+        [segment]: {
+          ...currentSegmentPerms,
+          ...perms
+        }
+      };
+      const updated = { ...prev, segmentPermissions: updatedSegmentPermissions };
+      try {
+        localStorage.setItem(STORAGE_KEYS.GLOBAL_CONFIG, JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+  };
+
+  const updatePromoBanner = (banner: Partial<SaaSPromoBanner>) => {
+    setGlobalConfigState((prev) => {
+      const updatedPromo = { ...prev.promoBanner, ...banner };
+      const updated = { ...prev, promoBanner: updatedPromo };
+      try {
+        localStorage.setItem(STORAGE_KEYS.GLOBAL_CONFIG, JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+  };
+
+  // Verifica se uma funcionalidade está liberada para um lojista/segmento
+  const isFeatureAllowed = (feature: keyof SaaSFeaturePermissions, tenant?: Tenant): boolean => {
+    const targetTenant = tenant || currentTenant;
+    const segment = targetTenant?.businessSegment;
+
+    // Se houver regra específica para o segmento da loja
+    if (segment && globalConfig.segmentPermissions?.[segment]?.[feature] !== undefined) {
+      return Boolean(globalConfig.segmentPermissions[segment]![feature]);
+    }
+
+    // Caso contrário, adota a permissão padrão configurada pelo Master
+    return Boolean(globalConfig.defaultPermissions[feature]);
   };
 
   // Sync to localStorage
@@ -1408,6 +1632,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         isTenantAuthenticated,
         loginTenant,
         logoutTenant,
+        globalConfig,
+        updateGlobalConfig,
+        updatePlanPrice,
+        updateSegmentPermissions,
+        updatePromoBanner,
+        isFeatureAllowed,
       }}
     >
       {children}

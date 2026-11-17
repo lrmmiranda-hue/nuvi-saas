@@ -56,7 +56,9 @@ import {
   Sliders,
   LayoutGrid,
   List,
-  CheckCircle2
+  CheckCircle2,
+  ArrowRight,
+  Megaphone
 } from 'lucide-react';
 
 interface TenantDashboardProps {
@@ -82,6 +84,8 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     themeMode,
     setThemeMode,
     toggleThemeMode,
+    isFeatureAllowed,
+    globalConfig,
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<
@@ -370,7 +374,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
   const isPhysicalEnabled = configEdits.enablePhysicalStore ?? currentTenant.config?.enablePhysicalStore ?? true;
   const isOnlineEnabled = configEdits.enableOnlineSales ?? currentTenant.config?.enableOnlineSales ?? true;
   const isBarcodeScannerEnabled = configEdits.enableBarcodeScanner ?? currentTenant.config?.enableBarcodeScanner ?? (currentTenant.businessSegment === 'adega' || currentTenant.businessSegment === 'mercadinho_emporio');
-  const isFoodOrPizza = currentTenant.businessSegment === 'pizzaria' || currentTenant.businessSegment === 'restaurante_lanchonete' || currentTenant.businessSegment === 'comida_japonesa';
+  const isFoodOrPizza = currentTenant.businessSegment === 'pizzaria' || currentTenant.businessSegment === 'restaurante_lanchonete' || currentTenant.businessSegment === 'comida_japonesa' || currentTenant.businessSegment === 'pastelaria';
   const isAdega = currentTenant.businessSegment === 'adega';
   const isWhatsAppOrdersEnabled = (whatsAppEdits?.enableWhatsAppOrders ?? currentTenant.whatsapp?.enableWhatsAppOrders ?? true) && isOnlineEnabled;
 
@@ -390,6 +394,10 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
         return { productsTabLabel: 'Cardápio & Lanches', productsTabIcon: UtensilsCrossed };
       case 'comida_japonesa':
         return { productsTabLabel: 'Cardápio & Culinária Japonesa', productsTabIcon: Fish };
+      case 'pesqueiro':
+        return { productsTabLabel: 'Cardápio & Porções de Peixe', productsTabIcon: Fish };
+      case 'pastelaria':
+        return { productsTabLabel: 'Cardápio & Pastéis', productsTabIcon: UtensilsCrossed };
       case 'mercadinho_emporio':
         return { productsTabLabel: 'Catálogo & Mercearia', productsTabIcon: Store };
       case 'cosmeticos_farmacia':
@@ -401,21 +409,27 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     }
   }, [currentTenant.businessSegment]);
 
-  // Dynamically constructed available tabs based on tenant operational model
+  // Permissões de Módulos definidas pelo Administrador Master
+  const allowPDV = isFeatureAllowed('enablePDVBalcao', currentTenant);
+  const allowStock = isFeatureAllowed('enableStockControl', currentTenant);
+  const allowStorefront = isFeatureAllowed('enableStorefront', currentTenant);
+  const allowMetrics = isFeatureAllowed('enableFinancialMetrics', currentTenant);
+
+  // Dynamically constructed available tabs based on tenant operational model & Master Permissions
   const availableTabs = [
-    ...(isPhysicalEnabled ? [{ id: 'vendas', label: 'Vendas Balcão (PDV)', icon: ShoppingCart }] : []),
+    ...(isPhysicalEnabled && allowPDV ? [{ id: 'vendas', label: 'Vendas Balcão (PDV)', icon: ShoppingCart }] : []),
     // Para Pizzaria e Lanchonete, NÃO exibe a aba de estoque ("Gestão de Cardápio"), mantendo unicamente a aba de "Cardápio & Lanches" / "Cardápio & Pizzas"!
-    ...(!isFoodOrPizza ? [{ 
+    ...(!isFoodOrPizza && allowStock ? [{ 
       id: 'estoque', 
       label: isAdega ? 'Estoque & Recebimento' : 'Controle de Estoque', 
       icon: Boxes, 
       count: tenantProducts.length 
     }] : []),
-    ...(isOnlineEnabled ? [
+    ...(isOnlineEnabled && allowStorefront ? [
       { id: 'pedidos', label: 'Gestão de Pedidos', icon: ShoppingBag, count: tenantOrders.length },
     ] : []),
     // Para Pizzaria e Lanchonete, a aba de Cardápio sempre fica visível (ou se vendas online estiver habilitado para outros segmentos)
-    ...(isFoodOrPizza || isOnlineEnabled ? [
+    ...((isFoodOrPizza || isOnlineEnabled) && allowStorefront ? [
       { id: 'produtos', label: productsTabLabel, icon: productsTabIcon, count: tenantProducts.length },
     ] : []),
     { id: 'configuracoes', label: 'Configurações da Loja', icon: Settings },
@@ -423,7 +437,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     ...(isWhatsAppOrdersEnabled ? [
       { id: 'whatsapp', label: 'WhatsApp & Mensagens', icon: MessageSquare },
     ] : []),
-    { id: 'metricas', label: 'Métricas & Desempenho', icon: BarChart3 },
+    ...(allowMetrics ? [
+      { id: 'metricas', label: 'Métricas & Desempenho', icon: BarChart3 },
+    ] : []),
   ];
 
   // Auto-switch tab if current tab is hidden by disabling online or physical mode
@@ -454,6 +470,32 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
   return (
     <div className="space-y-6 pb-20">
       
+      {/* Banner de Divulgação de Promoções de Vendas do SaaS Nuvi (Configurado pelo Master) */}
+      {globalConfig?.promoBanner?.enabled && (
+        <div className="rounded-2xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 text-white p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              <h3 className="font-extrabold text-sm sm:text-base">
+                {globalConfig.promoBanner.title}
+              </h3>
+            </div>
+            <p className="text-xs text-sky-100 max-w-3xl">
+              {globalConfig.promoBanner.message}
+            </p>
+          </div>
+          <a
+            href={globalConfig.promoBanner.ctaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2.5 rounded-xl bg-white text-blue-700 hover:bg-sky-50 active:scale-[0.98] font-extrabold text-xs shadow-md transition-all inline-flex items-center gap-2 shrink-0 cursor-pointer"
+          >
+            <span>{globalConfig.promoBanner.ctaText}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      )}
+
       {/* Onboarding Pending Banner */}
       {!currentTenant.onboardingCompleted && (
         <div className={`rounded-2xl border p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors ${
