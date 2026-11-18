@@ -578,16 +578,16 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
           </div>
           <button
             onClick={onOpenOnboarding}
-            className="btn-graphite px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 font-bold text-xs shrink-0 shadow-xs transition-all active:scale-95 cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shrink-0 shadow-md shadow-sky-500/25 transition-all active:scale-95 cursor-pointer"
           >
             Iniciar Passo a Passo
           </button>
         </div>
       )}
 
-      {/* Tenant Header / Store Identity Card */}
-      <div className={`rounded-2xl border p-5 sm:p-6 shadow-xs transition-colors ${
-        isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
+      {/* Tenant Header / Store Identity Card - Estilo Nuvi Master */}
+      <div className={`rounded-2xl border p-5 sm:p-6 transition-colors ${
+        isLight ? 'bg-white border-slate-200 text-slate-800 shadow-sm' : 'bg-[#11161B] border-[#1C2631] text-white shadow-xl'
       }`}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           
@@ -595,7 +595,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
             {/* Logo Image or Fallback Monogram */}
             {currentTenant.branding.logoUrl ? (
               <div className={`w-14 h-14 rounded-2xl overflow-hidden border shadow-xs shrink-0 flex items-center justify-center p-1 ${
-                isLight ? 'bg-slate-50 border-slate-200' : 'bg-neutral-950 border-white/20'
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#151D24] border-[#222E3A]'
               }`}>
                 <img
                   src={currentTenant.branding.logoUrl}
@@ -605,7 +605,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               </div>
             ) : (
               <div 
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold shadow-xs shrink-0 bg-neutral-800 text-white border border-neutral-700"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-xs shrink-0 bg-gradient-to-br from-sky-600 to-blue-600 text-white border border-sky-400/30"
               >
                 <span>{currentTenant.name.charAt(0)}</span>
               </div>
@@ -613,22 +613,22 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className={`text-xl sm:text-2xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                <h1 className={`text-xl sm:text-2xl font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   {currentTenant.name}
                 </h1>
-                <span className={`text-[11px] font-semibold uppercase px-2 py-0.5 rounded border ${
-                  isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-neutral-800 text-neutral-300 border-neutral-700'
+                <span className={`text-[11px] font-extrabold uppercase px-2 py-0.5 rounded border ${
+                  isLight ? 'bg-sky-50 text-sky-800 border-sky-300' : 'bg-sky-500/15 text-sky-400 border-sky-500/30'
                 }`}>
                   {currentTenant.plan}
                 </span>
-                <span className={`text-xs ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
+                <span className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                   Área Restrita do Estabelecimento
                 </span>
               </div>
-              <p className={`text-xs mt-0.5 ${isLight ? 'text-slate-600' : 'text-neutral-300'}`}>
+              <p className={`text-xs mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
                 {currentTenant.slogan || 'Bebidas no ponto e entrega rápida'}
               </p>
-              <p className={`text-[11px] mt-1 ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
+              <p className={`text-[11px] mt-1 ${isLight ? 'text-slate-500' : 'text-slate-500'}`}>
                 {currentTenant.address.street}, {currentTenant.address.number} - {currentTenant.address.neighborhood}, {currentTenant.address.city}
               </p>
             </div>
@@ -678,7 +678,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               </button>
             </div>
 
-            {/* Linha Inferior: Status da Loja e Botão Ver Minha Vitrine */}
+            {/* Linha Inferior: Status da Loja e Botão Ver Minha Vitrine em Tom Azul Nuvi */}
             <div className="flex items-center gap-2.5">
               {/* Open / Closed Toggle */}
               <button
@@ -697,24 +697,24 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 <span>{currentTenant.isOpen ? 'Loja Aberta' : 'Loja Fechada'}</span>
               </button>
 
-              {/* View Live Storefront (Only when Online Sales is enabled) */}
+              {/* View Live Storefront com Degradê Azul Nuvi Master */}
               {isOnlineEnabled ? (
                 <button
                   onClick={() => setViewRole('storefront')}
-                  className="btn-graphite flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-md shadow-sky-500/25 transition-all active:scale-95 cursor-pointer"
                 >
-                  <Store className="w-3.5 h-3.5 text-slate-300" />
+                  <Store className="w-3.5 h-3.5 text-white" />
                   <span>Ver Minha Vitrine</span>
-                  <ExternalLink className="w-3 h-3 text-slate-300" />
+                  <ExternalLink className="w-3 h-3 text-white" />
                 </button>
               ) : (
                 <div 
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] ${
-                    isLight ? 'bg-slate-100 border-slate-200 text-slate-600' : 'bg-neutral-950 border-neutral-800 text-neutral-400'
+                    isLight ? 'bg-slate-100 border-slate-200 text-slate-600' : 'bg-[#151D24] border-[#222E3A] text-slate-400'
                   }`}
                   title="Vendas online e vitrine pública desativadas nas configurações"
                 >
-                  <Store className="w-3.5 h-3.5 text-neutral-400" />
+                  <Store className="w-3.5 h-3.5 text-slate-400" />
                   <span>Loja Física (Sem Vitrine)</span>
                 </div>
               )}
@@ -724,9 +724,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
         </div>
 
-        {/* Tab Navigation - Padronizada em Azul Nuvi */}
+        {/* Tab Navigation - Padronizada em Azul Nuvi Master */}
         <div className={`flex items-center gap-1 mt-6 pt-4 border-t overflow-x-auto text-xs ${
-          isLight ? 'border-slate-200' : 'border-neutral-800'
+          isLight ? 'border-slate-200' : 'border-[#1C2631]'
         }`}>
           {availableTabs.map((tab) => {
             const Icon = tab.icon;
@@ -735,24 +735,24 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'btn-graphite bg-neutral-800 text-white border border-neutral-700 shadow-xs font-bold'
+                    ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-md shadow-sky-500/25 ring-1 ring-sky-400/40'
                     : isLight
-                      ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'
-                      : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
+                      ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70'
+                      : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-sky-500'}`} />
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
                   <span 
                     className={`px-1.5 py-0.2 rounded-full text-[10px] ${
                       isActive 
-                        ? 'bg-black/20 text-white font-bold' 
+                        ? 'bg-black/25 text-white font-bold' 
                         : isLight 
-                          ? 'bg-slate-200 text-slate-700 font-semibold' 
-                          : 'bg-neutral-800 text-neutral-400'
+                          ? 'bg-sky-100 text-sky-800 font-bold' 
+                          : 'bg-sky-950/60 text-sky-400 border border-sky-800/40'
                     }`}
                   >
                     {tab.count}
@@ -785,7 +785,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
           
           {/* Status Subfilters */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-1.5 p-1 bg-neutral-900 rounded-xl border border-neutral-800 text-xs overflow-x-auto">
+            <div className={`flex items-center gap-1.5 p-1 rounded-xl border text-xs overflow-x-auto ${
+              isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+            }`}>
               {[
                 { id: 'todos', label: 'Todos' },
                 { id: 'novo', label: 'Novos' },
@@ -797,10 +799,10 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 <button
                   key={st.id}
                   onClick={() => setOrderStatusFilter(st.id)}
-                  className={`px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer ${
                     orderStatusFilter === st.id
-                      ? 'btn-graphite bg-neutral-800 text-white border border-neutral-700 shadow-xs font-bold'
-                      : isLight ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                      ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-xs'
+                      : isLight ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60' : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
                   }`}
                 >
                   {st.label}
@@ -808,7 +810,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               ))}
             </div>
 
-            <p className="text-xs text-neutral-400">
+            <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
               {filteredOrders.length} {filteredOrders.length === 1 ? 'pedido listado' : 'pedidos listados'}
             </p>
           </div>
@@ -821,7 +823,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               return (
                 <div
                   key={order.id}
-                  className="rounded-2xl bg-neutral-900 border border-neutral-800 p-5 space-y-4 shadow-sm"
+                  className={`rounded-2xl border p-5 space-y-4 shadow-sm transition-colors ${
+                    isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+                  }`}
                 >
                   {/* Order Top Bar */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-800/80 pb-3">
@@ -999,7 +1003,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
             <button
               onClick={handleOpenAddProduct}
-              className="btn-graphite flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-md shadow-sky-500/25 transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>
@@ -1016,15 +1020,15 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
           {/* Product Filter Bar */}
           <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border ${
-            isLight ? 'bg-white border-slate-200' : 'bg-neutral-900 border-neutral-800'
+            isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
           }`}>
             <div className="flex items-center gap-2 overflow-x-auto text-xs">
               <button
                 onClick={() => setProductCategoryFilter('todas')}
-                className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
                   productCategoryFilter === 'todas'
-                    ? 'btn-graphite bg-neutral-800 text-white border border-neutral-700 font-bold shadow-xs'
-                    : isLight ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                    ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold shadow-xs'
+                    : isLight ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70' : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
                 }`}
               >
                 Todas ({tenantProducts.length})
@@ -1033,10 +1037,10 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 <button
                   key={cat.id}
                   onClick={() => setProductCategoryFilter(cat.id)}
-                  className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
                     productCategoryFilter === cat.id
-                      ? 'btn-graphite bg-neutral-800 text-white border border-neutral-700 font-bold shadow-xs'
-                      : isLight ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                      ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold shadow-xs'
+                      : isLight ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70' : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
                   }`}
                 >
                   {cat.label}
@@ -1051,8 +1055,8 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 value={productSearch}
                 onChange={(e) => setProductSearch(e.target.value)}
                 placeholder="Buscar produto..."
-                className={`w-full pl-8 pr-3 py-1.5 rounded-lg border text-xs focus:outline-none focus:border-blue-500 transition-colors ${
-                  isLight ? 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400' : 'bg-neutral-950 border-neutral-800 text-white placeholder-neutral-500'
+                className={`w-full pl-8 pr-3 py-1.5 rounded-lg border text-xs focus:outline-none focus:border-sky-500 transition-colors ${
+                  isLight ? 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400' : 'bg-[#0B0F12] border-[#1C2631] text-white placeholder-slate-500'
                 }`}
               />
             </div>
@@ -1063,7 +1067,11 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 p-4 flex flex-col justify-between transition-all"
+                className={`rounded-2xl border p-4 flex flex-col justify-between transition-all ${
+                  isLight 
+                    ? 'bg-white border-slate-200 hover:border-sky-300 shadow-sm' 
+                    : 'bg-[#11161B] border-[#1C2631] hover:border-sky-800 shadow-md'
+                }`}
               >
                 <div className="space-y-3">
                   {/* Photo & badges */}
@@ -1153,14 +1161,16 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
           </div>
 
           {filteredProducts.length === 0 && (
-            <div className="p-12 text-center rounded-2xl bg-neutral-900 border border-neutral-800 space-y-2">
+            <div className={`p-12 text-center rounded-2xl border space-y-2 ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+            }`}>
               <Flame className="w-8 h-8 text-neutral-600 mx-auto" />
-              <h4 className="text-sm font-bold text-white">Nenhum produto cadastrado nesta categoria</h4>
+              <h4 className={`text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Nenhum produto cadastrado nesta categoria</h4>
               <button
                 onClick={handleOpenAddProduct}
-                className="btn-graphite mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 font-bold text-xs shadow-xs cursor-pointer"
+                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-md shadow-sky-500/25 cursor-pointer transition-all active:scale-95"
               >
-                <Plus className="w-3 h-3" />
+                <Plus className="w-3.5 h-3.5" />
                 Cadastrar Primeiro Produto
               </button>
             </div>
@@ -1172,20 +1182,20 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
       {activeTab === 'configuracoes' && (
         <div className="space-y-6">
           <div className={`pb-3 flex items-center justify-between border-b ${
-            isLight ? 'border-slate-200' : 'border-neutral-800'
+            isLight ? 'border-slate-200' : 'border-[#1C2631]'
           }`}>
             <div>
               <h2 className={`text-base font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
                 Gerenciamento Geral da Loja
               </h2>
-              <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+              <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                 Configure as regras operacionais, modo de pedidos WhatsApp, formas de pagamento e dados da sua empresa.
               </p>
             </div>
 
             <button
               onClick={handleSaveStoreManagement}
-              className="btn-graphite px-4 py-2 rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700"
+              className="px-5 py-2.5 rounded-xl font-extrabold text-xs shadow-md shadow-sky-500/25 transition-all cursor-pointer bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white active:scale-95"
             >
               Salvar Configurações
             </button>
@@ -1436,14 +1446,14 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
           {/* Section: Modelo Visual do Cardápio na Vitrine (Grade vs Lista com Miniatura) */}
           {isOnlineEnabled && (
             <div className={`p-5 rounded-2xl border space-y-4 ${
-              isLight ? 'bg-white border-slate-200 shadow-xs' : 'bg-neutral-900 border-neutral-800'
+              isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#11161B] border-[#1C2631]'
             }`}>
               <div>
                 <h3 className={`text-sm sm:text-base font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  <Sliders className="w-4 h-4 text-slate-500" />
+                  <Sliders className="w-4 h-4 text-sky-500" />
                   <span>Modelo de Exibição dos Itens na Vitrine</span>
                 </h3>
-                <p className={`text-xs mt-1 ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                <p className={`text-xs mt-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                   Defina o formato visual que seus clientes verão ao navegar pelo cardápio/catálogo da sua loja.
                 </p>
               </div>
@@ -1461,32 +1471,32 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                   }}
                   className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                     (configEdits.catalogLayout || 'grid') === 'grid'
-                      ? 'btn-graphite border-neutral-700 shadow-sm'
+                      ? 'border-sky-500 bg-sky-500/15 shadow-md text-white'
                       : isLight
-                      ? 'bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-800'
-                      : 'bg-neutral-950 hover:bg-neutral-850 border-neutral-800 text-neutral-300'
+                      ? 'bg-slate-50 hover:bg-sky-50/50 border-slate-300 text-slate-800'
+                      : 'bg-[#151D24] hover:bg-[#1E2933] border-[#222E3A] text-slate-300'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <LayoutGrid className="w-5 h-5 text-slate-300" />
+                      <LayoutGrid className="w-5 h-5 text-sky-400" />
                       <span className="font-bold text-sm">Grade com Fotos Grandes</span>
                     </div>
                     {(configEdits.catalogLayout || 'grid') === 'grid' && (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-sky-400" />
                     )}
                   </div>
                   <p className="text-xs opacity-80 leading-relaxed">
                     Cards retangulares com fotos amplas em destaque e botão de adicionar no rodapé. Ideal para adegas, empórios, conveniências e vitrines de produtos.
                   </p>
                   <div className="h-12 rounded-lg bg-black/10 dark:bg-white/5 border border-black/10 p-1 flex gap-2 items-center">
-                    <div className="flex-1 h-full rounded bg-slate-400/25 flex flex-col p-1 justify-between">
-                      <div className="w-full h-4 rounded bg-slate-400/35" />
-                      <div className="w-2/3 h-1.5 rounded bg-slate-400/40" />
+                    <div className="flex-1 h-full rounded bg-sky-400/25 flex flex-col p-1 justify-between">
+                      <div className="w-full h-4 rounded bg-sky-400/35" />
+                      <div className="w-2/3 h-1.5 rounded bg-sky-400/40" />
                     </div>
-                    <div className="flex-1 h-full rounded bg-slate-400/25 flex flex-col p-1 justify-between">
-                      <div className="w-full h-4 rounded bg-slate-400/35" />
-                      <div className="w-2/3 h-1.5 rounded bg-slate-400/40" />
+                    <div className="flex-1 h-full rounded bg-sky-400/25 flex flex-col p-1 justify-between">
+                      <div className="w-full h-4 rounded bg-sky-400/35" />
+                      <div className="w-2/3 h-1.5 rounded bg-sky-400/40" />
                     </div>
                   </div>
                 </div>
@@ -1503,10 +1513,10 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                   }}
                   className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                     configEdits.catalogLayout === 'list'
-                      ? 'btn-graphite border-neutral-700 shadow-sm'
+                      ? 'border-sky-500 bg-sky-500/15 shadow-md text-white'
                       : isLight
-                      ? 'bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-800'
-                      : 'bg-neutral-950 hover:bg-neutral-850 border-neutral-800 text-neutral-300'
+                      ? 'bg-slate-50 hover:bg-sky-50/50 border-slate-300 text-slate-800'
+                      : 'bg-[#151D24] hover:bg-[#1E2933] border-[#222E3A] text-slate-300'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">

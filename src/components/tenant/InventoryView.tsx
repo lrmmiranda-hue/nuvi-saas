@@ -358,75 +358,75 @@ export const InventoryView: React.FC<InventoryViewProps> = ({ onOpenProductModal
   return (
     <div className="space-y-6">
       
-      {/* KPI Cards Row */}
+      {/* KPI Cards Row com estilo Nuvi Master */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Total Items */}
-        <div className={`p-4 rounded-2xl border space-y-1 shadow-xs transition-colors ${
-          isLight ? 'bg-white border-slate-200' : 'bg-neutral-900 border-neutral-800'
+        <div className={`p-4 rounded-2xl border space-y-1 shadow-sm transition-colors ${
+          isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`text-xs uppercase font-bold tracking-wide ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+            <span className={`text-xs uppercase font-extrabold tracking-wide ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
               Itens em Estoque
             </span>
-            <Boxes className={`w-4 h-4 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
+            <Boxes className="w-4 h-4 text-sky-400" />
           </div>
-          <div className={`text-2xl font-extrabold font-mono tabular-nums ${isLight ? 'text-slate-900' : 'text-white'}`}>
-            {totalItemsCount} <span className={`text-xs font-sans font-normal ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>unidades</span>
+          <div className={`text-2xl font-black font-mono tabular-nums ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            {totalItemsCount} <span className={`text-xs font-sans font-normal ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>unidades</span>
           </div>
-          <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
+          <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
             Distribuídos em {tenantProducts.length} produtos cadastrados
           </p>
         </div>
 
         {/* Total Cost Value */}
-        <div className={`p-4 rounded-2xl border space-y-1 shadow-xs transition-colors ${
-          isLight ? 'bg-white border-slate-200' : 'bg-neutral-900 border-neutral-800'
+        <div className={`p-4 rounded-2xl border space-y-1 shadow-sm transition-colors ${
+          isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`text-xs uppercase font-bold tracking-wide ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+            <span className={`text-xs uppercase font-extrabold tracking-wide ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
               Custo do Estoque
             </span>
-            <DollarSign className={`w-4 h-4 ${isLight ? 'text-sky-600' : 'text-sky-400'}`} />
+            <DollarSign className="w-4 h-4 text-sky-400" />
           </div>
-          <div className={`text-2xl font-extrabold font-mono tabular-nums ${isLight ? 'text-slate-900' : 'text-white'}`}>
+          <div className={`text-2xl font-black font-mono tabular-nums ${isLight ? 'text-slate-900' : 'text-white'}`}>
             R$ {totalCostValue.toFixed(2)}
           </div>
-          <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
+          <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
             Capital investido em mercadorias
           </p>
         </div>
 
         {/* Total Sale Potential & Margin */}
-        <div className={`p-4 rounded-2xl border space-y-1 shadow-xs transition-colors ${
-          isLight ? 'bg-white border-slate-200' : 'bg-neutral-900 border-neutral-800'
+        <div className={`p-4 rounded-2xl border space-y-1 shadow-sm transition-colors ${
+          isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`text-xs uppercase font-bold tracking-wide ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+            <span className={`text-xs uppercase font-extrabold tracking-wide ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
               Potencial de Venda
             </span>
-            <TrendingUp className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+            <TrendingUp className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className={`text-2xl font-extrabold font-mono tabular-nums ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}>
+          <div className={`text-2xl font-black font-mono tabular-nums ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}>
             R$ {totalSaleValue.toFixed(2)}
           </div>
-          <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
+          <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
             Lucro projetado: R$ {(totalSaleValue - totalCostValue).toFixed(2)}
           </p>
         </div>
 
         {/* Alerts: Low / Out of Stock */}
-        <div className={`p-4 rounded-2xl border space-y-1 shadow-xs transition-colors ${
-          isLight ? 'bg-white border-slate-200' : 'bg-neutral-900 border-neutral-800'
+        <div className={`p-4 rounded-2xl border space-y-1 shadow-sm transition-colors ${
+          isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`text-xs uppercase font-bold tracking-wide ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+            <span className={`text-xs uppercase font-extrabold tracking-wide ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
               Alertas de Reposição
             </span>
-            <AlertTriangle className={`w-4 h-4 ${lowStockCount > 0 || outOfStockCount > 0 ? (isLight ? 'text-amber-600' : 'text-amber-400') : (isLight ? 'text-slate-400' : 'text-neutral-500')}`} />
+            <AlertTriangle className={`w-4 h-4 ${lowStockCount > 0 || outOfStockCount > 0 ? (isLight ? 'text-amber-600' : 'text-amber-400') : (isLight ? 'text-slate-400' : 'text-slate-500')}`} />
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-2xl font-extrabold font-mono ${
+            <span className={`text-2xl font-black font-mono ${
               outOfStockCount > 0 
                 ? (isLight ? 'text-rose-600' : 'text-rose-400') 
                 : (isLight ? 'text-slate-900' : 'text-white')

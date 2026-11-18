@@ -181,17 +181,19 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
               </label>
             </div>
 
+            {/* Botão Entrar com a cor da fonte igual a letra 'V' da logomarca Nuvi (#1077e4) */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 active:scale-[0.99] text-white font-extrabold text-xs shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              style={{ color: '#1077e4' }}
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-sky-200 via-cyan-100 to-sky-200 hover:from-sky-100 hover:to-white active:scale-[0.99] font-black text-sm shadow-xl shadow-sky-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 border border-sky-300/60"
             >
               {isSubmitting ? (
-                <span>Validando acesso...</span>
+                <span style={{ color: '#1077e4' }}>Validando acesso...</span>
               ) : (
                 <>
-                  <span>Entrar no Painel da Loja</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span style={{ color: '#1077e4' }} className="font-black text-sm tracking-tight">Entrar no Painel da Loja</span>
+                  <ArrowRight style={{ color: '#1077e4' }} className="w-4 h-4" />
                 </>
               )}
             </button>

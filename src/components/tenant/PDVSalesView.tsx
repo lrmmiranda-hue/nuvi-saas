@@ -412,8 +412,8 @@ export const PDVSalesView: React.FC = () => {
       {/* Top Header do PDV: Modo Bipar com Leitor USB vs Modo Cardápio / Catálogo Ágil */}
       <div className={`p-4 rounded-2xl border shadow-sm transition-colors ${
         isLight
-          ? 'bg-white border-neutral-300 shadow-xs'
-          : 'bg-neutral-900 border-neutral-800'
+          ? 'bg-white border-slate-200 shadow-sm'
+          : 'bg-[#11161B] border-[#1C2631]'
       }`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           
@@ -564,18 +564,18 @@ export const PDVSalesView: React.FC = () => {
           
           <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border ${
             isLight
-              ? 'bg-white border-neutral-300 shadow-2xs'
-              : 'bg-neutral-900 border-neutral-800'
+              ? 'bg-white border-slate-200 shadow-2xs'
+              : 'bg-[#11161B] border-[#1C2631]'
           }`}>
             <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
               <button
                 onClick={() => setCategoryFilter('todas')}
                 className={`px-3 py-1.5 rounded-lg whitespace-nowrap font-bold transition-all cursor-pointer ${
                   categoryFilter === 'todas'
-                    ? 'btn-graphite bg-neutral-800 text-white border border-neutral-700 shadow-xs font-bold'
+                    ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold shadow-xs'
                     : isLight
-                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 font-semibold'
-                    : 'text-neutral-300 hover:text-white hover:bg-neutral-800'
+                    ? 'bg-slate-100 hover:bg-sky-50 text-slate-700 border border-slate-200/80'
+                    : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
                 }`}
               >
                 Todas ({tenantProducts.length})
@@ -586,10 +586,10 @@ export const PDVSalesView: React.FC = () => {
                   onClick={() => setCategoryFilter(cat.id)}
                   className={`px-3 py-1.5 rounded-lg whitespace-nowrap font-bold transition-all cursor-pointer ${
                     categoryFilter === cat.id
-                      ? 'btn-graphite bg-neutral-800 text-white border border-neutral-700 shadow-xs font-bold'
+                      ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white font-bold shadow-xs'
                       : isLight
-                      ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 font-semibold'
-                      : 'text-neutral-300 hover:text-white hover:bg-neutral-800'
+                      ? 'bg-slate-100 hover:bg-sky-50 text-slate-700 border border-slate-200/80'
+                      : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
                   }`}
                 >
                   {cat.label} ({cat.count})
@@ -760,12 +760,12 @@ export const PDVSalesView: React.FC = () => {
         {/* RIGHT COLUMN: Active Sale Checkout / Cashier Box (5 cols) */}
         <div className={`lg:col-span-5 rounded-2xl border p-5 space-y-4 shadow-xl transition-colors ${
           isLight
-            ? 'bg-white border-neutral-300 shadow-sm'
-            : 'bg-neutral-900 border-neutral-800'
+            ? 'bg-white border-slate-200 shadow-sm'
+            : 'bg-[#11161B] border-[#1C2631]'
         }`}>
           
           <div className={`flex items-center justify-between border-b pb-3 ${
-            isLight ? 'border-neutral-200' : 'border-neutral-800'
+            isLight ? 'border-slate-200' : 'border-[#1C2631]'
           }`}>
             <div className="flex items-center gap-2">
               <ShoppingCart className="w-5 h-5" style={{ color: brandAccent }} />
