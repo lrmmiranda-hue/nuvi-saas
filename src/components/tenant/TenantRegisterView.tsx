@@ -3,19 +3,19 @@ import { useStore } from '../../context/StoreContext';
 import { Tenant, BusinessSegmentType } from '../../types';
 import { BUSINESS_SEGMENTS, getSegmentById } from '../../data/businessSegments';
 import { NuviLogo } from '../common/NuviLogo';
-import { 
-  Store, 
-  User, 
-  Phone, 
-  MapPin, 
-  Lock, 
-  CheckCircle2, 
-  Sparkles, 
-  ArrowRight, 
-  Barcode, 
-  Boxes, 
-  ShoppingCart, 
-  ShieldCheck, 
+import {
+  Store,
+  User,
+  Phone,
+  MapPin,
+  Lock,
+  CheckCircle2,
+  Sparkles,
+  ArrowRight,
+  Barcode,
+  Boxes,
+  ShoppingCart,
+  ShieldCheck,
   Zap,
   Eye,
   EyeOff,
@@ -28,14 +28,14 @@ interface TenantRegisterViewProps {
 }
 
 export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSuccess }) => {
-  const { 
-    createTenant, 
-    setCurrentTenantId, 
-    setViewRole, 
-    themeMode, 
+  const {
+    createTenant,
+    setCurrentTenantId,
+    setViewRole,
+    themeMode,
     toggleThemeMode,
     globalConfig,
-    showAlert 
+    showAlert
   } = useStore();
 
   const isLight = themeMode === 'light';
@@ -138,45 +138,31 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   };
 
   return (
-    <div className={`min-h-[92vh] py-8 px-4 flex flex-col justify-center items-center transition-colors relative ${
-      isLight ? 'bg-slate-50/80' : 'bg-transparent'
-    }`}>
+    <div className={`min-h-[92vh] py-8 px-4 flex flex-col justify-center items-center transition-colors relative ${isLight ? 'bg-slate-50/80' : 'bg-transparent'
+      }`}>
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
+
         {/* Coluna Esquerda: Formulário de Cadastro com Paleta Azul e Tons Elegantes */}
         <div className="lg:col-span-7">
-          <div className={`p-6 sm:p-8 rounded-3xl border shadow-2xl text-left transition-all ${
-            isLight 
-              ? 'bg-white border-slate-200 shadow-sky-900/5' 
+          <div className={`p-6 sm:p-8 rounded-3xl border shadow-2xl text-left transition-all ${isLight
+              ? 'bg-white border-slate-200 shadow-sky-900/5'
               : 'bg-[#0E1318] border-sky-950/60 shadow-black/80'
-          }`}>
-            
-            <div className="mb-5 border-b pb-4 border-slate-200 dark:border-[#1C2631]">
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                      Cadastre o seu Comércio
-                    </h2>
-                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-500 border border-sky-500/20">
-                      {currentSegmentConfig.shortLabel}
-                    </span>
-                  </div>
-                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                    Escolha o segmento e preencha os dados para ativar seu painel de vendas e vitrine.
-                  </p>
-                </div>
+            }`}>
 
-                {/* Logo Nuvi no canto direito da tabela/card, clicável para alternar entre Modo Claro e Escuro */}
-                <button
-                  type="button"
-                  onClick={toggleThemeMode}
-                  title="Clique na logo para alternar entre Modo Claro e Escuro"
-                  className="cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0 focus:outline-none p-1 rounded-xl"
-                >
-                  <NuviLogo size="sm" isLight={isLight} showSubtitle={false} />
-                </button>
+            <div className="mb-5 border-b pb-4 border-slate-200 dark:border-[#1C2631]">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    Cadastre o seu Comércio
+                  </h2>
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-500 border border-sky-500/20">
+                    {currentSegmentConfig.shortLabel}
+                  </span>
+                </div>
+                <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Escolha o segmento e preencha os dados para ativar seu painel de vendas e vitrine.
+                </p>
               </div>
             </div>
 
@@ -195,13 +181,12 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                         key={seg.id}
                         type="button"
                         onClick={() => setSelectedSegment(seg.id)}
-                        className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 outline-none ${
-                          isSelected
+                        className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 outline-none ${isSelected
                             ? 'bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent shadow-sm border-0 ring-0'
                             : isLight
-                            ? 'bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 text-slate-700'
-                            : 'bg-[#121820] hover:bg-[#182230] border border-[#1C2631] hover:border-sky-800 text-slate-300'
-                        }`}
+                              ? 'bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 text-slate-700'
+                              : 'bg-[#121820] hover:bg-[#182230] border border-[#1C2631] hover:border-sky-800 text-slate-300'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-xl leading-none">{seg.emoji}</span>
@@ -209,11 +194,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                             <CheckCircle2 className={`w-3.5 h-3.5 ${isLight ? 'text-slate-800' : 'text-[#F8FAFC]'}`} />
                           )}
                         </div>
-                        <span className={`text-[11px] leading-tight line-clamp-1 ${
-                          isSelected 
-                            ? (isLight ? 'text-slate-800 font-extrabold' : 'text-[#F8FAFC] font-extrabold') 
+                        <span className={`text-[11px] leading-tight line-clamp-1 ${isSelected
+                            ? (isLight ? 'text-slate-800 font-extrabold' : 'text-[#F8FAFC] font-extrabold')
                             : ''
-                        }`}>
+                          }`}>
                           {seg.shortLabel}
                         </span>
                       </button>
@@ -235,11 +219,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                     value={storeName}
                     onChange={(e) => setStoreName(e.target.value)}
                     placeholder={currentSegmentConfig.namePlaceholder}
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
-                      isLight 
-                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white' 
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
+                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
                         : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                    }`}
+                      }`}
                   />
                 </div>
               </div>
@@ -259,23 +242,21 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                     <span>Usar sugestão</span>
                   </button>
                 </div>
-                
+
                 <input
                   type="text"
                   value={slogan}
                   onChange={(e) => setSlogan(e.target.value)}
                   placeholder={currentSegmentConfig.sloganExample}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
-                    isLight 
-                      ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white' 
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
+                      ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
                       : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                  }`}
+                    }`}
                 />
 
                 {/* Box de Exemplo em Tempo Real */}
-                <div className={`p-3 rounded-xl border flex items-start gap-2.5 text-xs transition-colors ${
-                  isLight ? 'bg-sky-50/60 border-sky-200 text-slate-800' : 'bg-[#121820] border-sky-950/60 text-slate-200'
-                }`}>
+                <div className={`p-3 rounded-xl border flex items-start gap-2.5 text-xs transition-colors ${isLight ? 'bg-sky-50/60 border-sky-200 text-slate-800' : 'bg-[#121820] border-sky-950/60 text-slate-200'
+                  }`}>
                   <Sparkles className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold italic text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">
@@ -290,7 +271,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
 
               {/* Responsável & WhatsApp (Grid 2 cols) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
+
                 <div className="space-y-1.5">
                   <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
                     Seu Nome Completo *
@@ -303,11 +284,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                       value={ownerName}
                       onChange={(e) => setOwnerName(e.target.value)}
                       placeholder="Ex: Carlos Miranda"
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
-                        isLight 
-                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white' 
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
+                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
                           : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                      }`}
+                        }`}
                     />
                   </div>
                 </div>
@@ -324,11 +304,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                       value={whatsappNumber}
                       onChange={(e) => setWhatsappNumber(e.target.value)}
                       placeholder="Ex: 11987654321"
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-mono font-medium outline-none transition-all ${
-                        isLight 
-                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white' 
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-mono font-medium outline-none transition-all ${isLight
+                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
                           : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                      }`}
+                        }`}
                     />
                   </div>
                 </div>
@@ -337,7 +316,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
 
               {/* Cidade & Bairro (Grid 2 cols) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
+
                 <div className="space-y-1.5">
                   <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
                     Cidade
@@ -349,11 +328,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="Ex: São Paulo"
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
-                        isLight 
-                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white' 
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
+                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
                           : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                      }`}
+                        }`}
                     />
                   </div>
                 </div>
@@ -367,11 +345,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                     value={neighborhood}
                     onChange={(e) => setNeighborhood(e.target.value)}
                     placeholder="Ex: Centro, Vila Nova..."
-                    className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
-                      isLight 
-                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white' 
+                    className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
+                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
                         : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                    }`}
+                      }`}
                   />
                 </div>
 
@@ -395,11 +372,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Digite sua senha de acesso"
-                    className={`w-full pl-10 pr-10 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
-                      isLight 
-                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white' 
+                    className={`w-full pl-10 pr-10 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
+                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
                         : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                    }`}
+                      }`}
                   />
                   <button
                     type="button"
@@ -420,20 +396,18 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 type="submit"
                 disabled={isSubmitting}
                 style={{ color: isLight ? '#1e293b' : '#F8FAFC' }}
-                className={`w-full mt-3 py-3.5 px-4 rounded-xl active:scale-[0.99] font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 border-0 ring-0 outline-none ${
-                  isLight
+                className={`w-full mt-3 py-3.5 px-4 rounded-xl active:scale-[0.99] font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 border-0 ring-0 outline-none ${isLight
                     ? 'bg-gradient-to-r from-sky-400/25 via-blue-400/20 to-sky-400/25 hover:from-sky-400/35 hover:to-sky-400/35 text-slate-800 shadow-xs'
                     : 'bg-gradient-to-br from-sky-600/30 via-blue-600/25 to-sky-500/20 hover:from-sky-600/40 hover:via-blue-600/35 text-[#F8FAFC] shadow-md shadow-black/30'
-                }`}
+                  }`}
               >
                 {isSubmitting ? (
-                  <div className={`w-5 h-5 border-2 rounded-full animate-spin ${
-                    isLight ? 'border-slate-800/30 border-t-slate-800' : 'border-[#F8FAFC]/30 border-t-[#F8FAFC]'
-                  }`} />
+                  <div className={`w-5 h-5 border-2 rounded-full animate-spin ${isLight ? 'border-slate-800/30 border-t-slate-800' : 'border-[#F8FAFC]/30 border-t-[#F8FAFC]'
+                    }`} />
                 ) : (
                   <>
                     <Zap className={`w-4 h-4 ${isLight ? 'text-slate-800' : 'text-[#F8FAFC]'}`} />
-                    <span 
+                    <span
                       style={{ color: isLight ? '#1e293b' : '#F8FAFC' }}
                       className={`font-black text-sm tracking-tight ${isLight ? 'text-slate-800' : 'text-[#F8FAFC]'}`}
                     >
@@ -468,14 +442,14 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
 
         {/* Coluna Direita: Apresentação com Identidade Visual Nuvi Master */}
         <div className="lg:col-span-5 space-y-6 text-left lg:sticky lg:top-8">
-          
-          {/* Logo Nuvi em Destaque (clicável para alternar Modo Claro / Escuro) */}
-          <div className="pb-1">
+
+          {/* Logo Nuvi em Destaque à Direita (clicável para alternar Modo Claro / Escuro) */}
+          <div className="pb-1 flex justify-end">
             <button
               type="button"
               onClick={toggleThemeMode}
               title="Clique na logo para alternar entre Modo Claro e Escuro"
-              className="cursor-pointer transition-transform hover:scale-105 active:scale-95 focus:outline-none text-left"
+              className="cursor-pointer transition-transform hover:scale-105 active:scale-95 focus:outline-none"
             >
               <NuviLogo size="lg" isLight={isLight} showSubtitle={false} />
             </button>
@@ -487,9 +461,8 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
               <span>Experimente Grátis por 7 Dias</span>
             </div>
 
-            <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight ${
-              isLight ? 'text-slate-900' : 'text-white'
-            }`}>
+            <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight ${isLight ? 'text-slate-900' : 'text-white'
+              }`}>
               A plataforma definitiva para o seu comércio crescer.
             </h1>
 
@@ -499,11 +472,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
           </div>
 
           {/* Destaque Dinâmico do Segmento Atual com Paleta Nuvi */}
-          <div className={`p-4 rounded-2xl border space-y-2 text-xs transition-all ${
-            isLight 
-              ? 'bg-sky-50/70 border-sky-200 text-slate-800 shadow-xs' 
+          <div className={`p-4 rounded-2xl border space-y-2 text-xs transition-all ${isLight
+              ? 'bg-sky-50/70 border-sky-200 text-slate-800 shadow-xs'
               : 'bg-[#0E1520] border-sky-900/40 text-slate-200 shadow-md'
-          }`}>
+            }`}>
             <div className="flex items-center gap-2 font-bold text-sky-600 dark:text-sky-400 text-sm">
               <span className="text-2xl">{currentSegmentConfig.emoji}</span>
               <span className="text-slate-900 dark:text-white font-extrabold">{currentSegmentConfig.title}</span>
@@ -524,7 +496,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
 
           {/* Funcionalidades com Estilo Nuvi Master */}
           <div className="space-y-3 pt-1">
-            
+
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center shrink-0 mt-0.5">
                 <Barcode className="w-4 h-4" />
@@ -570,9 +542,8 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
           </div>
 
           {/* Selo de Segurança */}
-          <div className={`p-3.5 rounded-xl border flex items-center gap-3 text-xs ${
-            isLight ? 'bg-white border-slate-200 text-slate-600 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631] text-slate-300'
-          }`}>
+          <div className={`p-3.5 rounded-xl border flex items-center gap-3 text-xs ${isLight ? 'bg-white border-slate-200 text-slate-600 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631] text-slate-300'
+            }`}>
             <ShieldCheck className="w-5 h-5 text-sky-500 shrink-0" />
             <span>Sem necessidade de cartão de crédito. Configure seu sistema em menos de 2 minutos!</span>
           </div>
