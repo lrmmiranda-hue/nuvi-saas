@@ -81,40 +81,21 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
   };
 
   return (
-    <div className={`min-h-[85vh] py-8 px-4 flex flex-col justify-center items-center transition-colors relative ${
+    <div className={`min-h-[85vh] py-10 px-4 flex flex-col justify-center items-center transition-colors relative ${
       isLight ? 'bg-slate-50' : 'bg-transparent'
     }`}>
-      {/* Botão Superior de Alternar Modo Claro / Modo Escuro */}
-      <div className="w-full max-w-md flex justify-end pb-3">
-        <button
-          type="button"
-          onClick={toggleThemeMode}
-          title={isLight ? 'Alternar para Modo Escuro' : 'Alternar para Modo Claro'}
-          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border shadow-2xs select-none active:scale-95 ${
-            isLight
-              ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-              : 'bg-[#11161B] border-[#1C2631] text-slate-200 hover:bg-[#161F28] hover:text-white'
-          }`}
-        >
-          {isLight ? (
-            <>
-              <Moon className="w-3.5 h-3.5 text-slate-700" />
-              <span>Modo Escuro</span>
-            </>
-          ) : (
-            <>
-              <Sun className="w-3.5 h-3.5 text-amber-400" />
-              <span>Modo Claro</span>
-            </>
-          )}
-        </button>
-      </div>
-
       <div className="w-full max-w-md">
-        {/* Header Card com Logo Nuvi */}
+        {/* Header Card com Logo Nuvi clicável para alternar entre Modo Claro e Escuro */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
-            <NuviLogo size="lg" isLight={isLight} showSubtitle={false} />
+            <button
+              type="button"
+              onClick={toggleThemeMode}
+              title="Clique na logo para alternar entre Modo Claro e Escuro"
+              className="cursor-pointer transition-transform hover:scale-105 active:scale-95 focus:outline-none"
+            >
+              <NuviLogo size="lg" isLight={isLight} showSubtitle={false} />
+            </button>
           </div>
           <h1 className={`text-2xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
             Painel do Lojista

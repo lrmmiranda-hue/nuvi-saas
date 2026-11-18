@@ -155,32 +155,6 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
       isLight ? 'bg-slate-50/80' : 'bg-transparent'
     }`}>
 
-      {/* Botão Superior de Alternar Modo Claro / Modo Escuro */}
-      <div className="w-full max-w-5xl flex justify-end pb-4">
-        <button
-          type="button"
-          onClick={toggleThemeMode}
-          title={isLight ? 'Alternar para Modo Escuro' : 'Alternar para Modo Claro'}
-          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border shadow-2xs select-none active:scale-95 ${
-            isLight
-              ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-              : 'bg-[#11161B] border-[#1C2631] text-slate-200 hover:bg-[#161F28] hover:text-white'
-          }`}
-        >
-          {isLight ? (
-            <>
-              <Moon className="w-3.5 h-3.5 text-slate-700" />
-              <span>Modo Escuro</span>
-            </>
-          ) : (
-            <>
-              <Sun className="w-3.5 h-3.5 text-amber-400" />
-              <span>Modo Claro</span>
-            </>
-          )}
-        </button>
-      </div>
-
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Coluna Esquerda: Formulário de Cadastro com Paleta Azul e Tons Elegantes */}
@@ -191,18 +165,32 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
               : 'bg-[#0E1318] border-sky-950/60 shadow-black/80'
           }`}>
             
-            <div className="mb-5 space-y-1 border-b pb-4 border-slate-200 dark:border-[#1C2631]">
-              <div className="flex items-center justify-between">
-                <h2 className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  Cadastre o seu Comércio
-                </h2>
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-500 border border-sky-500/20">
-                  {currentSegmentConfig.shortLabel}
-                </span>
+            <div className="mb-5 border-b pb-4 border-slate-200 dark:border-[#1C2631]">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      Cadastre o seu Comércio
+                    </h2>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-500 border border-sky-500/20">
+                      {currentSegmentConfig.shortLabel}
+                    </span>
+                  </div>
+                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                    Escolha o segmento e preencha os dados para ativar seu painel de vendas e vitrine.
+                  </p>
+                </div>
+
+                {/* Logo Nuvi no canto direito da tabela/card, clicável para alternar entre Modo Claro e Escuro */}
+                <button
+                  type="button"
+                  onClick={toggleThemeMode}
+                  title="Clique na logo para alternar entre Modo Claro e Escuro"
+                  className="cursor-pointer transition-transform hover:scale-105 active:scale-95 shrink-0 focus:outline-none p-1 rounded-xl"
+                >
+                  <NuviLogo size="sm" isLight={isLight} showSubtitle={false} />
+                </button>
               </div>
-              <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                Escolha o segmento e preencha os dados para ativar seu painel de vendas e vitrine.
-              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -561,9 +549,16 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
         {/* Coluna Direita: Apresentação com Identidade Visual Nuvi Master */}
         <div className="lg:col-span-5 space-y-6 text-left lg:sticky lg:top-8">
           
-          {/* Logo Nuvi em Destaque */}
+          {/* Logo Nuvi em Destaque (clicável para alternar Modo Claro / Escuro) */}
           <div className="pb-1">
-            <NuviLogo size="lg" isLight={isLight} showSubtitle={false} />
+            <button
+              type="button"
+              onClick={toggleThemeMode}
+              title="Clique na logo para alternar entre Modo Claro e Escuro"
+              className="cursor-pointer transition-transform hover:scale-105 active:scale-95 focus:outline-none text-left"
+            >
+              <NuviLogo size="lg" isLight={isLight} showSubtitle={false} />
+            </button>
           </div>
 
           <div className="space-y-3">
