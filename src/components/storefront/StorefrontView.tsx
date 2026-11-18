@@ -1073,7 +1073,9 @@ export const StorefrontView: React.FC = () => {
 
       {/* BARRA INFERIOR FIXA NO CELULAR: 3 ABAS NO MODO CARDÁPIO (Cardápio, Busca, Entrar) OU 4 ABAS NO MODO LOJA */}
       {isMenuOnly ? (
-        <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#e2e8f0] h-[58px] grid grid-cols-3 items-center justify-items-center shadow-lg safe-area-pb">
+        <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-50 h-[58px] grid grid-cols-3 items-center justify-items-center shadow-lg safe-area-pb transition-colors ${
+          isLight ? 'bg-white border-t border-[#e2e8f0] text-[#0F1111]' : 'bg-[#0E1318]/95 backdrop-blur-md border-t border-[#1C2631] text-white shadow-2xl'
+        }`}>
           {/* 1. Cardápio */}
           <button
             type="button"
@@ -1085,10 +1087,14 @@ export const StorefrontView: React.FC = () => {
               setSearchQuery('');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer text-[#0F1111]"
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+            }`}
           >
             {!isMobileSearchModalOpen && !isMobileAccountModalOpen && (
-              <span className="absolute top-0 w-8 h-[3.5px] bg-[#0F1111] rounded-b-sm" />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
+                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+              }`} />
             )}
             <BookOpen className="w-[22px] h-[22px] stroke-[1.75]" />
             <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
@@ -1106,10 +1112,14 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsMobileSearchModalOpen(true);
             }}
-            className="relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer text-[#0F1111]"
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+            }`}
           >
             {isMobileSearchModalOpen && (
-              <span className="absolute top-0 w-8 h-[3.5px] bg-[#0F1111] rounded-b-sm" />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
+                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+              }`} />
             )}
             <Search className="w-[22px] h-[22px] stroke-[1.75]" />
             <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
@@ -1127,10 +1137,14 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsMobileAccountModalOpen(true);
             }}
-            className="relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer text-[#0F1111]"
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+            }`}
           >
             {isMobileAccountModalOpen && (
-              <span className="absolute top-0 w-8 h-[3.5px] bg-[#0F1111] rounded-b-sm" />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
+                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+              }`} />
             )}
             <LogIn className="w-[22px] h-[22px] stroke-[1.75]" />
             <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
@@ -1141,7 +1155,9 @@ export const StorefrontView: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#e2e8f0] h-[58px] grid grid-cols-4 items-center justify-items-center shadow-lg safe-area-pb">
+        <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-50 h-[58px] grid grid-cols-4 items-center justify-items-center shadow-lg safe-area-pb transition-colors ${
+          isLight ? 'bg-white border-t border-[#e2e8f0] text-[#0F1111]' : 'bg-[#0E1318]/95 backdrop-blur-md border-t border-[#1C2631] text-white shadow-2xl'
+        }`}>
           {/* 1. Início */}
           <button
             type="button"
@@ -1154,10 +1170,14 @@ export const StorefrontView: React.FC = () => {
               setSearchQuery('');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer text-[#0F1111]"
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+            }`}
           >
             {!isCartOpen && !isMobileSearchModalOpen && !isMobileAccountModalOpen && (
-              <span className="absolute top-0 w-8 h-[3.5px] bg-[#0F1111] rounded-b-sm" />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
+                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+              }`} />
             )}
             <Home className="w-[22px] h-[22px] stroke-[1.75]" />
             <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
@@ -1176,10 +1196,14 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsMobileAccountModalOpen(true);
             }}
-            className="relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer text-[#0F1111]"
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+            }`}
           >
             {isMobileAccountModalOpen && (
-              <span className="absolute top-0 w-8 h-[3.5px] bg-[#0F1111] rounded-b-sm" />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
+                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+              }`} />
             )}
             <User className="w-[22px] h-[22px] stroke-[1.75]" />
             <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
@@ -1198,14 +1222,20 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsCartOpen(prev => !prev);
             }}
-            className="relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer text-[#0F1111]"
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+            }`}
           >
             {isCartOpen && (
-              <span className="absolute top-0 w-8 h-[3.5px] bg-[#0F1111] rounded-b-sm" />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
+                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+              }`} />
             )}
             <div className="relative">
               <ShoppingCart className="w-[22px] h-[22px] stroke-[1.75]" />
-              <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#0F1111] leading-none">
+              <span className={`absolute -top-1.5 left-1/2 -translate-x-1/2 text-[10px] font-bold leading-none ${
+                isLight ? 'text-[#0F1111]' : 'text-sky-300'
+              }`}>
                 {totalCartItems}
               </span>
             </div>
@@ -1225,10 +1255,14 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsMobileSearchModalOpen(true);
             }}
-            className="relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer text-[#0F1111]"
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+            }`}
           >
             {isMobileSearchModalOpen && (
-              <span className="absolute top-0 w-8 h-[3.5px] bg-[#0F1111] rounded-b-sm" />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
+                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+              }`} />
             )}
             <Search className="w-[22px] h-[22px] stroke-[1.75]" />
             <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
@@ -1339,7 +1373,9 @@ export const StorefrontView: React.FC = () => {
 
       {/* TELA INTEIRA DE PESQUISA & MENU DE CATEGORIAS (MOBILE & DESKTOP) */}
       {isMobileSearchModalOpen && (
-        <div className="fixed inset-x-0 top-0 bottom-[58px] sm:bottom-0 sm:inset-0 z-40 sm:z-50 p-4 sm:p-8 flex flex-col overflow-y-auto bg-white text-slate-900">
+        <div className={`fixed inset-x-0 top-0 bottom-[58px] sm:bottom-0 sm:inset-0 z-40 sm:z-50 p-4 sm:p-8 flex flex-col overflow-y-auto transition-colors ${
+          isLight ? 'bg-white text-slate-900' : 'bg-[#0B0F12] text-white'
+        }`}>
           <div className="max-w-4xl w-full mx-auto space-y-6">
             {/* Header da Busca - idêntico à imagem de referência */}
             <div className="flex items-center gap-3">
@@ -1469,24 +1505,32 @@ export const StorefrontView: React.FC = () => {
 
       {/* TELA INTEIRA DE CONTA NO CELULAR */}
       {isMobileAccountModalOpen && (
-        <div className="sm:hidden fixed inset-x-0 top-0 bottom-[58px] z-40 bg-white text-slate-900 overflow-y-auto p-4 sm:p-6 space-y-5">
+        <div className={`sm:hidden fixed inset-x-0 top-0 bottom-[58px] z-40 overflow-y-auto p-4 sm:p-6 space-y-5 transition-colors ${
+          isLight ? 'bg-white text-slate-900' : 'bg-[#0B0F12] text-white'
+        }`}>
           {/* Header da Tela de Conta */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+          <div className={`flex items-center justify-between pb-3 border-b ${
+            isLight ? 'border-slate-200' : 'border-[#1C2631]'
+          }`}>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Sua Conta</h2>
-              <p className="text-xs text-slate-500">{currentTenant.name}</p>
+              <h2 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Sua Conta</h2>
+              <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{currentTenant.name}</p>
             </div>
             <button
               type="button"
               onClick={() => setIsMobileAccountModalOpen(false)}
-              className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
+              className={`p-1.5 rounded-full cursor-pointer ${
+                isLight ? 'hover:bg-slate-100 text-slate-500 hover:text-slate-900' : 'hover:bg-[#1C2631] text-slate-400 hover:text-white'
+              }`}
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Card de Perfil / Boas-vindas */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3.5">
+          <div className={`p-4 rounded-2xl flex items-center gap-3.5 border ${
+            isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+          }`}>
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-base shadow-xs shrink-0"
               style={{ backgroundColor: `${brandAccent}20`, color: brandAccent }}
@@ -1494,8 +1538,8 @@ export const StorefrontView: React.FC = () => {
               <User className="w-6 h-6" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-bold text-slate-900 truncate">Cliente Convidado</h3>
-              <p className="text-xs text-slate-500">Navegando no cardápio de {currentTenant.name}</p>
+              <h3 className={`text-sm font-bold truncate ${isLight ? 'text-slate-900' : 'text-white'}`}>Cliente Convidado</h3>
+              <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Navegando no cardápio de {currentTenant.name}</p>
             </div>
           </div>
 
@@ -1512,14 +1556,18 @@ export const StorefrontView: React.FC = () => {
                 setIsMobileAccountModalOpen(false);
                 setViewRole('login_tenant');
               }}
-              className="w-full p-4 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs"
+              className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs ${
+                isLight 
+                  ? 'border-slate-200 bg-white hover:bg-slate-50 text-slate-900' 
+                  : 'border-[#1C2631] bg-[#11161B] hover:bg-[#161F28] text-white'
+              }`}
             >
-              <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700">
+              <div className={`p-2.5 rounded-xl ${isLight ? 'bg-slate-100 text-slate-700' : 'bg-[#1C2631] text-sky-400'}`}>
                 <Lock className="w-5 h-5" />
               </div>
               <div className="text-left flex-1">
-                <span className="block text-sm font-bold text-slate-900">Área do Lojista (Painel & PDV)</span>
-                <span className="text-xs text-slate-500 font-normal">Acesso com senha e WhatsApp da loja</span>
+                <span className={`block text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Área do Lojista (Painel & PDV)</span>
+                <span className={`text-xs font-normal ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Acesso com senha e WhatsApp da loja</span>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </button>
@@ -1531,16 +1579,20 @@ export const StorefrontView: React.FC = () => {
                 setIsMobileAccountModalOpen(false);
                 setViewRole('register_tenant');
               }}
-              className="w-full p-4 rounded-2xl border border-blue-200 bg-blue-50/50 hover:bg-blue-50 flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs"
+              className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs ${
+                isLight 
+                  ? 'border-blue-200 bg-blue-50/50 hover:bg-blue-50 text-blue-900' 
+                  : 'border-[#1C2631] bg-[#11161B] hover:bg-[#161F28] text-white'
+              }`}
             >
-              <div className="p-2.5 rounded-xl bg-blue-100 text-blue-700">
+              <div className={`p-2.5 rounded-xl ${isLight ? 'bg-blue-100 text-blue-700' : 'bg-sky-500/20 text-sky-400'}`}>
                 <Sparkles className="w-5 h-5" />
               </div>
               <div className="text-left flex-1">
-                <span className="block text-sm font-bold text-blue-900">Criar Minha Loja Grátis</span>
-                <span className="text-xs text-blue-700/80 font-normal">Cadastre seu próprio negócio em 2 minutos</span>
+                <span className={`block text-sm font-bold ${isLight ? 'text-blue-900' : 'text-white'}`}>Criar Minha Loja Grátis</span>
+                <span className={`text-xs font-normal ${isLight ? 'text-blue-700/80' : 'text-slate-400'}`}>Cadastre seu próprio negócio em 2 minutos</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-blue-500" />
+              <ChevronRight className={`w-4 h-4 ${isLight ? 'text-blue-500' : 'text-slate-400'}`} />
             </button>
 
             {/* 3. Informações da Loja */}

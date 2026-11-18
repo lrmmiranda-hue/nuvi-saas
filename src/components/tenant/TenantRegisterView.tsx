@@ -299,7 +299,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                         onClick={() => setSelectedSegment(seg.id)}
                         className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 outline-none ${
                           isSelected
-                            ? 'bg-gradient-to-br from-sky-600 via-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/25 border-transparent'
+                            ? 'bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent shadow-md border-transparent'
                             : isLight
                             ? 'bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 text-slate-700'
                             : 'bg-[#121820] hover:bg-[#182230] border border-[#1C2631] hover:border-sky-800 text-slate-300'
@@ -307,10 +307,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-xl leading-none">{seg.emoji}</span>
-                          {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                          {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-sky-500" />}
                         </div>
                         <span className={`text-[11px] font-bold leading-tight line-clamp-1 ${
-                          isSelected ? 'text-white' : ''
+                          isSelected ? 'text-sky-600 dark:text-sky-400 font-extrabold' : ''
                         }`}>
                           {seg.shortLabel}
                         </span>
@@ -580,12 +580,12 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 </p>
               </div>
 
-              {/* Botão de Criação com a fonte na cor azul do 'U' da logomarca Nuvi (#102a93) */}
+              {/* Botão de Criação com a mesma tonalidade da seleção de assinatura e fonte no azul do 'U' da logomarca (#102a93) */}
               <button
                 type="submit"
                 disabled={isSubmitting}
                 style={{ color: '#102a93' }}
-                className="w-full mt-3 py-3.5 px-4 rounded-xl bg-gradient-to-r from-sky-300 via-cyan-200 to-sky-300 hover:from-sky-200 hover:to-cyan-100 active:scale-[0.99] font-black text-sm shadow-xl shadow-sky-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 border border-sky-400/50"
+                className="w-full mt-3 py-3.5 px-4 rounded-xl bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent hover:from-sky-600/30 hover:via-blue-600/25 active:scale-[0.99] font-black text-sm shadow-xl shadow-sky-500/15 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 border border-sky-500/30"
               >
                 {isSubmitting ? (
                   <div className="w-5 h-5 border-2 border-[#102a93]/30 border-t-[#102a93] rounded-full animate-spin" />

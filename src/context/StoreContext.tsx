@@ -708,9 +708,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       const saved = localStorage.getItem('adegasaas_tenant_theme_mode');
       if (saved === 'dark' || saved === 'light') return saved;
-      return currentTenant?.branding?.colorMode || 'light';
+      return currentTenant?.branding?.colorMode || 'dark';
     } catch {
-      return 'light';
+      return 'dark';
     }
   });
 
