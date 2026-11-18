@@ -183,113 +183,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Coluna Esquerda: Apresentação com Identidade Visual Nuvi Master */}
-        <div className="lg:col-span-5 space-y-6 text-left lg:sticky lg:top-8">
-          
-          {/* Logo Nuvi em Destaque */}
-          <div className="pb-1">
-            <NuviLogo size="lg" isLight={isLight} showSubtitle={false} />
-          </div>
-
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-sky-500" />
-              <span>Experimente Grátis por 7 Dias</span>
-            </div>
-
-            <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight ${
-              isLight ? 'text-slate-900' : 'text-white'
-            }`}>
-              A plataforma definitiva para o seu comércio crescer.
-            </h1>
-
-            <p className={`text-sm leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
-              Frente de Caixa (PDV), controle de estoque inteligente com leitura de código de barras e vitrine digital integrada ao WhatsApp.
-            </p>
-          </div>
-
-          {/* Destaque Dinâmico do Segmento Atual com Paleta Nuvi */}
-          <div className={`p-4 rounded-2xl border space-y-2 text-xs transition-all ${
-            isLight 
-              ? 'bg-sky-50/70 border-sky-200 text-slate-800 shadow-xs' 
-              : 'bg-[#0E1520] border-sky-900/40 text-slate-200 shadow-md'
-          }`}>
-            <div className="flex items-center gap-2 font-bold text-sky-600 dark:text-sky-400 text-sm">
-              <span className="text-2xl">{currentSegmentConfig.emoji}</span>
-              <span className="text-slate-900 dark:text-white font-extrabold">{currentSegmentConfig.title}</span>
-            </div>
-            <p className={isLight ? 'text-slate-600' : 'text-slate-300'}>
-              {currentSegmentConfig.pitch}
-            </p>
-            <div className="flex items-center gap-2 pt-1 text-[11px] font-semibold text-sky-700 dark:text-sky-300">
-              <span className="bg-sky-500/10 px-2 py-0.5 rounded-md border border-sky-500/20">
-                📦 {currentSegmentConfig.packTerm}
-              </span>
-              <span>•</span>
-              <span className="bg-sky-500/10 px-2 py-0.5 rounded-md border border-sky-500/20">
-                ⚡ Pedidos no WhatsApp
-              </span>
-            </div>
-          </div>
-
-          {/* Funcionalidades com Estilo Nuvi Master */}
-          <div className="space-y-3 pt-1">
-            
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center shrink-0 mt-0.5">
-                <Barcode className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  Frente de Caixa Balcão (PDV Ágil)
-                </h4>
-                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Bipe produtos via código de barras USB ou venda rápida no toque. Venda no balcão e mesas.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center shrink-0 mt-0.5">
-                <Boxes className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  Estoque em Tempo Real & Margem de Lucro
-                </h4>
-                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Baixa automática a cada venda, alerta de reposição e importação fácil de planilhas.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 flex items-center justify-center shrink-0 mt-0.5">
-                <ShoppingCart className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  Cardápio & Vitrine Online com Pedidos no WhatsApp
-                </h4>
-                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Link exclusivo para compartilhar no Instagram e WhatsApp. Zero taxas de comissão.
-                </p>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Selo de Segurança */}
-          <div className={`p-3.5 rounded-xl border flex items-center gap-3 text-xs ${
-            isLight ? 'bg-white border-slate-200 text-slate-600 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631] text-slate-300'
-          }`}>
-            <ShieldCheck className="w-5 h-5 text-sky-500 shrink-0" />
-            <span>Sem necessidade de cartão de crédito. Configure seu sistema em menos de 2 minutos!</span>
-          </div>
-
-        </div>
-
-        {/* Coluna Direita: Formulário de Cadastro com Paleta Azul e Tons Elegantes */}
+        {/* Coluna Esquerda: Formulário de Cadastro com Paleta Azul e Tons Elegantes */}
         <div className="lg:col-span-7">
           <div className={`p-6 sm:p-8 rounded-3xl border shadow-2xl text-left transition-all ${
             isLight 
@@ -662,6 +556,112 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
             </form>
 
           </div>
+        </div>
+
+        {/* Coluna Direita: Apresentação com Identidade Visual Nuvi Master */}
+        <div className="lg:col-span-5 space-y-6 text-left lg:sticky lg:top-8">
+          
+          {/* Logo Nuvi em Destaque */}
+          <div className="pb-1">
+            <NuviLogo size="lg" isLight={isLight} showSubtitle={false} />
+          </div>
+
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+              <span>Experimente Grátis por 7 Dias</span>
+            </div>
+
+            <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight ${
+              isLight ? 'text-slate-900' : 'text-white'
+            }`}>
+              A plataforma definitiva para o seu comércio crescer.
+            </h1>
+
+            <p className={`text-sm leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+              Frente de Caixa (PDV), controle de estoque inteligente com leitura de código de barras e vitrine digital integrada ao WhatsApp.
+            </p>
+          </div>
+
+          {/* Destaque Dinâmico do Segmento Atual com Paleta Nuvi */}
+          <div className={`p-4 rounded-2xl border space-y-2 text-xs transition-all ${
+            isLight 
+              ? 'bg-sky-50/70 border-sky-200 text-slate-800 shadow-xs' 
+              : 'bg-[#0E1520] border-sky-900/40 text-slate-200 shadow-md'
+          }`}>
+            <div className="flex items-center gap-2 font-bold text-sky-600 dark:text-sky-400 text-sm">
+              <span className="text-2xl">{currentSegmentConfig.emoji}</span>
+              <span className="text-slate-900 dark:text-white font-extrabold">{currentSegmentConfig.title}</span>
+            </div>
+            <p className={isLight ? 'text-slate-600' : 'text-slate-300'}>
+              {currentSegmentConfig.pitch}
+            </p>
+            <div className="flex items-center gap-2 pt-1 text-[11px] font-semibold text-sky-700 dark:text-sky-300">
+              <span className="bg-sky-500/10 px-2 py-0.5 rounded-md border border-sky-500/20">
+                📦 {currentSegmentConfig.packTerm}
+              </span>
+              <span>•</span>
+              <span className="bg-sky-500/10 px-2 py-0.5 rounded-md border border-sky-500/20">
+                ⚡ Pedidos no WhatsApp
+              </span>
+            </div>
+          </div>
+
+          {/* Funcionalidades com Estilo Nuvi Master */}
+          <div className="space-y-3 pt-1">
+            
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center shrink-0 mt-0.5">
+                <Barcode className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  Frente de Caixa Balcão (PDV Ágil)
+                </h4>
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Bipe produtos via código de barras USB ou venda rápida no toque. Venda no balcão e mesas.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center shrink-0 mt-0.5">
+                <Boxes className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  Estoque em Tempo Real & Margem de Lucro
+                </h4>
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Baixa automática a cada venda, alerta de reposição e importação fácil de planilhas.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 flex items-center justify-center shrink-0 mt-0.5">
+                <ShoppingCart className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  Cardápio & Vitrine Online com Pedidos no WhatsApp
+                </h4>
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Link exclusivo para compartilhar no Instagram e WhatsApp. Zero taxas de comissão.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Selo de Segurança */}
+          <div className={`p-3.5 rounded-xl border flex items-center gap-3 text-xs ${
+            isLight ? 'bg-white border-slate-200 text-slate-600 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631] text-slate-300'
+          }`}>
+            <ShieldCheck className="w-5 h-5 text-sky-500 shrink-0" />
+            <span>Sem necessidade de cartão de crédito. Configure seu sistema em menos de 2 minutos!</span>
+          </div>
+
         </div>
 
       </div>
