@@ -1239,7 +1239,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 </div>
 
                 {/* Grid Dinâmico com os Planos Ativos do SaaS com Estilização Premium da Tela Inicial */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {((globalConfig?.plans && globalConfig.plans.length > 0)
                     ? globalConfig.plans.filter((p) => p.active !== false)
                     : [
@@ -1340,41 +1340,42 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             : 'bg-neutral-900/80 border-neutral-800 text-neutral-300 hover:border-neutral-700'
                         }`}
                       >
-                        <div>
-                          <div className="flex items-center justify-between gap-1 mb-2">
-                            <span className={`font-bold text-xs flex items-center gap-1.5 ${isSelected ? (isLight ? 'text-sky-950' : 'text-sky-200') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
-                              <PlanIcon className={`w-4 h-4 ${isSelected ? 'text-sky-400' : 'text-neutral-400'}`} />
-                              <span className="truncate">{planItem.name}</span>
+                        <div className="min-w-0 w-full">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <span className={`font-bold text-sm flex items-start gap-1.5 min-w-0 leading-snug ${isSelected ? (isLight ? 'text-sky-950' : 'text-sky-200') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                              <PlanIcon className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-sky-400' : 'text-neutral-400'}`} />
+                              <span className="break-words">{planItem.name}</span>
                             </span>
                             {isSelected ? (
-                              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
+                              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
                             ) : null}
                           </div>
 
-                          <div className="flex items-baseline gap-1 mb-1.5">
-                            <span className={`text-base font-black ${isSelected ? (isLight ? 'text-sky-700' : 'text-sky-400') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
-                              R$ {planItem.price.toFixed(2).replace('.', ',')}
+                          {planItem.badge && (
+                            <span className="inline-block mb-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 uppercase whitespace-nowrap">
+                              {planItem.badge}
                             </span>
-                            <span className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                          )}
+
+                          <div className="flex items-baseline gap-1 mb-1.5 whitespace-nowrap">
+                            <span className={`text-lg font-black ${isSelected ? (isLight ? 'text-sky-700' : 'text-sky-400') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                              R$&nbsp;{planItem.price.toFixed(2).replace('.', ',')}
+                            </span>
+                            <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
                               {planItem.period || '/mês'}
                             </span>
-                            {planItem.badge && (
-                              <span className="ml-auto text-[9px] font-bold px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 uppercase">
-                                {planItem.badge}
-                              </span>
-                            )}
                           </div>
 
-                          <p className={`text-[11px] leading-snug line-clamp-2 mb-2 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                          <p className={`text-[11px] leading-snug mb-2 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
                             {planItem.description}
                           </p>
 
                           {planItem.features && planItem.features.length > 0 && (
                             <ul className="space-y-1 pt-1.5 border-t border-neutral-200/50 dark:border-neutral-800/80">
                               {planItem.features.slice(0, 3).map((feat, idx) => (
-                                <li key={idx} className="flex items-center gap-1.5 text-[10px] opacity-90 truncate">
-                                  <Check className="w-3 h-3 text-sky-400 shrink-0" />
-                                  <span className="truncate">{feat}</span>
+                                <li key={idx} className="flex items-start gap-1.5 text-[11px] opacity-90 leading-snug">
+                                  <Check className="w-3 h-3 mt-0.5 text-sky-400 shrink-0" />
+                                  <span className="break-words">{feat}</span>
                                 </li>
                               ))}
                             </ul>
