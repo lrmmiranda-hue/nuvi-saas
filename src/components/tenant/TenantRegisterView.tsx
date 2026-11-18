@@ -297,12 +297,12 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                         key={seg.id}
                         type="button"
                         onClick={() => setSelectedSegment(seg.id)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
+                        className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 outline-none ${
                           isSelected
-                            ? 'bg-gradient-to-br from-sky-600 via-sky-500 to-blue-600 text-white border-sky-400 shadow-md shadow-sky-500/25 ring-2 ring-sky-400/50'
+                            ? 'bg-gradient-to-br from-sky-600 via-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/25 border-transparent'
                             : isLight
-                            ? 'bg-slate-50 hover:bg-sky-50/50 border-slate-200 hover:border-sky-300 text-slate-700'
-                            : 'bg-[#121820] hover:bg-[#182230] border-[#1C2631] hover:border-sky-800 text-slate-300'
+                            ? 'bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 text-slate-700'
+                            : 'bg-[#121820] hover:bg-[#182230] border border-[#1C2631] hover:border-sky-800 text-slate-300'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -345,12 +345,12 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                           key={plan.id}
                           type="button"
                           onClick={() => setSelectedPlanId(plan.id)}
-                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                          className={`p-3 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between gap-2 outline-none ${
                             isPlanSelected
-                              ? 'bg-gradient-to-br from-sky-600/15 via-blue-600/10 to-transparent border-sky-500 shadow-md ring-2 ring-sky-500/40'
+                              ? 'bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent shadow-md border-transparent'
                               : isLight
-                              ? 'bg-slate-50 hover:bg-sky-50/40 border-slate-200 hover:border-sky-300'
-                              : 'bg-[#121820] hover:bg-[#182230] border-[#1C2631] hover:border-sky-800'
+                              ? 'bg-slate-50 hover:bg-sky-50/40 border border-slate-200 hover:border-sky-300'
+                              : 'bg-[#121820] hover:bg-[#182230] border border-[#1C2631] hover:border-sky-800'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-1 w-full">

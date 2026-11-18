@@ -307,12 +307,12 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
                       setSelectedSegment(seg.id);
                       if (!slogan) setSlogan(seg.sloganExample);
                     }}
-                    className={`p-2 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
+                    className={`p-2 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1 outline-none ${
                       isSelected
-                        ? 'border-blue-600 bg-blue-500/15 ring-2 ring-blue-500/30 shadow-xs'
+                        ? 'bg-blue-600 text-white shadow-xs border-transparent'
                         : isLight
-                        ? 'bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-700'
-                        : 'bg-[#0B0F12] hover:bg-[#161D24] border-[#1C2631] text-neutral-300'
+                        ? 'bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700'
+                        : 'bg-[#0B0F12] hover:bg-[#161D24] border border-[#1C2631] text-neutral-300'
                     }`}
                   >
                     <span className="text-lg leading-none">{seg.emoji}</span>
