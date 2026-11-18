@@ -1,6 +1,6 @@
 export interface StoreWallpaper {
   id: string;
-  category: 'adega' | 'restaurante' | 'pizzaria' | 'japonesa' | 'pesqueiro' | 'mercadinho' | 'petshop' | 'tabacaria' | 'cosmeticos';
+  category: 'adega' | 'restaurante' | 'pizzaria' | 'japonesa' | 'pesqueiro' | 'mercadinho' | 'petshop' | 'tabacaria' | 'cosmeticos' | 'pastelaria';
   title: string;
   subtitle: string;
   url: string;
@@ -16,6 +16,8 @@ export const WALLPAPER_CATEGORIES = [
   { id: 'mercadinho' as const, label: 'Mercadinho & Empório', icon: 'ShoppingCart' },
   { id: 'petshop' as const, label: 'Pet Shop & Ração', icon: 'Dog' },
   { id: 'cosmeticos' as const, label: 'Cosméticos & Beleza', icon: 'Sparkles' },
+  { id: 'tabacaria' as const, label: 'Tabacaria & Lounge', icon: 'Flame' },
+  { id: 'pastelaria' as const, label: 'Pastelaria & Caldo de Cana', icon: 'UtensilsCrossed' },
 ];
 
 export const STORE_WALLPAPERS: StoreWallpaper[] = [
@@ -27,7 +29,7 @@ export const STORE_WALLPAPERS: StoreWallpaper[] = [
     category: 'adega',
     title: 'Adega Clássica Iluminada',
     subtitle: 'Barris de carvalho, vinhos finos e iluminação âmbar aconchegante',
-    url: '/src/assets/images/adega_hero_banner_1793972462239.jpg',
+    url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1200&q=80',
     tag: 'Mais Escolhido',
   },
   {
@@ -35,7 +37,7 @@ export const STORE_WALLPAPERS: StoreWallpaper[] = [
     category: 'adega',
     title: 'Cervejas Artesanais no Gelo',
     subtitle: 'Garrafas e latas super geladas trincando com gotas d\'água',
-    url: '/src/assets/images/beer_ice_cold_1793972463737.jpg',
+    url: 'https://images.unsplash.com/photo-1608270199042-3a3111f19812?auto=format&fit=crop&w=1200&q=80',
     tag: 'Distribuidoras',
   },
   {
@@ -43,7 +45,7 @@ export const STORE_WALLPAPERS: StoreWallpaper[] = [
     category: 'adega',
     title: 'Balcão de Destilados & Drinks',
     subtitle: 'Coquetéis premium, whisky importado, gin e taças de cristal',
-    url: '/src/assets/images/gin_whiskey_combo_1793972463037.jpg',
+    url: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=1200&q=80',
     tag: 'Premium Drinks',
   },
   {
@@ -51,7 +53,7 @@ export const STORE_WALLPAPERS: StoreWallpaper[] = [
     category: 'adega',
     title: 'Vinho Nobre & Taça Cristal',
     subtitle: 'Elegância e requinte para empórios, bistrôs e sommeliers',
-    url: '/src/assets/images/wine_fine_bottle_1793972464525.jpg',
+    url: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=1200&q=80',
     tag: 'Vinhos Finos',
   },
   {
@@ -541,5 +543,49 @@ export const STORE_WALLPAPERS: StoreWallpaper[] = [
     subtitle: 'Área verde ao ar livre, quiosques, chalés e restaurante na beira da água',
     url: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80',
     tag: 'Rancho & Natureza',
+  },
+
+  // ==========================================
+  // 🥟 9. PASTELARIA & CALDO DE CANA
+  // ==========================================
+  {
+    id: 'pastel_crocante_dourado',
+    category: 'pastelaria',
+    title: 'Pastel Frito Crocante & Sequinho',
+    subtitle: 'Massa artesanal dourada com recheio generoso saindo fumacinha',
+    url: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Mais Pedido',
+  },
+  {
+    id: 'pastel_caldo_cana_feira',
+    category: 'pastelaria',
+    title: 'Pastel de Feira & Caldo de Cana',
+    subtitle: 'A combinação tradicional com caldo de cana geladinho e limão',
+    url: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Clássico da Feira',
+  },
+  {
+    id: 'pastel_queijo_derretendo',
+    category: 'pastelaria',
+    title: 'Pastel de Queijo com Borda Crocante',
+    subtitle: 'Queijo derretendo e puxando a cada mordida com tempero especial',
+    url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Queijo Especial',
+  },
+  {
+    id: 'pastel_mesa_familia',
+    category: 'pastelaria',
+    title: 'Porção de Mini Pastéis & Petiscos',
+    subtitle: 'Cestinhas de mini pastéis para compartilhar com molhos da casa',
+    url: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Porções & Família',
+  },
+  {
+    id: 'pastel_doce_chocolate',
+    category: 'pastelaria',
+    title: 'Pastéis Doces & Sobremesas',
+    subtitle: 'Pastel de chocolate com morango, banana com canela e doce de leite',
+    url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Doces Especiais',
   },
 ];

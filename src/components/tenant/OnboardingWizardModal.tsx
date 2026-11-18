@@ -1004,11 +1004,19 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     if (activeSegment === 'restaurante_lanchonete') return 'restaurante';
     if (activeSegment === 'mercadinho_emporio') return 'mercadinho';
     if (activeSegment === 'cosmeticos_farmacia') return 'cosmeticos';
-    return activeSegment as any;
+    if (activeSegment === 'comida_japonesa') return 'japonesa';
+    if (activeSegment === 'pastelaria') return 'pastelaria';
+    if (activeSegment === 'pesqueiro') return 'pesqueiro';
+    if (activeSegment === 'pizzaria') return 'pizzaria';
+    if (activeSegment === 'petshop') return 'petshop';
+    if (activeSegment === 'tabacaria') return 'tabacaria';
+    return 'adega';
   })();
 
-  const relevantWallpaperCategories = useMemo(() => {
-    return WALLPAPER_CATEGORIES.filter((cat) => cat.id === targetWallpaperCat);
+  const segmentWallpapers = useMemo(() => {
+    const list = STORE_WALLPAPERS.filter((w) => w.category === targetWallpaperCat);
+    if (list.length > 0) return list;
+    return STORE_WALLPAPERS.filter((w) => w.category === 'restaurante' || w.category === 'adega');
   }, [targetWallpaperCat]);
 
   const [activeWallpaperCat, setActiveWallpaperCat] = useState<string>(targetWallpaperCat);
@@ -1980,35 +1988,22 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                     </button>
                   </div>
 
-                  {/* MODO 1: IMAGENS PRONTAS DO SISTEMA */}
+                  {/* MODO 1: IMAGENS PRONTAS EXCLUSIVAS DO RAMO DO COMÉRCIO */}
                   {bannerMode === 'prontas' && (
                     <div className="space-y-3">
-                      {/* Abas de Categorias de Comércio para os Banners */}
-                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
-                        {WALLPAPER_CATEGORIES.map((cat) => {
-                          const isActive = activeWallpaperCat === cat.id;
-                          return (
-                            <button
-                              key={cat.id}
-                              type="button"
-                              onClick={() => setActiveWallpaperCat(cat.id)}
-                              className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                                isActive
-                                  ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
-                                  : isLight
-                                  ? 'bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-100'
-                                  : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
-                              }`}
-                            >
-                              <span>{cat.label}</span>
-                            </button>
-                          );
-                        })}
+                      <div className="flex items-center justify-between">
+                        <span className={`text-xs font-bold flex items-center gap-1.5 ${isLight ? 'text-slate-800' : 'text-neutral-200'}`}>
+                          <span>{segmentConfig.emoji}</span>
+                          <span>Imagens Prontas para {segmentConfig.title} ({segmentWallpapers.length} opções exclusivas)</span>
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 uppercase">
+                          Exclusivo do seu Ramo
+                        </span>
                       </div>
 
-                      {/* Grid de Imagens da Categoria Ativa */}
+                      {/* Grid de Imagens Exclusivas da Categoria do Comércio */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {STORE_WALLPAPERS.filter((w) => w.category === activeWallpaperCat).map((banner) => {
+                        {segmentWallpapers.map((banner) => {
                           const isSelected = formData.branding.bannerUrl === banner.url;
                           return (
                             <button
@@ -2032,6 +2027,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                                 <img
                                   src={banner.url}
                                   alt={banner.title}
+                                  loading="lazy"
                                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                                 <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-xs text-white text-[9px] font-semibold">
@@ -2455,103 +2451,148 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
               </div>
 
               {/* CARD DE LINKS DE ACESSO GERADOS */}
-              <div className={`p-4 rounded-xl border space-y-3 ${
-                isLight ? 'bg-amber-50/70 border-amber-200 shadow-2xs' : 'bg-amber-500/10 border-amber-500/20'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <h4 className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-amber-900' : 'text-amber-400'}`}>
-                    Links de Acesso Gerados para a sua Loja
-                  </h4>
-                </div>
+              {(() => {
+                const rawSlug = (formData.name || tenant.slug || tenant.name || 'minha-loja');
+                const storeSlug = rawSlug
+                  .toLowerCase()
+                  .trim()
+                  .normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+                  .replace(/[^a-z0-9]/g, '-')
+                  .replace(/-+/g, '-')
+                  .replace(/^-|-$/g, '');
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  {/* Link Vitrine */}
-                  <div className={`p-3 rounded-xl border flex flex-col justify-between ${
-                    isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
+                const baseDomain = (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'))
+                  ? window.location.origin
+                  : 'https://nuvi-saas.vercel.app';
+
+                const vitrineCardapioUrl = `${baseDomain}/${storeSlug}/cardapio`;
+                const painelLojistaUrl = `${baseDomain}/${storeSlug}/painel`;
+                const phone = (formData.whatsapp.phoneNumber || tenant.whatsapp.phoneNumber).replace(/\D/g, '');
+                const pass = formData.adminPassword || tenant.adminPassword || '123456';
+
+                return (
+                  <div className={`p-4 rounded-xl border space-y-3 ${
+                    isLight ? 'bg-sky-50/70 border-sky-200 shadow-2xs' : 'bg-sky-950/20 border-sky-500/30'
                   }`}>
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`font-semibold flex items-center gap-1.5 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                          <Store className="w-3.5 h-3.5 text-amber-500" /> Vitrine dos Clientes
-                        </span>
-                        <span className="text-[10px] text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded font-semibold">Pública</span>
-                      </div>
-                      <p className={`text-[11px] font-mono break-all ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                        {window.location.origin}
-                      </p>
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-sky-500" />
+                      <h4 className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-sky-950' : 'text-sky-400'}`}>
+                        Links Oficiais de Acesso da sua Loja
+                      </h4>
                     </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      {/* Link Vitrine / Cardápio */}
+                      <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
+                        isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
+                      }`}>
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className={`font-bold flex items-center gap-1.5 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
+                              <Store className="w-3.5 h-3.5 text-sky-500" /> Vitrine & Cardápio dos Clientes
+                            </span>
+                            <span className="text-[10px] text-emerald-600 bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded font-bold">
+                              Pública
+                            </span>
+                          </div>
+                          <div className="p-2.5 rounded-lg bg-neutral-100 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 mb-2">
+                            <p className="text-[11px] font-mono font-bold text-sky-600 dark:text-sky-400 break-all select-all">
+                              {vitrineCardapioUrl}
+                            </p>
+                          </div>
+                          <p className={`text-[10px] mb-2 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                            Link oficial do cardápio digital para divulgar nas redes sociais e WhatsApp.
+                          </p>
+                        </div>
+                        <div className="flex gap-2 mt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard?.writeText(vitrineCardapioUrl);
+                              showAlert({
+                                title: 'Link da Vitrine Copiado!',
+                                message: `O link do cardápio foi copiado com sucesso:\n${vitrineCardapioUrl}`,
+                                variant: 'success'
+                              });
+                            }}
+                            className="flex-1 py-1.5 px-3 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-700 dark:text-sky-400 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Copy className="w-3 h-3" />
+                            <span>Copiar Link</span>
+                          </button>
+                          <a
+                            href={vitrineCardapioUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="py-1.5 px-2.5 rounded-lg border border-sky-500/30 hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
+                            title="Abrir cardápio em nova aba"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Link Painel do Lojista */}
+                      <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${
+                        isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
+                      }`}>
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className={`font-bold flex items-center gap-1.5 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
+                              <Lock className="w-3.5 h-3.5 text-amber-500" /> Painel do Lojista (PDV)
+                            </span>
+                            <span className="text-[10px] text-amber-600 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.2 rounded font-bold">
+                              Restrito
+                            </span>
+                          </div>
+                          <div className="p-2.5 rounded-lg bg-neutral-100 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 mb-2">
+                            <p className="text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400 break-all select-all">
+                              {painelLojistaUrl}
+                            </p>
+                          </div>
+                          <div className={`text-[11px] font-mono space-y-0.5 p-2 rounded-lg bg-neutral-50 dark:bg-neutral-950/50 border border-neutral-200 dark:border-neutral-800/80 mb-2 ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>
+                            <p>📱 Login: <strong>{formData.whatsapp.phoneNumber || tenant.whatsapp.phoneNumber}</strong></p>
+                            <p>🔑 Senha: <strong>{formData.adminPassword || tenant.adminPassword || '123456'}</strong></p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard?.writeText(painelLojistaUrl);
+                              showAlert({
+                                title: 'Link do Painel Copiado!',
+                                message: `O link do painel foi copiado:\n${painelLojistaUrl}\n\nLogin: ${formData.whatsapp.phoneNumber || tenant.whatsapp.phoneNumber}\nSenha: ${formData.adminPassword || tenant.adminPassword || '123456'}`,
+                                variant: 'success'
+                              });
+                            }}
+                            className="flex-1 py-1.5 px-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-400 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Copy className="w-3 h-3" />
+                            <span>Copiar Link do Painel</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* WhatsApp Share Button */}
                     <button
                       type="button"
                       onClick={() => {
-                        const url = `${window.location.origin}`;
-                        navigator.clipboard?.writeText(url);
-                        showAlert({
-                          title: 'Link da Vitrine Copiado!',
-                          message: 'O link da vitrine pública foi copiado para a sua área de transferência.',
-                          variant: 'success'
-                        });
+                        const emoji = segmentConfig.emoji || '🏪';
+                        const msg = `*${emoji} Acesso Oficial ao Sistema - ${formData.name || tenant.name}*\n\nOlá ${formData.ownerName || tenant.ownerName}! Seus acessos foram configurados com sucesso:\n\n🛒 *Vitrine & Cardápio dos Clientes:*\n${vitrineCardapioUrl}\n\n💻 *Painel do Lojista (PDV e Gestão):*\n${painelLojistaUrl}\n📱 *Usuário / WhatsApp:* ${formData.whatsapp.phoneNumber || tenant.whatsapp.phoneNumber}\n🔑 *Senha de Acesso:* ${pass}\n\nBoas vendas! Qualquer dúvida estamos à disposição.`;
+                        const waUrl = `https://wa.me/${phone.startsWith('55') ? phone : '55' + phone}?text=${encodeURIComponent(msg)}`;
+                        window.open(waUrl, '_blank');
                       }}
-                      className="mt-2 py-1.5 px-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-400 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
                     >
-                      <Copy className="w-3 h-3" />
-                      <span>Copiar Link da Vitrine</span>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Enviar Dados de Acesso no WhatsApp do Lojista</span>
                     </button>
                   </div>
-
-                  {/* Link Painel */}
-                  <div className={`p-3 rounded-xl border flex flex-col justify-between ${
-                    isLight ? 'bg-white border-neutral-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
-                  }`}>
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`font-semibold flex items-center gap-1.5 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                          <Lock className="w-3.5 h-3.5 text-amber-500" /> Painel do Lojista (PDV)
-                        </span>
-                        <span className="text-[10px] text-amber-600 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.2 rounded font-semibold">Restrito</span>
-                      </div>
-                      <div className={`text-[11px] font-mono space-y-0.5 ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>
-                        <p>📱 Login: <strong>{formData.whatsapp.phoneNumber || tenant.whatsapp.phoneNumber}</strong></p>
-                        <p>🔑 Senha: <strong>{formData.adminPassword || tenant.adminPassword || '123456'}</strong></p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const url = `${window.location.origin}`;
-                        navigator.clipboard?.writeText(url);
-                        showAlert({
-                          title: 'Link do Painel Copiado!',
-                          message: `O link do painel foi copiado. O lojista pode entrar com o WhatsApp (${formData.whatsapp.phoneNumber || tenant.whatsapp.phoneNumber}) e a senha (${formData.adminPassword || tenant.adminPassword || '123456'}).`,
-                          variant: 'success'
-                        });
-                      }}
-                      className="mt-2 py-1.5 px-3 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-400 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <Copy className="w-3 h-3" />
-                      <span>Copiar Link do Painel</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* WhatsApp Share Button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const phone = (formData.whatsapp.phoneNumber || tenant.whatsapp.phoneNumber).replace(/\D/g, '');
-                    const siteUrl = `${window.location.origin}`;
-                    const pass = formData.adminPassword || tenant.adminPassword || '123456';
-                    const emoji = segmentConfig.emoji || '🏪';
-                    const msg = `*${emoji} Acesso ao Sistema da sua Loja - ${formData.name || tenant.name}*\n\nOlá ${formData.ownerName || tenant.ownerName}! Seus acessos foram configurados com sucesso:\n\n🛒 *Vitrine dos Clientes:*\n${siteUrl}\n\n💻 *Painel do Lojista (PDV e Estoque):*\n${siteUrl}\n📱 *Usuário / WhatsApp:* ${formData.whatsapp.phoneNumber || tenant.whatsapp.phoneNumber}\n🔑 *Senha de Acesso:* ${pass}\n\nQualquer dúvida estamos à disposição!`;
-                    const waUrl = `https://wa.me/${phone.startsWith('55') ? phone : '55' + phone}?text=${encodeURIComponent(msg)}`;
-                    window.open(waUrl, '_blank');
-                  }}
-                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Enviar Dados de Acesso no WhatsApp do Lojista</span>
-                </button>
-              </div>
+                );
+              })()}
 
               <div>
                 <label className={labelClass}>
