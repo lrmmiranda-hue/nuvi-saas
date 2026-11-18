@@ -209,19 +209,24 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
               </label>
             </div>
 
-            {/* Botão Entrar com a cor da fonte igual a letra 'V' da logomarca Nuvi (#1077e4) */}
+            {/* Botão Entrar com o mesmo estilo do botão criar minha loja do modo escuro */}
             <button
               type="submit"
               disabled={isSubmitting}
-              style={{ color: '#1077e4' }}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-sky-200 via-cyan-100 to-sky-200 hover:from-sky-100 hover:to-white active:scale-[0.99] font-black text-sm shadow-xl shadow-sky-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 border border-sky-300/60"
+              style={{ color: '#F8FAFC' }}
+              className="w-full mt-3 py-3.5 px-4 rounded-xl bg-gradient-to-br from-sky-600/30 via-blue-600/25 to-sky-500/20 hover:from-sky-600/40 hover:via-blue-600/35 active:scale-[0.99] font-black text-sm shadow-md shadow-black/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 border-0 ring-0 outline-none text-[#F8FAFC]"
             >
               {isSubmitting ? (
-                <span style={{ color: '#1077e4' }}>Validando acesso...</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-[#F8FAFC]/30 border-t-[#F8FAFC] rounded-full animate-spin" />
+                  <span style={{ color: '#F8FAFC' }}>Validando acesso...</span>
+                </div>
               ) : (
                 <>
-                  <span style={{ color: '#1077e4' }} className="font-black text-sm tracking-tight">Entrar no Painel da Loja</span>
-                  <ArrowRight style={{ color: '#1077e4' }} className="w-4 h-4" />
+                  <span style={{ color: '#F8FAFC' }} className="font-black text-sm tracking-tight text-[#F8FAFC]">
+                    Entrar no Painel da Loja
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-[#F8FAFC]" />
                 </>
               )}
             </button>
