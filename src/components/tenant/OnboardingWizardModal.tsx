@@ -1247,7 +1247,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 </div>
 
                 {/* Grid Dinâmico com os Planos Ativos do SaaS com Estilização Premium da Tela Inicial */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {((globalConfig?.plans && globalConfig.plans.length > 0)
                     ? globalConfig.plans.filter((p) => p.active !== false)
                     : [
@@ -1338,52 +1338,55 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             });
                           }
                         }}
-                        className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer relative flex flex-col justify-between ${
+                        className={`w-full p-4 rounded-xl border text-left transition-all cursor-pointer relative flex flex-col justify-between overflow-hidden ${
                           isSelected
                             ? isLight
-                              ? 'bg-sky-50/80 border-sky-500 ring-2 ring-sky-500/30 text-neutral-900 shadow-md'
-                              : 'bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent border-sky-500/50 text-white shadow-lg shadow-sky-500/10 ring-2 ring-sky-500/40'
+                              ? 'bg-sky-500/15 border-2 border-sky-500 text-neutral-900 shadow-none'
+                              : 'bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent border-sky-500/60 text-white shadow-none ring-1 ring-sky-500/30'
                             : isLight
-                            ? 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 shadow-2xs'
-                            : 'bg-neutral-900/80 border-neutral-800 text-neutral-300 hover:border-neutral-700'
+                            ? 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 shadow-none'
+                            : 'bg-neutral-900/80 border-neutral-800 text-neutral-300 hover:border-neutral-700 shadow-none'
                         }`}
                       >
-                        <div className="min-w-0 w-full">
+                        <div className="w-full min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
-                            <span className={`font-bold text-sm flex items-start gap-1.5 min-w-0 leading-snug ${isSelected ? (isLight ? 'text-sky-950' : 'text-sky-200') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
-                              <PlanIcon className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-sky-400' : 'text-neutral-400'}`} />
-                              <span className="break-words">{planItem.name}</span>
-                            </span>
-                            {isSelected ? (
-                              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
-                            ) : null}
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <PlanIcon className={`w-4 h-4 shrink-0 ${isSelected ? 'text-sky-500' : 'text-neutral-400'}`} />
+                              <span className={`font-bold text-sm leading-snug break-words ${isSelected ? (isLight ? 'text-sky-950 font-extrabold' : 'text-sky-200') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                                {planItem.name}
+                              </span>
+                            </div>
+                            {isSelected && (
+                              <CheckCircle2 className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                            )}
                           </div>
 
-                          {planItem.badge && (
-                            <span className="inline-block mb-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 uppercase whitespace-nowrap">
-                              {planItem.badge}
-                            </span>
-                          )}
-
-                          <div className="flex items-baseline gap-1 mb-1.5 whitespace-nowrap">
-                            <span className={`text-lg font-black ${isSelected ? (isLight ? 'text-sky-700' : 'text-sky-400') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
-                              R$&nbsp;{planItem.price.toFixed(2).replace('.', ',')}
-                            </span>
-                            <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                              {planItem.period || '/mês'}
-                            </span>
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <div className="flex items-baseline gap-1">
+                              <span className={`text-lg sm:text-xl font-black ${isSelected ? (isLight ? 'text-sky-700' : 'text-sky-400') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                                R$ {planItem.price.toFixed(2).replace('.', ',')}
+                              </span>
+                              <span className={`text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                                {planItem.period || '/mês'}
+                              </span>
+                            </div>
+                            {planItem.badge && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 uppercase tracking-wide">
+                                {planItem.badge}
+                              </span>
+                            )}
                           </div>
 
-                          <p className={`text-[11px] leading-snug mb-2 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                          <p className={`text-xs leading-relaxed mb-3 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
                             {planItem.description}
                           </p>
 
                           {planItem.features && planItem.features.length > 0 && (
-                            <ul className="space-y-1 pt-1.5 border-t border-neutral-200/50 dark:border-neutral-800/80">
+                            <ul className="space-y-1.5 pt-2 border-t border-neutral-200/60 dark:border-neutral-800">
                               {planItem.features.slice(0, 3).map((feat, idx) => (
-                                <li key={idx} className="flex items-start gap-1.5 text-[11px] opacity-90 leading-snug">
-                                  <Check className="w-3 h-3 mt-0.5 text-sky-400 shrink-0" />
-                                  <span className="break-words">{feat}</span>
+                                <li key={idx} className="flex items-start gap-2 text-xs leading-snug">
+                                  <Check className="w-3.5 h-3.5 mt-0.5 text-sky-500 shrink-0" />
+                                  <span className={`break-words ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>{feat}</span>
                                 </li>
                               ))}
                             </ul>

@@ -615,10 +615,12 @@ export const StorefrontView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setViewModeOverride('grid')}
-                title="Exibir em Grade com Fotos Grandes"
+                title="Exibir em Grade com Fotos em Destaque (4 Colunas)"
                 className={`p-1.5 rounded-md transition-all cursor-pointer ${
                   !isListLayout
-                    ? 'btn-graphite bg-neutral-800 text-white shadow-xs'
+                    ? isLight
+                      ? 'bg-sky-500/15 text-sky-800 border border-sky-400/50 font-bold shadow-none'
+                      : 'bg-neutral-800 text-white shadow-none'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -630,7 +632,9 @@ export const StorefrontView: React.FC = () => {
                 title="Exibir em Lista Compacta com Miniatura Lateral"
                 className={`p-1.5 rounded-md transition-all cursor-pointer ${
                   isListLayout
-                    ? 'btn-graphite bg-neutral-800 text-white shadow-xs'
+                    ? isLight
+                      ? 'bg-sky-500/15 text-sky-800 border border-sky-400/50 font-bold shadow-none'
+                      : 'bg-neutral-800 text-white shadow-none'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >

@@ -579,7 +579,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
           </div>
           <button
             onClick={onOpenOnboarding}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shrink-0 shadow-md shadow-sky-500/25 transition-all active:scale-95 cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs shrink-0 shadow-none transition-all active:scale-95 cursor-pointer"
           >
             Iniciar Passo a Passo
           </button>
@@ -702,7 +702,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               {isOnlineEnabled ? (
                 <button
                   onClick={() => setViewRole('storefront')}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-md shadow-sky-500/25 transition-all active:scale-95 cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs shadow-none transition-all active:scale-95 cursor-pointer"
                 >
                   <Store className="w-3.5 h-3.5 text-white" />
                   <span>Ver Minha Vitrine</span>
@@ -738,13 +738,15 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-md shadow-sky-500/25 ring-1 ring-sky-400/40'
+                    ? isLight
+                      ? 'bg-sky-500/15 text-sky-800 border border-sky-400/50 shadow-none'
+                      : 'bg-sky-600 text-white ring-1 ring-sky-400/40 shadow-none'
                     : isLight
                       ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70'
                       : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-sky-500'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? (isLight ? 'text-sky-700' : 'text-white') : 'text-sky-500'}`} />
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
                   <span 
@@ -1004,7 +1006,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
             <button
               onClick={handleOpenAddProduct}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-md shadow-sky-500/25 transition-all active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs shadow-none transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>
@@ -1169,7 +1171,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               <h4 className={`text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Nenhum produto cadastrado nesta categoria</h4>
               <button
                 onClick={handleOpenAddProduct}
-                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-md shadow-sky-500/25 cursor-pointer transition-all active:scale-95"
+                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs shadow-none cursor-pointer transition-all active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Cadastrar Primeiro Produto
@@ -1196,7 +1198,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
             <button
               onClick={handleSaveStoreManagement}
-              className="px-5 py-2.5 rounded-xl font-extrabold text-xs shadow-md shadow-sky-500/25 transition-all cursor-pointer bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white active:scale-95"
+              className="px-5 py-2.5 rounded-xl font-bold text-xs shadow-none transition-all cursor-pointer bg-sky-600 hover:bg-sky-500 text-white active:scale-95"
             >
               Salvar Configurações
             </button>
@@ -1491,7 +1493,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Opção 1: Grade de Cards (Fotos Grandes) */}
+                {/* Opção 1: Grade de Cards (4 Colunas com Fotos Grandes) */}
                 <div
                   onClick={() => {
                     const nextConfig = { ...configEdits, catalogLayout: 'grid' as const };
@@ -1503,7 +1505,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                   }}
                   className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                     (configEdits.catalogLayout || 'grid') === 'grid'
-                      ? 'border-sky-500 bg-sky-500/15 shadow-md text-white'
+                      ? isLight
+                        ? 'border-sky-500 bg-sky-500/15 text-slate-900 font-bold shadow-none'
+                        : 'border-sky-500 bg-sky-500/15 text-white font-bold shadow-none'
                       : isLight
                       ? 'bg-slate-50 hover:bg-sky-50/50 border-slate-300 text-slate-800'
                       : 'bg-[#151D24] hover:bg-[#1E2933] border-[#222E3A] text-slate-300'
@@ -1511,25 +1515,23 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <LayoutGrid className="w-5 h-5 text-sky-400" />
-                      <span className="font-bold text-sm">Grade com Fotos Grandes</span>
+                      <LayoutGrid className="w-5 h-5 text-sky-500" />
+                      <span className="font-bold text-sm">Grade em 4 Colunas (Fotos em Destaque)</span>
                     </div>
                     {(configEdits.catalogLayout || 'grid') === 'grid' && (
-                      <CheckCircle2 className="w-4 h-4 text-sky-400" />
+                      <CheckCircle2 className="w-4 h-4 text-sky-500" />
                     )}
                   </div>
-                  <p className="text-xs opacity-80 leading-relaxed">
-                    Cards retangulares com fotos amplas em destaque e botão de adicionar no rodapé. Ideal para adegas, empórios, conveniências e vitrines de produtos.
+                  <p className={`text-xs leading-relaxed ${isLight ? 'text-slate-700' : 'opacity-80'}`}>
+                    Cards organizados em grade de 4 colunas com fotos em destaque e botão de adicionar. Ideal para adegas, empórios, conveniências e vitrines de produtos.
                   </p>
-                  <div className="h-12 rounded-lg bg-black/10 dark:bg-white/5 border border-black/10 p-1 flex gap-2 items-center">
-                    <div className="flex-1 h-full rounded bg-sky-400/25 flex flex-col p-1 justify-between">
-                      <div className="w-full h-4 rounded bg-sky-400/35" />
-                      <div className="w-2/3 h-1.5 rounded bg-sky-400/40" />
-                    </div>
-                    <div className="flex-1 h-full rounded bg-sky-400/25 flex flex-col p-1 justify-between">
-                      <div className="w-full h-4 rounded bg-sky-400/35" />
-                      <div className="w-2/3 h-1.5 rounded bg-sky-400/40" />
-                    </div>
+                  <div className="h-12 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-1 flex gap-1.5 items-center">
+                    {[1, 2, 3, 4].map((col) => (
+                      <div key={col} className="flex-1 h-full rounded bg-sky-400/25 flex flex-col p-1 justify-between">
+                        <div className="w-full h-4 rounded bg-sky-400/35" />
+                        <div className="w-2/3 h-1.5 rounded bg-sky-400/40" />
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -1545,7 +1547,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                   }}
                   className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                     configEdits.catalogLayout === 'list'
-                      ? 'border-sky-500 bg-sky-500/15 shadow-md text-white'
+                      ? isLight
+                        ? 'border-sky-500 bg-sky-500/15 text-slate-900 font-bold shadow-none'
+                        : 'border-sky-500 bg-sky-500/15 text-white font-bold shadow-none'
                       : isLight
                       ? 'bg-slate-50 hover:bg-sky-50/50 border-slate-300 text-slate-800'
                       : 'bg-[#151D24] hover:bg-[#1E2933] border-[#222E3A] text-slate-300'
@@ -1553,14 +1557,14 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <List className="w-5 h-5 text-slate-300" />
+                      <List className="w-5 h-5 text-sky-500" />
                       <span className="font-bold text-sm">Lista com Miniatura Lateral</span>
                     </div>
                     {configEdits.catalogLayout === 'list' && (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-sky-500" />
                     )}
                   </div>
-                  <p className="text-xs opacity-80 leading-relaxed">
+                  <p className={`text-xs leading-relaxed ${isLight ? 'text-slate-700' : 'opacity-80'}`}>
                     Lista corrida com título, descrição, preço e miniatura quadrada à direita. O formato tradicional e clássico de cardápios de pizzarias, hamburguerias e delivery.
                   </p>
                   <div className="h-12 rounded-lg bg-black/10 dark:bg-white/5 border border-black/10 p-1 flex flex-col justify-between gap-1">
@@ -2157,20 +2161,22 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                   }}
                   className={`p-3.5 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
                     themeMode === 'light'
-                      ? 'border-neutral-700 bg-neutral-800 text-white shadow-xs font-bold'
+                      ? isLight
+                        ? 'border-2 border-sky-500 bg-sky-500/15 text-sky-950 font-bold shadow-none'
+                        : 'border-sky-500 bg-sky-500/15 text-white font-bold shadow-none'
                       : isLight
                       ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
                       : 'border-neutral-800 bg-neutral-950 hover:bg-neutral-800 text-neutral-400'
                   }`}
                 >
-                  <div className={`p-2 rounded-lg ${themeMode === 'light' ? 'bg-neutral-700 text-white' : isLight ? 'bg-blue-100 text-blue-600' : 'bg-neutral-700 text-white'}`}>
+                  <div className={`p-2 rounded-lg ${themeMode === 'light' ? (isLight ? 'bg-sky-500/20 text-sky-600' : 'bg-sky-500/20 text-sky-400') : isLight ? 'bg-slate-100 text-slate-600' : 'bg-neutral-700 text-white'}`}>
                     <Sun className="w-5 h-5" />
                   </div>
                   <div className="text-left">
-                    <span className={`block text-xs font-bold ${themeMode === 'light' ? 'text-white' : isLight ? 'text-slate-900' : 'text-neutral-300'}`}>
+                    <span className={`block text-xs font-bold ${themeMode === 'light' ? (isLight ? 'text-sky-950 font-extrabold' : 'text-white') : isLight ? 'text-slate-900' : 'text-neutral-300'}`}>
                       Modo Claro (Diurno)
                     </span>
-                    <span className={`text-[11px] ${themeMode === 'light' ? 'text-neutral-300' : 'text-slate-500 dark:text-neutral-400'}`}>
+                    <span className={`text-[11px] ${themeMode === 'light' ? (isLight ? 'text-sky-900/80 font-medium' : 'text-neutral-300') : isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
                       Visual limpo com fundo branco e contraste suave
                     </span>
                   </div>
@@ -2195,20 +2201,22 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                   }}
                   className={`p-3.5 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
                     themeMode === 'dark'
-                      ? 'border-neutral-700 bg-neutral-800 text-white shadow-xs font-bold'
+                      ? isLight
+                        ? 'border-2 border-sky-500 bg-sky-500/15 text-sky-950 font-bold shadow-none'
+                        : 'border-sky-500 bg-sky-500/15 text-white font-bold shadow-none'
                       : isLight
                       ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
                       : 'border-neutral-800 bg-neutral-950 hover:bg-neutral-800 text-neutral-400'
                   }`}
                 >
-                  <div className={`p-2 rounded-lg ${themeMode === 'dark' ? 'bg-neutral-700 text-white' : isLight ? 'bg-slate-200 text-slate-800' : 'bg-neutral-700 text-white'}`}>
+                  <div className={`p-2 rounded-lg ${themeMode === 'dark' ? (isLight ? 'bg-sky-500/20 text-sky-600' : 'bg-sky-500/20 text-sky-400') : isLight ? 'bg-slate-100 text-slate-600' : 'bg-neutral-700 text-white'}`}>
                     <Moon className="w-5 h-5" />
                   </div>
                   <div className="text-left">
-                    <span className={`block text-xs font-bold ${themeMode === 'dark' ? 'text-white' : isLight ? 'text-slate-900' : 'text-neutral-300'}`}>
+                    <span className={`block text-xs font-bold ${themeMode === 'dark' ? (isLight ? 'text-sky-950 font-extrabold' : 'text-white') : isLight ? 'text-slate-900' : 'text-neutral-300'}`}>
                       Modo Escuro (Noturno)
                     </span>
-                    <span className={`text-[11px] ${themeMode === 'dark' ? 'text-neutral-300' : 'text-slate-500 dark:text-neutral-400'}`}>
+                    <span className={`text-[11px] ${themeMode === 'dark' ? (isLight ? 'text-sky-900/80 font-medium' : 'text-neutral-300') : isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
                       Visual grafite escuro premium para menor cansaço visual
                     </span>
                   </div>
@@ -2220,7 +2228,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
           <div className="flex justify-end pt-2">
             <button
               onClick={handleSaveStoreManagement}
-              className="btn-graphite px-6 py-2.5 rounded-xl font-bold text-xs bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 shadow-xs transition-all active:scale-95 cursor-pointer"
+              className="px-6 py-2.5 rounded-xl font-bold text-xs bg-sky-600 hover:bg-sky-500 text-white shadow-none transition-all active:scale-95 cursor-pointer"
             >
               Salvar Todas as Configurações da Loja
             </button>
@@ -2787,10 +2795,12 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                     }}
                     className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer ${
                       isSelected
-                        ? 'btn-graphite border-neutral-700 bg-neutral-800 ring-2 ring-neutral-600 text-white shadow-xs font-bold'
+                        ? isLight
+                          ? 'border-2 border-sky-500 bg-sky-500/15 text-sky-950 font-bold shadow-none'
+                          : 'btn-graphite border-neutral-700 bg-neutral-800 ring-2 ring-neutral-600 text-white shadow-none font-bold'
                         : isLight
-                        ? 'border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-2xs'
-                        : 'border-neutral-800 bg-neutral-900 hover:border-neutral-700'
+                        ? 'border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-none'
+                        : 'border-neutral-800 bg-neutral-900 hover:border-neutral-700 shadow-none'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
@@ -2803,7 +2813,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                           className="w-4 h-4 rounded-full border border-black/20 shrink-0 -ml-1 shadow-xs"
                           style={{ backgroundColor: theme.accent }}
                         />
-                        <span className={`text-xs font-bold ${isSelected && !isLight ? 'text-white' : isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
+                        <span className={`text-xs font-bold ${isSelected ? (isLight ? 'text-sky-950 font-extrabold' : 'text-white') : isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
                           {theme.name}
                         </span>
                       </div>
