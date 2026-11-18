@@ -1,6 +1,6 @@
 export interface StoreWallpaper {
   id: string;
-  category: 'adega' | 'restaurante' | 'pizzaria' | 'japonesa' | 'mercadinho' | 'petshop' | 'tabacaria' | 'cosmeticos';
+  category: 'adega' | 'restaurante' | 'pizzaria' | 'japonesa' | 'pesqueiro' | 'mercadinho' | 'petshop' | 'tabacaria' | 'cosmeticos';
   title: string;
   subtitle: string;
   url: string;
@@ -9,8 +9,9 @@ export interface StoreWallpaper {
 
 export const WALLPAPER_CATEGORIES = [
   { id: 'adega' as const, label: 'Adega & Bebidas', icon: 'Wine' },
-  { id: 'restaurante' as const, label: 'Lanches & Hamburgueria', icon: 'Sandwich' },
   { id: 'pizzaria' as const, label: 'Pizzaria & Forno', icon: 'Pizza' },
+  { id: 'pesqueiro' as const, label: 'Pesqueiro, Porções & À La Carte', icon: 'Fish' },
+  { id: 'restaurante' as const, label: 'Lanches & Hamburgueria', icon: 'Sandwich' },
   { id: 'japonesa' as const, label: 'Culinária Japonesa & Sushi', icon: 'Fish' },
   { id: 'mercadinho' as const, label: 'Mercadinho & Empório', icon: 'ShoppingCart' },
   { id: 'petshop' as const, label: 'Pet Shop & Ração', icon: 'Dog' },
@@ -488,5 +489,57 @@ export const STORE_WALLPAPERS: StoreWallpaper[] = [
     subtitle: 'Aromas florais e amadeirados em embalagens refinadas para presentes',
     url: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1200&q=80',
     tag: 'Linhas Nobres',
+  },
+
+  // ==========================================
+  // 🎣 8. PESQUEIRO, PORÇÕES & À LA CARTE
+  // ==========================================
+  {
+    id: 'pesqueiro_porcoes_peixe',
+    category: 'pesqueiro',
+    title: 'Porção de Peixe Frito & Iscas Crocantes',
+    subtitle: 'Tilápia frita sequinha, iscas de peixe com limão e molho tártaro',
+    url: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Mais Pedido',
+  },
+  {
+    id: 'pesqueiro_camarao_porcao',
+    category: 'pesqueiro',
+    title: 'Porção de Camarão & Frutos do Mar',
+    subtitle: 'Camarão empanado crocante, anéis de lula e petiscos especiais',
+    url: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Porções & Petiscos',
+  },
+  {
+    id: 'pesqueiro_prato_alacarte',
+    category: 'pesqueiro',
+    title: 'Pratos À La Carte & Peixes Nobres',
+    subtitle: 'Filés grelhados, salmão, pirarucu e moquecas com guarnições completas',
+    url: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1200&q=80',
+    tag: 'À La Carte',
+  },
+  {
+    id: 'pesqueiro_mesa_acompanhamentos',
+    category: 'pesqueiro',
+    title: 'Mesa Farta com Acompanhamentos',
+    subtitle: 'Arroz, pirão, farofa temperada, salada fresca e bebidas bem geladas',
+    url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Mesa & Família',
+  },
+  {
+    id: 'pesqueiro_lago_deck',
+    category: 'pesqueiro',
+    title: 'Pesqueiro, Lago & Deck de Pesca',
+    subtitle: 'Ambiente rústico de lazer, pescaria esportiva e tranquilidade na natureza',
+    url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Lago & Lazer',
+  },
+  {
+    id: 'pesqueiro_natureza_recreacao',
+    category: 'pesqueiro',
+    title: 'Pesque e Pague & Rancho na Represa',
+    subtitle: 'Área verde ao ar livre, quiosques, chalés e restaurante na beira da água',
+    url: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80',
+    tag: 'Rancho & Natureza',
   },
 ];

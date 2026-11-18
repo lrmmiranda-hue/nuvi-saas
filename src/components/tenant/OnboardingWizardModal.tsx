@@ -32,7 +32,8 @@ import {
   Flame,
   Pizza,
   Wine,
-  Dog
+  Dog,
+  Search
 } from 'lucide-react';
 
 interface OnboardingWizardModalProps {
@@ -246,17 +247,678 @@ export const PRESET_BANNERS = [
   },
 ];
 
+// =========================================================================
+// 🎨 PALETAS EXCLUSIVAS POR COMÉRCIO (EXATAMENTE 6 OPÇÕES CONTEXTUALIZADAS)
+// =========================================================================
+export const SEGMENT_THEMES: Record<BusinessSegmentType, PresetTheme[]> = {
+  pizzaria: [
+    {
+      id: 'pizza_forno',
+      name: 'Forno a Lenha & Terracota',
+      primary: '#1C1917',
+      accent: '#EA580C',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'Tons acolhedores inspirados no fogo do forno iglu e tijolos rústicos.',
+    },
+    {
+      id: 'pizza_pomodoro',
+      name: 'Pomodoro & Manjericão',
+      primary: '#18181B',
+      accent: '#DC2626',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'Vermelho intenso do molho italiano clássico com toque artesanal.',
+    },
+    {
+      id: 'pizza_queijo',
+      name: 'Queijo Dourado & Âmbar',
+      primary: '#09090B',
+      accent: '#F59E0B',
+      style: 'gold_luxury',
+      category: 'dark',
+      desc: 'Mussarela gratinada e borda crocante para pizzarias e esfiharias.',
+    },
+    {
+      id: 'pizza_vinho',
+      name: 'Vinho Italiano & Bordô',
+      primary: '#2E081C',
+      accent: '#F43F5E',
+      style: 'gold_luxury',
+      category: 'vibrant',
+      desc: 'Combinação refinada de trattoria italiana, massas e vinhos finos.',
+    },
+    {
+      id: 'pizza_noite',
+      name: 'Noite Napolitana & Fogo',
+      primary: '#09090B',
+      accent: '#F97316',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Preto carbon com laranja brasa, ideal para delivery noturno ágil.',
+    },
+    {
+      id: 'pizza_rustica',
+      name: 'Trattoria Madeira & Trigo',
+      primary: '#292524',
+      accent: '#FBBF24',
+      style: 'amber_pub',
+      category: 'dark',
+      desc: 'Tradição rústica com foco em massas artesanais de fermentação lenta.',
+    },
+  ],
+  pesqueiro: [
+    {
+      id: 'pesqueiro_represa',
+      name: 'Azul Lago & Dourado Nobre',
+      primary: '#082F49',
+      accent: '#F59E0B',
+      style: 'gold_luxury',
+      category: 'vibrant',
+      desc: 'Inspirado na tranquilidade das águas e na culinária nobre de peixes.',
+    },
+    {
+      id: 'pesqueiro_peixe_ouro',
+      name: 'Peixe Dourado & Âmbar',
+      primary: '#09090B',
+      accent: '#EAB308',
+      style: 'gold_luxury',
+      category: 'dark',
+      desc: 'Elegância e destaque para porções crocantes e peixes assados.',
+    },
+    {
+      id: 'pesqueiro_natureza',
+      name: 'Verde Represa & Menta',
+      primary: '#064E3B',
+      accent: '#34D399',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Ambiente campestre ao ar livre, quiosques e pesque e pague familiar.',
+    },
+    {
+      id: 'pesqueiro_porcoes',
+      name: 'Porções & Iscas Crocantes',
+      primary: '#18181B',
+      accent: '#F97316',
+      style: 'amber_pub',
+      category: 'dark',
+      desc: 'Quente e dinâmico para petiscos, camarão empanado e cerveja gelada.',
+    },
+    {
+      id: 'pesqueiro_deck',
+      name: 'Deck de Madeira & Ciano',
+      primary: '#1C1917',
+      accent: '#06B6D4',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Madeira rústica com ciano cristalino para decks na beira do lago.',
+    },
+    {
+      id: 'pesqueiro_sunset',
+      name: 'Pôr do Sol no Rancho',
+      primary: '#3B0764',
+      accent: '#FB923C',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'Cores de entardecer na represa para lazer, música e refeições completas.',
+    },
+  ],
+  adega: [
+    {
+      id: 'adega_ouro',
+      name: 'Preto & Ouro Imperial',
+      primary: '#09090B',
+      accent: '#F59E0B',
+      style: 'gold_luxury',
+      category: 'dark',
+      desc: 'Sofisticação máxima para adegas, vinhos nobres e destilados premium.',
+    },
+    {
+      id: 'adega_bordeaux',
+      name: 'Bordeaux & Champagne',
+      primary: '#881337',
+      accent: '#FBBF24',
+      style: 'gold_luxury',
+      category: 'vibrant',
+      desc: 'Vinhos tintos encorpados, taças de cristal e bistrôs requintados.',
+    },
+    {
+      id: 'adega_cerveja',
+      name: 'Cerveja Gelada & Âmbar',
+      primary: '#0F172A',
+      accent: '#EAB308',
+      style: 'amber_pub',
+      category: 'dark',
+      desc: 'Cervejas trincando no gelo, chopp artesanal e combos de latas.',
+    },
+    {
+      id: 'adega_carvalho',
+      name: 'Carvalho & Malte Whisky',
+      primary: '#3E1F17',
+      accent: '#D97706',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Tons amadeirados de barril para uísques, runs e destilados envelhecidos.',
+    },
+    {
+      id: 'adega_gin',
+      name: 'Gin & Ciano Cristalino',
+      primary: '#09090B',
+      accent: '#06B6D4',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Visual contemporâneo e refrescante para gins, tônicas e drinks autorais.',
+    },
+    {
+      id: 'adega_lounge',
+      name: 'Noite Lounge & Roxo Cyber',
+      primary: '#18181B',
+      accent: '#A855F7',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Atmosfera moderna para distribuidoras 24h e conveniências noturnas.',
+    },
+  ],
+  restaurante_lanchonete: [
+    {
+      id: 'rest_brasa',
+      name: 'Vermelho Brasa & Cheddar',
+      primary: '#B91C1C',
+      accent: '#F59E0B',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'Clássico imbatível para hamburguerias artesanais e lanches apetitosos.',
+    },
+    {
+      id: 'rest_black_angus',
+      name: 'Black Angus & Fogo',
+      primary: '#09090B',
+      accent: '#EF4444',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Carvão e fogo alto para carnes nobres grelhadas na parrilla.',
+    },
+    {
+      id: 'rest_bbq',
+      name: 'Smoked BBQ & Laranja Brasa',
+      primary: '#431407',
+      accent: '#F97316',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'American BBQ, defumados, costelinha e molhos especiais.',
+    },
+    {
+      id: 'rest_rustico',
+      name: 'Madeira Rústica & Ouro',
+      primary: '#292524',
+      accent: '#EAB308',
+      style: 'amber_pub',
+      category: 'dark',
+      desc: 'Gourmet e artesanal com pães brioche e tábuas de hambúrguer.',
+    },
+    {
+      id: 'rest_gourmet',
+      name: 'Gourmet Fresh & Verde Oliva',
+      primary: '#064E3B',
+      accent: '#84CC16',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Alface americana fresca, ingredientes orgânicos e lanches gourmet.',
+    },
+    {
+      id: 'rest_noite',
+      name: 'Dark Burger & Ciano',
+      primary: '#18181B',
+      accent: '#06B6D4',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Visual moderno e urbano para delivery express e kombis gourmet.',
+    },
+  ],
+  comida_japonesa: [
+    {
+      id: 'japa_imperial',
+      name: 'Preto Imperial & Carmim Sushi',
+      primary: '#09090B',
+      accent: '#DC2626',
+      style: 'dark_adega',
+      category: 'vibrant',
+      desc: 'Tradição milenar oriental com elegância e foco em peixes frescos.',
+    },
+    {
+      id: 'japa_tokyo',
+      name: 'Tokyo Dark & Salmão Fresh',
+      primary: '#18181B',
+      accent: '#FB7185',
+      style: 'dark_adega',
+      category: 'vibrant',
+      desc: 'Moderno e sofisticado para temakerias, combinados e pokes.',
+    },
+    {
+      id: 'japa_wasabi',
+      name: 'Verde Wasabi & Bambu',
+      primary: '#064E3B',
+      accent: '#84CC16',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Harmonia com folhas de bambu, shisô e frescor da culinária japonesa.',
+    },
+    {
+      id: 'japa_ouro',
+      name: 'Ouro Oriental & Carvão',
+      primary: '#09090B',
+      accent: '#F59E0B',
+      style: 'gold_luxury',
+      category: 'dark',
+      desc: 'Requinte para restaurantes à la carte com rodízio e pratos quentes.',
+    },
+    {
+      id: 'japa_torii',
+      name: 'Vermelho Torii & Sakura',
+      primary: '#7F1D1D',
+      accent: '#F43F5E',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'Inspirado nos portais japoneses e nas cerejeiras floridas.',
+    },
+    {
+      id: 'japa_clean',
+      name: 'Minimalista Preto & Branco',
+      primary: '#0A0A0A',
+      accent: '#F8FAFC',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Minimalismo puro com protagonismo absoluto para a beleza dos pratos.',
+    },
+  ],
+  mercadinho_emporio: [
+    {
+      id: 'merc_verde',
+      name: 'Verde Orgânico & Hortifrúti',
+      primary: '#064E3B',
+      accent: '#10B981',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Frescor de feira, verduras selecionadas e produtos saudáveis.',
+    },
+    {
+      id: 'merc_azul',
+      name: 'Azul Confiança & Amarelo',
+      primary: '#0F172A',
+      accent: '#EAB308',
+      style: 'amber_pub',
+      category: 'dark',
+      desc: 'Visual de supermercado tradicional, dinâmico e de alta conversão.',
+    },
+    {
+      id: 'merc_emporio',
+      name: 'Empório Nobre & Âmbar',
+      primary: '#451A03',
+      accent: '#D97706',
+      style: 'gold_luxury',
+      category: 'dark',
+      desc: 'Queijos artesanais, frios especiais e produtos coloniais.',
+    },
+    {
+      id: 'merc_clean',
+      name: 'Conveniência Clean & Celeste',
+      primary: '#0284C7',
+      accent: '#38BDF8',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Claro e objetivo para minimercados de condomínio e mercearias rápidas.',
+    },
+    {
+      id: 'merc_laranja',
+      name: 'Cesta Cheia & Laranja',
+      primary: '#18181B',
+      accent: '#F97316',
+      style: 'amber_pub',
+      category: 'dark',
+      desc: 'Ofertas diárias e destaque para economia e compras familiares.',
+    },
+    {
+      id: 'merc_dark',
+      name: 'Preto & Amarelo Express',
+      primary: '#09090B',
+      accent: '#FACC15',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Visual moderno de minimercados autônomos e conveniências 24 horas.',
+    },
+  ],
+  petshop: [
+    {
+      id: 'pet_azul',
+      name: 'Azul Pet & Amarelo Canário',
+      primary: '#0284C7',
+      accent: '#EAB308',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Alegre e acolhedor para lojas de ração, brinquedos e banho e tosa.',
+    },
+    {
+      id: 'pet_turquesa',
+      name: 'Turquesa Aqua & Laranja',
+      primary: '#0D9488',
+      accent: '#F97316',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Cuidado animal, higiene, estética pet e clínicas veterinárias.',
+    },
+    {
+      id: 'pet_roxo',
+      name: 'Roxo Divertido & Ciano',
+      primary: '#581C87',
+      accent: '#38BDF8',
+      style: 'dark_adega',
+      category: 'vibrant',
+      desc: 'Criativo e amigável para acessórios, caminhas e mimos para pets.',
+    },
+    {
+      id: 'pet_verde',
+      name: 'Verde Natureza & Menta',
+      primary: '#065F46',
+      accent: '#84CC16',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Alimentação natural, rações premium e saúde animal preventiva.',
+    },
+    {
+      id: 'pet_dark',
+      name: 'Pet Dark & Dourado Nobre',
+      primary: '#18181B',
+      accent: '#F59E0B',
+      style: 'gold_luxury',
+      category: 'dark',
+      desc: 'Boutique pet sofisticada para raças nobres e produtos importados.',
+    },
+    {
+      id: 'pet_rosa',
+      name: 'Rosa Carinho & Bege',
+      primary: '#831843',
+      accent: '#F472B6',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'Afetuoso para gatos, filhotes e cuidados delicados no banho.',
+    },
+  ],
+  cosmeticos_farmacia: [
+    {
+      id: 'cosm_rosa',
+      name: 'Rosa Glamour & Ouro',
+      primary: '#831843',
+      accent: '#F472B6',
+      style: 'gold_luxury',
+      category: 'vibrant',
+      desc: 'Beleza clássica, maquiagens de festa e fragrâncias exclusivas.',
+    },
+    {
+      id: 'cosm_dark_pink',
+      name: 'Preto & Pink Neon',
+      primary: '#09090B',
+      accent: '#EC4899',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Atitude fashion para salões, manicures e cosméticos modernos.',
+    },
+    {
+      id: 'cosm_ouro',
+      name: 'Dourado Nobre & Champanhe',
+      primary: '#18181B',
+      accent: '#FBBF24',
+      style: 'gold_luxury',
+      category: 'dark',
+      desc: 'Perfumaria importada fina e tratamentos capilares profissionais.',
+    },
+    {
+      id: 'cosm_spa',
+      name: 'Menta Spa & Skincare',
+      primary: '#064E3B',
+      accent: '#2DD4BF',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Dermocosméticos, bem-estar, massoterapia e cuidados com a pele.',
+    },
+    {
+      id: 'cosm_lavanda',
+      name: 'Lavanda Relax & Lilás',
+      primary: '#4C1D95',
+      accent: '#C084FC',
+      style: 'dark_adega',
+      category: 'vibrant',
+      desc: 'Aromaterapia, óleos essenciais e sabonetes artesanais relaxantes.',
+    },
+    {
+      id: 'cosm_farma',
+      name: 'Farmácia Saúde & Ciano',
+      primary: '#0F172A',
+      accent: '#38BDF8',
+      style: 'modern_emerald',
+      category: 'dark',
+      desc: 'Credibilidade e segurança para farmácias, suplementos e vitaminas.',
+    },
+  ],
+  tabacaria: [
+    {
+      id: 'tab_couro',
+      name: 'Couro Rústico & Âmbar',
+      primary: '#3E1F17',
+      accent: '#D97706',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Charutos nobres, cachimbos artesanais e tabacos envelhecidos.',
+    },
+    {
+      id: 'tab_ouro',
+      name: 'Preto Fosco & Ouro Nobre',
+      primary: '#09090B',
+      accent: '#F59E0B',
+      style: 'gold_luxury',
+      category: 'dark',
+      desc: 'Linhas premium de narguiles, sedas finas e isqueiros de luxo.',
+    },
+    {
+      id: 'tab_prata',
+      name: 'Fumaça & Prata Titanium',
+      primary: '#18181B',
+      accent: '#94A3B8',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Minimalismo escuro com contraste metálico para acessórios modernos.',
+    },
+    {
+      id: 'tab_brasa',
+      name: 'Brasa Viva & Carmim',
+      primary: '#450A0A',
+      accent: '#EF4444',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'Carvões de narguile acesos e energia de lounge noturno.',
+    },
+    {
+      id: 'tab_ciano',
+      name: 'Lounge Noturno & Ciano',
+      primary: '#09090B',
+      accent: '#06B6D4',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Atmosfera de pub e lounge com iluminação led futurista.',
+    },
+    {
+      id: 'tab_verde',
+      name: 'Verde Oliva & Folha Natural',
+      primary: '#064E3B',
+      accent: '#10B981',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'Sedas orgânicas de cânhamo e essências naturais de alta qualidade.',
+    },
+  ],
+  pastelaria: [
+    {
+      id: 'past_dourado',
+      name: 'Dourado Massa Frita & Âmbar',
+      primary: '#09090B',
+      accent: '#F59E0B',
+      style: 'gold_luxury',
+      category: 'dark',
+      desc: 'Casquinha sequinha crocante e recheios generosos de pastel.',
+    },
+    {
+      id: 'past_cana',
+      name: 'Caldo de Cana & Verde Limão',
+      primary: '#064E3B',
+      accent: '#84CC16',
+      style: 'modern_emerald',
+      category: 'vibrant',
+      desc: 'A clássica dupla do pastel de feira com caldo de cana trincando.',
+    },
+    {
+      id: 'past_recheio',
+      name: 'Vermelho Recheio & Queijo',
+      primary: '#991B1B',
+      accent: '#FBBF24',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'Carne moída especial, pizza, queijo derretido e temperos.',
+    },
+    {
+      id: 'past_feira',
+      name: 'Laranja Feira & Sol',
+      primary: '#7C2D12',
+      accent: '#FB923C',
+      style: 'amber_pub',
+      category: 'vibrant',
+      desc: 'Tradição brasileira de feira livre e pastelarias tradicionais.',
+    },
+    {
+      id: 'past_crocante',
+      name: 'Preto & Ouro Crocante',
+      primary: '#18181B',
+      accent: '#F59E0B',
+      style: 'dark_adega',
+      category: 'dark',
+      desc: 'Pastelaria gourmet e delivery de pastéis doces e salgados.',
+    },
+    {
+      id: 'past_rustico',
+      name: 'Rústico Tradição Familiar',
+      primary: '#451A03',
+      accent: '#FCD34D',
+      style: 'amber_pub',
+      category: 'dark',
+      desc: 'Receita de família com massa caseira fresca e ingredientes nobres.',
+    },
+  ],
+};
+
+export const getSegmentThemes = (segment?: BusinessSegmentType): PresetTheme[] => {
+  if (segment && SEGMENT_THEMES[segment]) {
+    return SEGMENT_THEMES[segment];
+  }
+  return SEGMENT_THEMES.adega;
+};
+
+// =========================================================================
+// 🔍 SUGESTÕES DE BUSCA NO GOOGLE IMAGENS POR COMÉRCIO
+// =========================================================================
+export const SEGMENT_GOOGLE_SEARCH_IDEAS: Record<BusinessSegmentType, Array<{ label: string; query: string }>> = {
+  pesqueiro: [
+    { label: '🐟 Porções & Peixe Frito', query: 'porção de peixe frito tilápia isca com limão alta resolução' },
+    { label: '🍤 Camarão & Petiscos', query: 'porção de camarão empanado crocante restaurante' },
+    { label: '🍲 Pratos À La Carte de Peixe', query: 'pratos à la carte peixe grelhado moqueca restaurante' },
+    { label: '🥗 Mesa com Acompanhamentos', query: 'mesa farta restaurante pesqueiro arroz pirao farofa acompanhamentos' },
+    { label: '🎣 Pesqueiro, Lago & Deck', query: 'pesqueiro lago deck de pesca natureza por do sol' },
+    { label: '🍖 Porção de Carnes & Churrasco', query: 'porção de carne picanha mandioca restaurante pesqueiro' },
+  ],
+  pizzaria: [
+    { label: '🍕 Pizza Saindo do Forno', query: 'pizza saindo forno a lenha queijo derretendo alta resolucao' },
+    { label: '🪵 Mesa de Pizzaria Rústica', query: 'mesa de pizzaria rustica fatias de pizza taça vinho' },
+    { label: '🍅 Pomodoro & Manjericão', query: 'ingredientes pizza molho tomate manjericao farinha rustico' },
+    { label: '🔥 Forno a Lenha com Chamas', query: 'forno a lenha pizzaria com fogo chamas' },
+    { label: '🧀 Borda Recheada & Queijo', query: 'fatia de pizza puxando queijo mussarela borda recheada' },
+    { label: '🍫 Pizzas Doces Especiais', query: 'pizza doce chocolate morango nutella gourmet' },
+  ],
+  adega: [
+    { label: '🍷 Adega de Vinhos & Barris', query: 'adega de vinhos barris de carvalho iluminacao aconchegante' },
+    { label: '🍺 Cervejas no Gelo Trincando', query: 'cervejas garrafas geladas no gelo gotas trincando alta resolucao' },
+    { label: '🥃 Bar de Whisky & Destilados', query: 'whisky gin garrafas premium balcao de drinks' },
+    { label: '🍻 Torneiras de Chopp Artesanal', query: 'torneiras de chopp artesanal caneca suada colarinho' },
+    { label: '🍾 Champagnes & Espumantes', query: 'garrafa de espumante balde de gelo taca brinde' },
+    { label: '🍹 Coquetéis & Gin Tônica', query: 'taca de gin tonica especiarias barman balcao' },
+  ],
+  restaurante_lanchonete: [
+    { label: '🍔 Hambúrguer Artesanal na Brasa', query: 'hamburguer artesanal queijo cheddar derretendo bacon' },
+    { label: '🍟 Batata Frita & Acompanhamentos', query: 'porção batata frita crocante molhos cheddar bacon' },
+    { label: '🥩 Parrilla & Carnes Grelhadas', query: 'churrasco parrilla carnes nobres grelhadas fogo' },
+    { label: '🥪 Lanches Gourmet & Artesanais', query: 'sanduiche artesanal pao brioche restaurante lanchonete' },
+    { label: '🥤 Bebidas & Milk Shakes', query: 'milk shake artesanal chocolate morango calda' },
+    { label: '🍽️ Prato Executivo Almoço', query: 'prato executivo restaurante arroz feijao carne salada' },
+  ],
+  comida_japonesa: [
+    { label: '🍣 Barco de Sushi & Sashimi', query: 'barco de sushi sashimi combinados salmao restaurante japones' },
+    { label: '🥢 Combinado de Salmão & Atum', query: 'prato sushi combinado salmao nigiri hossomaki uramaki' },
+    { label: '🥟 Temakis & Entradas Quentes', query: 'temaki salmao grelhado shimeji guioza culinaria japonesa' },
+    { label: '🍱 Pokes Havainos & Orientais', query: 'poke de salmao arroz manga edamame tigela' },
+    { label: '🍜 Lámen & Sopas Orientais', query: 'tigela de ramen oriental caldo ovo cebolinha chashu' },
+    { label: '🏮 Ambiente Restaurante Japonês', query: 'restaurante japones iluminação oriental decoracao' },
+  ],
+  mercadinho_emporio: [
+    { label: '🥦 Hortifrúti & Frutas Frescas', query: 'hortifruti feira frutas verduras frescas bancada supermercado' },
+    { label: '🧀 Frios, Queijos & Laticínios', query: 'tabua de queijos finos frios fatiados emporio' },
+    { label: '🥖 Padaria & Pães Artesanais', query: 'padaria paes artesanais quentinhos cesta emporio' },
+    { label: '🥫 Prateleiras de Mercearia', query: 'prateleiras organizadas mercadinho empório produtos' },
+    { label: '🍷 Vinhos & Produtos Coloniais', query: 'produtos coloniais doces compotas queijos vinhos' },
+    { label: '🛒 Carrinho de Compras & Ofertas', query: 'carrinho supermercado compras produtos feira' },
+  ],
+  petshop: [
+    { label: '🐶 Cães Brincando & Rações', query: 'cachorros fofos brincando racao pet shop' },
+    { label: '🐱 Gatos & Brinquedos Pet', query: 'gatos fofos arranhador brinquedos pet shop' },
+    { label: '🛁 Banho e Tosa Profissional', query: 'banho e tosa cachorro tosado limpo banheira pet' },
+    { label: '🦴 Petiscos, Ossos & Rações', query: 'pacotes de ração petiscos ossinhos loja pet shop' },
+    { label: '🧸 Acessórios, Coleiras & Camas', query: 'caminhas para cachorro coleiras roupinhas pet' },
+    { label: '🦜 Pássaros, Peixes & Pequenos Animais', query: 'aquario peixes ornamentais passaros pet shop' },
+  ],
+  cosmeticos_farmacia: [
+    { label: '💄 Batons & Maquiagem Profissional', query: 'maquiagem batons pinceis paleta de sombras penteadeira' },
+    { label: '🧴 Skincare & Cremes Hidratantes', query: 'skincare cosméticos frascos cremes cuidados com a pele' },
+    { label: '✨ Perfumaria Fina & Frascos de Luxo', query: 'perfumes importados frascos de cristal iluminação dourada' },
+    { label: '💆 Tratamento Capilar & Salão', query: 'produtos tratamento capilar mascaras oleos salao beleza' },
+    { label: '🌿 Cosméticos Naturais & Spa', query: 'cosmeticos naturais veganos folhas toalha sabonete artesanal' },
+    { label: '💊 Farmácia & Medicamentos', query: 'farmacia prateleiras organizadas remedios suplementos saude' },
+  ],
+  tabacaria: [
+    { label: '🍂 Charutos Nobres & Caixas de Madeira', query: 'charutos cubanos tabaco caixa de cedro cortador isqueiro' },
+    { label: '💨 Narguiles & Sessão Lounge', query: 'narguile fumaca lounge vasos mangueiras tabacaria' },
+    { label: '🔥 Isqueiros Especiais & Maçaricos', query: 'isqueiros zippo macariqueiro acessorios tabacaria' },
+    { label: '🍃 Sedas Orgânicas & Dichavadores', query: 'sedas papeis dichavadores acessorios tabacaria' },
+    { label: '🏺 Pipas, Cachimbos & Fumos', query: 'cachimbos de madeira fumo especial fita couro' },
+    { label: '🛋️ Lounge Noturno de Tabacaria', query: 'tabacaria lounge sofisticado iluminacao noturna' },
+  ],
+  pastelaria: [
+    { label: '🥟 Pastel Frito Quentinho & Crocante', query: 'pastel de feira frito sequinho dourado recheado' },
+    { label: '🥤 Garapa & Caldo de Cana Gelado', query: 'copo de caldo de cana com limao gelo feira' },
+    { label: '🧀 Pastel de Queijo Puxando', query: 'pastel queijo derretendo recheio generoso' },
+    { label: '🥩 Pastel de Carne Especial com Ovo', query: 'pastel de carne com ovo temperado frito' },
+    { label: '🍫 Pasteis Doces & Chocolate', query: 'pastel doce chocolate banana canela queijo doce' },
+    { label: '🎪 Barraca de Pastel & Feira Livre', query: 'barraca de pastel feira livre tradicional fritando' },
+  ],
+};
+
 export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   isOpen,
   onClose,
   targetTenant,
 }) => {
-  const { currentTenant, updateTenant, setViewRole, showAlert, themeMode } = useStore();
+  const { currentTenant, updateTenant, setViewRole, showAlert, themeMode, globalConfig } = useStore();
   const tenant = targetTenant || currentTenant;
   const isLight = themeMode === 'light';
 
   const [step, setStep] = useState<number>(1);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [bannerMode, setBannerMode] = useState<'prontas' | 'google'>('prontas');
+  const [googleImageUrl, setGoogleImageUrl] = useState<string>('');
 
   // Form state com businessSegment alterável exclusivamente pelo Master Admin
   const [formData, setFormData] = useState<{
@@ -556,219 +1218,246 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
             <div className="space-y-6">
               
               {/* OPERATING MODEL SELECTION */}
-              <div className={`p-4 rounded-xl border space-y-4 ${
-                isLight ? 'bg-neutral-50/70 border-neutral-200' : 'bg-neutral-950 border-neutral-800'
+              <div className={`p-5 rounded-2xl border space-y-4 ${
+                isLight ? 'bg-neutral-50/70 border-neutral-200' : 'bg-neutral-950/80 border-neutral-800'
               }`}>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold shrink-0">
-                    <Store className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold shrink-0">
+                    <Store className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className={`text-sm font-bold ${isLight ? 'text-neutral-900' : 'text-white'}`}>
+                    <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
                       Qual é o Modelo de Foco do seu Estabelecimento? *
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-500 font-semibold border border-sky-500/30">
+                        Definido pelo Plano
+                      </span>
                     </h3>
                     <p className={`text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                      Defina como seu comércio irá operar no dia a dia. Você poderá alterar isso a qualquer momento.
+                      Selecione o plano de assinatura do seu comércio. Os recursos e módulos operacionais serão ativados de acordo com a sua escolha.
                     </p>
                   </div>
                 </div>
 
-                {/* 3 Preset Model Selection Cards com Planos e Preços */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  
-                  {/* Card 1: Híbrido Completo */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData({
-                        ...formData,
-                        plan: 'hibrido',
-                        config: { ...formData.config, enablePhysicalStore: true, enableOnlineSales: true },
-                        whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: true },
-                      });
-                    }}
-                    className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer relative flex flex-col justify-between ${
-                      formData.config.enablePhysicalStore && formData.config.enableOnlineSales
-                        ? isLight
-                          ? 'bg-amber-50 border-amber-500 ring-1 ring-amber-500/40 text-neutral-900 shadow-xs'
-                          : 'bg-amber-500/15 border-amber-500 ring-1 ring-amber-500/40 text-white'
-                        : isLight
-                        ? 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 shadow-2xs'
-                        : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-neutral-700'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className={`font-bold text-xs flex items-center gap-1.5 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                          <Store className="w-4 h-4 text-amber-500" /> Híbrido Completo
-                        </span>
-                        {formData.config.enablePhysicalStore && formData.config.enableOnlineSales && (
-                          <CheckCircle2 className="w-4 h-4 text-amber-500" />
-                        )}
-                      </div>
-                      <div className="flex items-baseline gap-1.5 mb-1">
-                        <span className="text-sm font-extrabold text-amber-500">R$ 179,90</span>
-                        <span className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>/mês</span>
-                        <span className="ml-auto text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 uppercase">
-                          2 em 1
-                        </span>
-                      </div>
-                      <p className={`text-[11px] leading-snug ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                        Balcão físico com leitor de código de barras (PDV) + Vitrine online com pedidos no WhatsApp e estoque unificado.
-                      </p>
-                    </div>
-                  </button>
+                {/* Grid Dinâmico com os Planos Ativos do SaaS com Estilização Premium da Tela Inicial */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {((globalConfig?.plans && globalConfig.plans.length > 0)
+                    ? globalConfig.plans.filter((p) => p.active !== false)
+                    : [
+                        {
+                          id: 'plan_cardapio',
+                          name: 'Cardápio Digital & Pedidos',
+                          tagline: 'Ideal para iniciar sem custos elevados',
+                          price: 49.90,
+                          period: '/mês',
+                          description: 'Vitrine digital com fotos, descrições e pedidos no WhatsApp sem taxas de comissão.',
+                          badge: 'Iniciante',
+                          features: ['Vitrine Web com link próprio', 'Cardápio Digital QR Code', 'Pedidos direto no WhatsApp'],
+                          active: true,
+                        },
+                        {
+                          id: 'plan_balcao_pdv',
+                          name: 'Balcão & PDV Caixa Rápido',
+                          tagline: 'Para quem vende no balcão físico',
+                          price: 89.90,
+                          period: '/mês',
+                          description: 'Frente de Caixa (PDV) ultra-rápida no toque e leitor de código de barras.',
+                          badge: 'Mais Vendido',
+                          features: ['PDV Balcão Caixa Rápido', 'Leitor de Código de Barras', 'Fechamento de caixa diário'],
+                          active: true,
+                        },
+                        {
+                          id: 'plan_delivery_estoque',
+                          name: 'Delivery & Estoque Profissional',
+                          tagline: 'Autonomia total de entregas e estoque',
+                          price: 139.90,
+                          period: '/mês',
+                          description: 'Controle de estoque em tempo real com baixa automática e frete por raio.',
+                          badge: 'Profissional',
+                          features: ['Balcão PDV + Vitrine Web', 'Estoque e Reposição em Tempo Real', 'Cálculo de Frete por KM'],
+                          active: true,
+                        },
+                        {
+                          id: 'plan_nuvi_pro',
+                          name: 'Nuvi Pro Total (Completo)',
+                          tagline: 'A solução definitiva sem limites',
+                          price: 199.90,
+                          period: '/mês',
+                          description: 'Todos os módulos liberados com margem de lucro, múltiplos caixas e atendimento VIP.',
+                          badge: 'Completo VIP',
+                          features: ['Todos os recursos ilimitados', 'Margem de lucro e relatórios', 'Atendimento VIP Prioritário'],
+                          active: true,
+                        },
+                      ]
+                  ).map((planItem) => {
+                    const lower = `${planItem.id} ${planItem.name}`.toLowerCase();
+                    const isBalcaoPlan = lower.includes('balcao') && !lower.includes('delivery') && !lower.includes('pro') && !lower.includes('hibrido');
+                    const isCardapioPlan = lower.includes('cardapio') || lower.includes('vitrine');
 
-                  {/* Card 2: Apenas Loja Física */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData({
-                        ...formData,
-                        plan: 'balcao',
-                        config: { ...formData.config, enablePhysicalStore: true, enableOnlineSales: false },
-                        whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: false },
-                      });
-                    }}
-                    className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer relative flex flex-col justify-between ${
-                      formData.config.enablePhysicalStore && !formData.config.enableOnlineSales
-                        ? isLight
-                          ? 'bg-amber-50 border-amber-500 ring-1 ring-amber-500/40 text-neutral-900 shadow-xs'
-                          : 'bg-amber-500/15 border-amber-500 ring-1 ring-amber-500/40 text-white'
-                        : isLight
-                        ? 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 shadow-2xs'
-                        : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-neutral-700'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className={`font-bold text-xs flex items-center gap-1.5 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                          <ShoppingCart className="w-4 h-4 text-emerald-500" /> Apenas Balcão (PDV)
-                        </span>
-                        {formData.config.enablePhysicalStore && !formData.config.enableOnlineSales && (
-                          <CheckCircle2 className="w-4 h-4 text-amber-500" />
-                        )}
-                      </div>
-                      <div className="flex items-baseline gap-1.5 mb-1">
-                        <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">R$ 89,90</span>
-                        <span className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>/mês</span>
-                        <span className="ml-auto text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 uppercase">
-                          Físico
-                        </span>
-                      </div>
-                      <p className={`text-[11px] leading-snug ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                        Foco no balcão presencial: leitor de barras (PDV), estoque rápido e comprovante. Sem vitrine pública na web.
-                      </p>
-                    </div>
-                  </button>
+                    // Verifica se este plano está selecionado
+                    const isSelected = isBalcaoPlan
+                      ? (formData.config.enablePhysicalStore && !formData.config.enableOnlineSales)
+                      : isCardapioPlan
+                      ? (!formData.config.enablePhysicalStore && formData.config.enableOnlineSales)
+                      : (formData.config.enablePhysicalStore && formData.config.enableOnlineSales);
 
-                  {/* Card 3: Apenas Online / Delivery */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData({
-                        ...formData,
-                        plan: 'vitrine',
-                        config: { ...formData.config, enablePhysicalStore: false, enableOnlineSales: true },
-                        whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: true },
-                      });
-                    }}
-                    className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer relative flex flex-col justify-between ${
-                      !formData.config.enablePhysicalStore && formData.config.enableOnlineSales
-                        ? isLight
-                          ? 'bg-amber-50 border-amber-500 ring-1 ring-amber-500/40 text-neutral-900 shadow-xs'
-                          : 'bg-amber-500/15 border-amber-500 ring-1 ring-amber-500/40 text-white'
-                        : isLight
-                        ? 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 shadow-2xs'
-                        : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-neutral-700'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className={`font-bold text-xs flex items-center gap-1.5 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                          <Globe className="w-4 h-4 text-sky-500" /> Vitrine & WhatsApp
-                        </span>
-                        {!formData.config.enablePhysicalStore && formData.config.enableOnlineSales && (
-                          <CheckCircle2 className="w-4 h-4 text-amber-500" />
-                        )}
-                      </div>
-                      <div className="flex items-baseline gap-1.5 mb-1">
-                        <span className="text-sm font-extrabold text-sky-600 dark:text-sky-400">R$ 119,90</span>
-                        <span className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>/mês</span>
-                        <span className="ml-auto text-[9px] font-bold px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 uppercase">
-                          Online
-                        </span>
-                      </div>
-                      <p className={`text-[11px] leading-snug ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                        Foco em pedidos digitais: cardápio web na internet, frete por raio (km) e pedidos recebidos prontos no WhatsApp.
-                      </p>
-                    </div>
-                  </button>
+                    const PlanIcon = isBalcaoPlan ? ShoppingCart : isCardapioPlan ? Globe : lower.includes('pro') ? Sparkles : Store;
 
+                    return (
+                      <button
+                        key={planItem.id}
+                        type="button"
+                        onClick={() => {
+                          if (isBalcaoPlan) {
+                            setFormData({
+                              ...formData,
+                              plan: 'balcao',
+                              config: { ...formData.config, enablePhysicalStore: true, enableOnlineSales: false },
+                              whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: false },
+                            });
+                          } else if (isCardapioPlan) {
+                            setFormData({
+                              ...formData,
+                              plan: 'vitrine',
+                              config: { ...formData.config, enablePhysicalStore: false, enableOnlineSales: true },
+                              whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: true },
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              plan: 'hibrido',
+                              config: { ...formData.config, enablePhysicalStore: true, enableOnlineSales: true },
+                              whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: true },
+                            });
+                          }
+                        }}
+                        className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer relative flex flex-col justify-between ${
+                          isSelected
+                            ? isLight
+                              ? 'bg-sky-50/80 border-sky-500 ring-2 ring-sky-500/30 text-neutral-900 shadow-md'
+                              : 'bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent border-sky-500/50 text-white shadow-lg shadow-sky-500/10 ring-2 ring-sky-500/40'
+                            : isLight
+                            ? 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 shadow-2xs'
+                            : 'bg-neutral-900/80 border-neutral-800 text-neutral-300 hover:border-neutral-700'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-1 mb-2">
+                            <span className={`font-bold text-xs flex items-center gap-1.5 ${isSelected ? (isLight ? 'text-sky-950' : 'text-sky-200') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                              <PlanIcon className={`w-4 h-4 ${isSelected ? 'text-sky-400' : 'text-neutral-400'}`} />
+                              <span className="truncate">{planItem.name}</span>
+                            </span>
+                            {isSelected ? (
+                              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
+                            ) : null}
+                          </div>
+
+                          <div className="flex items-baseline gap-1 mb-1.5">
+                            <span className={`text-base font-black ${isSelected ? (isLight ? 'text-sky-700' : 'text-sky-400') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                              R$ {planItem.price.toFixed(2).replace('.', ',')}
+                            </span>
+                            <span className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                              {planItem.period || '/mês'}
+                            </span>
+                            {planItem.badge && (
+                              <span className="ml-auto text-[9px] font-bold px-1.5 py-0.2 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 uppercase">
+                                {planItem.badge}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className={`text-[11px] leading-snug line-clamp-2 mb-2 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                            {planItem.description}
+                          </p>
+
+                          {planItem.features && planItem.features.length > 0 && (
+                            <ul className="space-y-1 pt-1.5 border-t border-neutral-200/50 dark:border-neutral-800/80">
+                              {planItem.features.slice(0, 3).map((feat, idx) => (
+                                <li key={idx} className="flex items-center gap-1.5 text-[10px] opacity-90 truncate">
+                                  <Check className="w-3 h-3 text-sky-400 shrink-0" />
+                                  <span className="truncate">{feat}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {/* Granular Checkboxes */}
+                {/* Trava Informativa de Segurança do Modelo de Negócios */}
+                <div className={`p-3 rounded-xl border flex items-start gap-2.5 text-xs ${
+                  isLight ? 'bg-sky-50/70 border-sky-200 text-sky-950' : 'bg-sky-950/20 border-sky-500/30 text-sky-200'
+                }`}>
+                  <Lock className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block">
+                      Modelo Operacional Vinculado ao Plano Contratado
+                    </span>
+                    <span className="text-[11px] opacity-85 block mt-0.5">
+                      Para sua segurança e conformidade da assinatura, a alteração de modelo (ex: mudar de apenas Balcão para Híbrido) é exclusiva do Master Admin e ficará bloqueada nas configurações do painel da loja.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Resumo Granular dos Módulos Habilitados pelo Plano Selecionado */}
                 <div className={`pt-2 border-t space-y-2 ${isLight ? 'border-slate-200' : 'border-neutral-800/80'}`}>
                   <div className={`flex items-center justify-between p-2.5 rounded-lg border text-xs ${
-                    isLight ? 'bg-white border-slate-300 shadow-2xs text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
+                    formData.config.enablePhysicalStore
+                      ? isLight ? 'bg-sky-50/50 border-sky-200 text-slate-900' : 'bg-sky-950/20 border-sky-500/30 text-white'
+                      : isLight ? 'bg-slate-100/50 border-slate-200 opacity-60 text-slate-500' : 'bg-neutral-900 border-neutral-800 opacity-50 text-neutral-400'
                   }`}>
                     <div>
-                      <span className={`font-semibold block ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                        Trabalhar com Loja Física / Vendas no Balcão (PDV)
+                      <span className="font-semibold flex items-center gap-1.5">
+                        <ShoppingCart className="w-3.5 h-3.5 text-sky-500" />
+                        Loja Física / Vendas no Balcão (PDV Frente de Caixa)
                       </span>
-                      <span className={`text-[11px] ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
-                        Ativa o Frente de Caixa (PDV), leitor de código de barras e emissão de comprovantes
+                      <span className="text-[11px] block mt-0.5 opacity-80">
+                        {formData.config.enablePhysicalStore ? 'Módulo ATIVADO pelo seu plano atual' : 'Módulo DESATIVADO pelo seu plano atual'}
                       </span>
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={formData.config.enablePhysicalStore}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          config: { ...formData.config, enablePhysicalStore: e.target.checked },
-                        })
-                      }
-                      className="w-4 h-4 rounded text-amber-500 border-neutral-300 cursor-pointer accent-amber-500"
-                    />
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                      formData.config.enablePhysicalStore
+                        ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400'
+                        : 'bg-neutral-500/20 text-neutral-400'
+                    }`}>
+                      {formData.config.enablePhysicalStore ? 'Incluso' : 'Não incluso'}
+                    </span>
                   </div>
 
                   <div className={`flex items-center justify-between p-2.5 rounded-lg border text-xs ${
-                    isLight ? 'bg-white border-slate-300 shadow-2xs text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
+                    formData.config.enableOnlineSales
+                      ? isLight ? 'bg-sky-50/50 border-sky-200 text-slate-900' : 'bg-sky-950/20 border-sky-500/30 text-white'
+                      : isLight ? 'bg-slate-100/50 border-slate-200 opacity-60 text-slate-500' : 'bg-neutral-900 border-neutral-800 opacity-50 text-neutral-400'
                   }`}>
                     <div>
-                      <span className={`font-semibold block ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                        Trabalhar com Vendas Online / Vitrine & Cardápio Digital
+                      <span className="font-semibold flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-sky-500" />
+                        Vendas Online / Vitrine & Cardápio Digital na Web
                       </span>
-                      <span className={`text-[11px] ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
-                        Ativa o site da loja na web para clientes fazerem pedidos delivery ou retirada
+                      <span className="text-[11px] block mt-0.5 opacity-80">
+                        {formData.config.enableOnlineSales ? 'Módulo ATIVADO pelo seu plano atual' : 'Módulo DESATIVADO pelo seu plano atual'}
                       </span>
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={formData.config.enableOnlineSales}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setFormData({
-                          ...formData,
-                          config: { ...formData.config, enableOnlineSales: checked },
-                          whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: checked ? formData.whatsapp.enableWhatsAppOrders : false },
-                        });
-                      }}
-                      className="w-4 h-4 rounded text-amber-500 border-neutral-300 cursor-pointer accent-amber-500"
-                    />
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                      formData.config.enableOnlineSales
+                        ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400'
+                        : 'bg-neutral-500/20 text-neutral-400'
+                    }`}>
+                      {formData.config.enableOnlineSales ? 'Incluso' : 'Não incluso'}
+                    </span>
                   </div>
 
                   {formData.config.enableOnlineSales && (
-                    <div className={`flex items-center justify-between p-2.5 rounded-lg border text-xs pl-6 border-l-4 border-l-amber-500 ${
+                    <div className={`flex items-center justify-between p-2.5 rounded-lg border text-xs pl-6 border-l-4 border-l-sky-500 ${
                       isLight ? 'bg-white border-slate-300 shadow-2xs text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
                     }`}>
                       <div>
-                        <span className={`font-semibold block ${isLight ? 'text-emerald-700 font-bold' : 'text-emerald-400'}`}>
-                          Trabalhar com Pedidos via WhatsApp
+                        <span className={`font-semibold block ${isLight ? 'text-sky-700 font-bold' : 'text-sky-400'}`}>
+                          Recebimento de Pedidos no WhatsApp
                         </span>
                         <span className={`text-[11px] ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
-                          Redireciona o carrinho do cliente com a mensagem pronta de pedido para o seu WhatsApp
+                          Envia o carrinho do cliente com a mensagem formatada para o WhatsApp da sua loja
                         </span>
                       </div>
                       <input
@@ -780,7 +1469,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: e.target.checked },
                           })
                         }
-                        className="w-4 h-4 rounded text-amber-500 border-neutral-300 cursor-pointer accent-amber-500"
+                        className="w-4 h-4 rounded text-sky-500 border-neutral-300 cursor-pointer accent-sky-500"
                       />
                     </div>
                   )}
@@ -1098,7 +1787,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
                   <label className={labelClass}>
-                    Paleta de Cores da Vitrine do Cardápio Online
+                    Paleta de Cores da Vitrine & Cardápio ({segmentConfig.title} - 6 Opções Recomendadas)
                   </label>
                   <button
                     type="button"
@@ -1114,20 +1803,20 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         },
                       })
                     }
-                    className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer self-start"
+                    className="text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer self-start"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Usar cores recomendadas para {segmentConfig.shortLabel}</span>
+                    <span>Usar padrão recomendado para {segmentConfig.shortLabel}</span>
                   </button>
                 </div>
                 <p className={`text-[11px] mb-3 ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
-                  As cores selecionadas personalizam o catálogo e cardápio online acessado pelos clientes. Os sistemas administrativos internos e de PDV permanecem padronizados e neutros (branco, cinza gelo, black carbon e azul).
+                  As 6 opções abaixo foram especialmente selecionadas para combinar perfeitamente com a identidade visual de <strong>{segmentConfig.title}</strong>.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {PRESET_THEMES.map((theme) => {
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {getSegmentThemes(activeSegment).map((theme) => {
                     const isSelected =
-                      formData.branding.primaryColor === theme.primary &&
-                      formData.branding.accentColor === theme.accent;
+                      formData.branding.primaryColor.toLowerCase() === theme.primary.toLowerCase() &&
+                      formData.branding.accentColor.toLowerCase() === theme.accent.toLowerCase();
                     return (
                       <button
                         key={theme.id}
@@ -1143,28 +1832,33 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             },
                           })
                         }
-                        className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer ${
+                        className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer relative ${
                           isSelected
                             ? isLight
-                              ? 'border-neutral-900 bg-slate-100 ring-2 ring-neutral-700/20 shadow-xs'
-                              : 'border-neutral-400 bg-neutral-850 ring-2 ring-neutral-500/30'
+                              ? 'border-sky-500 bg-sky-50/80 ring-2 ring-sky-500/30 shadow-xs'
+                              : 'border-sky-500 bg-sky-950/20 ring-2 ring-sky-500/40 shadow-xs'
                             : isLight
                             ? 'border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-2xs'
                             : 'border-neutral-800 bg-neutral-900 hover:border-neutral-700'
                         }`}
                       >
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span
-                            className="w-4 h-4 rounded-full border border-black/20 shrink-0 shadow-xs"
-                            style={{ backgroundColor: theme.primary }}
-                          />
-                          <span
-                            className="w-4 h-4 rounded-full border border-black/20 shrink-0 -ml-1 shadow-xs"
-                            style={{ backgroundColor: theme.accent }}
-                          />
-                          <span className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                            {theme.name}
-                          </span>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-4 h-4 rounded-full border border-black/20 shrink-0 shadow-xs"
+                              style={{ backgroundColor: theme.primary }}
+                            />
+                            <span
+                              className="w-4 h-4 rounded-full border border-black/20 shrink-0 -ml-1.5 shadow-xs"
+                              style={{ backgroundColor: theme.accent }}
+                            />
+                            <span className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                              {theme.name}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <CheckCircle2 className="w-4 h-4 text-sky-500 shrink-0" />
+                          )}
                         </div>
                         <p className={`text-[11px] leading-snug ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
                           {theme.desc}
@@ -1240,95 +1934,230 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
               {/* Banner Selection Dinâmico por Segmentos de Comércio */}
               {formData.config.enableOnlineSales ? (
-                <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <label className={labelClass}>
                         Banner de Fundo & Papel de Parede da Vitrine
                       </label>
                       <p className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                        Escolha a categoria do seu comércio para visualizar layouts temáticos em alta definição:
+                        Escolha uma imagem pronta do catálogo ou busque fotos temáticas em alta resolução no Google Imagens:
                       </p>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 uppercase self-start">
-                      Layouts por Nicho
-                    </span>
                   </div>
 
-                  {/* Abas de Categorias de Comércio para os Banners */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
-                    {relevantWallpaperCategories.map((cat) => {
-                      const isActive = activeWallpaperCat === cat.id;
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          onClick={() => setActiveWallpaperCat(cat.id)}
-                          className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-                            isActive
-                              ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
-                              : isLight
-                              ? 'bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-100'
-                              : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
-                          }`}
-                        >
-                          <span>{cat.label}</span>
-                        </button>
-                      );
-                    })}
+                  {/* 2 Botões de Ação no Topo: Imagens Prontas vs Buscar no Google */}
+                  <div className="flex flex-wrap items-center gap-2 p-1 rounded-xl bg-neutral-100 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 w-fit">
+                    <button
+                      type="button"
+                      onClick={() => setBannerMode('prontas')}
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        bannerMode === 'prontas'
+                          ? 'bg-sky-600 text-white shadow-xs'
+                          : isLight
+                          ? 'text-neutral-700 hover:text-neutral-900 hover:bg-neutral-200/60'
+                          : 'text-neutral-300 hover:text-white hover:bg-neutral-800'
+                      }`}
+                    >
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      <span>🖼️ Imagens Prontas do Sistema</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setBannerMode('google')}
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                        bannerMode === 'google'
+                          ? 'bg-sky-600 text-white shadow-xs'
+                          : isLight
+                          ? 'text-neutral-700 hover:text-neutral-900 hover:bg-neutral-200/60'
+                          : 'text-neutral-300 hover:text-white hover:bg-neutral-800'
+                      }`}
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      <span>🔍 Buscar Imagens no Google</span>
+                    </button>
                   </div>
 
-                  {/* Grid de Imagens da Categoria Ativa */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {STORE_WALLPAPERS.filter((w) => w.category === activeWallpaperCat).map((banner) => {
-                      const isSelected = formData.branding.bannerUrl === banner.url;
-                      return (
-                        <button
-                          key={banner.id}
-                          type="button"
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              branding: { ...formData.branding, bannerUrl: banner.url },
-                            })
-                          }
-                          className={`group relative rounded-xl overflow-hidden border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            isSelected
-                              ? 'border-amber-500 ring-2 ring-amber-500 shadow-md'
-                              : isLight
-                              ? 'border-neutral-200 bg-white hover:border-neutral-300 shadow-2xs'
-                              : 'border-neutral-800 bg-neutral-900 hover:border-neutral-700'
-                          }`}
-                        >
-                          <div className="relative w-full h-24 overflow-hidden bg-neutral-950">
-                            <img
-                              src={banner.url}
-                              alt={banner.title}
-                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                            />
-                            <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-xs text-white text-[9px] font-semibold">
-                              {banner.tag}
-                            </div>
-                            {isSelected && (
-                              <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-md">
-                                <Check className="w-3 h-3 stroke-[3]" />
+                  {/* MODO 1: IMAGENS PRONTAS DO SISTEMA */}
+                  {bannerMode === 'prontas' && (
+                    <div className="space-y-3">
+                      {/* Abas de Categorias de Comércio para os Banners */}
+                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
+                        {WALLPAPER_CATEGORIES.map((cat) => {
+                          const isActive = activeWallpaperCat === cat.id;
+                          return (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => setActiveWallpaperCat(cat.id)}
+                              className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+                                isActive
+                                  ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                                  : isLight
+                                  ? 'bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-100'
+                                  : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
+                              }`}
+                            >
+                              <span>{cat.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Grid de Imagens da Categoria Ativa */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {STORE_WALLPAPERS.filter((w) => w.category === activeWallpaperCat).map((banner) => {
+                          const isSelected = formData.branding.bannerUrl === banner.url;
+                          return (
+                            <button
+                              key={banner.id}
+                              type="button"
+                              onClick={() =>
+                                setFormData({
+                                  ...formData,
+                                  branding: { ...formData.branding, bannerUrl: banner.url },
+                                })
+                              }
+                              className={`group relative rounded-xl overflow-hidden border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                                isSelected
+                                  ? 'border-sky-500 ring-2 ring-sky-500 shadow-md'
+                                  : isLight
+                                  ? 'border-neutral-200 bg-white hover:border-neutral-300 shadow-2xs'
+                                  : 'border-neutral-800 bg-neutral-900 hover:border-neutral-700'
+                              }`}
+                            >
+                              <div className="relative w-full h-24 overflow-hidden bg-neutral-950">
+                                <img
+                                  src={banner.url}
+                                  alt={banner.title}
+                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                                <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-xs text-white text-[9px] font-semibold">
+                                  {banner.tag}
+                                </div>
+                                {isSelected && (
+                                  <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-md">
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                  </div>
+                                )}
                               </div>
-                            )}
+                              <div className={`p-2 transition-colors ${
+                                isLight ? 'bg-white text-neutral-800' : 'bg-neutral-950 text-neutral-200'
+                              }`}>
+                                <p className="text-[11px] font-bold truncate leading-tight">{banner.title}</p>
+                                <p className={`text-[10px] truncate leading-tight mt-0.5 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                                  {banner.subtitle}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* MODO 2: BUSCAR NO GOOGLE IMAGENS DIRETAMENTE PARA O COMÉRCIO */}
+                  {bannerMode === 'google' && (
+                    <div className={`p-4 rounded-xl border space-y-4 ${
+                      isLight ? 'bg-sky-50/50 border-sky-200' : 'bg-neutral-950 border-neutral-800'
+                    }`}>
+                      <div>
+                        <h4 className={`text-xs font-bold flex items-center gap-2 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
+                          <Search className="w-4 h-4 text-sky-500" />
+                          Sugestões de Busca no Google Imagens para {segmentConfig.title}
+                        </h4>
+                        <p className={`text-[11px] mt-0.5 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                          Clique em um dos botões abaixo para abrir a pesquisa com fotos em alta definição em uma nova aba. Depois, copie o link da imagem desejada e cole no campo abaixo.
+                        </p>
+                      </div>
+
+                      {/* Botões de Consulta do Google formatados para o segmento */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {(SEGMENT_GOOGLE_SEARCH_IDEAS[activeSegment] || SEGMENT_GOOGLE_SEARCH_IDEAS.adega).map((idea, idx) => (
+                          <a
+                            key={idx}
+                            href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(idea.query)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`p-2.5 rounded-lg border text-left text-xs font-medium flex items-center justify-between gap-1.5 transition-all cursor-pointer ${
+                              isLight
+                                ? 'bg-white border-sky-200 text-sky-950 hover:bg-sky-50 hover:border-sky-300 shadow-2xs'
+                                : 'bg-neutral-900 border-neutral-800 text-neutral-200 hover:bg-neutral-800 hover:border-neutral-700'
+                            }`}
+                          >
+                            <span className="truncate">{idea.label}</span>
+                            <ExternalLink className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                          </a>
+                        ))}
+                      </div>
+
+                      {/* Campo para colar a URL com botão de aplicar */}
+                      <div className="pt-2 border-t border-sky-200/60 dark:border-neutral-800/80 space-y-2">
+                        <label className={`block text-xs font-bold ${isLight ? 'text-neutral-800' : 'text-neutral-200'}`}>
+                          Cole a URL da Imagem Escolhida no Google:
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={googleImageUrl}
+                            onChange={(e) => setGoogleImageUrl(e.target.value)}
+                            placeholder="https://... (exemplo: cole o link da imagem aqui)"
+                            className={inputClass}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!googleImageUrl.trim()) {
+                                showAlert({
+                                  title: 'URL Inválida',
+                                  message: 'Por favor, cole um link válido de imagem da internet antes de aplicar.',
+                                  variant: 'warning'
+                                });
+                                return;
+                              }
+                              setFormData({
+                                ...formData,
+                                branding: { ...formData.branding, bannerUrl: googleImageUrl.trim() }
+                              });
+                              showAlert({
+                                title: 'Banner Atualizado!',
+                                message: 'A imagem do Google foi aplicada como banner da sua vitrine.',
+                                variant: 'success'
+                              });
+                            }}
+                            className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs whitespace-nowrap cursor-pointer transition-colors shrink-0 flex items-center gap-1.5"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Aplicar Imagem</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Pré-visualização da imagem atual */}
+                      {formData.branding.bannerUrl && (
+                        <div className="p-2.5 rounded-lg border border-neutral-300 dark:border-neutral-800 bg-black/40 flex items-center gap-3">
+                          <div className="w-16 h-10 rounded overflow-hidden shrink-0 bg-neutral-900 border border-neutral-700">
+                            <img
+                              src={formData.branding.bannerUrl}
+                              alt="Banner Atual"
+                              className="w-full h-full object-cover"
+                            />
                           </div>
-                          <div className={`p-2 transition-colors ${
-                            isLight ? 'bg-white text-neutral-800' : 'bg-neutral-950 text-neutral-200'
-                          }`}>
-                            <p className="text-[11px] font-bold truncate leading-tight">{banner.title}</p>
-                            <p className={`text-[10px] truncate leading-tight mt-0.5 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                              {banner.subtitle}
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 block">
+                              Banner Ativo Atualmente
+                            </span>
+                            <p className="text-xs text-neutral-300 truncate">
+                              {formData.branding.bannerUrl}
                             </p>
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                  {/* Input de URL Personalizada */}
+                  {/* Input de URL Personalizada Genérico */}
                   <div className="pt-1">
                     <input
                       type="text"
@@ -1339,7 +2168,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                           branding: { ...formData.branding, bannerUrl: e.target.value },
                         })
                       }
-                      placeholder="Ou cole a URL direta de uma imagem da internet para o banner"
+                      placeholder="Ou digite/cole a URL direta de uma imagem personalizada para o banner"
                       className={inputClass}
                     />
                   </div>

@@ -40,22 +40,9 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
 
   const isLight = themeMode === 'light';
 
-  // Opções de Planos de Venda ativos no Painel Master
-  const activePlans = (globalConfig?.plans || []).filter(p => p.active);
-
   // Selected Business Segment (padrão adega)
   const [selectedSegment, setSelectedSegment] = useState<BusinessSegmentType>('adega');
   const currentSegmentConfig = getSegmentById(selectedSegment);
-
-  // Plano Selecionado (inicializa com a primeira opção ativa definida pelo Master)
-  const [selectedPlanId, setSelectedPlanId] = useState<string>(activePlans[0]?.id || 'plan_cardapio');
-
-  // Mantém seleção válida se a lista de planos ativos mudar
-  React.useEffect(() => {
-    if (activePlans.length > 0 && !activePlans.some(p => p.id === selectedPlanId)) {
-      setSelectedPlanId(activePlans[0].id);
-    }
-  }, [activePlans, selectedPlanId]);
 
   // Form fields
   const [storeName, setStoreName] = useState('');
@@ -119,7 +106,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
           allowPickup: true,
           openingHours: 'Seg a Dom: 10h às 23h',
         },
-        plan: (selectedPlanId as any) || 'starter',
+        plan: 'hibrido',
         status: 'trial',
         adminPassword: password.trim(),
         onboardingCompleted: false,
@@ -235,77 +222,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 </div>
               </div>
 
-              {/* SELEÇÃO DE PLANO / OPÇÃO DE VENDA ATIVA CONFORME DEFINIDO NO PAINEL MASTER */}
-              {activePlans.length > 0 && (
-                <div className="space-y-2 pt-1">
-                  <div className="flex items-center justify-between">
-                    <label className={`block text-xs font-bold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                      2. Escolha sua Opção de Assinatura *
-                    </label>
-                    <span className="text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
-                      7 Dias Grátis no Plano Selecionado
-                    </span>
-                  </div>
-
-                  <div className={`grid gap-2.5 ${
-                    activePlans.length === 1 ? 'grid-cols-1' :
-                    activePlans.length === 2 ? 'grid-cols-1 sm:grid-cols-2' :
-                    activePlans.length === 3 ? 'grid-cols-1 sm:grid-cols-3' :
-                    'grid-cols-1 sm:grid-cols-2'
-                  }`}>
-                    {activePlans.map((plan) => {
-                      const isPlanSelected = selectedPlanId === plan.id;
-                      return (
-                        <button
-                          key={plan.id}
-                          type="button"
-                          onClick={() => setSelectedPlanId(plan.id)}
-                          className={`p-3 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between gap-2 outline-none ${
-                            isPlanSelected
-                              ? 'bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent shadow-md border-transparent'
-                              : isLight
-                              ? 'bg-slate-50 hover:bg-sky-50/40 border border-slate-200 hover:border-sky-300'
-                              : 'bg-[#121820] hover:bg-[#182230] border border-[#1C2631] hover:border-sky-800'
-                          }`}
-                        >
-                          <div className="flex items-start justify-between gap-1 w-full">
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25 uppercase tracking-wider">
-                              {plan.badge || 'Plano'}
-                            </span>
-                            {isPlanSelected ? (
-                              <CheckCircle2 className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
-                            ) : (
-                              <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-neutral-600 shrink-0 mt-0.5" />
-                            )}
-                          </div>
-
-                          <div>
-                            <h4 className="text-xs font-black text-slate-900 dark:text-white line-clamp-1">
-                              {plan.name}
-                            </h4>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                              {plan.tagline}
-                            </p>
-                          </div>
-
-                          <div className="pt-1 border-t border-slate-200/80 dark:border-[#1C2631] flex items-baseline gap-1">
-                            <span className="text-xs font-semibold text-slate-500">R$</span>
-                            <span className="text-base font-black text-sky-600 dark:text-sky-400">
-                              {plan.price.toFixed(2).replace('.', ',')}
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-medium">{plan.period}</span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* 3. Nome do Estabelecimento */}
+              {/* 2. Nome do Estabelecimento */}
               <div className="space-y-1.5 pt-1">
                 <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                  3. Nome do seu Estabelecimento ({currentSegmentConfig.shortLabel}) *
+                  2. Nome do seu Estabelecimento ({currentSegmentConfig.shortLabel}) *
                 </label>
                 <div className="relative">
                   <Store className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -324,11 +244,11 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 </div>
               </div>
 
-              {/* 4. Frase de Destaque / Slogan da Vitrine */}
+              {/* 3. Frase de Destaque / Slogan da Vitrine */}
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between">
                   <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                    4. Frase de Destaque / Slogan da Vitrine
+                    3. Frase de Destaque / Slogan da Vitrine
                   </label>
                   <button
                     type="button"
