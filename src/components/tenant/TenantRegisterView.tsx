@@ -18,7 +18,9 @@ import {
   ShieldCheck, 
   Zap,
   Eye,
-  EyeOff
+  EyeOff,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface TenantRegisterViewProps {
@@ -31,6 +33,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
     setCurrentTenantId, 
     setViewRole, 
     themeMode, 
+    toggleThemeMode,
     globalConfig,
     showAlert 
   } = useStore();
@@ -148,9 +151,35 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   };
 
   return (
-    <div className={`min-h-[92vh] py-10 px-4 flex flex-col justify-center items-center transition-colors relative ${
+    <div className={`min-h-[92vh] py-8 px-4 flex flex-col justify-center items-center transition-colors relative ${
       isLight ? 'bg-slate-50/80' : 'bg-transparent'
     }`}>
+
+      {/* Botão Superior de Alternar Modo Claro / Modo Escuro */}
+      <div className="w-full max-w-5xl flex justify-end pb-4">
+        <button
+          type="button"
+          onClick={toggleThemeMode}
+          title={isLight ? 'Alternar para Modo Escuro' : 'Alternar para Modo Claro'}
+          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border shadow-2xs select-none active:scale-95 ${
+            isLight
+              ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+              : 'bg-[#11161B] border-[#1C2631] text-slate-200 hover:bg-[#161F28] hover:text-white'
+          }`}
+        >
+          {isLight ? (
+            <>
+              <Moon className="w-3.5 h-3.5 text-slate-700" />
+              <span>Modo Escuro</span>
+            </>
+          ) : (
+            <>
+              <Sun className="w-3.5 h-3.5 text-amber-400" />
+              <span>Modo Claro</span>
+            </>
+          )}
+        </button>
+      </div>
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
