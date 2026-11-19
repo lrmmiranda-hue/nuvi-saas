@@ -677,20 +677,20 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                             theme: t.id,
                             badgeText: prev.badgeText || t.badge
                           }))}
-                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                          className={`p-3 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
                             isSelected
-                              ? 'border-sky-500 bg-sky-500/10 ring-2 ring-sky-500/30 shadow-md'
+                              ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0'
                               : isLight
-                              ? 'border-slate-200 bg-slate-50 hover:border-slate-300'
-                              : 'border-[#1C2631] bg-[#121820] hover:border-slate-700'
+                              ? 'border border-slate-200 bg-slate-50 hover:border-slate-300'
+                              : 'border border-[#1C2631] bg-[#121820] hover:border-slate-700'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <span className="font-bold text-xs text-white flex items-center gap-1.5">
                               {t.name}
                             </span>
                             {isSelected && (
-                              <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />
+                              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
                             )}
                           </div>
                           <div className={`h-6 rounded-lg bg-gradient-to-r ${t.colorPreview} border border-white/20 shadow-inner flex items-center px-2`}>
@@ -821,7 +821,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={handleSavePromo}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-xs shadow-lg shadow-sky-500/25 active:scale-[0.98] transition-all cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] text-white font-extrabold text-xs shadow-md shadow-[#0C2340]/40 border-0 active:scale-[0.98] transition-all cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Publicar Promoção no Painel dos Lojistas</span>
