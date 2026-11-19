@@ -33,7 +33,8 @@ import {
   Pizza,
   Wine,
   Dog,
-  Search
+  Search,
+  ChevronDown
 } from 'lucide-react';
 
 interface OnboardingWizardModalProps {
@@ -233,17 +234,32 @@ export const PRESET_BANNERS = [
   {
     id: 'banner_wine',
     title: 'Adega Clássica Iluminada',
-    url: '/src/assets/images/adega_hero_banner_1793972462239.jpg',
+    url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1200&q=80',
   },
   {
     id: 'banner_beer',
     title: 'Cervejas Artesanais Geladas',
-    url: '/src/assets/images/beer_ice_cold_1793972463737.jpg',
+    url: 'https://images.unsplash.com/photo-1608270199042-3a3111f19812?auto=format&fit=crop&w=1200&q=80',
   },
   {
     id: 'banner_spirits',
     title: 'Bar de Destilados & Drinks',
-    url: '/src/assets/images/gin_whiskey_combo_1793972463037.jpg',
+    url: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    id: 'banner_propaganda_combos',
+    title: 'Propaganda: Mega Combos & Ofertas Especiais',
+    url: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    id: 'banner_propaganda_cervejas',
+    title: 'Propaganda: Cervejas Super Geladas & Fardos Promocionais',
+    url: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    id: 'banner_propaganda_happy_hour',
+    title: 'Propaganda: Festival de Drinks & Delivery no WhatsApp',
+    url: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1200&q=80',
   },
 ];
 
@@ -1025,6 +1041,35 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     setActiveWallpaperCat(targetWallpaperCat);
   }, [targetWallpaperCat]);
 
+  // Estados para filtro dropdown de cores no celular
+  const [isColorFilterOpen, setIsColorFilterOpen] = useState(false);
+  const [colorSearchQuery, setColorSearchQuery] = useState('');
+
+  const currentSegmentThemes = useMemo(() => getSegmentThemes(activeSegment), [activeSegment]);
+
+  const activeThemeSelected = useMemo(() => {
+    return currentSegmentThemes.find(
+      (t) =>
+        t.primary.toLowerCase() === formData.branding.primaryColor.toLowerCase() &&
+        t.accent.toLowerCase() === formData.branding.accentColor.toLowerCase()
+    ) || currentSegmentThemes[0] || {
+      id: 'custom',
+      name: 'Paleta Personalizada',
+      primary: formData.branding.primaryColor,
+      accent: formData.branding.accentColor,
+      style: formData.branding.themeStyle,
+      desc: 'Cores selecionadas na vitrine',
+    };
+  }, [currentSegmentThemes, formData.branding.primaryColor, formData.branding.accentColor]);
+
+  const filteredSegmentThemes = useMemo(() => {
+    if (!colorSearchQuery.trim()) return currentSegmentThemes;
+    const q = colorSearchQuery.toLowerCase();
+    return currentSegmentThemes.filter(
+      (t) => t.name.toLowerCase().includes(q) || (t.desc && t.desc.toLowerCase().includes(q))
+    );
+  }, [currentSegmentThemes, colorSearchQuery]);
+
   // Populate from tenant
   useEffect(() => {
     if (tenant) {
@@ -1246,8 +1291,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   </div>
                 </div>
 
-                {/* Grid Dinâmico com os Planos Ativos do SaaS com Estilização Premium da Tela Inicial */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Grid Dinâmico com os Planos Ativos do SaaS em 2 Colunas (Mobile e Desktop) */}
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
                   {((globalConfig?.plans && globalConfig.plans.length > 0)
                     ? globalConfig.plans.filter((p) => p.active !== false)
                     : [
@@ -1338,54 +1383,52 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             });
                           }
                         }}
-                        className={`w-full p-4 rounded-xl border text-left transition-all cursor-pointer relative flex flex-col justify-between overflow-hidden ${
+                        className={`w-full p-2.5 sm:p-4 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between overflow-hidden ${
                           isSelected
-                            ? isLight
-                              ? 'bg-sky-500/15 border-2 border-sky-500 text-neutral-900 shadow-none'
-                              : 'bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent border-sky-500/60 text-white shadow-none ring-1 ring-sky-500/30'
+                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0'
                             : isLight
-                            ? 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 shadow-none'
-                            : 'bg-neutral-900/80 border-neutral-800 text-neutral-300 hover:border-neutral-700 shadow-none'
+                            ? 'bg-white border border-neutral-200 text-neutral-700 hover:border-neutral-300 shadow-none'
+                            : 'bg-neutral-900/80 border border-neutral-800 text-neutral-300 hover:border-neutral-700 shadow-none'
                         }`}
                       >
                         <div className="w-full min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <PlanIcon className={`w-4 h-4 shrink-0 ${isSelected ? 'text-sky-500' : 'text-neutral-400'}`} />
-                              <span className={`font-bold text-sm leading-snug break-words ${isSelected ? (isLight ? 'text-sky-950 font-extrabold' : 'text-sky-200') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                          <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+                              <PlanIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isSelected ? 'text-sky-500' : 'text-neutral-400'}`} />
+                              <span className={`font-bold text-xs sm:text-sm leading-snug break-words ${isSelected ? (isLight ? 'text-sky-950 font-extrabold' : 'text-sky-200') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
                                 {planItem.name}
                               </span>
                             </div>
                             {isSelected && (
-                              <CheckCircle2 className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-500 shrink-0 mt-0.5" />
                             )}
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                             <div className="flex items-baseline gap-1">
-                              <span className={`text-lg sm:text-xl font-black ${isSelected ? (isLight ? 'text-sky-700' : 'text-sky-400') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                              <span className={`text-base sm:text-xl font-black ${isSelected ? (isLight ? 'text-sky-700' : 'text-sky-400') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
                                 R$ {planItem.price.toFixed(2).replace('.', ',')}
                               </span>
-                              <span className={`text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                              <span className={`text-[10px] sm:text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
                                 {planItem.period || '/mês'}
                               </span>
                             </div>
                             {planItem.badge && (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 uppercase tracking-wide">
+                              <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 uppercase tracking-wide">
                                 {planItem.badge}
                               </span>
                             )}
                           </div>
 
-                          <p className={`text-xs leading-relaxed mb-3 ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                          <p className={`text-[11px] sm:text-xs leading-relaxed mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-none ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
                             {planItem.description}
                           </p>
 
                           {planItem.features && planItem.features.length > 0 && (
-                            <ul className="space-y-1.5 pt-2 border-t border-neutral-200/60 dark:border-neutral-800">
+                            <ul className="space-y-1 sm:space-y-1.5 pt-1.5 sm:pt-2 border-t border-neutral-200/60 dark:border-neutral-800">
                               {planItem.features.slice(0, 3).map((feat, idx) => (
-                                <li key={idx} className="flex items-start gap-2 text-xs leading-snug">
-                                  <Check className="w-3.5 h-3.5 mt-0.5 text-sky-500 shrink-0" />
+                                <li key={idx} className="flex items-start gap-1.5 sm:gap-2 text-[10px] sm:text-xs leading-snug">
+                                  <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 mt-0.5 text-sky-500 shrink-0" />
                                   <span className={`break-words ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>{feat}</span>
                                 </li>
                               ))}
@@ -1395,21 +1438,6 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                       </button>
                     );
                   })}
-                </div>
-
-                {/* Trava Informativa de Segurança do Modelo de Negócios */}
-                <div className={`p-3 rounded-xl border flex items-start gap-2.5 text-xs ${
-                  isLight ? 'bg-sky-50/70 border-sky-200 text-sky-950' : 'bg-sky-950/20 border-sky-500/30 text-sky-200'
-                }`}>
-                  <Lock className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold block">
-                      Modelo Operacional Vinculado ao Plano Contratado
-                    </span>
-                    <span className="text-[11px] opacity-85 block mt-0.5">
-                      Para sua segurança e conformidade da assinatura, a alteração de modelo (ex: mudar de apenas Balcão para Híbrido) é exclusiva do Master Admin e ficará bloqueada nas configurações do painel da loja.
-                    </span>
-                  </div>
                 </div>
 
                 {/* Resumo Granular dos Módulos Habilitados pelo Plano Selecionado */}
@@ -1824,7 +1852,171 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                 <p className={`text-[11px] mb-3 ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
                   As 6 opções abaixo foram especialmente selecionadas para combinar perfeitamente com a identidade visual de <strong>{segmentConfig.title}</strong>.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* ======================================================== */}
+                {/* 1. SELETOR DE CORES NO CELULAR: Filtro Dropdown conforme Imagem 2 */}
+                {/* ======================================================== */}
+                <div className="sm:hidden space-y-2">
+                  {/* Botão Gatilho do Dropdown */}
+                  <button
+                    type="button"
+                    onClick={() => setIsColorFilterOpen(!isColorFilterOpen)}
+                    className={`w-full p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                      isColorFilterOpen
+                        ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/30'
+                        : isLight
+                        ? 'bg-slate-50 border-slate-300 text-slate-800'
+                        : 'bg-[#0E1520] border-[#1C2631] text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex items-center shrink-0">
+                        <span
+                          className="w-4 h-4 rounded-full border border-black/20 shadow-xs"
+                          style={{ backgroundColor: activeThemeSelected.primary }}
+                        />
+                        <span
+                          className="w-4 h-4 rounded-full border border-black/20 -ml-1.5 shadow-xs"
+                          style={{ backgroundColor: activeThemeSelected.accent }}
+                        />
+                      </div>
+                      <div className="text-left">
+                        <span className="font-bold text-xs block text-slate-900 dark:text-white">
+                          {activeThemeSelected.name}
+                        </span>
+                        <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                          Toque para filtrar outra paleta de cores
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-500 border border-blue-500/30">
+                        Selecionada
+                      </span>
+                      <ChevronDown className={`w-4 h-4 text-blue-400 transition-transform ${isColorFilterOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                  </button>
+
+                  {/* Painel do Filtro conforme Imagem 2 */}
+                  {isColorFilterOpen && (
+                    <div className={`p-3 rounded-2xl border-2 border-blue-500 shadow-2xl space-y-2.5 transition-all ${
+                      isLight ? 'bg-white shadow-blue-500/10' : 'bg-[#0B131E] shadow-black/80'
+                    }`}>
+                      {/* Input de Busca com borda azul e ícone de lupa */}
+                      <div className="relative">
+                        <Search className="w-4 h-4 text-blue-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={colorSearchQuery}
+                          onChange={(e) => setColorSearchQuery(e.target.value)}
+                          placeholder="Digite para buscar cor (ex: Ouro, Azul, Vinho)..."
+                          className={`w-full pl-9 pr-3 py-2 rounded-lg text-xs font-medium outline-none border-2 border-blue-500/80 focus:border-blue-500 transition-colors ${
+                            isLight
+                              ? 'bg-slate-50 text-slate-900 placeholder-slate-400 focus:bg-white'
+                              : 'bg-[#080E17] text-white placeholder-slate-500'
+                          }`}
+                          autoFocus
+                        />
+                        {colorSearchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setColorSearchQuery('')}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Cabeçalho da Lista: Marcar exibidos (conforme imagem 2) */}
+                      <div className="flex items-center justify-between px-1 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                        <span>Marcar paleta exibida ({filteredSegmentThemes.length})</span>
+                      </div>
+
+                      {/* Lista vertical rolável com barra de scroll e checkboxes brancos */}
+                      <div className="max-h-56 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
+                        {filteredSegmentThemes.map((theme) => {
+                          const isSelected =
+                            formData.branding.primaryColor.toLowerCase() === theme.primary.toLowerCase() &&
+                            formData.branding.accentColor.toLowerCase() === theme.accent.toLowerCase();
+                          return (
+                            <button
+                              key={theme.id}
+                              type="button"
+                              onClick={() => {
+                                setFormData({
+                                  ...formData,
+                                  branding: {
+                                    ...formData.branding,
+                                    primaryColor: theme.primary,
+                                    accentColor: theme.accent,
+                                    themeStyle: theme.style,
+                                  },
+                                });
+                                setIsColorFilterOpen(false);
+                                setColorSearchQuery('');
+                              }}
+                              className={`w-full p-2.5 rounded-lg flex items-center gap-3 text-left transition-colors cursor-pointer ${
+                                isSelected
+                                  ? isLight
+                                    ? 'bg-blue-50 text-blue-900 font-bold'
+                                    : 'bg-blue-600/20 text-white font-bold'
+                                  : isLight
+                                  ? 'hover:bg-slate-100 text-slate-700'
+                                  : 'hover:bg-[#121B27] text-slate-300'
+                              }`}
+                            >
+                              {/* Checkbox branco conforme Imagem 2 */}
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                                isSelected
+                                  ? 'bg-white border-white text-slate-900'
+                                  : isLight
+                                  ? 'border-slate-300 bg-white'
+                                  : 'border-slate-600 bg-transparent'
+                              }`}>
+                                {isSelected && (
+                                  <Check className="w-3 h-3 text-slate-900 stroke-[3]" />
+                                )}
+                              </div>
+
+                              {/* Bolinhas de cores */}
+                              <div className="flex items-center shrink-0">
+                                <span
+                                  className="w-4 h-4 rounded-full border border-black/20 shadow-xs"
+                                  style={{ backgroundColor: theme.primary }}
+                                />
+                                <span
+                                  className="w-4 h-4 rounded-full border border-black/20 -ml-1.5 shadow-xs"
+                                  style={{ backgroundColor: theme.accent }}
+                                />
+                              </div>
+
+                              {/* Nome da cor e descrição */}
+                              <div className="flex-1 min-w-0">
+                                <span className="text-xs font-semibold block truncate">
+                                  {theme.name}
+                                </span>
+                                <span className={`text-[10px] block truncate ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                                  {theme.desc}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+
+                        {filteredSegmentThemes.length === 0 && (
+                          <p className="text-center text-xs py-4 text-slate-500">
+                            Nenhuma paleta encontrada para "{colorSearchQuery}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ======================================================== */}
+                {/* 2. SELETOR DE CORES NO COMPUTADOR: Grid como estava antes */}
+                {/* ======================================================== */}
+                <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {getSegmentThemes(activeSegment).map((theme) => {
                     const isSelected =
                       formData.branding.primaryColor.toLowerCase() === theme.primary.toLowerCase() &&
@@ -1844,14 +2036,12 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             },
                           })
                         }
-                        className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer relative ${
+                        className={`text-left p-3.5 rounded-xl transition-all cursor-pointer relative ${
                           isSelected
-                            ? isLight
-                              ? 'border-sky-500 bg-sky-50/80 ring-2 ring-sky-500/30 shadow-xs'
-                              : 'border-sky-500 bg-sky-950/20 ring-2 ring-sky-500/40 shadow-xs'
+                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0'
                             : isLight
-                            ? 'border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-2xs'
-                            : 'border-neutral-800 bg-neutral-900 hover:border-neutral-700'
+                            ? 'border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-2xs'
+                            : 'border border-neutral-800 bg-neutral-900 hover:border-neutral-700'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1.5">
@@ -2465,9 +2655,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                   .replace(/-+/g, '-')
                   .replace(/^-|-$/g, '');
 
-                const baseDomain = (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'))
+                const baseDomain = (typeof window !== 'undefined' && window.location.hostname.includes('nuvi-saas.web.app'))
                   ? window.location.origin
-                  : 'https://nuvi-saas.vercel.app';
+                  : 'https://nuvi-saas.web.app';
 
                 const vitrineCardapioUrl = `${baseDomain}/${storeSlug}/cardapio`;
                 const painelLojistaUrl = `${baseDomain}/${storeSlug}/painel`;

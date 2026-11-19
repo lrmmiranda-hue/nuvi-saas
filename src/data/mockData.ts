@@ -1,10 +1,10 @@
 import { Tenant, Product, Order, CategoryType } from '../types';
 import { getStarterProductsForSegment } from './segmentProducts';
 
-export const HERO_BANNER_IMG = '/src/assets/images/adega_hero_banner_1793972462239.jpg';
-export const CRAFT_BEER_IMG = '/src/assets/images/beer_ice_cold_1793972463737.jpg';
-export const WINE_BOTTLE_IMG = '/src/assets/images/wine_fine_bottle_1793972464525.jpg';
-export const GIN_COMBO_IMG = '/src/assets/images/gin_whiskey_combo_1793972463037.jpg';
+export const HERO_BANNER_IMG = '/images/adega_hero_banner_1793972462239.jpg';
+export const CRAFT_BEER_IMG = '/images/beer_ice_cold_1793972463737.jpg';
+export const WINE_BOTTLE_IMG = '/images/wine_fine_bottle_1793972464525.jpg';
+export const GIN_COMBO_IMG = '/images/gin_whiskey_combo_1793972463037.jpg';
 
 export const INITIAL_TENANTS: Tenant[] = [
   {

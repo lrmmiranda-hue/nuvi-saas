@@ -84,6 +84,8 @@ export interface Order {
   cashChangeFor?: number | null;
   status: OrderStatus;
   notes?: string;
+  cashierUserId?: string; // ID do usuário/operador que efetuou a venda no caixa
+  cashierUserName?: string; // Nome do usuário/operador no caixa
   createdAt: string;
 }
 
@@ -99,6 +101,8 @@ export interface StockMovement {
   newStock: number;
   costPrice?: number;
   supplierInvoice?: string;
+  operatorId?: string; // ID do usuário que realizou a operação
+  operatorName?: string; // Nome do usuário/operador
   notes?: string;
   createdAt: string;
 }
@@ -241,6 +245,44 @@ export interface TenantCategory {
   isCustom?: boolean; // Se foi adicionada manualmente pelo lojista
 }
 
+export interface Expense {
+  id: string;
+  tenantId: string;
+  description: string;
+  category: 'fornecedor' | 'aluguel' | 'funcionarios' | 'energia_agua' | 'embalagens' | 'manutencao' | 'outros';
+  amount: number;
+  paymentMethod?: 'pix' | 'dinheiro' | 'cartao_debito' | 'cartao_credito' | 'transferencia';
+  date: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export type StoreUserRole = 'gerente' | 'caixa' | 'atendente' | 'estoquista' | 'personalizado';
+
+export type StoreModulePermission =
+  | 'produtos'        // Catálogo de Produtos
+  | 'vendas'          // Venda de Balcão (PDV)
+  | 'estoque'         // Controle de Estoque
+  | 'pedidos'         // Gestão de Pedidos
+  | 'metricas'        // Gestão Financeira & Resultados
+  | 'configuracoes'   // Configurações da Loja
+  | 'visual'          // Visual, Cores & Vitrine
+  | 'whatsapp'        // Central WhatsApp
+  | 'entrega';        // Raio & Taxas de Entrega
+
+export interface StoreUser {
+  id: string;
+  tenantId: string;
+  name: string;
+  username: string; // Ex: "caixa1", "maria"
+  pin: string; // PIN ou senha de 4 a 6 dígitos
+  role: StoreUserRole;
+  roleLabel: string; // Ex: "Operador de Caixa", "Gerente Geral"
+  active: boolean;
+  permissions: StoreModulePermission[];
+  createdAt: string;
+}
+
 export interface Tenant {
   id: string;
   slug: string;
@@ -257,6 +299,8 @@ export interface Tenant {
   config?: StoreManagementConfig;
   categories?: TenantCategory[]; // Lista unificada de categorias gerenciadas da loja
   customCategories?: { id: string; label: string }[]; // Compatibilidade retroativa
+  expenses?: Expense[]; // Lançamentos de despesas e saídas financeiras do lojista
+  users?: StoreUser[]; // Usuários e operadores da loja com controle de permissões
   isOpen: boolean;
   onboardingCompleted: boolean;
   plan: TenantPlan;
@@ -290,12 +334,17 @@ export interface SaaSSubscriptionPlan {
   active: boolean;
 }
 
+export type SaaSPromoBannerTheme = 'cyber_neon' | 'sunset_gold' | 'emerald_turbo';
+
 export interface SaaSPromoBanner {
   enabled: boolean;
   title: string;
   message: string;
   ctaText: string;
   ctaUrl: string; // Link de contato ou WhatsApp do Master
+  theme?: SaaSPromoBannerTheme;
+  badgeText?: string;
+  updatedAt?: number;
 }
 
 export interface GlobalSaaSConfig {

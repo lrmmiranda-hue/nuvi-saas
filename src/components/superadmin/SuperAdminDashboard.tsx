@@ -161,21 +161,16 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button
-              onClick={() => setIsSettingsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border transition-all active:scale-[0.98] cursor-pointer bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 border-sky-500/30 shadow-xs"
-            >
-              <Settings className="w-4 h-4 text-sky-500 animate-[spin_12s_linear_infinite]" />
-              <span>Configurações & Permissões</span>
-            </button>
-
+          <div className="flex items-center shrink-0">
+            {/* Botão Cadastrar Novo Estabelecimento Reformulado */}
             <button
               onClick={onOpenNewTenantModal}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl !text-white font-extrabold text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400"
+              className="flex items-center gap-2.5 px-5 py-3 rounded-2xl text-white font-medium text-xs sm:text-sm shadow-lg shadow-sky-600/25 hover:shadow-sky-500/40 transition-all active:scale-[0.98] cursor-pointer bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 border border-sky-400/30"
             >
-              <Plus className="w-4 h-4 !text-white stroke-[2.5]" />
-              <span className="!text-white">Cadastrar Novo Estabelecimento</span>
+              <div className="w-5 h-5 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                <Plus className="w-3.5 h-3.5 text-white stroke-[3]" />
+              </div>
+              <span className="text-white font-semibold tracking-tight">Cadastrar Novo Estabelecimento</span>
             </button>
           </div>
         </div>

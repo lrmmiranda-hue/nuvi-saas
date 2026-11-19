@@ -10,6 +10,10 @@ import {
   MapPin,
   Lock,
   CheckCircle2,
+  Check,
+  Search,
+  ChevronDown,
+  X,
   Sparkles,
   ArrowRight,
   Barcode,
@@ -18,9 +22,7 @@ import {
   ShieldCheck,
   Zap,
   Eye,
-  EyeOff,
-  Sun,
-  Moon
+  EyeOff
 } from 'lucide-react';
 
 interface TenantRegisterViewProps {
@@ -34,17 +36,20 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
     setViewRole,
     themeMode,
     toggleThemeMode,
-    globalConfig,
     showAlert
   } = useStore();
 
   const isLight = themeMode === 'light';
 
-  // Selected Business Segment (padrão adega)
+  // Ramo selecionado (padrão: adega)
   const [selectedSegment, setSelectedSegment] = useState<BusinessSegmentType>('adega');
   const currentSegmentConfig = getSegmentById(selectedSegment);
 
-  // Form fields
+  // Estados do Filtro de Ramo no Celular (conforme Imagem 2)
+  const [isBranchFilterOpen, setIsBranchFilterOpen] = useState(false);
+  const [branchSearchQuery, setBranchSearchQuery] = useState('');
+
+  // Form fields (para o computador e mobile)
   const [storeName, setStoreName] = useState('');
   const [slogan, setSlogan] = useState('');
   const [ownerName, setOwnerName] = useState('');
@@ -55,9 +60,19 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Lista de ramos filtrados para a busca no celular (Imagem 2)
+  const filteredBranches = BUSINESS_SEGMENTS.filter(seg =>
+    seg.title.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
+    seg.shortLabel.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
+    seg.pitch.toLowerCase().includes(branchSearchQuery.toLowerCase())
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!storeName.trim() || !ownerName.trim() || !whatsappNumber.trim() || !password.trim()) {
+
+    // Se for no desktop com formulário completo e faltar dados obrigatórios
+    const isMobileView = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (!isMobileView && (!storeName.trim() || !ownerName.trim() || !whatsappNumber.trim() || !password.trim())) {
       showAlert({
         title: 'Campos Obrigatórios',
         message: 'Por favor, preencha o nome do seu comércio, seu nome, seu WhatsApp e defina sua senha de acesso para continuar.',
@@ -69,27 +84,31 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
     setIsSubmitting(true);
 
     setTimeout(() => {
-      // Cria a nova loja com período de teste ativo (trial) e configurações do segmento
-      const cleanSlug = storeName
+      const finalStoreName = storeName.trim() || currentSegmentConfig.title;
+
+      const cleanSlug = finalStoreName
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]/g, '-')
         .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
+        .replace(/^-|-$/g, '') || `${selectedSegment}-${Date.now().toString().slice(-4)}`;
+
+      const existingSlug = tenants.some(t => (t.slug || '').toLowerCase() === cleanSlug.toLowerCase());
+      const finalSlug = existingSlug ? `${cleanSlug}-${Date.now().toString().slice(-4)}` : cleanSlug;
 
       const newTenant = createTenant({
-        name: storeName.trim(),
-        slug: cleanSlug || `${selectedSegment}-${Date.now().toString().slice(-4)}`,
+        name: finalStoreName,
+        slug: finalSlug,
         businessSegment: selectedSegment,
         slogan: slogan.trim() || currentSegmentConfig.sloganExample,
-        ownerName: ownerName.trim(),
+        ownerName: ownerName.trim() || 'Comerciante',
         whatsapp: {
-          phoneNumber: whatsappNumber.replace(/\D/g, ''),
+          phoneNumber: whatsappNumber.replace(/\D/g, '') || '11999999999',
           enableWhatsAppOrders: true,
           orderTemplate: '',
           statusUpdateTemplate: '',
-          welcomeMessage: `Olá! Seja bem-vindo à ${storeName.trim()}. Como posso te ajudar hoje?`,
+          welcomeMessage: `Olá! Seja bem-vindo à ${finalStoreName}. Como posso te ajudar hoje?`,
           supportLinkEnabled: true,
         },
         address: {
@@ -108,8 +127,8 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
         },
         plan: 'hibrido',
         status: 'trial',
-        adminPassword: password.trim(),
-        onboardingCompleted: false,
+        adminPassword: password.trim() || 'admin',
+        onboardingCompleted: false, // Abre o Passo a Passo de Configuração Inicial automaticamente!
         branding: {
           logoUrl: '',
           bannerUrl: currentSegmentConfig.bannerUrl,
@@ -134,317 +153,21 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
       setCurrentTenantId(newTenant.id);
       setViewRole('tenant_admin');
       onSuccess(newTenant);
-    }, 500);
+    }, 400);
   };
 
   return (
-    <div className={`min-h-[92vh] py-8 px-4 flex flex-col justify-center items-center transition-colors relative ${isLight ? 'bg-slate-50/80' : 'bg-transparent'
-      }`}>
+    <div className={`min-h-[92vh] py-6 sm:py-8 px-3 sm:px-4 flex flex-col justify-center items-center transition-colors relative ${
+      isLight ? 'bg-slate-50/80' : 'bg-transparent'
+    }`}>
 
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-        {/* Coluna Esquerda: Formulário de Cadastro com Paleta Azul e Tons Elegantes */}
-        <div className="lg:col-span-7">
-          <div className={`p-6 sm:p-8 rounded-3xl border shadow-2xl text-left transition-all ${isLight
-              ? 'bg-white border-slate-200 shadow-sky-900/5'
-              : 'bg-[#0E1318] border-sky-950/60 shadow-black/80'
-            }`}>
+        {/* Coluna Esquerda (ou Topo no Celular): Apresentação com Identidade Visual Nuvi Master */}
+        <div className="w-full lg:col-span-5 space-y-6 text-left lg:sticky lg:top-8">
 
-            <div className="mb-5 border-b pb-4 border-slate-200 dark:border-[#1C2631]">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    Cadastre o seu Comércio
-                  </h2>
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-500 border border-sky-500/20">
-                    {currentSegmentConfig.shortLabel}
-                  </span>
-                </div>
-                <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Escolha o segmento e preencha os dados para ativar seu painel de vendas e vitrine.
-                </p>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-
-              {/* SELETOR DE RAMO / TIPO DE COMÉRCIO (Grid 3x3 responsivo para acomodar todos os ramos) */}
-              <div className="space-y-2">
-                <label className={`block text-xs font-bold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                  1. Qual é o ramo da sua loja? *
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {BUSINESS_SEGMENTS.map((seg) => {
-                    const isSelected = selectedSegment === seg.id;
-                    return (
-                      <button
-                        key={seg.id}
-                        type="button"
-                        onClick={() => setSelectedSegment(seg.id)}
-                        className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 outline-none ${isSelected
-                            ? 'bg-gradient-to-br from-sky-600/20 via-blue-600/15 to-transparent shadow-sm border-0 ring-0'
-                            : isLight
-                              ? 'bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 text-slate-700'
-                              : 'bg-[#121820] hover:bg-[#182230] border border-[#1C2631] hover:border-sky-800 text-slate-300'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xl leading-none">{seg.emoji}</span>
-                          {isSelected && (
-                            <CheckCircle2 className={`w-3.5 h-3.5 ${isLight ? 'text-slate-800' : 'text-[#F8FAFC]'}`} />
-                          )}
-                        </div>
-                        <span className={`text-[11px] leading-tight line-clamp-1 ${isSelected
-                            ? (isLight ? 'text-slate-800 font-extrabold' : 'text-[#F8FAFC] font-extrabold')
-                            : ''
-                          }`}>
-                          {seg.shortLabel}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 2. Nome do Estabelecimento */}
-              <div className="space-y-1.5 pt-1">
-                <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                  2. Nome do seu Estabelecimento ({currentSegmentConfig.shortLabel}) *
-                </label>
-                <div className="relative">
-                  <Store className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type="text"
-                    required
-                    value={storeName}
-                    onChange={(e) => setStoreName(e.target.value)}
-                    placeholder={currentSegmentConfig.namePlaceholder}
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
-                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
-                        : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                      }`}
-                  />
-                </div>
-              </div>
-
-              {/* 3. Frase de Destaque / Slogan da Vitrine */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center justify-between">
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                    3. Frase de Destaque / Slogan da Vitrine
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setSlogan(currentSegmentConfig.sloganExample)}
-                    className="text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <Sparkles className="w-3 h-3 text-sky-500" />
-                    <span>Usar sugestão</span>
-                  </button>
-                </div>
-
-                <input
-                  type="text"
-                  value={slogan}
-                  onChange={(e) => setSlogan(e.target.value)}
-                  placeholder={currentSegmentConfig.sloganExample}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
-                      ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
-                      : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                    }`}
-                />
-
-                {/* Box de Exemplo em Tempo Real */}
-                <div className={`p-3 rounded-xl border flex items-start gap-2.5 text-xs transition-colors ${isLight ? 'bg-sky-50/60 border-sky-200 text-slate-800' : 'bg-[#121820] border-sky-950/60 text-slate-200'
-                  }`}>
-                  <Sparkles className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold italic text-[11px] leading-relaxed text-slate-700 dark:text-slate-300">
-                      "{slogan.trim() || currentSegmentConfig.sloganExample}"
-                    </p>
-                    <p className={`text-[10px] mt-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      Seu cliente verá: <strong className="text-sky-600 dark:text-sky-400">{storeName.trim() || currentSegmentConfig.namePlaceholder.split(',')[0].replace('Ex: ', '')}</strong>
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Responsável & WhatsApp (Grid 2 cols) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                <div className="space-y-1.5">
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                    Seu Nome Completo *
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      type="text"
-                      required
-                      value={ownerName}
-                      onChange={(e) => setOwnerName(e.target.value)}
-                      placeholder="Ex: Carlos Miranda"
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
-                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
-                          : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                        }`}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                    WhatsApp da Loja (com DDD) *
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      type="tel"
-                      required
-                      value={whatsappNumber}
-                      onChange={(e) => setWhatsappNumber(e.target.value)}
-                      placeholder="Ex: 11987654321"
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-mono font-medium outline-none transition-all ${isLight
-                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
-                          : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                        }`}
-                    />
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Cidade & Bairro (Grid 2 cols) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                <div className="space-y-1.5">
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                    Cidade
-                  </label>
-                  <div className="relative">
-                    <MapPin className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="Ex: São Paulo"
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
-                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
-                          : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                        }`}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                    Bairro
-                  </label>
-                  <input
-                    type="text"
-                    value={neighborhood}
-                    onChange={(e) => setNeighborhood(e.target.value)}
-                    placeholder="Ex: Centro, Vila Nova..."
-                    className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
-                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
-                        : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                      }`}
-                  />
-                </div>
-
-              </div>
-
-              {/* Senha de Acesso */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                    Crie sua Senha de Acesso ao Painel *
-                  </label>
-                  <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                    Mínimo 6 dígitos
-                  </span>
-                </div>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Digite sua senha de acesso"
-                    className={`w-full pl-10 pr-10 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${isLight
-                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
-                        : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
-                      }`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-sky-500 cursor-pointer"
-                    title={showPassword ? 'Ocultar Senha' : 'Ver Senha'}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-500'}`}>
-                  Você usará o seu WhatsApp e esta senha para gerenciar suas vendas e caixa.
-                </p>
-              </div>
-
-              {/* Botão de Criação sem borda, sombra suave e fonte chumbo no modo claro / branco gelo no modo escuro */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                style={{ color: isLight ? '#1e293b' : '#F8FAFC' }}
-                className={`w-full mt-3 py-3.5 px-4 rounded-xl active:scale-[0.99] font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 border-0 ring-0 outline-none ${isLight
-                    ? 'bg-gradient-to-r from-sky-400/25 via-blue-400/20 to-sky-400/25 hover:from-sky-400/35 hover:to-sky-400/35 text-slate-800 shadow-xs'
-                    : 'bg-gradient-to-br from-sky-600/30 via-blue-600/25 to-sky-500/20 hover:from-sky-600/40 hover:via-blue-600/35 text-[#F8FAFC] shadow-md shadow-black/30'
-                  }`}
-              >
-                {isSubmitting ? (
-                  <div className={`w-5 h-5 border-2 rounded-full animate-spin ${isLight ? 'border-slate-800/30 border-t-slate-800' : 'border-[#F8FAFC]/30 border-t-[#F8FAFC]'
-                    }`} />
-                ) : (
-                  <>
-                    <Zap className={`w-4 h-4 ${isLight ? 'text-slate-800' : 'text-[#F8FAFC]'}`} />
-                    <span
-                      style={{ color: isLight ? '#1e293b' : '#F8FAFC' }}
-                      className={`font-black text-sm tracking-tight ${isLight ? 'text-slate-800' : 'text-[#F8FAFC]'}`}
-                    >
-                      Criar Minha Loja ({currentSegmentConfig.shortLabel}) & Começar Grátis
-                    </span>
-                    <ArrowRight className={`w-4 h-4 ${isLight ? 'text-slate-800' : 'text-[#F8FAFC]'}`} />
-                  </>
-                )}
-              </button>
-
-              <p className={`text-[11px] text-center ${isLight ? 'text-slate-500' : 'text-slate-400'} pt-1`}>
-                Ao criar sua loja, você tem 7 dias de acesso completo sem compromisso.
-              </p>
-
-              <div className="pt-3 border-t border-slate-200 dark:border-[#1C2631] text-center">
-                <span className={`text-xs ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                  Já possui uma loja cadastrada?{' '}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setViewRole('login_tenant')}
-                  className="text-xs font-bold text-sky-500 hover:underline cursor-pointer ml-1"
-                >
-                  Entrar no Painel do Lojista
-                </button>
-              </div>
-
-            </form>
-
-          </div>
-        </div>
-
-        {/* Coluna Direita: Apresentação com Identidade Visual Nuvi Master */}
-        <div className="lg:col-span-5 space-y-6 text-left lg:sticky lg:top-8">
-
-          {/* Logo Nuvi em Destaque à Direita (clicável para alternar Modo Claro / Escuro) */}
-          <div className="pb-1 flex justify-end">
+          {/* Logo Nuvi em Destaque à Esquerda (clicável para alternar Modo Claro / Escuro) */}
+          <div className="pb-1">
             <button
               type="button"
               onClick={toggleThemeMode}
@@ -461,8 +184,9 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
               <span>Experimente Grátis por 7 Dias</span>
             </div>
 
-            <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight ${isLight ? 'text-slate-900' : 'text-white'
-              }`}>
+            <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight ${
+              isLight ? 'text-slate-900' : 'text-white'
+            }`}>
               A plataforma definitiva para o seu comércio crescer.
             </h1>
 
@@ -472,10 +196,11 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
           </div>
 
           {/* Destaque Dinâmico do Segmento Atual com Paleta Nuvi */}
-          <div className={`p-4 rounded-2xl border space-y-2 text-xs transition-all ${isLight
+          <div className={`p-4 rounded-2xl border space-y-2 text-xs transition-all ${
+            isLight
               ? 'bg-sky-50/70 border-sky-200 text-slate-800 shadow-xs'
               : 'bg-[#0E1520] border-sky-900/40 text-slate-200 shadow-md'
-            }`}>
+          }`}>
             <div className="flex items-center gap-2 font-bold text-sky-600 dark:text-sky-400 text-sm">
               <span className="text-2xl">{currentSegmentConfig.emoji}</span>
               <span className="text-slate-900 dark:text-white font-extrabold">{currentSegmentConfig.title}</span>
@@ -496,7 +221,6 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
 
           {/* Funcionalidades com Estilo Nuvi Master */}
           <div className="space-y-3 pt-1">
-
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center shrink-0 mt-0.5">
                 <Barcode className="w-4 h-4" />
@@ -538,16 +262,430 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 </p>
               </div>
             </div>
-
           </div>
 
           {/* Selo de Segurança */}
-          <div className={`p-3.5 rounded-xl border flex items-center gap-3 text-xs ${isLight ? 'bg-white border-slate-200 text-slate-600 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631] text-slate-300'
-            }`}>
+          <div className={`p-3.5 rounded-xl border flex items-center gap-3 text-xs ${
+            isLight ? 'bg-white border-slate-200 text-slate-600 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631] text-slate-300'
+          }`}>
             <ShieldCheck className="w-5 h-5 text-sky-500 shrink-0" />
             <span>Sem necessidade de cartão de crédito. Configure seu sistema em menos de 2 minutos!</span>
           </div>
 
+        </div>
+
+        {/* Coluna Direita: Formulário de Cadastro */}
+        <div className="lg:col-span-7 w-full">
+          <div className={`p-5 sm:p-8 rounded-3xl border shadow-2xl text-left transition-all ${
+            isLight
+              ? 'bg-white border-slate-200 shadow-sky-900/5'
+              : 'bg-[#0E1318] border-sky-950/60 shadow-black/80'
+          }`}>
+
+            {/* Cabeçalho do Card */}
+            <div className="mb-5 border-b pb-4 border-slate-200 dark:border-[#1C2631]">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    Cadastre o seu Comércio
+                  </h2>
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-500 border border-sky-500/20">
+                    {currentSegmentConfig.shortLabel}
+                  </span>
+                </div>
+                <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Escolha o segmento e ative seu painel de vendas e vitrine.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+
+              {/* ======================================================== */}
+              {/* 1. SELETOR DE RAMO NO COMPUTADOR: Grid 3x3 como estava antes */}
+              {/* ======================================================== */}
+              <div className="hidden md:block space-y-2">
+                <label className={`block text-xs font-bold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                  1. Qual é o ramo da sua loja? *
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {BUSINESS_SEGMENTS.map((seg) => {
+                    const isSelected = selectedSegment === seg.id;
+                    return (
+                      <button
+                        key={seg.id}
+                        type="button"
+                        onClick={() => setSelectedSegment(seg.id)}
+                        className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 outline-none ${
+                          isSelected
+                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0'
+                            : isLight
+                            ? 'bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 text-slate-700'
+                            : 'bg-[#121820] hover:bg-[#182230] border border-[#1C2631] hover:border-sky-800 text-slate-300'
+                        }`}
+                        >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl leading-none">{seg.emoji}</span>
+                          {isSelected && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                          )}
+                        </div>
+                        <span className={`text-[11px] leading-tight line-clamp-1 ${
+                          isSelected
+                            ? 'text-white font-bold'
+                            : ''
+                        }`}>
+                          {seg.shortLabel}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ======================================================== */}
+              {/* 1. SELETOR DE RAMO NO CELULAR: Filtro Dropdown conforme Imagem 2 */}
+              {/* ======================================================== */}
+              <div className="md:hidden space-y-2">
+                <label className={`block text-xs font-bold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                  1. Escolha o ramo da sua loja: *
+                </label>
+
+                {/* Botão Gatilho do Dropdown */}
+                <button
+                  type="button"
+                  onClick={() => setIsBranchFilterOpen(!isBranchFilterOpen)}
+                  className={`w-full p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                    isBranchFilterOpen
+                      ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/30'
+                      : isLight
+                      ? 'bg-slate-50 border-slate-300 text-slate-800'
+                      : 'bg-[#0E1520] border-[#1C2631] text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl leading-none">{currentSegmentConfig.emoji}</span>
+                    <div className="text-left">
+                      <span className="font-bold text-xs block text-slate-900 dark:text-white">
+                        {currentSegmentConfig.title}
+                      </span>
+                      <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                        Toque para filtrar outro ramo
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-500 border border-blue-500/30">
+                      Selecionado
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-blue-400 transition-transform ${isBranchFilterOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+
+                {/* Painel do Filtro conforme Imagem 2 */}
+                {isBranchFilterOpen && (
+                  <div className={`p-3 rounded-2xl border-2 border-blue-500 shadow-2xl space-y-2.5 transition-all ${
+                    isLight ? 'bg-white shadow-blue-500/10' : 'bg-[#0B131E] shadow-black/80'
+                  }`}>
+                    {/* Input de Busca com borda azul e ícone de lupa */}
+                    <div className="relative">
+                      <Search className="w-4 h-4 text-blue-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={branchSearchQuery}
+                        onChange={(e) => setBranchSearchQuery(e.target.value)}
+                        placeholder="Digite para buscar ramo (ex: Adega, Pizzaria)..."
+                        className={`w-full pl-9 pr-3 py-2 rounded-lg text-xs font-medium outline-none border-2 border-blue-500/80 focus:border-blue-500 transition-colors ${
+                          isLight
+                            ? 'bg-slate-50 text-slate-900 placeholder-slate-400 focus:bg-white'
+                            : 'bg-[#080E17] text-white placeholder-slate-500'
+                        }`}
+                        autoFocus
+                      />
+                      {branchSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setBranchSearchQuery('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Cabeçalho da Lista: Marcar exibidos (conforme imagem 2) */}
+                    <div className="flex items-center justify-between px-1 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                      <span>Marcar ramo exibido ({filteredBranches.length})</span>
+                    </div>
+
+                    {/* Lista vertical rolável com barra de scroll e checkboxes brancos */}
+                    <div className="max-h-56 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
+                      {filteredBranches.map((seg) => {
+                        const isSelected = selectedSegment === seg.id;
+                        return (
+                          <button
+                            key={seg.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedSegment(seg.id);
+                              setIsBranchFilterOpen(false);
+                              setBranchSearchQuery('');
+                            }}
+                            className={`w-full p-2.5 rounded-lg flex items-center gap-3 text-left transition-colors cursor-pointer ${
+                              isSelected
+                                ? isLight
+                                  ? 'bg-blue-50 text-blue-900 font-bold'
+                                  : 'bg-blue-600/20 text-white font-bold'
+                                : isLight
+                                ? 'hover:bg-slate-100 text-slate-700'
+                                : 'hover:bg-[#121B27] text-slate-300'
+                            }`}
+                          >
+                            {/* Checkbox branco conforme Imagem 2 */}
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                              isSelected
+                                ? 'bg-white border-white text-slate-900'
+                                : isLight
+                                ? 'border-slate-300 bg-white'
+                                : 'border-slate-600 bg-transparent'
+                            }`}>
+                              {isSelected && (
+                                <Check className="w-3 h-3 text-slate-900 stroke-[3]" />
+                              )}
+                            </div>
+
+                            {/* Emoji e Nome do Ramo */}
+                            <span className="text-base leading-none">{seg.emoji}</span>
+                            <span className="text-xs font-semibold flex-1 truncate">
+                              {seg.title}
+                            </span>
+                          </button>
+                        );
+                      })}
+
+                      {filteredBranches.length === 0 && (
+                        <p className="text-center text-xs py-4 text-slate-500">
+                          Nenhum ramo encontrado para "{branchSearchQuery}"
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 2. NOME DO ESTABELECIMENTO */}
+              <div className="space-y-1.5 pt-1">
+                <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                  2. Nome do seu Estabelecimento ({currentSegmentConfig.shortLabel}) *
+                </label>
+                <div className="relative">
+                  <Store className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={storeName}
+                    onChange={(e) => setStoreName(e.target.value)}
+                    placeholder={currentSegmentConfig.namePlaceholder}
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
+                      isLight
+                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
+                        : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* ======================================================== */}
+              {/* CAMPOS EXCLUSIVOS DO COMPUTADOR (Como estava antes) */}
+              {/* ======================================================== */}
+              <div className="hidden md:block space-y-4">
+                {/* 3. Frase de Destaque / Slogan da Vitrine */}
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                      3. Frase de Destaque / Slogan da Vitrine
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setSlogan(currentSegmentConfig.sloganExample)}
+                      className="text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Sparkles className="w-3 h-3 text-sky-500" />
+                      <span>Usar sugestão</span>
+                    </button>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={slogan}
+                    onChange={(e) => setSlogan(e.target.value)}
+                    placeholder={currentSegmentConfig.sloganExample}
+                    className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
+                      isLight
+                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
+                        : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
+                    }`}
+                  />
+                </div>
+
+                {/* Responsável & WhatsApp (Grid 2 cols) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                      Seu Nome Completo *
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={ownerName}
+                        onChange={(e) => setOwnerName(e.target.value)}
+                        placeholder="Ex: Carlos Miranda"
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
+                          isLight
+                            ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
+                            : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                      WhatsApp da Loja (com DDD) *
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="tel"
+                        value={whatsappNumber}
+                        onChange={(e) => setWhatsappNumber(e.target.value)}
+                        placeholder="Ex: 11987654321"
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-mono font-medium outline-none transition-all ${
+                          isLight
+                            ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
+                            : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cidade & Bairro (Grid 2 cols) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                      Cidade
+                    </label>
+                    <div className="relative">
+                      <MapPin className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder="Ex: São Paulo"
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
+                          isLight
+                            ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
+                            : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                      Bairro
+                    </label>
+                    <input
+                      type="text"
+                      value={neighborhood}
+                      onChange={(e) => setNeighborhood(e.target.value)}
+                      placeholder="Ex: Centro, Vila Nova..."
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
+                        isLight
+                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
+                          : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Senha de Acesso */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                      Crie sua Senha de Acesso ao Painel *
+                    </label>
+                    <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      Mínimo 6 dígitos
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Digite sua senha de acesso"
+                      className={`w-full pl-10 pr-10 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
+                        isLight
+                          ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 focus:bg-white'
+                          : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-sky-500 cursor-pointer"
+                      title={showPassword ? 'Ocultar Senha' : 'Ver Senha'}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botão de Criação */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full mt-2 py-3.5 px-4 rounded-xl active:scale-[0.99] font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 border-0 ring-0 outline-none bg-sky-600 hover:bg-sky-500 text-white shadow-none"
+              >
+                {isSubmitting ? (
+                  <div className="w-5 h-5 border-2 rounded-full animate-spin border-white/30 border-t-white" />
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 text-white" />
+                    <span>
+                      Criar Minha Loja ({currentSegmentConfig.shortLabel}) & Começar Grátis
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-white" />
+                  </>
+                )}
+              </button>
+
+              <div className="md:hidden p-2.5 rounded-xl border border-sky-500/25 bg-sky-500/5 text-[11px] text-center text-slate-600 dark:text-slate-400 flex items-center justify-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                <span>No celular, as cores, WhatsApp e endereço são personalizados no <strong>Passo a Passo Guiado</strong> em seguida.</span>
+              </div>
+
+              {/* Link de login se já tiver loja */}
+              <div className="pt-2 border-t border-slate-200 dark:border-[#1C2631] text-center">
+                <span className={`text-xs ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                  Já possui uma loja cadastrada?{' '}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setViewRole('login_tenant')}
+                  className="text-xs font-bold text-sky-500 hover:underline cursor-pointer ml-1"
+                >
+                  Entrar no Painel do Lojista
+                </button>
+              </div>
+
+            </form>
+
+          </div>
         </div>
 
       </div>

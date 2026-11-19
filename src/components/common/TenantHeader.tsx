@@ -39,24 +39,19 @@ export const TenantHeader: React.FC<TenantHeaderProps> = () => {
         
         {/* Lado Esquerdo: Identificação Exclusiva da Loja do Lojista */}
         <div className="flex items-center gap-3">
-          <div className={`flex items-center gap-2.5 px-3 py-1.5 rounded-xl border text-left ${
-            isLight 
-              ? 'bg-slate-50 border-slate-300' 
-              : 'bg-[#151D24] border-[#222E3A]'
-          }`}>
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border text-left bg-sky-600 border-sky-400 text-white shadow-xs">
             {/* Ícone ou Avatar da Loja */}
             <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm text-white shadow-xs shrink-0"
-              style={{ backgroundColor: currentTenant?.branding?.primaryColor || '#0284C7' }}
+              className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm text-sky-800 bg-white shadow-xs shrink-0"
             >
               {segmentConfig?.emoji ? segmentConfig.emoji : currentTenant?.name?.charAt(0).toUpperCase()}
             </div>
 
             <div className="flex flex-col">
-              <span className="font-extrabold text-xs sm:text-sm truncate max-w-[150px] sm:max-w-[240px]">
+              <span className="font-extrabold text-xs sm:text-sm truncate max-w-[150px] sm:max-w-[240px] text-white">
                 {currentTenant?.name || 'Meu Estabelecimento'}
               </span>
-              <span className="text-[10px] text-slate-500 dark:text-neutral-400 font-semibold truncate">
+              <span className="text-[10px] text-sky-100 font-semibold truncate">
                 {segmentConfig?.shortLabel || 'Comércio'} • {currentTenant?.address?.city || 'Brasil'}
               </span>
             </div>
@@ -92,41 +87,32 @@ export const TenantHeader: React.FC<TenantHeaderProps> = () => {
           </button>
         </div>
 
-        {/* Lado Direito: Tema Claro/Escuro e Sair */}
-        <div className="flex items-center gap-2">
+        {/* Lado Direito: Tema Claro/Escuro e Sair (Somente Ícone sem Fundo) */}
+        <div className="flex items-center gap-1 sm:gap-2">
           
-          {/* Alternador de Tema da Loja */}
+          {/* Alternador de Tema da Loja (Somente Ícone sem Fundo) */}
           <button
             onClick={toggleThemeMode}
             title={isLight ? 'Ativar Modo Escuro' : 'Ativar Modo Claro'}
-            className={`p-2 rounded-xl border transition-all cursor-pointer ${
-              isLight 
-                ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700' 
-                : 'bg-[#151D24] hover:bg-[#1E2933] border-[#222E3A] text-slate-200'
-            }`}
+            className="p-2 text-slate-400 hover:text-amber-400 bg-transparent border-0 transition-colors cursor-pointer outline-none"
           >
             {isLight ? (
-              <Moon className="w-4 h-4 text-slate-700" />
+              <Moon className="w-5 h-5 text-slate-600 hover:text-blue-600" />
             ) : (
-              <Sun className="w-4 h-4 text-amber-400" />
+              <Sun className="w-5 h-5 text-slate-400 hover:text-amber-400" />
             )}
           </button>
 
-          {/* Botão de Sair do Painel do Lojista */}
+          {/* Botão de Sair do Painel do Lojista (Somente Ícone sem Fundo) */}
           <button
             onClick={() => {
               logoutTenant();
               setViewRole('login_tenant');
             }}
             title="Encerrar sessão do lojista"
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-              isLight
-                ? 'border-rose-200 text-rose-700 hover:bg-rose-50'
-                : 'border-rose-900/50 text-rose-400 hover:bg-rose-950/40'
-            }`}
+            className="p-2 text-slate-400 hover:text-rose-400 bg-transparent border-0 transition-colors cursor-pointer outline-none"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Sair</span>
+            <LogOut className="w-5 h-5" />
           </button>
 
         </div>

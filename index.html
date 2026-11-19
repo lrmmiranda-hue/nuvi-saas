@@ -1,6 +1,11 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
+    <script>
+      if (window.location.hostname && window.location.hostname.includes('vercel.app')) {
+        window.location.replace('https://nuvi-saas.web.app' + window.location.pathname + window.location.search + window.location.hash);
+      }
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />

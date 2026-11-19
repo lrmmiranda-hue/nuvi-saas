@@ -27,7 +27,9 @@ import {
   Eye,
   Edit3,
   DollarSign,
-  Layers
+  Layers,
+  Menu,
+  User
 } from 'lucide-react';
 
 interface InventoryViewProps {
@@ -93,6 +95,24 @@ export const InventoryView: React.FC<InventoryViewProps> = ({ onOpenProductModal
   const [excelPasteText, setExcelPasteText] = useState('');
   const [parsedPreview, setParsedPreview] = useState<Array<Partial<Product> & { name: string; price: number }>>([]);
   const [importResult, setImportResult] = useState<{ imported: number; updated: number } | null>(null);
+
+  // MENU SUSPENSO ÚNICO COM TODAS AS AÇÕES DO ESTOQUE
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  const actionsMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+        setIsActionsMenuOpen(false);
+      }
+    };
+    if (isActionsMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isActionsMenuOpen]);
 
   // Audio Beep for Receiving Barcode Scanner
   const playBeep = () => {
@@ -485,62 +505,127 @@ export const InventoryView: React.FC<InventoryViewProps> = ({ onOpenProductModal
           )}
         </div>
 
-        {/* Quick Action Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Recebimento / Entrada de Materiais - OCULTO PARA PIZZARIA E LANCHONETE */}
-          {!isFoodOrPizza && (
-            <button
-              onClick={() => {
-                setSelectedProductForReceiving(null);
-                setReceiveBarcode('');
-                setReceivePacksCount(5);
-                setReceivePackSize(12);
-                setReceiveQuantity(isAdega ? 60 : 20);
-                setReceiveMode(isAdega ? 'fardo' : 'unidade');
-                setIsReceivingModalOpen(true);
-              }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
-            >
-              <Boxes className="w-4 h-4 text-emerald-100" />
-              <span>{isAdega ? '+ Entrada de Fardos & Estoque' : '+ Entrada de Mercadoria / Estoque'}</span>
-            </button>
+        {/* Menu de Ações Único com Somente o Ícone Menu */}
+        <div className="relative shrink-0" ref={actionsMenuRef}>
+          <button
+            type="button"
+            onClick={() => setIsActionsMenuOpen(!isActionsMenuOpen)}
+            className="flex items-center justify-center p-2.5 rounded-xl text-white font-bold text-xs shadow-md shadow-[#0C2340]/40 transition-all active:scale-95 cursor-pointer bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] border-0"
+            title="Menu de Ações do Estoque (Novo Produto, Entrada, Planilha, Categorias)"
+          >
+            <Menu className="w-5 h-5 stroke-[2.5]" />
+          </button>
+
+          {/* Dropdown Menu */}
+          {isActionsMenuOpen && (
+            <div className={`absolute right-0 top-full mt-2 w-64 rounded-2xl border p-2 z-50 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 ${
+              isLight
+                ? 'bg-white/95 border-slate-200 text-slate-800 shadow-slate-300/50'
+                : 'bg-[#10161E]/95 border-[#1C2631] text-slate-200 shadow-black/80'
+            }`}>
+              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800/80 mb-1">
+                <span className="text-[10px] uppercase font-black tracking-wider text-slate-400">
+                  Gerenciamento Rápido
+                </span>
+              </div>
+
+              {/* 1. Cadastrar Novo Produto */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsActionsMenuOpen(false);
+                  onOpenProductModal();
+                }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                  isLight
+                    ? 'hover:bg-sky-50 text-slate-800 hover:text-sky-600'
+                    : 'hover:bg-sky-500/10 text-slate-200 hover:text-sky-400'
+                }`}
+              >
+                <div className="w-7 h-7 rounded-lg bg-sky-500/15 text-sky-500 flex items-center justify-center shrink-0">
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
+                </div>
+                <div>
+                  <span className="block leading-tight">Novo Produto</span>
+                  <span className="text-[10px] font-normal text-slate-400">Cadastrar item no catálogo</span>
+                </div>
+              </button>
+
+              {/* 2. Entrada de Mercadoria / Estoque */}
+              {!isFoodOrPizza && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsActionsMenuOpen(false);
+                    setSelectedProductForReceiving(null);
+                    setReceiveBarcode('');
+                    setReceivePacksCount(5);
+                    setReceivePackSize(12);
+                    setReceiveQuantity(isAdega ? 60 : 20);
+                    setReceiveMode(isAdega ? 'fardo' : 'unidade');
+                    setIsReceivingModalOpen(true);
+                  }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                    isLight
+                      ? 'hover:bg-emerald-50 text-slate-800 hover:text-emerald-600'
+                      : 'hover:bg-emerald-500/10 text-slate-200 hover:text-emerald-400'
+                  }`}
+                >
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0">
+                    <Boxes className="w-4 h-4 stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <span className="block leading-tight">Entrada de Mercadoria</span>
+                    <span className="text-[10px] font-normal text-slate-400">Dar entrada em fardos e unidades</span>
+                  </div>
+                </button>
+              )}
+
+              {/* 3. Importar Planilha */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsActionsMenuOpen(false);
+                  setIsExcelModalOpen(true);
+                }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                  isLight
+                    ? 'hover:bg-teal-50 text-slate-800 hover:text-teal-600'
+                    : 'hover:bg-teal-500/10 text-slate-200 hover:text-teal-400'
+                }`}
+              >
+                <div className="w-7 h-7 rounded-lg bg-teal-500/15 text-teal-500 flex items-center justify-center shrink-0">
+                  <FileSpreadsheet className="w-4 h-4 stroke-[2.5]" />
+                </div>
+                <div>
+                  <span className="block leading-tight">Importar Planilha</span>
+                  <span className="text-[10px] font-normal text-slate-400">Subir produtos via Excel / CSV</span>
+                </div>
+              </button>
+
+              {/* 4. Gerenciar Categorias */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsActionsMenuOpen(false);
+                  setIsCategoryModalOpen(true);
+                }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
+                  isLight
+                    ? 'hover:bg-indigo-50 text-slate-800 hover:text-indigo-600'
+                    : 'hover:bg-indigo-500/10 text-slate-200 hover:text-indigo-400'
+                }`}
+              >
+                <div className="w-7 h-7 rounded-lg bg-indigo-500/15 text-indigo-500 flex items-center justify-center shrink-0">
+                  <Layers className="w-4 h-4 stroke-[2.5]" />
+                </div>
+                <div>
+                  <span className="block leading-tight">Categorias ({activeCategories.length})</span>
+                  <span className="text-[10px] font-normal text-slate-400">Organizar categorias do cardápio</span>
+                </div>
+              </button>
+            </div>
           )}
-
-          {/* Importar Excel / Planilha */}
-          <button
-            onClick={() => setIsExcelModalOpen(true)}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border font-semibold text-xs transition-colors cursor-pointer ${
-              isLight 
-                ? 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-2xs' 
-                : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700 shadow-sm'
-            }`}
-          >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <span>Importar Planilha</span>
-          </button>
-
-          {/* Gerenciar Categorias */}
-          <button
-            onClick={() => setIsCategoryModalOpen(true)}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border font-semibold text-xs transition-colors cursor-pointer ${
-              isLight 
-                ? 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-2xs' 
-                : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700 shadow-sm'
-            }`}
-            title="Adicionar ou remover categorias de produtos da sua loja"
-          >
-            <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span>Categorias ({activeCategories.length})</span>
-          </button>
-
-          {/* Adicionar Produto */}
-          <button
-            onClick={() => onOpenProductModal()}
-            className="btn-graphite flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs shadow-xs transition-all active:scale-95 cursor-pointer bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Novo Produto</span>
-          </button>
         </div>
 
       </div>
@@ -864,6 +949,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({ onOpenProductModal
                   }`}>
                     <th className="p-3 pl-4">Data / Hora</th>
                     <th className="p-3">Tipo de Operação</th>
+                    <th className="p-3">Operador / Caixa</th>
                     <th className="p-3">Produto</th>
                     <th className="p-3">Código</th>
                     <th className="p-3 text-center">Qtd</th>
@@ -905,6 +991,15 @@ export const InventoryView: React.FC<InventoryViewProps> = ({ onOpenProductModal
                           </span>
                         </td>
 
+                        <td className="p-3 whitespace-nowrap">
+                          <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
+                            isLight ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-neutral-800 border-neutral-700 text-neutral-300'
+                          }`}>
+                            <User className="w-3 h-3 text-sky-400" />
+                            <span>{mov.operatorName || 'Administrador'}</span>
+                          </span>
+                        </td>
+
                         <td className={`p-3 font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
                           {mov.productName}
                         </td>
@@ -935,7 +1030,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({ onOpenProductModal
 
                   {tenantStockMovements.length === 0 && (
                     <tr>
-                      <td colSpan={7} className={`p-8 text-center ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
+                      <td colSpan={8} className={`p-8 text-center ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
                         Nenhuma movimentação de estoque registrada até o momento.
                       </td>
                     </tr>

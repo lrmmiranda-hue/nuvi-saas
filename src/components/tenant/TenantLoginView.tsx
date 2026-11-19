@@ -190,12 +190,12 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
               </label>
             </div>
 
-            {/* Botão Entrar com o mesmo estilo do botão criar minha loja do modo escuro */}
+            {/* Botão Entrar: fundo azul noturno com excelente contraste tanto no modo escuro quanto no modo claro, sem negrito excessivo */}
             <button
               type="submit"
               disabled={isSubmitting}
               style={{ color: '#F8FAFC' }}
-              className="w-full mt-3 py-3.5 px-4 rounded-xl bg-gradient-to-br from-sky-600/30 via-blue-600/25 to-sky-500/20 hover:from-sky-600/40 hover:via-blue-600/35 active:scale-[0.99] font-black text-sm shadow-md shadow-black/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 border-0 ring-0 outline-none text-[#F8FAFC]"
+              className="w-full mt-3 py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#0d2a45] via-[#103250] to-[#143d60] hover:from-[#113557] hover:to-[#17466d] active:scale-[0.99] font-medium text-sm shadow-md shadow-black/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60 border-0 ring-0 outline-none text-[#F8FAFC]"
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
@@ -204,7 +204,7 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
                 </div>
               ) : (
                 <>
-                  <span style={{ color: '#F8FAFC' }} className="font-black text-sm tracking-tight text-[#F8FAFC]">
+                  <span style={{ color: '#F8FAFC' }} className="font-medium text-sm tracking-tight text-[#F8FAFC]">
                     Entrar no Painel da Loja
                   </span>
                   <ArrowRight className="w-4 h-4 text-[#F8FAFC]" />

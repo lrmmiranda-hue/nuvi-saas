@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { BUSINESS_SEGMENTS } from '../../data/businessSegments';
-import { BusinessSegmentType, SaaSFeaturePermissions, SaaSSubscriptionPlan } from '../../types';
+import { BusinessSegmentType, SaaSFeaturePermissions, SaaSSubscriptionPlan, SaaSPromoBannerTheme } from '../../types';
+import { PromoFlyerBanner, PROMO_BANNER_THEMES } from '../common/PromoFlyerBanner';
 import { 
   Settings, 
   X, 
@@ -24,7 +25,8 @@ import {
   Lock,
   Unlock,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Database
 } from 'lucide-react';
 
 interface MasterSettingsModalProps {
@@ -39,6 +41,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
     updatePlanPrice, 
     updateSegmentPermissions, 
     updatePromoBanner,
+    syncAllDataToFirestore,
     showAlert,
     themeMode 
   } = useStore();
@@ -55,6 +58,19 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
 
   // Estado local para o banner promocional
   const [promoState, setPromoState] = useState(globalConfig.promoBanner);
+
+  // Sincroniza estados caso o globalConfig seja alterado externamente
+  useEffect(() => {
+    if (globalConfig.promoBanner) {
+      setPromoState(globalConfig.promoBanner);
+    }
+  }, [globalConfig.promoBanner]);
+
+  useEffect(() => {
+    if (globalConfig.plans) {
+      setPlansState(globalConfig.plans);
+    }
+  }, [globalConfig.plans]);
 
   if (!isOpen) return null;
 
@@ -644,6 +660,71 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                   </button>
                 </div>
 
+                {/* Seletor dos 3 Modelos de Banner Inteligente Estilo Flyer */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Escolha o Modelo de Banner Inteligente (Animação Estilo Flyer):
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {PROMO_BANNER_THEMES.map((t) => {
+                      const isSelected = (promoState.theme || 'cyber_neon') === t.id;
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setPromoState(prev => ({ 
+                            ...prev, 
+                            theme: t.id,
+                            badgeText: prev.badgeText || t.badge
+                          }))}
+                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                            isSelected
+                              ? 'border-sky-500 bg-sky-500/10 ring-2 ring-sky-500/30 shadow-md'
+                              : isLight
+                              ? 'border-slate-200 bg-slate-50 hover:border-slate-300'
+                              : 'border-[#1C2631] bg-[#121820] hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                              {t.name}
+                            </span>
+                            {isSelected && (
+                              <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />
+                            )}
+                          </div>
+                          <div className={`h-6 rounded-lg bg-gradient-to-r ${t.colorPreview} border border-white/20 shadow-inner flex items-center px-2`}>
+                            <span className="text-[9px] font-bold text-white tracking-wider truncate">
+                              {t.badge}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-tight">
+                            {t.description}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Selo / Badge de Destaque */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Selo / Destaque do Flyer (Badge Superior)
+                  </label>
+                  <input
+                    type="text"
+                    value={promoState.badgeText || ''}
+                    onChange={(e) => setPromoState(prev => ({ ...prev, badgeText: e.target.value }))}
+                    placeholder="Ex: ⚡ OFERTA EXCLUSIVA NUVI ou 🔥 MEGA OFERTA LIMITADA"
+                    className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none transition-all ${
+                      isLight 
+                        ? 'bg-slate-50 border border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20' 
+                        : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
+                    }`}
+                  />
+                </div>
+
                 {/* Título da Promoção */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -717,26 +798,20 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                   </div>
                 </div>
 
-                {/* Prévia Visual do Banner */}
+                {/* Prévia Visual do Banner Animado Estilo Flyer */}
                 <div className="pt-2 space-y-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    Prévia de como o comerciante verá no topo do painel:
-                  </span>
-                  <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 text-white shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-amber-300" />
-                        <h4 className="font-extrabold text-xs sm:text-sm">{promoState.title || 'Título da Promoção'}</h4>
-                      </div>
-                      <p className="text-xs text-sky-100">{promoState.message || 'Descrição da promoção...'}</p>
-                    </div>
-                    <div className="shrink-0">
-                      <span className="px-4 py-2 rounded-xl bg-white text-blue-700 font-extrabold text-xs shadow-md inline-flex items-center gap-1.5">
-                        <span>{promoState.ctaText || 'Aproveitar'}</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Prévia de como o comerciante verá no topo do painel (Animação Ativa):
+                    </span>
+                    <span className="text-[10px] text-sky-400 font-bold">
+                      Modelo: {PROMO_BANNER_THEMES.find(t => t.id === (promoState.theme || 'cyber_neon'))?.name}
+                    </span>
                   </div>
+                  <PromoFlyerBanner
+                    banner={promoState}
+                    isPreview={true}
+                  />
                 </div>
 
               </div>
@@ -759,7 +834,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
         </div>
 
         {/* Footer do Modal */}
-        <div className={`px-6 py-4 border-t flex items-center justify-between ${
+        <div className={`px-6 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 ${
           isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
         }`}>
           <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -767,16 +842,28 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
             <span>Configurações exclusivas do Administrador Geral Nuvi</span>
           </div>
 
-          <button
-            onClick={onClose}
-            className={`px-4 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-              isLight 
-                ? 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700' 
-                : 'bg-[#161D24] hover:bg-[#1E2933] border-[#222E3A] text-slate-200'
-            }`}
-          >
-            Fechar
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={syncAllDataToFirestore}
+              title="Gravar todas as lojas, produtos com imagens e configurações no Firebase"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 border border-sky-500/30 transition-all cursor-pointer"
+            >
+              <Database className="w-3.5 h-3.5 text-sky-500" />
+              <span>Gravar Dados no Firebase</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className={`px-4 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                isLight 
+                  ? 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700' 
+                  : 'bg-[#161D24] hover:bg-[#1E2933] border-[#222E3A] text-slate-200'
+              }`}
+            >
+              Fechar
+            </button>
+          </div>
         </div>
 
       </div>

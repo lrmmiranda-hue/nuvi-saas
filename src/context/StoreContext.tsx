@@ -1,11 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Tenant, Product, Order, OrderItem, ViewRole, OrderStatus, StockMovement, PaymentMethod, GlobalSaaSConfig, SaaSFeaturePermissions, SaaSSubscriptionPlan, SaaSPromoBanner, BusinessSegmentType } from '../types';
+import { Tenant, Product, Order, OrderItem, ViewRole, OrderStatus, StockMovement, PaymentMethod, GlobalSaaSConfig, SaaSFeaturePermissions, SaaSSubscriptionPlan, SaaSPromoBanner, BusinessSegmentType, Expense, StoreUser } from '../types';
 import { INITIAL_TENANTS, INITIAL_PRODUCTS, INITIAL_ORDERS } from '../data/mockData';
 import { ConfirmModal, ConfirmDialogOptions, AlertDialogOptions, DialogVariant } from '../components/common/ConfirmModal';
 import { getSegmentById, getTenantCategories } from '../data/businessSegments';
 import { getStarterProductsForSegment } from '../data/segmentProducts';
 import { detectPortalMode } from '../utils/portalEnvironment';
-import { parseCurrentRoute } from '../utils/routes';
+import { parseCurrentRoute, findTenantBySlugOrId } from '../utils/routes';
+import {
+  listenToTenants,
+  saveTenantFirestore,
+  saveAllTenantsFirestore,
+  deleteTenantFirestore,
+  listenToProducts,
+  saveProductFirestore,
+  saveAllProductsFirestore,
+  deleteProductFirestore,
+  listenToOrders,
+  saveOrderFirestore,
+  listenToGlobalConfig,
+  saveGlobalConfigFirestore,
+} from '../services/firestoreSync';
 
 interface StoreContextType {
   tenants: Tenant[];
@@ -20,11 +34,11 @@ interface StoreContextType {
   tenantOrders: Order[];
   cart: OrderItem[];
   addToCart: (
-    product: Product, 
-    quantity?: number, 
-    chilled?: boolean, 
-    notes?: string, 
-    packUnits?: number, 
+    product: Product,
+    quantity?: number,
+    chilled?: boolean,
+    notes?: string,
+    packUnits?: number,
     packLabel?: string
   ) => void;
   removeFromCart: (productId: string, chilled: boolean) => void;
@@ -52,16 +66,16 @@ interface StoreContextType {
   stockMovements: StockMovement[];
   tenantStockMovements: StockMovement[];
   receiveStock: (
-    productId: string, 
-    quantity: number, 
-    costPrice?: number, 
-    supplierInvoice?: string, 
+    productId: string,
+    quantity: number,
+    costPrice?: number,
+    supplierInvoice?: string,
     notes?: string
   ) => void;
   registerPDVSale: (
-    items: OrderItem[], 
-    paymentMethod: PaymentMethod, 
-    customerName?: string, 
+    items: OrderItem[],
+    paymentMethod: PaymentMethod,
+    customerName?: string,
     cashChangeFor?: number | null
   ) => Order;
   findProductByBarcode: (barcode: string) => Product | undefined;
@@ -69,6 +83,18 @@ interface StoreContextType {
   importProductsFromExcel: (
     products: Array<Partial<Product> & { name: string; price: number }>
   ) => { imported: number; updated: number };
+  // Gestão Financeira & Despesas
+  tenantExpenses: Expense[];
+  addExpense: (expenseData: Omit<Expense, 'id' | 'tenantId' | 'createdAt'>) => Expense;
+  deleteExpense: (expenseId: string) => void;
+  // Usuários e Operadores da Loja
+  tenantUsers: StoreUser[];
+  currentStoreUser: StoreUser | null;
+  setCurrentStoreUserId: (userId: string | null) => void;
+  addStoreUser: (userData: Omit<StoreUser, 'id' | 'tenantId' | 'createdAt'>) => StoreUser;
+  updateStoreUser: (userId: string, data: Partial<StoreUser>) => void;
+  deleteStoreUser: (userId: string) => void;
+  switchStoreUser: (usernameOrPin: string) => { success: boolean; message: string; user?: StoreUser };
   // Modal de Avisos e Confirmações
   showConfirm: (options: ConfirmDialogOptions) => void;
   showAlert: (options: AlertDialogOptions | string) => void;
@@ -95,6 +121,7 @@ interface StoreContextType {
   updateSegmentPermissions: (segment: BusinessSegmentType, perms: Partial<SaaSFeaturePermissions>) => void;
   updatePromoBanner: (banner: Partial<SaaSPromoBanner>) => void;
   isFeatureAllowed: (feature: keyof SaaSFeaturePermissions, tenant?: Tenant) => boolean;
+  syncAllDataToFirestore: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -220,10 +247,13 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
   ],
   promoBanner: {
     enabled: true,
+    theme: 'cyber_neon',
+    badgeText: '⚡ OFERTA EXCLUSIVA NUVI',
     title: '🔥 Promoção Exclusiva de Lançamento Nuvi SaaS',
     message: 'Assine o Plano Completo neste mês com 30% de desconto e garanta suporte prioritário de implantação!',
     ctaText: 'Falar com Consultor no WhatsApp',
-    ctaUrl: 'https://wa.me/5511999999999?text=Ol%C3%A1!%20Tenho%20interesse%20na%20promo%C3%A7%C3%A3o%20do%20Nuvi%20SaaS.'
+    ctaUrl: 'https://wa.me/5511999999999?text=Ol%C3%A1!%20Tenho%20interesse%20na%20promo%C3%A7%C3%A3o%20do%20Nuvi%20SaaS.',
+    updatedAt: 1
   }
 };
 
@@ -372,18 +402,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
               const parsed = JSON.parse(saved);
               if (Array.isArray(parsed) && parsed.length > 0) return parsed as Tenant[];
             }
-          } catch {}
+          } catch { }
           return INITIAL_TENANTS;
         })();
 
         const route = parseCurrentRoute(allLoadedTenants);
         if (route.tenantSlugOrId) {
-          const match = allLoadedTenants.find(t => 
-            t.id.toLowerCase() === route.tenantSlugOrId?.toLowerCase() || 
-            (t.slug && t.slug.toLowerCase() === route.tenantSlugOrId?.toLowerCase()) ||
-            t.id.toLowerCase().replace(/[^a-z0-9]/g, '') === route.tenantSlugOrId?.toLowerCase().replace(/[^a-z0-9]/g, '') ||
-            (t.slug && t.slug.toLowerCase().replace(/[^a-z0-9]/g, '') === route.tenantSlugOrId?.toLowerCase().replace(/[^a-z0-9]/g, ''))
-          );
+          const match = findTenantBySlugOrId(allLoadedTenants, route.tenantSlugOrId);
           if (match) return match.id;
           return route.tenantSlugOrId;
         }
@@ -406,7 +431,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
               const parsed = JSON.parse(saved);
               if (Array.isArray(parsed) && parsed.length > 0) return parsed as Tenant[];
             }
-          } catch {}
+          } catch { }
           return INITIAL_TENANTS;
         })();
 
@@ -438,7 +463,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setAdminThemeModeState(mode);
     try {
       localStorage.setItem(STORAGE_KEYS.ADMIN_THEME_MODE, mode);
-    } catch {}
+    } catch { }
   };
 
   const toggleAdminThemeMode = () => {
@@ -460,7 +485,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setIsMasterAuthenticated(true);
       try {
         localStorage.setItem(STORAGE_KEYS.MASTER_AUTH, 'true');
-      } catch {}
+      } catch { }
       return true;
     }
     return false;
@@ -470,7 +495,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setIsMasterAuthenticated(false);
     try {
       localStorage.removeItem(STORAGE_KEYS.MASTER_AUTH);
-    } catch {}
+    } catch { }
   };
 
   // Autenticação Lojista
@@ -495,15 +520,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const name = (t.name || '').toLowerCase();
 
       const phoneMatch = cleanDigits.length >= 8 && (
-        tenantPhone.endsWith(cleanDigits.slice(-8)) || 
+        tenantPhone.endsWith(cleanDigits.slice(-8)) ||
         ownerPhone.endsWith(cleanDigits.slice(-8)) ||
         cleanDigits.endsWith(tenantPhone.slice(-8))
       );
 
       const textMatch = rawInput.length >= 3 && (
-        email === rawInput || 
-        slug === rawInput || 
-        name === rawInput || 
+        email === rawInput ||
+        slug === rawInput ||
+        name === rawInput ||
         t.id === rawInput
       );
 
@@ -521,7 +546,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       try {
         localStorage.setItem(STORAGE_KEYS.TENANT_AUTH, 'true');
         localStorage.setItem(STORAGE_KEYS.CURRENT_TENANT_ID, found.id);
-      } catch {}
+      } catch { }
       return true;
     }
 
@@ -532,7 +557,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setIsTenantAuthenticated(false);
     try {
       localStorage.removeItem(STORAGE_KEYS.TENANT_AUTH);
-    } catch {}
+    } catch { }
   };
 
   // Configurações Globais do SaaS Nuvi (Permissões, 4 Planos de Venda e Promoções)
@@ -566,6 +591,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const updated = { ...prev, ...newConfig };
       try {
         localStorage.setItem(STORAGE_KEYS.GLOBAL_CONFIG, JSON.stringify(updated));
+        saveGlobalConfigFirestore(updated);
       } catch (e) {
         console.error(e);
       }
@@ -579,6 +605,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const updated = { ...prev, plans: updatedPlans };
       try {
         localStorage.setItem(STORAGE_KEYS.GLOBAL_CONFIG, JSON.stringify(updated));
+        saveGlobalConfigFirestore(updated);
       } catch (e) {
         console.error(e);
       }
@@ -599,6 +626,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const updated = { ...prev, segmentPermissions: updatedSegmentPermissions };
       try {
         localStorage.setItem(STORAGE_KEYS.GLOBAL_CONFIG, JSON.stringify(updated));
+        saveGlobalConfigFirestore(updated);
       } catch (e) {
         console.error(e);
       }
@@ -608,10 +636,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const updatePromoBanner = (banner: Partial<SaaSPromoBanner>) => {
     setGlobalConfigState((prev) => {
-      const updatedPromo = { ...prev.promoBanner, ...banner };
+      const updatedPromo = { ...prev.promoBanner, ...banner, updatedAt: Date.now() };
       const updated = { ...prev, promoBanner: updatedPromo };
       try {
         localStorage.setItem(STORAGE_KEYS.GLOBAL_CONFIG, JSON.stringify(updated));
+        saveGlobalConfigFirestore(updated);
       } catch (e) {
         console.error(e);
       }
@@ -633,7 +662,83 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return Boolean(globalConfig.defaultPermissions[feature]);
   };
 
-  // Sync to localStorage
+  // Redirecionamento automático caso alguém acesse pelo Vercel legado para o domínio oficial nuvi-saas.web.app
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+      const targetUrl = `https://nuvi-saas.web.app${window.location.pathname}${window.location.search}${window.location.hash}`;
+      window.location.replace(targetUrl);
+    }
+  }, []);
+
+  // Sincronização em tempo real com o Firebase Firestore (Localhost <-> Web App)
+  useEffect(() => {
+    // 1. Escuta Lojas em Tempo Real
+    const unsubTenants = listenToTenants((remoteTenants) => {
+      if (remoteTenants && remoteTenants.length > 0) {
+        setTenants(remoteTenants);
+
+        // Se a rota na URL for de uma loja específica, sincroniza o currentTenantId imediatamente com a loja encontrada
+        try {
+          if (typeof window !== 'undefined') {
+            const route = parseCurrentRoute(remoteTenants);
+            if (route.tenantSlugOrId) {
+              const matched = findTenantBySlugOrId(remoteTenants, route.tenantSlugOrId);
+              if (matched) {
+                setCurrentTenantIdState(matched.id);
+                localStorage.setItem(STORAGE_KEYS.CURRENT_TENANT_ID, matched.id);
+              }
+            }
+          }
+        } catch {}
+      } else {
+        const seeded = localStorage.getItem('nuvi_firestore_seeded_v1');
+        if (!seeded) {
+          localStorage.setItem('nuvi_firestore_seeded_v1', 'true');
+          saveAllTenantsFirestore(INITIAL_TENANTS);
+        } else {
+          setTenants([]);
+        }
+      }
+    });
+
+    // 2. Escuta Produtos em Tempo Real
+    const unsubProducts = listenToProducts((remoteProducts) => {
+      if (remoteProducts && remoteProducts.length > 0) {
+        setAllProducts(enrichProductsWithDefaultPacks(remoteProducts));
+      } else {
+        const seeded = localStorage.getItem('nuvi_firestore_prods_seeded_v1');
+        if (!seeded) {
+          localStorage.setItem('nuvi_firestore_prods_seeded_v1', 'true');
+          saveAllProductsFirestore(INITIAL_PRODUCTS);
+        } else {
+          setAllProducts([]);
+        }
+      }
+    });
+
+    // 3. Escuta Pedidos em Tempo Real
+    const unsubOrders = listenToOrders((remoteOrders) => {
+      if (remoteOrders && remoteOrders.length > 0) {
+        setAllOrders(remoteOrders);
+      }
+    });
+
+    // 4. Escuta Configurações Globais do SaaS em Tempo Real
+    const unsubConfig = listenToGlobalConfig((remoteConfig) => {
+      if (remoteConfig) {
+        setGlobalConfigState(remoteConfig);
+      }
+    });
+
+    return () => {
+      unsubTenants();
+      unsubProducts();
+      unsubOrders();
+      unsubConfig();
+    };
+  }, []);
+
+  // Cache em localStorage para resiliência offline e carregamento instantâneo
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(tenants));
@@ -653,6 +758,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(allOrders));
+      allOrders.forEach((ord) => saveOrderFirestore(ord));
     } catch (e) {
       console.error(e);
     }
@@ -697,11 +803,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           window.history.pushState({}, '', `/${slug}/painel`);
         }
       }
-    } catch {}
+    } catch { }
   };
 
-  // Safe current tenant lookup (localiza por id ou por slug amigável da URL)
-  const currentTenant = tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId) || tenants[0];
+  // Safe current tenant lookup (localiza inteligentemente por id, slug amigável ou nome)
+  const currentTenant = findTenantBySlugOrId(tenants, currentTenantId) || tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId) || tenants[0];
 
   // Estado reativo persistido para o tema da vitrine e do painel do lojista
   const [tenantThemeMode, setTenantThemeMode] = useState<'dark' | 'light'>(() => {
@@ -727,7 +833,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setTenantThemeMode(mode);
       try {
         localStorage.setItem('adegasaas_tenant_theme_mode', mode);
-      } catch {}
+      } catch { }
       if (currentTenant) {
         updateTenant(currentTenant.id, {
           branding: {
@@ -744,16 +850,77 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setThemeMode(nextMode);
   };
 
-  // Isolated products, orders and movements for currentTenant
+  // Isolated products, orders, expenses and movements for currentTenant
   const tenantProducts = allProducts.filter((p) => p.tenantId === currentTenant?.id);
   const tenantOrders = allOrders.filter((o) => o.tenantId === currentTenant?.id);
   const tenantStockMovements = stockMovements.filter((m) => m.tenantId === currentTenant?.id);
+  const tenantExpenses: Expense[] = currentTenant?.expenses || [];
+
+  // Usuários e Operadores de Caixa da Loja com Permissões
+  const tenantUsers: StoreUser[] = React.useMemo(() => {
+    if (currentTenant?.users && currentTenant.users.length > 0) {
+      return currentTenant.users;
+    }
+    // Cria usuários padrão caso o comércio ainda não tenha lista personalizada
+    const defaultOwner: StoreUser = {
+      id: `usr-${currentTenant?.id || 'admin'}-owner`,
+      tenantId: currentTenant?.id || '',
+      name: currentTenant?.ownerName || 'Administrador',
+      username: 'admin',
+      pin: '1234',
+      role: 'gerente',
+      roleLabel: 'Proprietário / Gerente Geral',
+      active: true,
+      permissions: ['produtos', 'vendas', 'estoque', 'pedidos', 'metricas', 'configuracoes', 'visual', 'whatsapp', 'entrega'],
+      createdAt: new Date().toISOString(),
+    };
+    const defaultCaixa: StoreUser = {
+      id: `usr-${currentTenant?.id || 'caixa'}-caixa1`,
+      tenantId: currentTenant?.id || '',
+      name: 'Operador de Caixa 1',
+      username: 'caixa1',
+      pin: '1234',
+      role: 'caixa',
+      roleLabel: 'Operador de Caixa (Frente)',
+      active: true,
+      permissions: ['vendas'], // Permissão focada em Venda de Balcão (PDV)!
+      createdAt: new Date().toISOString(),
+    };
+    return [defaultOwner, defaultCaixa];
+  }, [currentTenant?.id, currentTenant?.users, currentTenant?.ownerName]);
+
+  const [currentStoreUserId, setCurrentStoreUserIdState] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(`adegasaas_active_user_${currentTenantId}`) || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const currentStoreUser: StoreUser | null = React.useMemo(() => {
+    if (currentStoreUserId) {
+      const found = tenantUsers.find((u) => u.id === currentStoreUserId);
+      if (found) return found;
+    }
+    return tenantUsers[0] || null;
+  }, [currentStoreUserId, tenantUsers]);
+
+  const setCurrentStoreUserId = (userId: string | null) => {
+    setCurrentStoreUserIdState(userId);
+    try {
+      if (userId) {
+        localStorage.setItem(`adegasaas_active_user_${currentTenantId}`, userId);
+      } else {
+        localStorage.removeItem(`adegasaas_active_user_${currentTenantId}`);
+      }
+    } catch { }
+  };
 
   // Cart operations
   const addToCart = (
-    product: Product, 
-    quantity = 1, 
-    chilled = false, 
+    product: Product,
+    quantity = 1,
+    chilled = false,
     notes = '',
     packUnits?: number,
     packLabel?: string
@@ -813,7 +980,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const findProductByBarcode = (barcode: string): Product | undefined => {
     const cleanBarcode = barcode.trim().toLowerCase();
     if (!cleanBarcode) return undefined;
-    return tenantProducts.find((p) => 
+    return tenantProducts.find((p) =>
       p.barcode?.toLowerCase() === cleanBarcode ||
       p.packOptions?.some((pack) => pack.enabled && pack.barcode?.toLowerCase() === cleanBarcode)
     );
@@ -923,28 +1090,61 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const updatedList = [newTenant, ...prev];
       try {
         localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(updatedList));
-      } catch {}
+      } catch { }
       return updatedList;
     });
+
+    // Salva imediatamente no Firestore
+    saveTenantFirestore(newTenant);
 
     // Populate com catálogo inicial temático correspondente ao segmento do comércio criado
     const starterProducts = getStarterProductsForSegment(segment, id);
     setAllProducts((prev) => [...prev, ...starterProducts]);
+    saveAllProductsFirestore(starterProducts);
 
     return newTenant;
   };
 
   const updateTenant = (id: string, updates: Partial<Tenant>) => {
-    setTenants((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
-    );
+    setTenants((prev) => {
+      const updated = prev.map((t) => (t.id === id ? { ...t, ...updates } : t));
+      try {
+        localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(updated));
+      } catch { }
+      const target = updated.find((t) => t.id === id);
+      if (target) {
+        saveTenantFirestore(target);
+      }
+      return updated;
+    });
   };
 
   const deleteTenant = (id: string) => {
+    // 1. Remove do estado local
     setTenants((prev) => prev.filter((t) => t.id !== id));
     setAllProducts((prev) => prev.filter((p) => p.tenantId !== id));
     setAllOrders((prev) => prev.filter((o) => o.tenantId !== id));
     setStockMovements((prev) => prev.filter((m) => m.tenantId !== id));
+
+    // 2. Remove imediatamente do localStorage
+    try {
+      const savedTenants = localStorage.getItem(STORAGE_KEYS.TENANTS);
+      if (savedTenants) {
+        const parsed = JSON.parse(savedTenants);
+        const filtered = parsed.filter((t: any) => t.id !== id);
+        localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(filtered));
+      }
+      const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+      if (savedProducts) {
+        const parsed = JSON.parse(savedProducts);
+        const filtered = parsed.filter((p: any) => p.tenantId !== id);
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(filtered));
+      }
+    } catch { }
+
+    // 3. Remove permanentemente do Firestore (incluindo produtos e pedidos vinculados)
+    deleteTenantFirestore(id);
+
     if (currentTenantId === id) {
       const remaining = tenants.filter((t) => t.id !== id);
       if (remaining.length > 0) {
@@ -966,30 +1166,35 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const catId = id || `cat_${Date.now()}`;
 
-    setTenants((prev) =>
-      prev.map((t) => {
+    setTenants((prev) => {
+      const updated = prev.map((t) => {
         if (t.id === currentTenantId) {
           const currentList = getTenantCategories(t);
           if (currentList.some((c) => c.id === catId)) {
             // Se já existe, reativa a categoria
-            return {
+            const modified = {
               ...t,
               categories: currentList.map((c) => c.id === catId ? { ...c, enabled: true, label: cleanLabel } : c)
             };
+            saveTenantFirestore(modified);
+            return modified;
           }
           const updatedCategories = [
             ...currentList,
             { id: catId, label: cleanLabel, enabled: true, isCustom: true }
           ];
-          return {
+          const modified = {
             ...t,
             categories: updatedCategories,
             customCategories: [...(t.customCategories || []), { id: catId, label: cleanLabel }],
           };
+          saveTenantFirestore(modified);
+          return modified;
         }
         return t;
-      })
-    );
+      });
+      return updated;
+    });
 
     return catId;
   };
@@ -1006,13 +1211,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           const updatedCategories = currentList.map((c) =>
             c.id === id ? { ...c, label: cleanLabel } : c
           );
-          return {
+          const modified = {
             ...t,
             categories: updatedCategories,
             customCategories: (t.customCategories || []).map((c) =>
               c.id === id ? { ...c, label: cleanLabel } : c
             ),
           };
+          saveTenantFirestore(modified);
+          return modified;
         }
         return t;
       })
@@ -1034,10 +1241,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             }
             return c;
           });
-          return {
+          const modified = {
             ...t,
             categories: updatedCategories,
           };
+          saveTenantFirestore(modified);
+          return modified;
         }
         return t;
       })
@@ -1053,11 +1262,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         if (t.id === currentTenantId) {
           const currentList = getTenantCategories(t);
           const updatedCategories = currentList.filter((c) => c.id !== categoryId);
-          return {
+          const modified = {
             ...t,
             categories: updatedCategories,
             customCategories: (t.customCategories || []).filter((c) => c.id !== categoryId),
           };
+          saveTenantFirestore(modified);
+          return modified;
         }
         return t;
       })
@@ -1080,7 +1291,16 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       minStockAlert: productData.minStockAlert ?? 10,
     };
 
-    setAllProducts((prev) => [newProduct, ...prev]);
+    setAllProducts((prev) => {
+      const updated = [newProduct, ...prev];
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      } catch { }
+      return updated;
+    });
+
+    // Salva imediatamente no Firestore
+    saveProductFirestore(newProduct);
 
     // Record initial stock movement if quantity > 0
     if (newProduct.stockQuantity > 0) {
@@ -1105,22 +1325,44 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const updateProduct = (id: string, updates: Partial<Product>) => {
-    setAllProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
-    );
+    setAllProducts((prev) => {
+      const updated = prev.map((p) => (p.id === id ? { ...p, ...updates } : p));
+      try {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(updated));
+      } catch { }
+      const target = updated.find((p) => p.id === id);
+      if (target) {
+        saveProductFirestore(target);
+      }
+      return updated;
+    });
   };
 
   const deleteProduct = (id: string) => {
+    // 1. Remove do estado local
     setAllProducts((prev) => prev.filter((p) => p.id !== id));
     setCart((prev) => prev.filter((item) => item.productId !== id));
+
+    // 2. Remove imediatamente do localStorage
+    try {
+      const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+      if (savedProducts) {
+        const parsed = JSON.parse(savedProducts);
+        const filtered = parsed.filter((p: any) => p.id !== id);
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(filtered));
+      }
+    } catch { }
+
+    // 3. Remove permanentemente do Firestore
+    deleteProductFirestore(id);
   };
 
   // Receive stock / Entrada de mercadorias
   const receiveStock = (
-    productId: string, 
-    quantity: number, 
-    costPrice?: number, 
-    supplierInvoice?: string, 
+    productId: string,
+    quantity: number,
+    costPrice?: number,
+    supplierInvoice?: string,
     notes?: string
   ) => {
     setAllProducts((prevProducts) =>
@@ -1143,6 +1385,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             newStock: newStock,
             costPrice: updatedCostPrice,
             supplierInvoice: supplierInvoice,
+            operatorId: currentStoreUser?.id,
+            operatorName: currentStoreUser?.name || currentTenant?.ownerName || 'Administrador',
             notes: notes || 'Recebimento de mercadoria',
             createdAt: new Date().toISOString(),
           };
@@ -1162,9 +1406,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // PDV Physical Sale (Balcão de Adega)
   const registerPDVSale = (
-    items: OrderItem[], 
-    paymentMethod: PaymentMethod, 
-    customerName = 'Cliente Balcão', 
+    items: OrderItem[],
+    paymentMethod: PaymentMethod,
+    customerName = 'Cliente Balcão',
     cashChangeFor?: number | null
   ): Order => {
     const subtotal = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
@@ -1172,6 +1416,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const orderId = `PDV-${randomNum}`;
+    const activeOperatorName = currentStoreUser?.name || currentTenant?.ownerName || 'Administrador';
+    const activeOperatorId = currentStoreUser?.id;
 
     const newSaleOrder: Order = {
       id: orderId,
@@ -1187,7 +1433,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       paymentMethod,
       cashChangeFor,
       status: 'finalizado',
-      notes: 'Venda de balcão via PDV',
+      notes: `Venda de balcão via PDV • Operador: ${activeOperatorName}`,
+      cashierUserId: activeOperatorId,
+      cashierUserName: activeOperatorName,
       createdAt: new Date().toISOString(),
     };
 
@@ -1221,9 +1469,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             previousStock,
             newStock,
             costPrice: prod.costPrice,
-            notes: item.packLabel 
-              ? `Venda balcão #${orderId} (${item.quantity}x ${item.packLabel})`
-              : `Venda balcão #${orderId}`,
+            operatorId: activeOperatorId,
+            operatorName: activeOperatorName,
+            notes: item.packLabel
+              ? `Venda balcão #${orderId} (${item.quantity}x ${item.packLabel}) • Operador: ${activeOperatorName}`
+              : `Venda balcão #${orderId} • Operador: ${activeOperatorName}`,
             createdAt: new Date().toISOString(),
           });
         }
@@ -1244,10 +1494,10 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       prev.map((t) =>
         t.id === currentTenantId
           ? {
-              ...t,
-              totalRevenue: (t.totalRevenue || 0) + total,
-              ordersCount: (t.ordersCount || 0) + 1,
-            }
+            ...t,
+            totalRevenue: (t.totalRevenue || 0) + total,
+            ordersCount: (t.ordersCount || 0) + 1,
+          }
           : t
       )
     );
@@ -1269,7 +1519,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       productsToImport.forEach((item) => {
         const cleanBarcode = item.barcode?.trim();
-        const existingIndex = cleanBarcode 
+        const existingIndex = cleanBarcode
           ? currentList.findIndex((p) => p.tenantId === currentTenantId && p.barcode === cleanBarcode)
           : currentList.findIndex((p) => p.tenantId === currentTenantId && p.name.toLowerCase() === item.name.toLowerCase());
 
@@ -1365,6 +1615,120 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return { imported, updated };
   };
 
+  // Lançamentos Financeiros (Gastos / Saídas)
+  const addExpense = (expenseData: Omit<Expense, 'id' | 'tenantId' | 'createdAt'>): Expense => {
+    if (!currentTenantId) throw new Error('Nenhum estabelecimento ativo selecionado');
+    const newExpense: Expense = {
+      ...expenseData,
+      id: `exp-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      tenantId: currentTenantId,
+      createdAt: new Date().toISOString(),
+    };
+
+    setTenants((prev) =>
+      prev.map((t) => {
+        if (t.id === currentTenantId) {
+          const updatedExpenses = [newExpense, ...(t.expenses || [])];
+          const updatedTenant = { ...t, expenses: updatedExpenses };
+          saveTenantFirestore(updatedTenant).catch(console.error);
+          return updatedTenant;
+        }
+        return t;
+      })
+    );
+
+    return newExpense;
+  };
+
+  const deleteExpense = (expenseId: string) => {
+    if (!currentTenantId) return;
+    setTenants((prev) =>
+      prev.map((t) => {
+        if (t.id === currentTenantId) {
+          const updatedExpenses = (t.expenses || []).filter((e) => e.id !== expenseId);
+          const updatedTenant = { ...t, expenses: updatedExpenses };
+          saveTenantFirestore(updatedTenant).catch(console.error);
+          return updatedTenant;
+        }
+        return t;
+      })
+    );
+  };
+
+  // Gerenciamento de Usuários e Operadores da Loja
+  const addStoreUser = (userData: Omit<StoreUser, 'id' | 'tenantId' | 'createdAt'>): StoreUser => {
+    if (!currentTenantId) throw new Error('Nenhum estabelecimento ativo selecionado');
+    const newUser: StoreUser = {
+      ...userData,
+      id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      tenantId: currentTenantId,
+      createdAt: new Date().toISOString(),
+    };
+
+    setTenants((prev) =>
+      prev.map((t) => {
+        if (t.id === currentTenantId) {
+          const currentList = t.users && t.users.length > 0 ? t.users : tenantUsers;
+          const updatedUsers = [...currentList, newUser];
+          const updatedTenant = { ...t, users: updatedUsers };
+          saveTenantFirestore(updatedTenant).catch(console.error);
+          return updatedTenant;
+        }
+        return t;
+      })
+    );
+
+    return newUser;
+  };
+
+  const updateStoreUser = (userId: string, data: Partial<StoreUser>) => {
+    if (!currentTenantId) return;
+    setTenants((prev) =>
+      prev.map((t) => {
+        if (t.id === currentTenantId) {
+          const currentList = t.users && t.users.length > 0 ? t.users : tenantUsers;
+          const updatedUsers = currentList.map((u) => (u.id === userId ? { ...u, ...data } : u));
+          const updatedTenant = { ...t, users: updatedUsers };
+          saveTenantFirestore(updatedTenant).catch(console.error);
+          return updatedTenant;
+        }
+        return t;
+      })
+    );
+  };
+
+  const deleteStoreUser = (userId: string) => {
+    if (!currentTenantId) return;
+    setTenants((prev) =>
+      prev.map((t) => {
+        if (t.id === currentTenantId) {
+          const currentList = t.users && t.users.length > 0 ? t.users : tenantUsers;
+          const updatedUsers = currentList.filter((u) => u.id !== userId);
+          const updatedTenant = { ...t, users: updatedUsers };
+          saveTenantFirestore(updatedTenant).catch(console.error);
+          return updatedTenant;
+        }
+        return t;
+      })
+    );
+    if (currentStoreUserId === userId) {
+      setCurrentStoreUserId(null);
+    }
+  };
+
+  const switchStoreUser = (usernameOrPin: string): { success: boolean; message: string; user?: StoreUser } => {
+    const clean = usernameOrPin.trim().toLowerCase();
+    const found = tenantUsers.find((u) => u.pin === clean || u.username.toLowerCase() === clean);
+    if (!found) {
+      return { success: false, message: 'Usuário ou PIN não localizado. Tente novamente.' };
+    }
+    if (!found.active) {
+      return { success: false, message: `O usuário "${found.name}" está inativo.` };
+    }
+    setCurrentStoreUserId(found.id);
+    return { success: true, message: `Operador alterado para "${found.name}" com sucesso!`, user: found };
+  };
+
   // Order CRUD (Online checkout)
   const createOrder = (orderData: Omit<Order, 'id' | 'tenantId' | 'createdAt'>): Order => {
     const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -1407,8 +1771,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             previousStock,
             newStock,
             costPrice: prod.costPrice,
-            notes: item.packLabel 
-              ? `Venda Online #${id} (${item.quantity}x ${item.packLabel})` 
+            notes: item.packLabel
+              ? `Venda Online #${id} (${item.quantity}x ${item.packLabel})`
               : `Venda Online #${id}`,
             createdAt: new Date().toISOString(),
           });
@@ -1429,10 +1793,10 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       prev.map((t) =>
         t.id === currentTenantId
           ? {
-              ...t,
-              totalRevenue: (t.totalRevenue || 0) + newOrder.total,
-              ordersCount: (t.ordersCount || 0) + 1,
-            }
+            ...t,
+            totalRevenue: (t.totalRevenue || 0) + newOrder.total,
+            ordersCount: (t.ordersCount || 0) + 1,
+          }
           : t
       )
     );
@@ -1451,10 +1815,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const itemsFormatted = order.items
       .map(
         (i) =>
-          `• ${i.quantity}x ${i.productName} (${i.volume})${
-            i.chilled ? ' ❄️ [GELADA]' : ''
-          } - R$ ${(i.price * i.quantity).toFixed(2)}${
-            i.notes ? `\n   Obs: ${i.notes}` : ''
+          `• ${i.quantity}x ${i.productName} (${i.volume})${i.chilled ? ' ❄️ [GELADA]' : ''
+          } - R$ ${(i.price * i.quantity).toFixed(2)}${i.notes ? `\n   Obs: ${i.notes}` : ''
           }`
       )
       .join('\n');
@@ -1474,11 +1836,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const addressFormatted =
       order.deliveryType === 'delivery' && order.address
-        ? `${order.address.street}, Nº ${order.address.number}${
-            order.address.complement ? ` - ${order.address.complement}` : ''
-          }\nBairro: ${order.address.neighborhood} - ${order.address.city}${
-            order.address.referencePoint ? `\nRef: ${order.address.referencePoint}` : ''
-          }`
+        ? `${order.address.street}, Nº ${order.address.number}${order.address.complement ? ` - ${order.address.complement}` : ''
+        }\nBairro: ${order.address.neighborhood} - ${order.address.city}${order.address.referencePoint ? `\nRef: ${order.address.referencePoint}` : ''
+        }`
         : 'Retirada no Balcão da Loja';
 
     let message = tenant.whatsapp.orderTemplate || '';
@@ -1552,7 +1912,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     cancelText: 'Cancelar',
     isConfirmMode: false,
     variant: 'info',
-    onConfirm: () => {},
+    onConfirm: () => { },
   });
 
   const showConfirm = (options: ConfirmDialogOptions) => {
@@ -1579,7 +1939,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         confirmText: 'Entendido',
         isConfirmMode: false,
         variant: 'info',
-        onConfirm: () => {},
+        onConfirm: () => { },
       });
     } else {
       setDialogState({
@@ -1612,6 +1972,26 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setCurrentTenantId('adega-imperial');
     setViewRole('super_admin');
     setCart([]);
+  };
+
+  const syncAllDataToFirestore = async () => {
+    try {
+      await saveAllTenantsFirestore(tenants);
+      await saveAllProductsFirestore(allProducts);
+      await saveGlobalConfigFirestore(globalConfig);
+      showAlert({
+        title: 'Banco de Dados Atualizado!',
+        message: 'Todas as lojas, produtos, imagens e configurações foram gravadas com sucesso no Cloud Firestore.',
+        variant: 'success'
+      });
+    } catch (err: any) {
+      console.warn('Erro na sincronização manual:', err);
+      showAlert({
+        title: 'Aviso de Sincronização',
+        message: 'Os dados estão salvos localmente. Assim que você ativar o Firestore no console do Firebase, eles serão enviados automaticamente para a nuvem!',
+        variant: 'warning'
+      });
+    }
   };
 
   return (
@@ -1657,6 +2037,16 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         findProductByBarcode,
         findProductOrPackByBarcode,
         importProductsFromExcel,
+        tenantExpenses,
+        addExpense,
+        deleteExpense,
+        tenantUsers,
+        currentStoreUser,
+        setCurrentStoreUserId,
+        addStoreUser,
+        updateStoreUser,
+        deleteStoreUser,
+        switchStoreUser,
         showConfirm,
         showAlert,
         adminThemeMode,
@@ -1677,6 +2067,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         updateSegmentPermissions,
         updatePromoBanner,
         isFeatureAllowed,
+        syncAllDataToFirestore,
       }}
     >
       {children}

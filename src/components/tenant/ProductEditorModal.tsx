@@ -1164,7 +1164,7 @@ export const ProductEditorModal: React.FC<ProductEditorModalProps> = ({
             </button>
             <button
               type="submit"
-              className="btn-graphite px-5 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] text-white border-0 text-xs font-bold shadow-md shadow-[#0C2340]/40 transition-all active:scale-95 cursor-pointer"
             >
               {editingProduct 
                 ? 'Salvar Alterações' 

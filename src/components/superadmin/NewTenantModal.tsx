@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Tenant, BusinessSegmentType } from '../../types';
+import { Tenant, BusinessSegmentType, TenantPlan } from '../../types';
 import { BUSINESS_SEGMENTS, getSegmentById } from '../../data/businessSegments';
 import { PRESET_THEMES, PRESET_BANNERS } from '../tenant/OnboardingWizardModal';
 import { 
   X, 
-  Building2, 
   Store, 
   Sparkles, 
   Check, 
   Lock, 
   Eye, 
-  EyeOff,
-  Copy,
-  ExternalLink,
-  CheckCircle2,
-  MessageCircle,
-  ShieldCheck
+  EyeOff, 
+  Copy, 
+  ExternalLink, 
+  CheckCircle2, 
+  MessageCircle, 
+  ArrowRight, 
+  ArrowLeft,
+  Building2,
+  Palette,
+  ShieldCheck,
+  MapPin,
+  Phone,
+  User,
+  Zap
 } from 'lucide-react';
 
 interface NewTenantModalProps {
@@ -30,9 +37,13 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
   onClose,
   onTenantCreated,
 }) => {
-  const { createTenant, showAlert, themeMode } = useStore();
+  const { createTenant, showAlert, themeMode, globalConfig } = useStore();
   const isLight = themeMode === 'light';
 
+  // Controle dos 2 passos solicitados (1 e 2 unidos no Passo 1, e Acessos/Localização no Passo 2)
+  const [step, setStep] = useState<1 | 2>(1);
+
+  // Estados do formulário
   const [selectedSegment, setSelectedSegment] = useState<BusinessSegmentType>('adega');
   const segmentConfig = getSegmentById(selectedSegment);
 
@@ -45,7 +56,7 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [city, setCity] = useState('São Paulo');
   const [neighborhood, setNeighborhood] = useState('');
-  const [plan, setPlan] = useState<'starter' | 'pro' | 'enterprise'>('pro');
+  const [plan, setPlan] = useState<TenantPlan>('hibrido');
   const [selectedThemeIndex, setSelectedThemeIndex] = useState(0);
 
   // Tela de confirmação e credenciais após a criação
@@ -55,7 +66,7 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
   if (!isOpen) return null;
 
   const handleCopyText = (text: string, fieldName: string) => {
-    navigator.clipboard.writeText(text);
+    navigator.clipboard?.writeText(text);
     setCopiedField(fieldName);
     setTimeout(() => setCopiedField(null), 2500);
   };
@@ -68,6 +79,18 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
     onClose();
   };
 
+  const handleAdvanceToStep2 = () => {
+    if (!name.trim()) {
+      showAlert({
+        title: 'Nome Obrigatório',
+        message: 'Por favor, informe o nome comercial do estabelecimento antes de avançar.',
+        variant: 'warning',
+      });
+      return;
+    }
+    setStep(2);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -76,10 +99,21 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
         message: 'Por favor, informe o nome comercial do cliente.',
         variant: 'warning',
       });
+      setStep(1);
       return;
     }
 
-    const theme = PRESET_THEMES[selectedThemeIndex];
+    if (!ownerPhone.trim()) {
+      showAlert({
+        title: 'WhatsApp Obrigatório',
+        message: 'Por favor, informe o WhatsApp do lojista para acesso e recebimento de pedidos.',
+        variant: 'warning',
+      });
+      setStep(2);
+      return;
+    }
+
+    const theme = PRESET_THEMES[selectedThemeIndex] || PRESET_THEMES[0];
     const cleanSlug = name
       .toLowerCase()
       .normalize('NFD')
@@ -118,92 +152,164 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
         standardDeliveryFee: 8.0,
         freeDeliveryThreshold: 150,
         allowPickup: true,
-        openingHours: 'Seg a Sáb: 10h às 00h',
+        openingHours: 'Seg a Sáb: 10h às 23h | Dom: 10h às 20h',
       },
       whatsapp: {
-        phoneNumber: ownerPhone ? `55${ownerPhone.replace(/\D/g, '')}` : '5511999990000',
+        phoneNumber: ownerPhone || '5511999990000',
         enableWhatsAppOrders: true,
-        orderTemplate: `📦 *NOVO PEDIDO - {loja}* 📦\n\n*Pedido:* #{id_pedido}\n*Cliente:* {cliente}\n*Telefone:* {telefone}\n*Tipo:* {tipo_entrega}\n\n*Itens:*\n{itens}\n\n*Subtotal:* R$ {subtotal}\n*Taxa de Entrega:* R$ {taxa_entrega}\n*TOTAL:* R$ {total}\n*Pagamento:* {pagamento}{troco_info}\n\n*Endereço:* {endereco}`,
-        statusUpdateTemplate: `Olá {cliente}! Seu pedido #{id_pedido} na *{loja}* está: *{novo_status}*.`,
-        welcomeMessage: `Olá! Bem-vindo à ${name}. Como posso te ajudar hoje?`,
+        orderTemplate: `📦 *NOVO PEDIDO - {loja}* 📦\n\n*Pedido:* #{id_pedido}\n*Cliente:* {cliente}\n*Telefone:* {telefone}\n*Entrega:* {tipo_entrega}\n\n*Itens:* \n{itens}\n\n*Subtotal:* R$ {subtotal}\n*Taxa Entrega:* R$ {taxa_entrega}\n*TOTAL:* R$ {total}\n*Pagamento:* {pagamento}{troco_info}\n\n*Endereço de Entrega:* \n{endereco}`,
+        statusUpdateTemplate: `Olá {cliente}! Seu pedido #{id_pedido} na *{loja}* foi atualizado: *{novo_status}*.`,
+        welcomeMessage: `Olá! Bem-vindo à ${name}. Como podemos te atender hoje?`,
         supportLinkEnabled: true,
       },
-      onboardingCompleted: false, // will require onboarding
+      config: {
+        enablePhysicalStore: plan !== 'vitrine',
+        enableOnlineSales: plan !== 'balcao',
+        acceptPix: true,
+        acceptCard: true,
+        acceptCash: true,
+        allowOrdersWhenClosed: false,
+        soundAlerts: true,
+      },
     });
 
     setCreatedTenantResult(newTenant);
   };
 
-  const inputClass = `w-full px-3 py-2 rounded-lg text-xs outline-none transition-all ${
-    isLight 
-      ? 'bg-white border border-neutral-300 text-neutral-900 placeholder-neutral-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 shadow-2xs' 
-      : 'bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30'
+  const inputClass = `w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all ${
+    isLight
+      ? 'bg-slate-50 border-slate-300 text-slate-900 focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20'
+      : 'bg-[#121820] border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
   }`;
 
-  const labelClass = `block text-xs font-semibold mb-1 ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`;
+  const labelClass = `block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`;
+
+  // Planos disponíveis no SaaS
+  const availablePlans = (globalConfig?.plans && globalConfig.plans.length > 0)
+    ? globalConfig.plans.filter(p => p.active !== false)
+    : [
+        { id: 'plan_cardapio', name: 'Vitrine Online & WhatsApp', price: 97, tag: 'Delivery' },
+        { id: 'plan_balcao', name: 'PDV Balcão & Estoque', price: 127, tag: 'Frente de Caixa' },
+        { id: 'plan_hibrido', name: 'Completo Híbrido (Vitrine + PDV)', price: 167, tag: 'Mais Escolhido' }
+      ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className={`relative w-full max-w-xl rounded-2xl border shadow-2xl overflow-hidden my-8 transition-colors ${
-        isLight ? 'bg-white border-neutral-200 text-neutral-900' : 'bg-[#11161B] border-[#1C2631] text-neutral-100'
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      
+      <div className={`relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden transition-all ${
+        isLight 
+          ? 'bg-white border-slate-200 text-slate-800' 
+          : 'bg-[#0E1318] border-[#1C2631] text-white'
       }`}>
-        
-        {/* Header */}
-        <div className={`flex items-center justify-between px-6 py-4 border-b transition-colors ${
-          isLight ? 'bg-neutral-50 border-neutral-200' : 'bg-[#0B0F12] border-[#1C2631]'
+
+        {/* Header do Modal com o mesmo estilo do Passo a Passo */}
+        <div className={`px-6 py-4 border-b flex items-center justify-between transition-colors ${
+          isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
         }`}>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold">
-              <Store className="w-4 h-4" />
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-500 flex items-center justify-center font-bold">
+              <Store className="w-5 h-5 text-sky-500" />
             </div>
             <div>
-              <h2 className={`text-base font-bold ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                {createdTenantResult ? 'Acesso Criado com Sucesso' : 'Cadastrar Novo Estabelecimento / Lojista'}
+              <h2 className={`text-base font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                Cadastrar Novo Estabelecimento / Lojista
               </h2>
-              <p className={`text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                {createdTenantResult ? 'Compartilhe o link do cardápio e os dados de login com o cliente' : 'Crie um novo ambiente isolado para qualquer segmento de comércio'}
+              <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                Crie um novo ambiente isolado para qualquer segmento de comércio
               </p>
             </div>
           </div>
+
           <button
-            onClick={createdTenantResult ? handleFinishSuccess : onClose}
+            type="button"
+            onClick={onClose}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-              isLight ? 'text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+              isLight 
+                ? 'text-slate-400 hover:text-slate-700 hover:bg-slate-200/60' 
+                : 'text-slate-400 hover:text-white hover:bg-neutral-800'
             }`}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Se acabou de criar, exibe tela de credenciais com link da vitrine e senha */}
+        {/* Wizard Stepper Bar: APENAS 2 PASSOS (Unindo 1 e 2 no Passo 1, e Acesso/Localização no Passo 2) */}
+        {!createdTenantResult && (
+          <div className={`grid grid-cols-2 border-b text-xs transition-colors ${
+            isLight ? 'bg-slate-100 border-slate-300' : 'bg-neutral-950 border-neutral-800'
+          }`}>
+            {[
+              { num: 1, label: 'Estabelecimento & Identidade Visual', icon: Building2 },
+              { num: 2, label: 'Acesso, Contato & Localização', icon: ShieldCheck },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isDone = step > item.num;
+              const isCurrent = step === item.num;
+              return (
+                <button
+                  key={item.num}
+                  type="button"
+                  onClick={() => {
+                    if (item.num === 1) setStep(1);
+                    if (item.num === 2) handleAdvanceToStep2();
+                  }}
+                  className={`py-3 px-3 flex items-center justify-center gap-2 border-b-2 transition-all cursor-pointer ${
+                    isCurrent
+                      ? isLight
+                        ? 'border-sky-600 text-sky-700 bg-white font-bold shadow-xs'
+                        : 'border-sky-500 text-white bg-[#121820] font-bold'
+                      : isDone
+                      ? isLight
+                        ? 'border-emerald-500 text-emerald-800 font-bold bg-emerald-50/60'
+                        : 'border-emerald-500 text-emerald-400 font-medium'
+                      : isLight
+                      ? 'border-transparent text-slate-600 hover:text-slate-900 font-semibold'
+                      : 'border-transparent text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {isDone ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
+                  ) : (
+                    <Icon className="w-4 h-4 shrink-0" />
+                  )}
+                  <span className="font-semibold">{item.num}. {item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Corpo do Modal */}
         {createdTenantResult ? (
-          <div className="p-6 space-y-4 text-xs max-h-[75vh] overflow-y-auto">
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400">
-              <CheckCircle2 className="w-6 h-6 shrink-0 text-emerald-500" />
-              <div>
-                <h3 className="font-black text-sm">Loja Cadastrada com Sucesso!</h3>
-                <p className="text-xs text-emerald-600 dark:text-emerald-300">
-                  O comércio <strong>{createdTenantResult.name}</strong> já está ativo no sistema.
-                </p>
+          /* Tela de Sucesso com as Credenciais e Acessos Gerados */
+          <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+            <div className={`p-5 rounded-2xl border text-center space-y-2 ${
+              isLight ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
+            }`}>
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
+              <h3 className="font-bold text-base text-emerald-500">Estabelecimento Cadastrado com Sucesso!</h3>
+              <p className="text-xs max-w-md mx-auto">
+                A loja <strong>"{createdTenantResult.name}"</strong> foi criada e já está configurada com vitrine online, painel de controle e PDV.
+              </p>
             </div>
 
-            {/* Links e Acessos Oficiais */}
             <div className="space-y-3">
-              {/* Link da Vitrine Online / Cardápio */}
+              {/* Link da Vitrine / Cardápio Online */}
               <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 ${
                 isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#151D24] border-[#222E3A]'
               }`}>
                 <div className="min-w-0 flex-1">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Link Oficial da Vitrine / Cardápio</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Link da Vitrine / Cardápio Online</span>
                   <p className="font-mono font-bold text-xs text-sky-600 dark:text-sky-400 truncate">
-                    {`https://nuvi-saas.vercel.app/${createdTenantResult.slug}/cardapio`}
+                    {`https://nuvi-saas.web.app/${createdTenantResult.slug}/cardapio`}
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
-                    onClick={() => handleCopyText(`https://nuvi-saas.vercel.app/${createdTenantResult.slug}/cardapio`, 'vitrine')}
+                    onClick={() => handleCopyText(`https://nuvi-saas.web.app/${createdTenantResult.slug}/cardapio`, 'vitrine')}
                     className="p-2 rounded-lg border text-xs font-semibold hover:bg-slate-200 dark:hover:bg-neutral-700 transition-all flex items-center gap-1 cursor-pointer"
                   >
                     {copiedField === 'vitrine' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -228,12 +334,12 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
                 <div className="min-w-0 flex-1">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">Link de Acesso do Lojista</span>
                   <p className="font-mono font-bold text-xs text-sky-600 dark:text-sky-400 truncate">
-                    {`https://nuvi-saas.vercel.app/acesso_lojista`}
+                    {`https://nuvi-saas.web.app/acesso_lojista`}
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleCopyText(`https://nuvi-saas.vercel.app/acesso_lojista`, 'painel')}
+                  onClick={() => handleCopyText(`https://nuvi-saas.web.app/acesso_lojista`, 'painel')}
                   className="p-2 rounded-lg border text-xs font-semibold hover:bg-slate-200 dark:hover:bg-neutral-700 transition-all flex items-center gap-1 cursor-pointer shrink-0"
                 >
                   {copiedField === 'painel' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -260,19 +366,19 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
               </div>
             </div>
 
-            {/* Ações de Compartilhamento */}
+            {/* Ações de Compartilhamento no WhatsApp */}
             <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 dark:border-neutral-800">
               <a
                 href={`https://wa.me/55${(createdTenantResult.ownerPhone || '').replace(/\D/g, '')}?text=${encodeURIComponent(
                   `Olá ${createdTenantResult.ownerName}! Seu estabelecimento ${createdTenantResult.name} está liberado no Nuvi SaaS:\n\n` +
-                  `🌐 Sua Vitrine / Cardápio: https://nuvi-saas.vercel.app/${createdTenantResult.slug}/cardapio\n` +
-                  `📱 Seu Painel de Gestão: https://nuvi-saas.vercel.app/acesso_lojista\n` +
+                  `🌐 Sua Vitrine / Cardápio: https://nuvi-saas.web.app/${createdTenantResult.slug}/cardapio\n` +
+                  `📱 Seu Painel de Gestão: https://nuvi-saas.web.app/acesso_lojista\n` +
                   `🔑 Login (WhatsApp): ${createdTenantResult.ownerPhone}\n` +
                   `🔒 Senha: ${createdTenantResult.adminPassword || '123456'}`
                 )}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20be5a] text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20be5a] text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
               >
                 <MessageCircle className="w-4 h-4 fill-white" />
                 <span>Enviar Acesso no WhatsApp</span>
@@ -281,270 +387,434 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
               <button
                 type="button"
                 onClick={handleFinishSuccess}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-md cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition-all shadow-md cursor-pointer"
               >
                 Concluir & Abrir Gestão
               </button>
             </div>
           </div>
         ) : (
-          /* Form Body */
-          <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
-          
-          {/* Segmento de Comércio */}
-          <div className="space-y-1.5">
-            <label className={labelClass}>
-              Segmento / Tipo de Comércio do Cliente *
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {BUSINESS_SEGMENTS.map((seg) => {
-                const isSelected = selectedSegment === seg.id;
-                return (
-                  <button
-                    key={seg.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedSegment(seg.id);
-                      if (!slogan) setSlogan(seg.sloganExample);
-                    }}
-                    className={`p-2 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1 outline-none ${
-                      isSelected
-                        ? 'bg-blue-600 text-white shadow-xs border-transparent'
-                        : isLight
-                        ? 'bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700'
-                        : 'bg-[#0B0F12] hover:bg-[#161D24] border border-[#1C2631] text-neutral-300'
-                    }`}
-                  >
-                    <span className="text-lg leading-none">{seg.emoji}</span>
-                    <span className={`text-[10px] font-bold leading-tight line-clamp-1 ${
-                      isSelected ? (isLight ? 'text-blue-700' : 'text-blue-400') : ''
-                    }`}>
-                      {seg.shortLabel}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+            
+            {/* Scrollable Form Content */}
+            <div className="p-6 space-y-6 max-h-[68vh] overflow-y-auto">
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="sm:col-span-2">
-              <label className={labelClass}>
-                Nome Fantasia do Estabelecimento ({segmentConfig.shortLabel}) *
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={segmentConfig.namePlaceholder}
-                className={inputClass}
-              />
-            </div>
+              {/* ======================================================== */}
+              {/* PASSO 1: ESTABELECIMENTO & IDENTIDADE VISUAL (1 e 2 UNIDOS) */}
+              {/* ======================================================== */}
+              {step === 1 && (
+                <div className="space-y-6">
 
-            <div className="sm:col-span-2 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className={labelClass}>
-                  Slogan / Proposta de Valor
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setSlogan(segmentConfig.sloganExample)}
-                  className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:opacity-80 flex items-center gap-1 cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  <span>Usar simulação</span>
-                </button>
-              </div>
-              <input
-                type="text"
-                value={slogan}
-                onChange={(e) => setSlogan(e.target.value)}
-                placeholder={segmentConfig.sloganExample}
-                className={inputClass}
-              />
-              <div className={`p-2.5 rounded-lg border text-xs flex items-center justify-between gap-2 ${
-                isLight ? 'bg-blue-50 border-blue-200 text-blue-900' : 'bg-blue-950/20 border-blue-500/30 text-blue-200'
-              }`}>
-                <span className="truncate italic">
-                  💡 Simulação para {segmentConfig.shortLabel}: "{segmentConfig.sloganExample}"
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setSlogan(segmentConfig.sloganExample)}
-                  className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white shrink-0 cursor-pointer"
-                >
-                  Preencher
-                </button>
-              </div>
-            </div>
+                  {/* 1. Escolha do Ramo / Segmento de Comércio */}
+                  <div className={`p-4 rounded-2xl border space-y-3 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <label className={labelClass}>
+                        1. Qual é o ramo / segmento de comércio do cliente? *
+                      </label>
+                      <span className="text-[11px] font-bold text-sky-500">
+                        {segmentConfig.title}
+                      </span>
+                    </div>
 
-            <div>
-              <label className={labelClass}>
-                Nome do Lojista / Contratante
-              </label>
-              <input
-                type="text"
-                value={ownerName}
-                onChange={(e) => setOwnerName(e.target.value)}
-                placeholder="Marcos Paulo"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                WhatsApp do Lojista (DDD + Número) *
-              </label>
-              <input
-                type="tel"
-                required
-                value={ownerPhone}
-                onChange={(e) => setOwnerPhone(e.target.value)}
-                placeholder="11988887777"
-                className={inputClass}
-              />
-            </div>
-
-            {/* Senha de Acesso Inicial */}
-            <div className="sm:col-span-2">
-              <label className={labelClass}>
-                Senha de Acesso do Lojista (Painel & PDV) *
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Defina a senha de acesso (padrão: 123456)"
-                  className={`${inputClass} pl-9 pr-10`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-blue-500 cursor-pointer"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              <p className={`text-[11px] mt-1 ${isLight ? 'text-neutral-500' : 'text-neutral-500'}`}>
-                Essa é a senha que o lojista usará para entrar no painel da loja dele junto com o WhatsApp.
-              </p>
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                Cidade
-              </label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="São Paulo"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                Bairro Principal
-              </label>
-              <input
-                type="text"
-                value={neighborhood}
-                onChange={(e) => setNeighborhood(e.target.value)}
-                placeholder="Pinheiros, Vila Madalena..."
-                className={inputClass}
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className={labelClass}>
-                Plano Contratado do SaaS
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: 'starter', label: 'Starter', price: 'R$ 99/mês' },
-                  { id: 'pro', label: 'Pro (Recomendado)', price: 'R$ 189/mês' },
-                  { id: 'enterprise', label: 'Enterprise', price: 'R$ 299/mês' },
-                ].map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setPlan(p.id as any)}
-                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                      plan === p.id
-                        ? isLight
-                          ? 'border-blue-600 bg-blue-50 text-neutral-900 font-bold shadow-2xs'
-                          : 'border-blue-500 bg-blue-500/15 text-white font-bold'
-                        : isLight
-                        ? 'border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 shadow-2xs'
-                        : 'border-neutral-800 bg-neutral-800 text-neutral-400'
-                    }`}
-                  >
-                    <div className="text-xs font-semibold">{p.label}</div>
-                    <div className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>{p.price}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Initial Theme Selection */}
-          <div className={`pt-3 border-t ${isLight ? 'border-neutral-200' : 'border-neutral-800'}`}>
-            <label className={labelClass}>
-              Tema Visual Inicial da Vitrine
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {PRESET_THEMES.map((theme, idx) => (
-                <button
-                  key={theme.id}
-                  type="button"
-                  onClick={() => setSelectedThemeIndex(idx)}
-                  className={`p-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
-                    selectedThemeIndex === idx
-                      ? isLight
-                        ? 'border-blue-600 bg-blue-50/70 ring-1 ring-blue-500 shadow-2xs'
-                        : 'border-blue-500 bg-neutral-800 ring-1 ring-blue-500/50'
-                      : isLight
-                      ? 'border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 shadow-2xs'
-                      : 'border-neutral-800 bg-neutral-800/40 text-neutral-400'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-4 h-4 rounded-md border border-black/20 shrink-0"
-                      style={{ backgroundColor: theme.primary }}
-                    />
-                    <span className={`text-xs font-medium ${isLight ? 'text-neutral-900' : 'text-white'}`}>{theme.name}</span>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {BUSINESS_SEGMENTS.map((seg) => {
+                        const isSelected = selectedSegment === seg.id;
+                        return (
+                          <button
+                            key={seg.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedSegment(seg.id);
+                              if (!slogan) setSlogan(seg.sloganExample);
+                            }}
+                            className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 outline-none ${
+                              isSelected
+                                ? 'nuvi-btn-cyber-blue text-white shadow-md shadow-[#0C2340]/40'
+                                : isLight
+                                ? 'bg-white hover:bg-sky-50/50 border border-slate-200 text-slate-700'
+                                : 'bg-[#0B0F12] hover:bg-[#161D24] border border-[#1C2631] text-slate-300'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xl leading-none">{seg.emoji}</span>
+                              {isSelected && (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                              )}
+                            </div>
+                            <span className={`text-[11px] leading-tight line-clamp-1 ${
+                              isSelected ? 'text-white font-bold' : 'font-medium'
+                            }`}>
+                              {seg.shortLabel}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  {selectedThemeIndex === idx && <Check className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
-                </button>
-              ))}
+
+                  {/* 2. Nome do Estabelecimento e Slogan Comercial */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-2">
+                      <label className={labelClass}>
+                        2. Nome Fantasia do Estabelecimento ({segmentConfig.shortLabel}) *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder={segmentConfig.namePlaceholder}
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className={labelClass}>
+                          Slogan / Proposta de Valor
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setSlogan(segmentConfig.sloganExample)}
+                          className="text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:opacity-80 flex items-center gap-1 cursor-pointer"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>Usar simulação</span>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={slogan}
+                        onChange={(e) => setSlogan(e.target.value)}
+                        placeholder={segmentConfig.sloganExample}
+                        className={inputClass}
+                      />
+                      <div className={`p-2.5 rounded-lg border text-xs flex items-center justify-between gap-2 ${
+                        isLight ? 'bg-sky-50 border-sky-200 text-sky-900' : 'bg-sky-950/20 border-sky-500/30 text-sky-200'
+                      }`}>
+                        <span className="truncate italic">
+                          💡 Sugestão para {segmentConfig.shortLabel}: "{segmentConfig.sloganExample}"
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setSlogan(segmentConfig.sloganExample)}
+                          className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-600 hover:bg-sky-500 text-white shrink-0 cursor-pointer"
+                        >
+                          Preencher
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Seleção de Plano do SaaS (Cards Dinâmicos em 2 Colunas) */}
+                  <div className="space-y-2">
+                    <label className={labelClass}>
+                      3. Plano de Assinatura do SaaS Contratado
+                    </label>
+                    <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+                      {availablePlans.map((p: any) => {
+                        const isSelected = plan === p.id || (p.id === 'plan_hibrido' && plan === 'hibrido') || (p.id === 'plan_balcao' && plan === 'balcao') || (p.id === 'plan_cardapio' && plan === 'vitrine');
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => {
+                              if (p.id === 'plan_cardapio') setPlan('vitrine');
+                              else if (p.id === 'plan_balcao') setPlan('balcao');
+                              else setPlan('hibrido');
+                            }}
+                            className={`p-3.5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                              isSelected
+                                ? 'nuvi-btn-cyber-blue text-white shadow-md shadow-[#0C2340]/40'
+                                : isLight
+                                ? 'bg-slate-50 border border-slate-200 hover:border-slate-300'
+                                : 'bg-[#121820] border border-[#1C2631] hover:border-slate-700'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className={`font-bold text-xs line-clamp-1 ${
+                                isSelected ? 'text-white' : 'text-slate-900 dark:text-white'
+                              }`}>
+                                {p.name}
+                              </span>
+                              <div className="flex items-center gap-1.5">
+                                {p.tag && (
+                                  <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full shrink-0 ${
+                                    isSelected 
+                                      ? 'bg-white/20 text-white' 
+                                      : 'bg-sky-500/20 text-sky-400'
+                                  }`}>
+                                    {p.tag}
+                                  </span>
+                                )}
+                                {isSelected && (
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5] shrink-0" />
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-baseline gap-1">
+                              <span className={`text-base sm:text-lg font-black ${
+                                isSelected ? 'text-sky-300' : 'text-sky-500'
+                              }`}>
+                                R$ {Number(p.price || 97).toFixed(2)}
+                              </span>
+                              <span className={`text-[10px] ${
+                                isSelected ? 'text-slate-300' : 'text-slate-400'
+                              }`}>/mês</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 4. Tema Visual & Cores Iniciais da Vitrine */}
+                  <div className="space-y-2">
+                    <label className={labelClass}>
+                      4. Tema Visual e Paleta de Cores da Vitrine
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {PRESET_THEMES.slice(0, 8).map((t, idx) => {
+                        const isSelected = selectedThemeIndex === idx;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setSelectedThemeIndex(idx)}
+                            className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                              isSelected
+                                ? 'nuvi-btn-cyber-blue text-white shadow-md shadow-[#0C2340]/40'
+                                : isLight
+                                ? 'bg-slate-50 border border-slate-200 hover:border-slate-300'
+                                : 'bg-[#121820] border border-[#1C2631] hover:border-slate-700'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <div 
+                                  className="w-4 h-4 rounded-full border border-white/30 shadow-xs" 
+                                  style={{ backgroundColor: t.primary }} 
+                                />
+                                <div 
+                                  className="w-4 h-4 rounded-full border border-white/30 shadow-xs" 
+                                  style={{ backgroundColor: t.accent }} 
+                                />
+                              </div>
+                              {isSelected && (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                              )}
+                            </div>
+                            <span className={`text-[10px] font-bold truncate ${
+                              isSelected ? 'text-white' : 'text-slate-900 dark:text-white'
+                            }`}>
+                              {t.name}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {/* ======================================================== */}
+              {/* PASSO 2: ACESSO, CONTATO & LOCALIZAÇÃO */}
+              {/* ======================================================== */}
+              {step === 2 && (
+                <div className="space-y-6">
+
+                  {/* 1. Dados do Lojista e Contato */}
+                  <div className={`p-4 rounded-2xl border space-y-4 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                  }`}>
+                    <h3 className={`text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${
+                      isLight ? 'text-slate-800' : 'text-slate-200'
+                    }`}>
+                      <User className="w-4 h-4 text-sky-500" />
+                      1. Responsável & WhatsApp de Contato
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className={labelClass}>
+                          Nome do Lojista / Proprietário
+                        </label>
+                        <input
+                          type="text"
+                          value={ownerName}
+                          onChange={(e) => setOwnerName(e.target.value)}
+                          placeholder="Ex: Carlos Eduardo"
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>
+                          WhatsApp do Lojista (DDD + Número) *
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={ownerPhone}
+                          onChange={(e) => setOwnerPhone(e.target.value)}
+                          placeholder="Ex: 11988887777"
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. Credenciais de Acesso ao Painel & PDV */}
+                  <div className={`p-4 rounded-2xl border space-y-3 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                  }`}>
+                    <h3 className={`text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${
+                      isLight ? 'text-slate-800' : 'text-slate-200'
+                    }`}>
+                      <Lock className="w-4 h-4 text-sky-500" />
+                      2. Senha de Acesso do Lojista (Painel & PDV) *
+                    </h3>
+
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Defina a senha (padrão: 123456)"
+                        className={`${inputClass} pl-9 pr-10`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-sky-500 cursor-pointer"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    <p className="text-[11px] text-slate-500">
+                      O lojista usará este número de WhatsApp e esta senha para entrar no painel de vendas e PDV.
+                    </p>
+                  </div>
+
+                  {/* 3. Localização da Loja */}
+                  <div className={`p-4 rounded-2xl border space-y-3 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                  }`}>
+                    <h3 className={`text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${
+                      isLight ? 'text-slate-800' : 'text-slate-200'
+                    }`}>
+                      <MapPin className="w-4 h-4 text-sky-500" />
+                      3. Localização do Estabelecimento
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className={labelClass}>Cidade</label>
+                        <input
+                          type="text"
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          placeholder="São Paulo"
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>Bairro Principal</label>
+                        <input
+                          type="text"
+                          value={neighborhood}
+                          onChange={(e) => setNeighborhood(e.target.value)}
+                          placeholder="Centro, Pinheiros..."
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4. Resumo da Configuração Antes de Criar */}
+                  <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${
+                    isLight ? 'bg-sky-50/50 border-sky-200' : 'bg-sky-950/20 border-sky-500/30'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{segmentConfig.emoji}</span>
+                      <div>
+                        <h4 className="font-bold text-xs text-slate-900 dark:text-white">
+                          {name || 'Nome do Estabelecimento'}
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          {segmentConfig.title} • {city || 'São Paulo'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-sky-500 block">
+                        Plano {plan.toUpperCase()}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        Pronto para ativação
+                      </span>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
             </div>
-          </div>
 
-          <div className={`flex items-center justify-end gap-2 pt-4 border-t ${isLight ? 'border-neutral-200' : 'border-neutral-800'}`}>
-            <button
-              type="button"
-              onClick={onClose}
-              className={`px-4 py-2 rounded-xl font-medium transition-colors cursor-pointer ${
-                isLight ? 'bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-100' : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300'
-              }`}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-md cursor-pointer"
-            >
-              Cadastrar Estabelecimento
-            </button>
-          </div>
+            {/* Wizard Navigation Footer */}
+            <div className={`px-6 py-4 border-t flex items-center justify-between transition-colors ${
+              isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+            }`}>
+              
+              <div>
+                {step === 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                      isLight 
+                        ? 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700' 
+                        : 'bg-[#161D24] hover:bg-[#1E2933] border-[#222E3A] text-slate-200'
+                    }`}
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Voltar</span>
+                  </button>
+                )}
+              </div>
 
-        </form>
+              <div className="flex items-center gap-2">
+                {step === 1 ? (
+                  <button
+                    type="button"
+                    onClick={handleAdvanceToStep2}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                  >
+                    <span>Próximo Passo</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-sky-600/25 transition-all active:scale-[0.98] cursor-pointer"
+                  >
+                    <Zap className="w-4 h-4 text-white" />
+                    <span>Criar Estabelecimento & Gerar Acessos</span>
+                  </button>
+                )}
+              </div>
+
+            </div>
+
+          </form>
         )}
 
       </div>

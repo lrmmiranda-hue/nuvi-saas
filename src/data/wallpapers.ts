@@ -1,6 +1,6 @@
 export interface StoreWallpaper {
   id: string;
-  category: 'adega' | 'restaurante' | 'pizzaria' | 'japonesa' | 'pesqueiro' | 'mercadinho' | 'petshop' | 'tabacaria' | 'cosmeticos' | 'pastelaria';
+  category: 'adega' | 'restaurante' | 'pizzaria' | 'japonesa' | 'pesqueiro' | 'mercadinho' | 'petshop' | 'tabacaria' | 'cosmeticos' | 'pastelaria' | 'propaganda';
   title: string;
   subtitle: string;
   url: string;
@@ -9,6 +9,7 @@ export interface StoreWallpaper {
 
 export const WALLPAPER_CATEGORIES = [
   { id: 'adega' as const, label: 'Adega & Bebidas', icon: 'Wine' },
+  { id: 'propaganda' as const, label: '📢 Banners de Propaganda & Ofertas', icon: 'Megaphone' },
   { id: 'pizzaria' as const, label: 'Pizzaria & Forno', icon: 'Pizza' },
   { id: 'pesqueiro' as const, label: 'Pesqueiro, Porções & À La Carte', icon: 'Fish' },
   { id: 'restaurante' as const, label: 'Lanches & Hamburgueria', icon: 'Sandwich' },
@@ -22,8 +23,60 @@ export const WALLPAPER_CATEGORIES = [
 
 export const STORE_WALLPAPERS: StoreWallpaper[] = [
   // ==========================================
+  // 📢 BANNERS DE PROPAGANDA & OFERTAS
+  // ==========================================
+  {
+    id: 'propaganda_mega_combos',
+    category: 'propaganda',
+    title: 'Propaganda: Mega Ofertas & Combos Especiais',
+    subtitle: 'Flyer promocional impactante com combos, drinks iluminados e ofertas da semana',
+    url: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=1200&q=80',
+    tag: '📢 Mega Oferta',
+  },
+  {
+    id: 'propaganda_cervejas_trincando',
+    category: 'propaganda',
+    title: 'Propaganda: Cervejas Super Geladas & Fardos Promocionais',
+    subtitle: 'Garrafas e cervejas trincando no gelo com gotas d\'água para alta conversão de pedidos',
+    url: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1200&q=80',
+    tag: '📢 Promoção Relâmpago',
+  },
+  {
+    id: 'propaganda_happy_hour_drinks',
+    category: 'propaganda',
+    title: 'Propaganda: Festival de Drinks & Delivery no WhatsApp',
+    subtitle: 'Lounge festivo iluminado com taças e coquetéis premium para eventos e churrascos',
+    url: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1200&q=80',
+    tag: '📢 Happy Hour & Festas',
+  },
+
+  // ==========================================
   // 🍷 1. ADEGA & DISTRIBUIDORA DE BEBIDAS
   // ==========================================
+  {
+    id: 'adega_propaganda_combos',
+    category: 'adega',
+    title: 'Propaganda: Mega Combos de Destilados & Energéticos',
+    subtitle: 'Flyer de alta conversão para kits, festas e entregas de bebidas à noite',
+    url: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=1200&q=80',
+    tag: '📢 Propaganda & Kits',
+  },
+  {
+    id: 'adega_propaganda_cervejas',
+    category: 'adega',
+    title: 'Propaganda: Cervejas Trincando no Gelo & Preço de Atacado',
+    subtitle: 'Garrafas suadas prontas para entrega rápida sem taxa de comissão',
+    url: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1200&q=80',
+    tag: '📢 Propaganda Geladas',
+  },
+  {
+    id: 'adega_propaganda_drinks',
+    category: 'adega',
+    title: 'Propaganda: Drinks Especiais & Noite de Degustação',
+    subtitle: 'Visual cinematográfico noturno para impulsionar pedidos no WhatsApp',
+    url: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1200&q=80',
+    tag: '📢 Propaganda Drinks',
+  },
   {
     id: 'adega_iluminada',
     category: 'adega',
