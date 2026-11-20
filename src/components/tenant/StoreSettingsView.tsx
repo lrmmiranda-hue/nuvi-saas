@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { StoreUsersManager } from './StoreUsersManager';
 import { StoreBrandingSettings } from './StoreBrandingSettings';
+import { TableQRCodeModal } from './TableQRCodeModal';
 import {
   Building2,
   Sliders,
@@ -88,6 +89,9 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
     enableOnlineSales: true,
     enableBarcodeScanner: true,
     enableMenuOnlyMode: false,
+    enableTableService: false,
+    tableCount: 12,
+    serviceFeePercentage: 10,
     catalogLayout: 'grid' as const,
     pixKey: '',
     acceptPix: true,
@@ -96,6 +100,8 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
     allowOrdersWhenClosed: false,
     soundAlerts: true,
   });
+
+  const [isTableQRCodeModalOpen, setIsTableQRCodeModalOpen] = useState(false);
 
   // Form states de WhatsApp
   const [whatsAppEdits, setWhatsAppEdits] = useState(currentTenant?.whatsapp || {
@@ -599,6 +605,68 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
                       onChange={(e) => setConfigEdits({ ...configEdits, enableBarcodeScanner: e.target.checked })}
                       className="w-4 h-4 rounded cursor-pointer"
                     />
+                  </div>
+
+                  {/* Toggle Atendimento em Mesas & Comandas (Dine-in) */}
+                  <div className={`p-4 rounded-xl border space-y-3 sm:col-span-2 ${
+                    configEdits.enableTableService
+                      ? isLight ? 'bg-sky-50 border-sky-300' : 'bg-sky-950/20 border-sky-500/40'
+                      : isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <UtensilsCrossed className="w-5 h-5 text-sky-500" />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold block text-xs sm:text-sm">
+                              Atendimento em Mesas & Comandas (Dine-in)
+                            </span>
+                            <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-500">
+                              Restaurante & Bar
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-slate-400">
+                            Ao ativar, os pedidos feitos no salão indicam a Mesa e vão direto para a Cozinha sem WhatsApp, acumulando na conta da mesa para recebimento no caixa.
+                          </span>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={configEdits.enableTableService ?? false}
+                        onChange={(e) => setConfigEdits({ ...configEdits, enableTableService: e.target.checked })}
+                        className="w-5 h-5 rounded text-sky-500 cursor-pointer"
+                      />
+                    </div>
+
+                    {configEdits.enableTableService && (
+                      <div className="pt-3 border-t border-sky-200 dark:border-sky-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                            Mesas no Salão:
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="60"
+                            value={configEdits.tableCount || 12}
+                            onChange={(e) => setConfigEdits({ ...configEdits, tableCount: Math.max(1, parseInt(e.target.value) || 1) })}
+                            className={`w-20 px-2.5 py-1 rounded-lg text-xs font-bold border outline-none ${
+                              isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#0B0F14] border-[#1C2631] text-white'
+                            }`}
+                          />
+                          <span className="text-xs text-slate-400">mesas ativas</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsTableQRCodeModalOpen(true)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg nuvi-btn-cyber-blue text-white font-bold text-xs shadow-md shadow-[#0C2340]/40 transition-all cursor-pointer hover:brightness-110 shrink-0"
+                        >
+                          <QrCode className="w-3.5 h-3.5" />
+                          <span>Imprimir Plaquinhas QR Code das Mesas</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1106,6 +1174,15 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
 
         </div>
       </div>
+
+      {/* Modal de Plaquinhas QR Code das Mesas */}
+      {isTableQRCodeModalOpen && currentTenant && (
+        <TableQRCodeModal
+          tenant={currentTenant}
+          onClose={() => setIsTableQRCodeModalOpen(false)}
+          isLight={isLight}
+        />
+      )}
     </div>
   );
 };

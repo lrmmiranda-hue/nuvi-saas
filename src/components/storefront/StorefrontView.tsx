@@ -41,13 +41,15 @@ import {
   Sun,
   Moon,
   LayoutGrid,
-  List
+  List,
+  ReceiptText
 } from 'lucide-react';
 
 export const StorefrontView: React.FC = () => {
   const {
     currentTenant,
     tenantProducts,
+    tenantOrders,
     cart,
     addToCart,
     generateWhatsAppDirectChatUrl,
@@ -57,6 +59,37 @@ export const StorefrontView: React.FC = () => {
   } = useStore();
 
   const isLight = themeMode === 'light';
+
+  // Atendimento em Mesas (Salão / Dine-in)
+  const [tableNumber, setTableNumber] = useState<string | null>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('mesa') || params.get('table') || null;
+    } catch {
+      return null;
+    }
+  });
+  const [isTableSelectorOpen, setIsTableSelectorOpen] = useState(false);
+  const [isTableOrdersModalOpen, setIsTableOrdersModalOpen] = useState(false);
+  const [tempTableInput, setTempTableInput] = useState('');
+
+  const isTableActive = Boolean(currentTenant?.config?.enableTableService || tableNumber);
+
+  // Pedidos ativos da mesa atual
+  const tableOrders = useMemo(() => {
+    if (!tableNumber) return [];
+    const normalizedTarget = tableNumber.replace(/[^0-9]/g, '');
+    return tenantOrders.filter((ord) => {
+      if (ord.status === 'cancelado') return false;
+      if (ord.tableStatus === 'fechada') return false;
+      const ordMesa = (ord.tableNumber || '').replace(/[^0-9]/g, '');
+      return ordMesa === normalizedTarget || ord.tableNumber === tableNumber;
+    });
+  }, [tenantOrders, tableNumber]);
+
+  const tableOrdersTotal = useMemo(() => {
+    return tableOrders.reduce((sum, ord) => sum + ord.total, 0);
+  }, [tableOrders]);
 
   // Controle de Layout do Cardápio: Grade com fotos grandes vs Lista com miniatura lateral
   const [viewModeOverride, setViewModeOverride] = useState<'grid' | 'list' | null>(null);
@@ -485,6 +518,63 @@ export const StorefrontView: React.FC = () => {
           </div>
         );
       })()}
+
+      {/* Barra de Atendimento em Mesas (Salão / Dine-in) */}
+      {isTableActive && (
+        <div className={`p-3 sm:p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-sm transition-all ${
+          isLight 
+            ? 'bg-gradient-to-r from-blue-50 via-indigo-50/50 to-white border-blue-200 text-blue-950' 
+            : 'bg-gradient-to-r from-blue-950/40 via-neutral-900 to-neutral-900 border-blue-800/60 text-white'
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+              <UtensilsCrossed className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-500 border border-blue-500/25">
+                  Cardápio da Mesa
+                </span>
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <h3 className="text-sm font-black flex items-center gap-1.5 mt-0.5">
+                {tableNumber ? (
+                  <>Você está na <span className="text-blue-500">Mesa {tableNumber.replace(/[^0-9]/g, '') || tableNumber}</span></>
+                ) : (
+                  <>Atendimento no Salão • Informe sua Mesa</>
+                )}
+              </h3>
+              <p className="text-[11px] text-slate-500 dark:text-neutral-400">
+                Seus pedidos vão direto para a cozinha e acumulam nesta comanda.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setTempTableInput(tableNumber || '');
+                setIsTableSelectorOpen(true);
+              }}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold border border-blue-300 dark:border-blue-700/60 bg-white dark:bg-neutral-800 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-neutral-700 transition-all cursor-pointer shadow-2xs"
+            >
+              {tableNumber ? 'Trocar Mesa' : 'Informar Mesa'}
+            </button>
+
+            {tableOrdersTotal > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsTableOrdersModalOpen(true)}
+                className="px-3 py-1.5 rounded-xl text-xs font-black bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <ReceiptText className="w-3.5 h-3.5" />
+                <span>Ver Conta (R$ {tableOrdersTotal.toFixed(2)})</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Filter Toolbar & Category Navigation */}
       <div className="space-y-3">
@@ -1658,7 +1748,226 @@ export const StorefrontView: React.FC = () => {
         onClose={() => setIsCartOpen(false)}
         tenant={currentTenant}
         onOrderCompleted={handleOrderCompleted}
+        tableNumber={tableNumber || undefined}
+        onSetTableNumber={(tbl) => setTableNumber(tbl)}
+        isTableServiceEnabled={isTableActive}
       />
+
+      {/* Modal Selecionar Número da Mesa */}
+      {isTableSelectorOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="absolute inset-0" onClick={() => setIsTableSelectorOpen(false)} />
+          <div className={`relative max-w-sm w-full rounded-3xl border p-5 sm:p-6 shadow-2xl space-y-4 ${
+            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-blue-600 text-white">
+                  <UtensilsCrossed className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Identificar Mesa</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-neutral-400">Em qual mesa você está sentado?</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTableSelectorOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold block mb-1.5 text-slate-700 dark:text-neutral-300">
+                Digite o número da sua mesa:
+              </label>
+              <input
+                type="text"
+                autoFocus
+                value={tempTableInput}
+                onChange={(e) => setTempTableInput(e.target.value)}
+                placeholder="Ex: Mesa 04 ou 4"
+                className={`w-full px-3.5 py-2.5 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-500 ${
+                  isLight
+                    ? 'bg-slate-50 border border-slate-300 text-slate-900'
+                    : 'bg-neutral-950 border border-neutral-700 text-white'
+                }`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (tempTableInput.trim()) {
+                      setTableNumber(tempTableInput.trim());
+                      setIsTableSelectorOpen(false);
+                    }
+                  }
+                }}
+              />
+            </div>
+
+            {/* Atalhos rápidos de mesa */}
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-neutral-400 block mb-2">
+                Atalhos Rápidos:
+              </span>
+              <div className="grid grid-cols-4 gap-2">
+                {Array.from({ length: Math.min(12, currentTenant.config?.tableCount || 12) }, (_, i) => {
+                  const num = String(i + 1).padStart(2, '0');
+                  const mesaStr = `Mesa ${num}`;
+                  const isSelected = tableNumber === mesaStr || tableNumber === String(i + 1);
+                  return (
+                    <button
+                      key={mesaStr}
+                      type="button"
+                      onClick={() => {
+                        setTableNumber(mesaStr);
+                        setIsTableSelectorOpen(false);
+                      }}
+                      className={`p-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-blue-600 border-blue-500 text-white shadow-sm'
+                          : isLight
+                          ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                          : 'bg-neutral-950 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-2 flex gap-2">
+              {tableNumber && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTableNumber(null);
+                    setIsTableSelectorOpen(false);
+                  }}
+                  className="px-3 py-2.5 rounded-xl text-xs font-bold border border-slate-300 dark:border-neutral-700 text-slate-600 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors"
+                >
+                  Limpar
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (tempTableInput.trim()) {
+                    setTableNumber(tempTableInput.trim());
+                  }
+                  setIsTableSelectorOpen(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20"
+              >
+                Confirmar Mesa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Extrato da Conta da Mesa (Cliente Consulta) */}
+      {isTableOrdersModalOpen && tableNumber && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="absolute inset-0" onClick={() => setIsTableOrdersModalOpen(false)} />
+          <div className={`relative max-w-md w-full rounded-3xl border p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col ${
+            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-blue-600 text-white">
+                  <ReceiptText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black">
+                    Extrato Parcial • {tableNumber.replace(/[^0-9]/g, '') ? `Mesa ${tableNumber.replace(/[^0-9]/g, '')}` : tableNumber}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-neutral-400">
+                    {tableOrders.length} {tableOrders.length === 1 ? 'pedido lançado' : 'pedidos lançados'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTableOrdersModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Lista dos Pedidos da Mesa */}
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
+              {tableOrders.map((ord, idx) => (
+                <div
+                  key={ord.id}
+                  className={`p-3 rounded-2xl border space-y-2 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-neutral-950 border-neutral-800'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-blue-500">
+                      Rodada #{idx + 1} • {ord.id}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                      ord.status === 'novo'
+                        ? 'bg-amber-500/15 text-amber-500'
+                        : ord.status === 'preparando'
+                        ? 'bg-blue-500/15 text-blue-500'
+                        : 'bg-emerald-500/15 text-emerald-500'
+                    }`}>
+                      {ord.status === 'novo' ? 'Na Cozinha' : ord.status === 'preparando' ? 'Em Preparo' : 'Entregue'}
+                    </span>
+                  </div>
+
+                  <div className="divide-y divide-slate-200 dark:divide-neutral-800">
+                    {ord.items.map((it, iIdx) => (
+                      <div key={iIdx} className="py-1 flex justify-between items-center text-slate-700 dark:text-neutral-300">
+                        <span>
+                          <strong className="text-slate-900 dark:text-white">{it.quantity}x</strong> {it.productName}
+                        </span>
+                        <span className="font-mono">R$ {(it.price * it.quantity).toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-1 border-t border-slate-200 dark:border-neutral-800 flex justify-between font-bold text-slate-900 dark:text-white">
+                    <span>Subtotal:</span>
+                    <span>R$ {ord.total.toFixed(2)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Total Acumulado */}
+            <div className={`p-3.5 rounded-2xl border shrink-0 space-y-1.5 ${
+              isLight ? 'bg-blue-50 border-blue-200 text-blue-950' : 'bg-blue-950/30 border-blue-800/60 text-white'
+            }`}>
+              <div className="flex justify-between items-baseline font-black">
+                <span className="text-xs uppercase tracking-wider">Total Consumido:</span>
+                <span className="text-lg text-blue-600 dark:text-blue-400 font-black">
+                  R$ {tableOrdersTotal.toFixed(2)}
+                </span>
+              </div>
+              <p className="text-[10px] text-blue-600 dark:text-blue-300 font-medium">
+                💳 Para fechar sua conta e efetuar o pagamento, solicite o encerramento ao garçom ou dirija-se ao caixa informando sua mesa.
+              </p>
+            </div>
+
+            <div className="pt-1 flex gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsTableOrdersModalOpen(false)}
+                className="w-full py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20"
+              >
+                Voltar ao Cardápio & Pedir Mais
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Order Confirmation Screen */}
       <OrderConfirmationModal

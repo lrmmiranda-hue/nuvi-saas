@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Tenant, Order, PaymentMethod, DeliveryType } from '../../types';
 import { 
@@ -17,7 +17,8 @@ import {
   Check, 
   Sparkles,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  UtensilsCrossed
 } from 'lucide-react';
 
 interface CartDrawerProps {
@@ -25,6 +26,9 @@ interface CartDrawerProps {
   onClose: () => void;
   tenant: Tenant;
   onOrderCompleted: (order: Order) => void;
+  tableNumber?: string;
+  onSetTableNumber?: (table: string) => void;
+  isTableServiceEnabled?: boolean;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
@@ -32,6 +36,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onClose,
   tenant,
   onOrderCompleted,
+  tableNumber,
+  onSetTableNumber,
+  isTableServiceEnabled,
 }) => {
   const {
     cart,
@@ -45,13 +52,22 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   } = useStore();
 
   const isLight = themeMode === 'light';
+  const hasTableService = isTableServiceEnabled || tenant.config?.enableTableService || !!tableNumber;
 
-  const [deliveryType, setDeliveryType] = useState<DeliveryType>('delivery');
+  const [deliveryType, setDeliveryType] = useState<DeliveryType>(tableNumber ? 'mesa' : 'delivery');
+  const [selectedTable, setSelectedTable] = useState<string>(tableNumber || '');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
   const [cashChangeFor, setCashChangeFor] = useState<string>('');
   const [orderNotes, setOrderNotes] = useState('');
+
+  useEffect(() => {
+    if (tableNumber) {
+      setSelectedTable(tableNumber);
+      setDeliveryType('mesa');
+    }
+  }, [tableNumber]);
 
   // Address
   const [address, setAddress] = useState({
@@ -70,11 +86,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
   const isFreeDelivery =
     deliveryType === 'pickup' ||
+    deliveryType === 'mesa' ||
     (tenant.address.freeDeliveryThreshold &&
       subtotal >= tenant.address.freeDeliveryThreshold);
 
   const deliveryFee =
-    deliveryType === 'pickup'
+    deliveryType === 'pickup' || deliveryType === 'mesa'
       ? 0
       : isFreeDelivery
       ? 0
@@ -109,6 +126,51 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         message: 'Seu carrinho está vazio! Adicione bebidas antes de finalizar.',
         variant: 'warning',
       });
+      return;
+    }
+
+    // Tratamento especial para MESA (Salão / Dine-in)
+    if (deliveryType === 'mesa') {
+      const mesaFinal = selectedTable.trim() || tableNumber?.trim();
+      if (!mesaFinal) {
+        showAlert({
+          title: 'Mesa Não Informada',
+          message: 'Por favor, informe o número da mesa em que você está sentado.',
+          variant: 'warning',
+        });
+        return;
+      }
+
+      const clientName = customerName.trim() || `Cliente Mesa ${mesaFinal.replace(/[^0-9]/g, '') || mesaFinal}`;
+      const clientPhone = customerPhone.trim() || 'Presencial Salão';
+
+      const newOrder = createOrder({
+        customerName: clientName,
+        customerPhone: clientPhone,
+        deliveryType: 'mesa',
+        tableNumber: mesaFinal,
+        isTableOrder: true,
+        tableStatus: 'aberta',
+        address: undefined,
+        deliveryFee: 0,
+        items: [...cart],
+        subtotal,
+        total: subtotal,
+        paymentMethod,
+        cashChangeFor: paymentMethod === 'dinheiro' && cashChangeFor ? Number(cashChangeFor) : null,
+        status: 'novo',
+        notes: orderNotes,
+      });
+
+      showAlert({
+        title: '🍽️ Pedido Enviado para a Cozinha!',
+        message: `Tudo certo! Seus itens foram adicionados à comanda da Mesa ${mesaFinal} e já estão sendo preparados. Bom apetite!`,
+        variant: 'info',
+      });
+
+      clearCart();
+      onOrderCompleted(newOrder);
+      onClose();
       return;
     }
 
@@ -337,11 +399,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
                     Forma de Recebimento
                   </span>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className={`grid gap-2 text-xs ${hasTableService ? 'grid-cols-3' : 'grid-cols-2'}`}>
                     <button
                       type="button"
                       onClick={() => setDeliveryType('delivery')}
-                      className={`p-3 rounded-xl border flex flex-col items-center gap-1 font-medium transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
                         deliveryType === 'delivery'
                           ? isLight
                             ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
@@ -353,7 +415,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       style={deliveryType === 'delivery' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
                     >
                       <Truck className="w-4 h-4" />
-                      <span>Entrega em Casa</span>
+                      <span>Em Casa</span>
                       <span className="text-[10px] opacity-75">
                         {deliveryFee === 0 ? 'Grátis' : `Taxa R$ ${deliveryFee.toFixed(2)}`}
                       </span>
@@ -362,7 +424,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     <button
                       type="button"
                       onClick={() => setDeliveryType('pickup')}
-                      className={`p-3 rounded-xl border flex flex-col items-center gap-1 font-medium transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
                         deliveryType === 'pickup'
                           ? isLight
                             ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
@@ -374,35 +436,99 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       style={deliveryType === 'pickup' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
                     >
                       <Store className="w-4 h-4" />
-                      <span>Retirar na Loja</span>
+                      <span>Retirar</span>
                       <span className="text-[10px] text-emerald-500 font-bold">Sem taxa</span>
                     </button>
+
+                    {hasTableService && (
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryType('mesa')}
+                        className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
+                          deliveryType === 'mesa'
+                            ? isLight
+                              ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
+                              : 'border-blue-500 bg-blue-500/20 text-blue-300 font-bold ring-1 ring-blue-500/40'
+                            : isLight
+                            ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                            : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
+                        }`}
+                      >
+                        <UtensilsCrossed className="w-4 h-4 text-blue-500" />
+                        <span>Na Mesa</span>
+                        <span className="text-[10px] text-blue-400 font-bold">Salão / Cozinha</span>
+                      </button>
+                    )}
                   </div>
                 </div>
+
+                {/* Bloco de Mesa quando selecionado */}
+                {deliveryType === 'mesa' && (
+                  <div className={`p-3.5 rounded-xl border space-y-2.5 ${
+                    isLight ? 'bg-blue-50/70 border-blue-200' : 'bg-blue-950/30 border-blue-800/60'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-blue-600 text-white shrink-0">
+                        <UtensilsCrossed className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className={`text-xs font-bold ${isLight ? 'text-blue-950' : 'text-blue-200'}`}>
+                          Atendimento em Mesa (Dine-in)
+                        </h4>
+                        <p className={`text-[11px] ${isLight ? 'text-blue-700' : 'text-blue-300'}`}>
+                          Os itens serão enviados direto para a cozinha e adicionados à sua comanda.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={`text-[11px] font-bold block mb-1 ${isLight ? 'text-slate-700' : 'text-neutral-300'}`}>
+                        Qual é o número da sua Mesa? *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={selectedTable}
+                        onChange={(e) => {
+                          setSelectedTable(e.target.value);
+                          if (onSetTableNumber) onSetTableNumber(e.target.value);
+                        }}
+                        placeholder="Ex: Mesa 04 (ou apenas 4)"
+                        className={`w-full px-3 py-2 rounded-lg text-xs font-bold focus:outline-none focus:border-blue-500 ${
+                          isLight
+                            ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
+                            : 'bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Customer Info Form */}
                 <div className={`space-y-3 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-neutral-800'}`}>
                   <div className="flex items-center justify-between">
                     <span className={`text-xs font-bold ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
-                      Seus Dados para o Pedido
+                      {deliveryType === 'mesa' ? 'Identificação do Cliente (Opcional)' : 'Seus Dados para o Pedido'}
                     </span>
-                    <button
-                      type="button"
-                      onClick={handleFillDemoAddress}
-                      className="text-[11px] text-amber-500 hover:text-amber-400 font-bold cursor-pointer"
-                    >
-                      Preencher Exemplo
-                    </button>
+                    {deliveryType !== 'mesa' && (
+                      <button
+                        type="button"
+                        onClick={handleFillDemoAddress}
+                        className="text-[11px] text-amber-500 hover:text-amber-400 font-bold cursor-pointer"
+                      >
+                        Preencher Exemplo
+                      </button>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <input
                         type="text"
-                        required
+                        required={deliveryType !== 'mesa'}
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
-                        placeholder="Seu Nome Completo *"
+                        placeholder={deliveryType === 'mesa' ? 'Seu Nome (opcional)' : 'Seu Nome Completo *'}
                         className={`w-full px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-amber-500 ${
                           isLight
                             ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
@@ -413,10 +539,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     <div>
                       <input
                         type="tel"
-                        required
+                        required={deliveryType !== 'mesa'}
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
-                        placeholder="WhatsApp (ex: 11988887777) *"
+                        placeholder={deliveryType === 'mesa' ? 'WhatsApp (opcional)' : 'WhatsApp (ex: 11988887777) *'}
                         className={`w-full px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-amber-500 ${
                           isLight
                             ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
@@ -596,7 +722,22 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
               </div>
 
-              {tenant.whatsapp.enableWhatsAppOrders !== false ? (
+              {deliveryType === 'mesa' ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleCheckout}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm shadow-lg transition-all active:scale-[0.98] cursor-pointer text-white bg-blue-600 hover:bg-blue-500 shadow-blue-500/25"
+                  >
+                    <UtensilsCrossed className="w-4 h-4" />
+                    <span>🍽️ Enviar Itens para a Cozinha ({selectedTable ? `Mesa ${selectedTable.replace(/[^0-9]/g, '') || selectedTable}` : 'Informar Mesa'})</span>
+                  </button>
+
+                  <p className="text-[10px] text-blue-500 dark:text-blue-400 text-center font-medium">
+                    ⚡ Pedido instantâneo! Seus itens entram direto no painel da cozinha e acumulam na comanda da sua mesa sem passar pelo WhatsApp.
+                  </p>
+                </>
+              ) : tenant.whatsapp.enableWhatsAppOrders !== false ? (
                 <>
                   <button
                     type="button"

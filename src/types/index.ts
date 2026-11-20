@@ -43,7 +43,7 @@ export interface Product {
   ingredients?: string; // Ingredientes / Composição do prato, lanche ou pizza
 }
 
-export type DeliveryType = 'delivery' | 'pickup' | 'balcao';
+export type DeliveryType = 'delivery' | 'pickup' | 'balcao' | 'mesa';
 export type PaymentMethod = 'pix' | 'cartao_entrega' | 'cartao_debito' | 'cartao_credito' | 'dinheiro';
 export type OrderStatus = 'novo' | 'preparando' | 'em_entrega' | 'finalizado' | 'cancelado';
 export type OrderChannel = 'online' | 'pdv';
@@ -68,6 +68,9 @@ export interface Order {
   customerName: string;
   customerPhone: string;
   deliveryType: DeliveryType;
+  tableNumber?: string; // Número ou identificador da Mesa (ex: "01", "Mesa 04")
+  isTableOrder?: boolean; // Se o pedido é de atendimento no salão / mesa
+  tableStatus?: 'aberta' | 'fechada'; // Status da comanda da mesa
   address?: {
     street: string;
     number: string;
@@ -87,6 +90,17 @@ export interface Order {
   cashierUserId?: string; // ID do usuário/operador que efetuou a venda no caixa
   cashierUserName?: string; // Nome do usuário/operador no caixa
   createdAt: string;
+}
+
+export interface DiningTable {
+  id: string;
+  number: number;
+  name: string;
+  status: 'available' | 'occupied' | 'closing';
+  openedAt?: string;
+  customerName?: string;
+  orders: Order[];
+  totalAmount: number;
 }
 
 export interface StockMovement {
@@ -150,6 +164,9 @@ export interface StoreManagementConfig {
   enableOnlineSales?: boolean; // Trabalhar com vendas online / cardápio digital / vitrine web
   enableBarcodeScanner?: boolean; // Trabalhar com leitor de código de barras (USB/Bluetooth)
   enableMenuOnlyMode?: boolean; // Modo Somente Cardápio / Consulta: desativa botão adicionar e carrinho, operando como cardápio puro de mesa
+  enableTableService?: boolean; // Atendimento em Mesas & Comandas (Dine-in): pedidos no cardápio vão direto para a cozinha acumulando na mesa
+  tableCount?: number; // Quantidade de mesas do salão (padrão: 12)
+  serviceFeePercentage?: number; // Taxa de serviço opcional para fechamento de mesa (ex: 10%)
   catalogLayout?: 'grid' | 'list'; // 'grid': Grade com fotos grandes; 'list': Lista compacta com miniatura
   pixKey?: string;
   acceptPix: boolean;

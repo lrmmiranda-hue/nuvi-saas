@@ -10,6 +10,7 @@ import { PDVSalesView } from './PDVSalesView';
 import { InventoryView } from './InventoryView';
 import { FinancialManagementView } from './FinancialManagementView';
 import { StoreSettingsView } from './StoreSettingsView';
+import { DiningTablesView } from './DiningTablesView';
 import { PromoFlyerBanner } from '../common/PromoFlyerBanner';
 import { 
   Building2, 
@@ -45,12 +46,12 @@ import {
   Image as ImageIcon,
   Boxes,
   ShoppingCart,
+  UtensilsCrossed,
   Globe,
   Info,
   Sun,
   Moon,
   Wine,
-  UtensilsCrossed,
   Sandwich,
   Pizza,
   Dog,
@@ -110,7 +111,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
   const [showSwitchOperatorModal, setShowSwitchOperatorModal] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
-    'produtos' | 'vendas' | 'estoque' | 'pedidos' | 'configuracoes' | 'visual' | 'whatsapp' | 'entrega' | 'metricas'
+    'produtos' | 'vendas' | 'estoque' | 'pedidos' | 'mesas' | 'configuracoes' | 'visual' | 'whatsapp' | 'entrega' | 'metricas'
   >('produtos');
 
   // Orders filter
@@ -506,6 +507,10 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
   const allowStorefront = isFeatureAllowed('enableStorefront', currentTenant);
   const allowMetrics = isFeatureAllowed('enableFinancialMetrics', currentTenant);
 
+  // Mesas & Salão ativas se configurado ou se for segmento gastronômico
+  const isTableServiceActive = currentTenant?.config?.enableTableService ?? (isFoodOrPizza || currentTenant?.businessSegment === 'cafeteria');
+  const activeTableOrdersCount = tenantOrders.filter(o => o.deliveryType === 'mesa' && o.status !== 'finalizado' && o.status !== 'cancelado').length;
+
   // Dynamically constructed available tabs based on tenant operational model & Master Permissions
   // Prioridade número 1 solicitada: Catálogo de Produtos / Cardápio sempre em primeiro lugar!
   const allSystemTabs = [
@@ -513,6 +518,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
       { id: 'produtos', label: productsTabLabel, icon: productsTabIcon, count: tenantProducts.length },
     ] : []),
     ...(isPhysicalEnabled && allowPDV ? [{ id: 'vendas', label: 'Vendas Balcão (PDV)', icon: ShoppingCart }] : []),
+    ...(isTableServiceActive ? [
+      { id: 'mesas', label: 'Mesas & Salão', icon: UtensilsCrossed, count: activeTableOrdersCount > 0 ? activeTableOrdersCount : undefined }
+    ] : []),
     // Para Pizzaria e Lanchonete, NÃO exibe a aba de estoque ("Gestão de Cardápio"), mantendo unicamente a aba de "Cardápio & Lanches" / "Cardápio & Pizzas"!
     ...(!isFoodOrPizza && allowStock ? [{ 
       id: 'estoque', 
@@ -701,6 +709,11 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
         <PDVSalesView />
       )}
 
+      {/* TAB: GESTÃO DE MESAS & COMANDAS NO SALÃO */}
+      {activeTab === 'mesas' && (
+        <DiningTablesView />
+      )}
+
       {/* TAB: CONTROLE DE ESTOQUE, RECEBIMENTO DE MERCADORIAS & IMPORTAR EXCEL */}
       {activeTab === 'estoque' && (
         <InventoryView 
@@ -768,12 +781,21 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                       <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${statusInfo.bg} ${statusInfo.text}`}>
                         {statusInfo.label}
                       </span>
-                      <span className="text-xs text-neutral-400">
-                        {order.deliveryType === 'delivery' ? '🛵 Entrega em Casa' : '🏪 Retirada no Balcão'}
+                      <span className="text-xs font-semibold text-neutral-400">
+                        {order.deliveryType === 'delivery' 
+                          ? '🛵 Entrega em Casa' 
+                          : order.deliveryType === 'mesa' 
+                          ? `🍽️ Mesa ${order.tableNumber || ''} (Salão)` 
+                          : '🏪 Retirada no Balcão'}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
+                      {order.deliveryType === 'mesa' && (
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                          👨‍🍳 Cozinha • Mesa {order.tableNumber || ''}
+                        </span>
+                      )}
                       <span className="text-xs text-neutral-500">
                         {new Date(order.createdAt).toLocaleDateString('pt-BR')} às{' '}
                         {new Date(order.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
