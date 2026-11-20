@@ -56,7 +56,7 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [city, setCity] = useState('São Paulo');
   const [neighborhood, setNeighborhood] = useState('');
-  const [plan, setPlan] = useState<TenantPlan>('hibrido');
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('plan_nuvi_pro');
   const [selectedThemeIndex, setSelectedThemeIndex] = useState(0);
 
   // Tela de confirmação e credenciais após a criação
@@ -121,6 +121,9 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
+    // Busca o plano selecionado entre os 4 oficiais
+    const currentSelectedPlan = officialNuviPlans.find(p => p.id === selectedPlanId) || officialNuviPlans[3];
+
     const newTenant = createTenant({
       name: name.trim(),
       slug: cleanSlug,
@@ -130,7 +133,7 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
       ownerEmail: ownerEmail || 'contato@cliente.com.br',
       ownerPhone: ownerPhone || '11999990000',
       adminPassword: password.trim() || '123456',
-      plan,
+      plan: currentSelectedPlan.tenantPlan,
       branding: {
         logoUrl: '',
         bannerUrl: segmentConfig.bannerUrl || PRESET_BANNERS[0].url,
@@ -163,8 +166,9 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
         supportLinkEnabled: true,
       },
       config: {
-        enablePhysicalStore: plan !== 'vitrine',
-        enableOnlineSales: plan !== 'balcao',
+        enablePhysicalStore: selectedPlanId !== 'plan_cardapio',
+        enableOnlineSales: selectedPlanId !== 'plan_balcao_pdv',
+        enableStockControl: selectedPlanId === 'plan_delivery_estoque' || selectedPlanId === 'plan_nuvi_pro',
         acceptPix: true,
         acceptCard: true,
         acceptCash: true,
@@ -184,14 +188,55 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
 
   const labelClass = `block text-xs font-bold mb-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`;
 
-  // Planos disponíveis no SaaS
-  const availablePlans = (globalConfig?.plans && globalConfig.plans.length > 0)
-    ? globalConfig.plans.filter(p => p.active !== false)
-    : [
-        { id: 'plan_cardapio', name: 'Vitrine Online & WhatsApp', price: 97, tag: 'Delivery' },
-        { id: 'plan_balcao', name: 'PDV Balcão & Estoque', price: 127, tag: 'Frente de Caixa' },
-        { id: 'plan_hibrido', name: 'Completo Híbrido (Vitrine + PDV)', price: 167, tag: 'Mais Escolhido' }
-      ];
+  // Os 4 Planos Oficiais do Nuvi SaaS com preços sincronizados do Master
+  const officialNuviPlans = [
+    {
+      id: 'plan_cardapio',
+      tenantPlan: 'vitrine' as TenantPlan,
+      name: 'Cardápio Digital & Pedidos',
+      badge: 'Iniciante / Delivery',
+      tag: 'WhatsApp',
+      price: globalConfig?.plans?.find(p => p.id === 'plan_cardapio')?.price ?? 49.90,
+      description: 'Vitrine online exclusiva, QR Code de mesa/balcão e pedidos direto no WhatsApp sem cobrança de taxas por venda.',
+      features: ['Vitrine Web com link próprio', 'Pedidos no WhatsApp', 'QR Code de balcão e mesas', 'Sem taxas de comissão'],
+      icon: '🛍️'
+    },
+    {
+      id: 'plan_balcao_pdv',
+      tenantPlan: 'balcao' as TenantPlan,
+      name: 'Balcão & PDV Caixa Rápido',
+      badge: 'Frente de Caixa',
+      tag: 'PDV & Balcão',
+      price: globalConfig?.plans?.find(p => p.id === 'plan_balcao_pdv')?.price ?? 89.90,
+      description: 'Frente de Caixa (PDV) ultra-rápida no toque e bipe de leitor USB/Bluetooth para registrar vendas ágeis no balcão.',
+      features: ['PDV Balcão completo', 'Leitor de código de barras USB', 'Venda avulsa ou fardo/caixa', 'Fechamento de caixa diário'],
+      icon: '⚡'
+    },
+    {
+      id: 'plan_delivery_estoque',
+      tenantPlan: 'starter' as TenantPlan,
+      name: 'Delivery & Estoque Profissional',
+      badge: 'Profissional',
+      tag: 'Estoque & Frete',
+      price: globalConfig?.plans?.find(p => p.id === 'plan_delivery_estoque')?.price ?? 139.90,
+      description: 'Controle de estoque em tempo real com baixa automática, alerta de reposição e frete calculado por raio em KM.',
+      features: ['Baixa automática de estoque', 'Alerta de reposição mínima', 'Cálculo de frete por KM', 'Gestão de entregas'],
+      icon: '📦'
+    },
+    {
+      id: 'plan_nuvi_pro',
+      tenantPlan: 'hibrido' as TenantPlan,
+      name: 'Nuvi Pro Total (Completo)',
+      badge: 'Mais Recomendado',
+      tag: 'Tudo Incluso',
+      price: globalConfig?.plans?.find(p => p.id === 'plan_nuvi_pro')?.price ?? 199.90,
+      description: 'A solução definitiva sem limites: Frente de Caixa (PDV) + Vitrine Web + Estoque Automático + Delivery + Gestão Financeira.',
+      features: ['Vitrine + PDV simultâneos', 'Controle total de estoque', 'Gestão Financeira & DRE', 'Suporte VIP prioritário'],
+      icon: '👑'
+    }
+  ];
+
+  const currentSelectedPlan = officialNuviPlans.find(p => p.id === selectedPlanId) || officialNuviPlans[3];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
@@ -508,63 +553,88 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
                     </div>
                   </div>
 
-                  {/* 3. Seleção de Plano do SaaS (Cards Dinâmicos em 2 Colunas) */}
-                  <div className="space-y-2">
-                    <label className={labelClass}>
-                      3. Plano de Assinatura do SaaS Contratado
-                    </label>
-                    <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
-                      {availablePlans.map((p: any) => {
-                        const isSelected = plan === p.id || (p.id === 'plan_hibrido' && plan === 'hibrido') || (p.id === 'plan_balcao' && plan === 'balcao') || (p.id === 'plan_cardapio' && plan === 'vitrine');
+                  {/* 3. Seleção de Plano do SaaS (Cards Dinâmicos em Grid 4 Colunas) */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className={labelClass}>
+                        3. Escolha o Plano de Assinatura do Estabelecimento *
+                      </label>
+                      <span className="text-[11px] font-bold text-sky-500">
+                        {currentSelectedPlan.name} selecionado
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                      {officialNuviPlans.map((p) => {
+                        const isSelected = selectedPlanId === p.id;
                         return (
-                          <button
+                          <div
                             key={p.id}
-                            type="button"
-                            onClick={() => {
-                              if (p.id === 'plan_cardapio') setPlan('vitrine');
-                              else if (p.id === 'plan_balcao') setPlan('balcao');
-                              else setPlan('hibrido');
-                            }}
-                            className={`p-3.5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                            onClick={() => setSelectedPlanId(p.id)}
+                            className={`p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between relative group ${
                               isSelected
-                                ? 'nuvi-btn-cyber-blue text-white shadow-md shadow-[#0C2340]/40'
+                                ? 'nuvi-btn-cyber-blue text-white shadow-xl shadow-[#0C2340]/50 ring-2 ring-sky-400 border-0 scale-[1.01]'
                                 : isLight
-                                ? 'bg-slate-50 border border-slate-200 hover:border-slate-300'
-                                : 'bg-[#121820] border border-[#1C2631] hover:border-slate-700'
+                                ? 'bg-white hover:bg-slate-50 border-slate-200 hover:border-sky-300 text-slate-800 shadow-sm'
+                                : 'bg-[#121820] hover:bg-[#182230] border-[#1C2631] hover:border-slate-700 text-white'
                             }`}
                           >
-                            <div className="flex items-center justify-between">
-                              <span className={`font-bold text-xs line-clamp-1 ${
-                                isSelected ? 'text-white' : 'text-slate-900 dark:text-white'
-                              }`}>
-                                {p.name}
-                              </span>
-                              <div className="flex items-center gap-1.5">
-                                {p.tag && (
-                                  <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full shrink-0 ${
-                                    isSelected 
-                                      ? 'bg-white/20 text-white' 
-                                      : 'bg-sky-500/20 text-sky-400'
-                                  }`}>
-                                    {p.tag}
-                                  </span>
-                                )}
-                                {isSelected && (
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5] shrink-0" />
+                            {/* Header do Card */}
+                            <div>
+                              <div className="flex items-center justify-between gap-1 mb-2">
+                                <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full shrink-0 ${
+                                  isSelected 
+                                    ? 'bg-white/20 text-white' 
+                                    : 'bg-sky-500/15 text-sky-500 border border-sky-500/30'
+                                }`}>
+                                  {p.tag}
+                                </span>
+                                {isSelected ? (
+                                  <CheckCircle2 className="w-4 h-4 text-white stroke-[2.5] shrink-0" />
+                                ) : (
+                                  <span className="text-base leading-none">{p.icon}</span>
                                 )}
                               </div>
-                            </div>
-                            <div className="flex items-baseline gap-1">
-                              <span className={`text-base sm:text-lg font-black ${
-                                isSelected ? 'text-sky-300' : 'text-sky-500'
+
+                              <h4 className={`font-black text-xs leading-snug mb-1 ${
+                                isSelected ? 'text-white' : isLight ? 'text-slate-900' : 'text-white'
                               }`}>
-                                R$ {Number(p.price || 97).toFixed(2)}
-                              </span>
-                              <span className={`text-[10px] ${
-                                isSelected ? 'text-slate-300' : 'text-slate-400'
-                              }`}>/mês</span>
+                                {p.name}
+                              </h4>
+
+                              <p className={`text-[11px] leading-relaxed line-clamp-2 mb-3 ${
+                                isSelected ? 'text-sky-100' : isLight ? 'text-slate-500' : 'text-slate-400'
+                              }`}>
+                                {p.description}
+                              </p>
                             </div>
-                          </button>
+
+                            {/* Preço e Botão */}
+                            <div className={`pt-3 border-t flex flex-col gap-2 ${
+                              isSelected ? 'border-white/20' : isLight ? 'border-slate-100' : 'border-[#1C2631]'
+                            }`}>
+                              <div className="flex items-baseline gap-1">
+                                <span className={`text-xl font-black ${
+                                  isSelected ? 'text-white' : 'text-sky-500'
+                                }`}>
+                                  R$ {p.price.toFixed(2).replace('.', ',')}
+                                </span>
+                                <span className={`text-[10px] font-semibold ${
+                                  isSelected ? 'text-sky-200' : isLight ? 'text-slate-400' : 'text-slate-500'
+                                }`}>/mês</span>
+                              </div>
+
+                              <div className={`w-full py-1.5 px-2 rounded-xl text-center font-bold text-[11px] transition-all ${
+                                isSelected
+                                  ? 'bg-white text-slate-900 shadow-sm'
+                                  : isLight
+                                  ? 'bg-slate-100 text-slate-700 group-hover:bg-sky-50 group-hover:text-sky-600'
+                                  : 'bg-[#1C2631] text-slate-300 group-hover:bg-[#253342] group-hover:text-white'
+                              }`}>
+                                {isSelected ? '✓ Plano Selecionado' : 'Selecionar'}
+                              </div>
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
@@ -756,10 +826,10 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
 
                     <div className="text-right">
                       <span className="text-xs font-bold text-sky-500 block">
-                        Plano {plan.toUpperCase()}
+                        {currentSelectedPlan.name}
                       </span>
                       <span className="text-[10px] text-slate-400">
-                        Pronto para ativação
+                        R$ {currentSelectedPlan.price.toFixed(2).replace('.', ',')}/mês • Pronto para ativação
                       </span>
                     </div>
                   </div>

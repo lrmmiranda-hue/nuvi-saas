@@ -36,7 +36,9 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
     setViewRole,
     themeMode,
     toggleThemeMode,
-    showAlert
+    showAlert,
+    globalConfig,
+    tenants
   } = useStore();
 
   const isLight = themeMode === 'light';
@@ -44,6 +46,9 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   // Ramo selecionado (padrão: adega)
   const [selectedSegment, setSelectedSegment] = useState<BusinessSegmentType>('adega');
   const currentSegmentConfig = getSegmentById(selectedSegment);
+
+  // Plano selecionado
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('plan_nuvi_pro');
 
   // Estados do Filtro de Ramo no Celular (conforme Imagem 2)
   const [isBranchFilterOpen, setIsBranchFilterOpen] = useState(false);
@@ -59,6 +64,52 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Os 4 Planos Oficiais do Nuvi SaaS com preços integrados às configurações globais
+  const officialNuviPlans = [
+    {
+      id: 'plan_cardapio',
+      tenantPlan: 'vitrine' as const,
+      name: 'Cardápio Digital & Pedidos',
+      badge: 'Iniciante / Delivery',
+      tag: 'WhatsApp',
+      price: globalConfig?.plans?.find(p => p.id === 'plan_cardapio')?.price ?? 49.90,
+      description: 'Vitrine online exclusiva, QR Code de mesa/balcão e pedidos direto no WhatsApp sem cobrança de taxas por venda.',
+      icon: '🛍️'
+    },
+    {
+      id: 'plan_balcao_pdv',
+      tenantPlan: 'balcao' as const,
+      name: 'Balcão & PDV Caixa Rápido',
+      badge: 'Frente de Caixa',
+      tag: 'PDV & Balcão',
+      price: globalConfig?.plans?.find(p => p.id === 'plan_balcao_pdv')?.price ?? 89.90,
+      description: 'Frente de Caixa (PDV) ultra-rápida no toque e bipe de leitor USB/Bluetooth para registrar vendas ágeis no balcão.',
+      icon: '⚡'
+    },
+    {
+      id: 'plan_delivery_estoque',
+      tenantPlan: 'starter' as const,
+      name: 'Delivery & Estoque Profissional',
+      badge: 'Profissional',
+      tag: 'Estoque & Frete',
+      price: globalConfig?.plans?.find(p => p.id === 'plan_delivery_estoque')?.price ?? 139.90,
+      description: 'Controle de estoque em tempo real com baixa automática, alerta de reposição e frete calculado por raio em KM.',
+      icon: '📦'
+    },
+    {
+      id: 'plan_nuvi_pro',
+      tenantPlan: 'hibrido' as const,
+      name: 'Nuvi Pro Total (Completo)',
+      badge: 'Mais Recomendado',
+      tag: 'Tudo Incluso',
+      price: globalConfig?.plans?.find(p => p.id === 'plan_nuvi_pro')?.price ?? 199.90,
+      description: 'A solução definitiva sem limites: Frente de Caixa (PDV) + Vitrine Web + Estoque Automático + Delivery + Gestão Financeira.',
+      icon: '👑'
+    }
+  ];
+
+  const currentSelectedPlan = officialNuviPlans.find(p => p.id === selectedPlanId) || officialNuviPlans[3];
 
   // Lista de ramos filtrados para a busca no celular (Imagem 2)
   const filteredBranches = BUSINESS_SEGMENTS.filter(seg =>
@@ -125,7 +176,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
           allowPickup: true,
           openingHours: 'Seg a Dom: 10h às 23h',
         },
-        plan: 'hibrido',
+        plan: currentSelectedPlan.tenantPlan,
         status: 'trial',
         adminPassword: password.trim() || 'admin',
         onboardingCompleted: false, // Abre o Passo a Passo de Configuração Inicial automaticamente!
@@ -139,8 +190,9 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
           colorMode: 'dark',
         },
         config: {
-          enablePhysicalStore: true,
-          enableOnlineSales: true,
+          enablePhysicalStore: selectedPlanId !== 'plan_cardapio',
+          enableOnlineSales: selectedPlanId !== 'plan_balcao_pdv',
+          enableStockControl: selectedPlanId === 'plan_delivery_estoque' || selectedPlanId === 'plan_nuvi_pro',
           acceptPix: true,
           acceptCard: true,
           acceptCash: true,
@@ -494,15 +546,96 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 </div>
               </div>
 
+              {/* 3. SELEÇÃO DO PLANO DO SAAS (4 PLANOS OFICIAIS) */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                    3. Escolha seu Plano Nuvi SaaS *
+                  </label>
+                  <span className="text-[11px] font-bold text-sky-500">
+                    {currentSelectedPlan.name}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                  {officialNuviPlans.map((p) => {
+                    const isSelected = selectedPlanId === p.id;
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => setSelectedPlanId(p.id)}
+                        className={`p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between relative group ${
+                          isSelected
+                            ? 'nuvi-btn-cyber-blue text-white shadow-xl shadow-[#0C2340]/50 ring-2 ring-sky-400 border-0 scale-[1.01]'
+                            : isLight
+                            ? 'bg-slate-50 hover:bg-white border-slate-200 hover:border-sky-300 text-slate-800 shadow-sm'
+                            : 'bg-[#121820] hover:bg-[#182230] border-[#1C2631] hover:border-slate-700 text-white'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-1 mb-1.5">
+                            <span className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-full shrink-0 ${
+                              isSelected 
+                                ? 'bg-white/20 text-white' 
+                                : 'bg-sky-500/15 text-sky-500 border border-sky-500/30'
+                            }`}>
+                              {p.tag}
+                            </span>
+                            {isSelected ? (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5] shrink-0" />
+                            ) : (
+                              <span className="text-sm leading-none">{p.icon}</span>
+                            )}
+                          </div>
+
+                          <h4 className={`font-black text-xs leading-snug mb-1 ${
+                            isSelected ? 'text-white' : isLight ? 'text-slate-900' : 'text-white'
+                          }`}>
+                            {p.name}
+                          </h4>
+
+                          <p className={`text-[10px] leading-relaxed line-clamp-2 mb-2 ${
+                            isSelected ? 'text-sky-100' : isLight ? 'text-slate-500' : 'text-slate-400'
+                          }`}>
+                            {p.description}
+                          </p>
+                        </div>
+
+                        <div className={`pt-2 border-t flex items-baseline justify-between ${
+                          isSelected ? 'border-white/20' : isLight ? 'border-slate-200' : 'border-[#1C2631]'
+                        }`}>
+                          <div className="flex items-baseline gap-1">
+                            <span className={`text-base font-black ${
+                              isSelected ? 'text-white' : 'text-sky-500'
+                            }`}>
+                              R$ {p.price.toFixed(2).replace('.', ',')}
+                            </span>
+                            <span className={`text-[9px] font-semibold ${
+                              isSelected ? 'text-sky-200' : isLight ? 'text-slate-400' : 'text-slate-500'
+                            }`}>/mês</span>
+                          </div>
+
+                          <span className={`text-[10px] font-bold ${
+                            isSelected ? 'text-white' : 'text-sky-500'
+                          }`}>
+                            {isSelected ? '✓ Ativo' : 'Escolher'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* ======================================================== */}
               {/* CAMPOS EXCLUSIVOS DO COMPUTADOR (Como estava antes) */}
               {/* ======================================================== */}
               <div className="hidden md:block space-y-4">
-                {/* 3. Frase de Destaque / Slogan da Vitrine */}
+                {/* 4. Frase de Destaque / Slogan da Vitrine */}
                 <div className="space-y-2 pt-1">
                   <div className="flex items-center justify-between">
                     <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                      3. Frase de Destaque / Slogan da Vitrine
+                      4. Frase de Destaque / Slogan da Vitrine
                     </label>
                     <button
                       type="button"
