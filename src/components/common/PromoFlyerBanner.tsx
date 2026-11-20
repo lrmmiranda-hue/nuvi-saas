@@ -190,16 +190,41 @@ export const PromoFlyerBanner: React.FC<PromoFlyerBannerProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* CONTEÚDO PRINCIPAL (SLIM / ALTURA COMPACTA)              */}
+      {/* CONTEÚDO PRINCIPAL (SLIM / ALTURA COMPACTA & EQUILIBRADA) */}
       {/* ======================================================== */}
-      <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 sm:gap-4 pr-5 sm:pr-6">
+      <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pr-5 sm:pr-6">
         
-        {/* Lado Esquerdo: Badges Dinâmicas + Título + Mensagem Enxuta */}
-        <div className="space-y-1 sm:space-y-1.5 max-w-3xl min-w-0">
+        {/* Lado Esquerdo: Identificador + Título + Mensagem */}
+        <div className="space-y-1 sm:space-y-1.5 max-w-2xl min-w-0">
           
-          {/* Linha de Badges Promocionais Estilo Retail */}
-          <div className="flex flex-wrap items-center gap-2">
-            
+          {/* Indicador de Oferta Ativa */}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span>Oferta Ativa</span>
+            </span>
+            <span className="text-[10px] text-white/50 font-medium hidden sm:inline">
+              • Vagas Limitadas
+            </span>
+          </div>
+
+          {/* Título Principal com Tipografia de Alto Impacto */}
+          <h2 className="text-sm sm:text-base md:text-lg font-black text-white tracking-tight leading-snug drop-shadow-sm flex items-center gap-1.5">
+            <Flame className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
+            <span className="truncate">{banner.title || 'Promoção Exclusiva de Lançamento Nuvi SaaS'}</span>
+          </h2>
+
+          {/* Mensagem Comercial Enxuta */}
+          <p className={`text-[11px] sm:text-xs font-medium leading-relaxed line-clamp-2 ${themeStyles.accentText}`}>
+            {banner.message || 'Assine o Plano Completo neste mês com descontos especiais e garanta suporte prioritário de implantação!'}
+          </p>
+        </div>
+
+        {/* Lado Direito: Badges de Destaque no Topo + Botão de WhatsApp Transparente Abaixo */}
+        <div className="flex flex-col items-start sm:items-end gap-2 shrink-0 self-end sm:self-center pt-1 sm:pt-0">
+          
+          {/* Badges de Destaque no Canto Direito (Preenchem o espaço vazio) */}
+          <div className="flex items-center gap-2">
             {/* Badge Inclinada Estilo Sale */}
             <div className={`transform -rotate-2 px-2.5 py-0.5 rounded-md font-black text-[10px] uppercase tracking-wider inline-flex items-center gap-1 transition-transform hover:scale-105 ${themeStyles.badgeBg}`}>
               {themeStyles.badgeIcon}
@@ -211,45 +236,30 @@ export const PromoFlyerBanner: React.FC<PromoFlyerBannerProps> = ({
               <Tag className="w-2.5 h-2.5" />
               <span>{detectedHighlight}</span>
             </div>
-
-            {/* Indicador de Oferta Ativa */}
-            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-white/60 uppercase tracking-widest pl-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              <span>Oferta Ativa</span>
-            </span>
           </div>
 
-          {/* Título Principal com Tipografia de Alto Impacto e Altura Controlada */}
-          <h2 className="text-sm sm:text-base md:text-lg font-black text-white tracking-tight leading-snug drop-shadow-sm truncate">
-            {banner.title || 'Promoção Exclusiva de Lançamento Nuvi SaaS'}
-          </h2>
+          {/* Botão Menor e com Fundo Mais Transparente */}
+          <div>
+            {isPreview ? (
+              <div className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold text-[11px] sm:text-xs inline-flex items-center gap-2 select-none transition-all active:scale-95 ${themeStyles.btnStyle}`}>
+                <MessageCircle className={`w-3.5 h-3.5 shrink-0 ${themeStyles.btnIconColor}`} />
+                <span className="tracking-tight">{banner.ctaText || 'Falar com Consultor'}</span>
+                <ArrowRight className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
+              </div>
+            ) : (
+              <a
+                href={banner.ctaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold text-[11px] sm:text-xs inline-flex items-center gap-2 cursor-pointer transition-all active:scale-95 ${themeStyles.btnStyle}`}
+              >
+                <MessageCircle className={`w-3.5 h-3.5 shrink-0 ${themeStyles.btnIconColor}`} />
+                <span className="tracking-tight">{banner.ctaText || 'Falar com Consultor'}</span>
+                <ArrowRight className="w-3 h-3 stroke-[2.2] opacity-80" />
+              </a>
+            )}
+          </div>
 
-          {/* Mensagem Comercial Enxuta */}
-          <p className={`text-[11px] sm:text-xs font-medium leading-relaxed line-clamp-2 ${themeStyles.accentText}`}>
-            {banner.message || 'Assine o Plano Completo neste mês com descontos especiais e garanta suporte prioritário de implantação!'}
-          </p>
-        </div>
-
-        {/* Lado Direito / Canto Inferior Direito: Botão Menor e Transparente */}
-        <div className="shrink-0 self-end sm:self-end pt-1 sm:pt-0">
-          {isPreview ? (
-            <div className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold text-[11px] sm:text-xs inline-flex items-center gap-2 select-none transition-all active:scale-95 ${themeStyles.btnStyle}`}>
-              <MessageCircle className={`w-3.5 h-3.5 shrink-0 ${themeStyles.btnIconColor}`} />
-              <span className="tracking-tight">{banner.ctaText || 'Falar com Consultor'}</span>
-              <ArrowRight className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
-            </div>
-          ) : (
-            <a
-              href={banner.ctaUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold text-[11px] sm:text-xs inline-flex items-center gap-2 cursor-pointer transition-all active:scale-95 ${themeStyles.btnStyle}`}
-            >
-              <MessageCircle className={`w-3.5 h-3.5 shrink-0 ${themeStyles.btnIconColor}`} />
-              <span className="tracking-tight">{banner.ctaText || 'Falar com Consultor'}</span>
-              <ArrowRight className="w-3 h-3 shrink-0 stroke-[2.2] opacity-80" />
-            </a>
-          )}
         </div>
 
       </div>

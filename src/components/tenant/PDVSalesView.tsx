@@ -732,21 +732,25 @@ export const PDVSalesView: React.FC = () => {
                       </span>
                     </div>
 
-                    {/* Foto (se houver) */}
-                    {product.imageUrl && (
-                      <div className="w-full h-24 rounded-xl overflow-hidden mb-2 bg-black/30 flex items-center justify-center">
+                    {/* Descrição / Nome do Produto no Topo */}
+                    <h4 className="text-xs font-bold leading-snug line-clamp-2 text-white min-h-[30px] mb-2">
+                      {product.name}
+                    </h4>
+
+                    {/* Foto Pequena com a Garrafa ou Lata Abaixo da Descrição */}
+                    {product.imageUrl ? (
+                      <div className="w-full h-20 rounded-xl overflow-hidden mb-2 bg-black/25 flex items-center justify-center p-1.5">
                         <img
                           src={product.imageUrl}
                           alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="h-full w-auto max-w-full object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-md"
                         />
                       </div>
+                    ) : (
+                      <div className="w-full h-12 rounded-xl mb-2 bg-white/5 flex items-center justify-center">
+                        <span className="text-[10px] text-slate-500 font-medium">Sem imagem</span>
+                      </div>
                     )}
-
-                    {/* Nome do Produto */}
-                    <h4 className="text-xs font-bold leading-tight line-clamp-2 text-white">
-                      {product.name}
-                    </h4>
                   </div>
 
                   {/* Preço e Botão Adicionar */}
@@ -772,7 +776,8 @@ export const PDVSalesView: React.FC = () => {
                         </button>
                       )}
 
-                      <span className="w-7 h-7 rounded-xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-sky-600/30 border border-sky-400/30 transition-transform active:scale-95">
+                      {/* Botão Adicionar com Formatação Igual ao Selecionado Dinheiro/PIX */}
+                      <span className="w-7 h-7 rounded-xl nuvi-btn-cyber-blue text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#0C2340]/40 border-0 transition-transform active:scale-95 hover:brightness-110">
                         <Plus className="w-4 h-4 stroke-[2.5]" />
                       </span>
                     </div>
@@ -1000,7 +1005,7 @@ export const PDVSalesView: React.FC = () => {
               disabled={cartItems.length === 0}
               className={`w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
                 cartItems.length > 0
-                  ? 'bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold shadow-xl shadow-sky-600/30 border-0 active:scale-[0.98]'
+                  ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40 border-0 active:scale-[0.98] hover:brightness-110'
                   : 'bg-neutral-800 text-neutral-500 cursor-not-allowed border-0'
               }`}
             >
