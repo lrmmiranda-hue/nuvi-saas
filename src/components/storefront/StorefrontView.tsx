@@ -436,7 +436,7 @@ export const StorefrontView: React.FC = () => {
                       <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: brandAccent }} />
                       {currentTenant.address.openingHours}
                     </span>
-                    {currentTenant.address.freeDeliveryThreshold && (
+                    {!isTableActive && currentTenant.address.freeDeliveryThreshold && (
                       <>
                         <span>·</span>
                         <span className="font-bold" style={{ color: brandAccent }}>

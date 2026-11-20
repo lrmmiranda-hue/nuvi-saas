@@ -287,8 +287,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </div>
             ) : (
               <>
-                {/* Free Delivery Bar */}
-                {tenant.address.freeDeliveryThreshold && (
+                {/* Free Delivery Bar - Apenas para Delivery / Retirada (NUNCA para Mesas) */}
+                {deliveryType !== 'mesa' && tenant.address.freeDeliveryThreshold && (
                   <div className={`p-3 rounded-xl border text-xs ${
                     isLight ? 'bg-amber-50/80 border-amber-200' : 'bg-neutral-950 border-neutral-800'
                   }`}>
@@ -394,76 +394,112 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   ))}
                 </div>
 
-                {/* Delivery Type Selection */}
-                <div className={`space-y-2 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-neutral-800'}`}>
-                  <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
-                    Forma de Recebimento
-                  </span>
-                  <div className={`grid gap-2 text-xs ${hasTableService ? 'grid-cols-3' : 'grid-cols-2'}`}>
-                    <button
-                      type="button"
-                      onClick={() => setDeliveryType('delivery')}
-                      className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
-                        deliveryType === 'delivery'
-                          ? isLight
-                            ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
-                            : 'border-blue-500 bg-neutral-800 text-white font-bold ring-1 ring-blue-500/40'
-                          : isLight
-                          ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                          : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
-                      }`}
-                      style={deliveryType === 'delivery' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
-                    >
-                      <Truck className="w-4 h-4" />
-                      <span>Em Casa</span>
-                      <span className="text-[10px] opacity-75">
-                        {deliveryFee === 0 ? 'Grátis' : `Taxa R$ ${deliveryFee.toFixed(2)}`}
-                      </span>
-                    </button>
+                {/* Delivery Type Selection / Identificação da Mesa */}
+                {tableNumber ? (
+                  /* Cliente já está em uma mesa específica (via QR Code ou seleção prévia) */
+                  <div className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 ${
+                    isLight ? 'bg-blue-50/80 border-blue-200 text-blue-950' : 'bg-blue-950/30 border-blue-800/60 text-white'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black shadow-md shadow-blue-500/20 shrink-0">
+                        <UtensilsCrossed className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-blue-500">
+                          Consumo no Salão
+                        </span>
+                        <h4 className="text-sm font-black">
+                          {selectedTable.toUpperCase().includes('MESA') ? selectedTable : `Mesa ${selectedTable}`}
+                        </h4>
+                        <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
+                          Itens lançados direto na comanda desta mesa.
+                        </p>
+                      </div>
+                    </div>
 
                     <button
                       type="button"
-                      onClick={() => setDeliveryType('pickup')}
-                      className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
-                        deliveryType === 'pickup'
-                          ? isLight
-                            ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
-                            : 'border-blue-500 bg-neutral-800 text-white font-bold ring-1 ring-blue-500/40'
-                          : isLight
-                          ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                          : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
-                      }`}
-                      style={deliveryType === 'pickup' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
+                      onClick={() => {
+                        if (onSetTableNumber) onSetTableNumber('');
+                        setSelectedTable('');
+                        setDeliveryType('delivery');
+                      }}
+                      className="px-2.5 py-1 rounded-lg text-xs font-bold border border-blue-300 dark:border-blue-700/60 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                     >
-                      <Store className="w-4 h-4" />
-                      <span>Retirar</span>
-                      <span className="text-[10px] text-emerald-500 font-bold">Sem taxa</span>
+                      Mudar
                     </button>
-
-                    {hasTableService && (
+                  </div>
+                ) : (
+                  <div className={`space-y-2 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-neutral-800'}`}>
+                    <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
+                      Forma de Recebimento
+                    </span>
+                    <div className={`grid gap-2 text-xs ${hasTableService ? 'grid-cols-3' : 'grid-cols-2'}`}>
                       <button
                         type="button"
-                        onClick={() => setDeliveryType('mesa')}
+                        onClick={() => setDeliveryType('delivery')}
                         className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
-                          deliveryType === 'mesa'
+                          deliveryType === 'delivery'
                             ? isLight
                               ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
-                              : 'border-blue-500 bg-blue-500/20 text-blue-300 font-bold ring-1 ring-blue-500/40'
+                              : 'border-blue-500 bg-neutral-800 text-white font-bold ring-1 ring-blue-500/40'
                             : isLight
                             ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                             : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
                         }`}
+                        style={deliveryType === 'delivery' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
                       >
-                        <UtensilsCrossed className="w-4 h-4 text-blue-500" />
-                        <span>Na Mesa</span>
-                        <span className="text-[10px] text-blue-400 font-bold">Salão / Cozinha</span>
+                        <Truck className="w-4 h-4" />
+                        <span>Em Casa</span>
+                        <span className="text-[10px] opacity-75">
+                          {deliveryFee === 0 ? 'Grátis' : `Taxa R$ ${deliveryFee.toFixed(2)}`}
+                        </span>
                       </button>
-                    )}
-                  </div>
-                </div>
 
-                {/* Bloco de Mesa quando selecionado */}
-                {deliveryType === 'mesa' && (
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryType('pickup')}
+                        className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
+                          deliveryType === 'pickup'
+                            ? isLight
+                              ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
+                              : 'border-blue-500 bg-neutral-800 text-white font-bold ring-1 ring-blue-500/40'
+                            : isLight
+                            ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                            : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
+                        }`}
+                        style={deliveryType === 'pickup' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
+                      >
+                        <Store className="w-4 h-4" />
+                        <span>Retirar</span>
+                        <span className="text-[10px] text-emerald-500 font-bold">Sem taxa</span>
+                      </button>
+
+                      {hasTableService && (
+                        <button
+                          type="button"
+                          onClick={() => setDeliveryType('mesa')}
+                          className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
+                            deliveryType === 'mesa'
+                              ? isLight
+                                ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
+                                : 'border-blue-500 bg-blue-500/20 text-blue-300 font-bold ring-1 ring-blue-500/40'
+                              : isLight
+                              ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                              : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
+                          }`}
+                        >
+                          <UtensilsCrossed className="w-4 h-4 text-blue-500" />
+                          <span>Na Mesa</span>
+                          <span className="text-[10px] text-blue-400 font-bold">Salão / Cozinha</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Bloco de Mesa quando selecionado manualmente */}
+                {deliveryType === 'mesa' && !tableNumber && (
                   <div className={`p-3.5 rounded-xl border space-y-2.5 ${
                     isLight ? 'bg-blue-50/70 border-blue-200' : 'bg-blue-950/30 border-blue-800/60'
                   }`}>
@@ -508,7 +544,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <div className={`space-y-3 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-neutral-800'}`}>
                   <div className="flex items-center justify-between">
                     <span className={`text-xs font-bold ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
-                      {deliveryType === 'mesa' ? 'Identificação do Cliente (Opcional)' : 'Seus Dados para o Pedido'}
+                      {deliveryType === 'mesa' ? 'Nome ou Apelido na Mesa (Opcional)' : 'Seus Dados para o Pedido'}
                     </span>
                     {deliveryType !== 'mesa' && (
                       <button
@@ -536,20 +572,36 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         }`}
                       />
                     </div>
-                    <div>
-                      <input
-                        type="tel"
-                        required={deliveryType !== 'mesa'}
-                        value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value)}
-                        placeholder={deliveryType === 'mesa' ? 'WhatsApp (opcional)' : 'WhatsApp (ex: 11988887777) *'}
-                        className={`w-full px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-amber-500 ${
-                          isLight
-                            ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
-                            : 'bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500'
-                        }`}
-                      />
-                    </div>
+                    {deliveryType !== 'mesa' ? (
+                      <div>
+                        <input
+                          type="tel"
+                          required
+                          value={customerPhone}
+                          onChange={(e) => setCustomerPhone(e.target.value)}
+                          placeholder="WhatsApp (ex: 11988887777) *"
+                          className={`w-full px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-amber-500 ${
+                            isLight
+                              ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
+                              : 'bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500'
+                          }`}
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <input
+                          type="text"
+                          value={orderNotes}
+                          onChange={(e) => setOrderNotes(e.target.value)}
+                          placeholder="Observação da mesa (ex: sem gelo, mal passado)"
+                          className={`w-full px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-blue-500 ${
+                            isLight
+                              ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
+                              : 'bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500'
+                          }`}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Delivery Address if delivery */}
@@ -611,83 +663,98 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   )}
                 </div>
 
-                {/* Payment Method */}
-                <div className={`space-y-2 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-neutral-800'}`}>
-                  <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
-                    Forma de Pagamento
-                  </span>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('pix')}
-                      className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                        paymentMethod === 'pix'
-                          ? isLight
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ring-1 ring-emerald-500/40'
-                            : 'border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold'
-                          : isLight
-                          ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                          : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      <QrCode className="w-4 h-4" />
-                      <span>PIX</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('cartao_entrega')}
-                      className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                        paymentMethod === 'cartao_entrega'
-                          ? isLight
-                            ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
-                            : 'border-blue-500 bg-neutral-800 text-white font-bold'
-                          : isLight
-                          ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                          : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
-                      }`}
-                      style={paymentMethod === 'cartao_entrega' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      <span>Cartão</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('dinheiro')}
-                      className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                        paymentMethod === 'dinheiro'
-                          ? isLight
-                            ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
-                            : 'border-blue-500 bg-neutral-800 text-white font-bold'
-                          : isLight
-                          ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                          : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
-                      }`}
-                      style={paymentMethod === 'dinheiro' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
-                    >
-                      <Banknote className="w-4 h-4" />
-                      <span>Dinheiro</span>
-                    </button>
-                  </div>
-
-                  {paymentMethod === 'dinheiro' && (
-                    <div className="pt-1">
-                      <input
-                        type="number"
-                        step="1"
-                        value={cashChangeFor}
-                        onChange={(e) => setCashChangeFor(e.target.value)}
-                        placeholder="Precisa de troco para quanto? Ex: 50 ou 100"
-                        className={`w-full px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-amber-500 ${
-                          isLight
-                            ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
-                            : 'bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500'
-                        }`}
-                      />
+                {/* Bloco de Forma de Pagamento OU Aviso da Comanda da Mesa */}
+                {deliveryType === 'mesa' ? (
+                  <div className={`p-3.5 rounded-2xl border space-y-1.5 ${
+                    isLight ? 'bg-blue-50/80 border-blue-200 text-blue-950' : 'bg-blue-950/20 border-blue-800/50 text-blue-200'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <UtensilsCrossed className="w-4 h-4 text-blue-500 shrink-0" />
+                      <span className="text-xs font-black">Pagamento no Fechamento da Mesa</span>
                     </div>
-                  )}
-                </div>
+                    <p className={`text-[11px] ${isLight ? 'text-blue-800' : 'text-blue-300'}`}>
+                      Você não precisa pagar agora! Os itens deste pedido serão somados à conta da sua mesa. No final, você escolhe se paga via <strong>PIX, Dinheiro ou Cartão</strong> diretamente com o garçom ou no caixa.
+                    </p>
+                  </div>
+                ) : (
+                  /* Payment Method para Delivery ou Retirada */
+                  <div className={`space-y-2 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-neutral-800'}`}>
+                    <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
+                      Forma de Pagamento
+                    </span>
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('pix')}
+                        className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                          paymentMethod === 'pix'
+                            ? isLight
+                              ? 'border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ring-1 ring-emerald-500/40'
+                              : 'border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold'
+                            : isLight
+                            ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                            : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
+                        }`}
+                      >
+                        <QrCode className="w-4 h-4" />
+                        <span>PIX</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('cartao_entrega')}
+                        className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                          paymentMethod === 'cartao_entrega'
+                            ? isLight
+                              ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
+                              : 'border-blue-500 bg-neutral-800 text-white font-bold'
+                            : isLight
+                            ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                            : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
+                        }`}
+                        style={paymentMethod === 'cartao_entrega' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        <span>Cartão</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('dinheiro')}
+                        className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                          paymentMethod === 'dinheiro'
+                            ? isLight
+                              ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
+                              : 'border-blue-500 bg-neutral-800 text-white font-bold'
+                            : isLight
+                            ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                            : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
+                        }`}
+                        style={paymentMethod === 'dinheiro' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
+                      >
+                        <Banknote className="w-4 h-4" />
+                        <span>Dinheiro</span>
+                      </button>
+                    </div>
+
+                    {paymentMethod === 'dinheiro' && (
+                      <div className="pt-1">
+                        <input
+                          type="number"
+                          step="1"
+                          value={cashChangeFor}
+                          onChange={(e) => setCashChangeFor(e.target.value)}
+                          placeholder="Precisa de troco para quanto? Ex: 50 ou 100"
+                          className={`w-full px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-amber-500 ${
+                            isLight
+                              ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
+                              : 'bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500'
+                          }`}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
 
@@ -700,24 +767,26 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             }`}>
               <div className={`space-y-1.5 text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
                 <div className="flex justify-between">
-                  <span>Subtotal:</span>
+                  <span>{deliveryType === 'mesa' ? 'Subtotal dos Itens:' : 'Subtotal:'}</span>
                   <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-neutral-200'}`}>R$ {subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Taxa de Entrega:</span>
-                  <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
-                    {deliveryFee === 0 ? 'Grátis' : `R$ ${deliveryFee.toFixed(2)}`}
-                  </span>
-                </div>
+                {deliveryType !== 'mesa' && (
+                  <div className="flex justify-between">
+                    <span>Taxa de Entrega:</span>
+                    <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
+                      {deliveryFee === 0 ? 'Grátis' : `R$ ${deliveryFee.toFixed(2)}`}
+                    </span>
+                  </div>
+                )}
                 <div className={`flex justify-between text-base font-bold pt-1 border-t ${
                   isLight ? 'text-slate-900 border-slate-200' : 'text-white border-neutral-800'
                 }`}>
-                  <span>TOTAL:</span>
+                  <span>{deliveryType === 'mesa' ? 'TOTAL DESTA RODADA:' : 'TOTAL:'}</span>
                   <span 
                     className="font-black text-lg"
                     style={{ color: tenant.branding?.accentColor || '#3B82F6' }}
                   >
-                    R$ {total.toFixed(2)}
+                    R$ {subtotal.toFixed(2)}
                   </span>
                 </div>
               </div>

@@ -11,6 +11,7 @@ import { InventoryView } from './InventoryView';
 import { FinancialManagementView } from './FinancialManagementView';
 import { StoreSettingsView } from './StoreSettingsView';
 import { DiningTablesView } from './DiningTablesView';
+import { KitchenKDSView } from './KitchenKDSView';
 import { PromoFlyerBanner } from '../common/PromoFlyerBanner';
 import { 
   Building2, 
@@ -47,6 +48,7 @@ import {
   Boxes,
   ShoppingCart,
   UtensilsCrossed,
+  ChefHat,
   Globe,
   Info,
   Sun,
@@ -111,7 +113,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
   const [showSwitchOperatorModal, setShowSwitchOperatorModal] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
-    'produtos' | 'vendas' | 'estoque' | 'pedidos' | 'mesas' | 'configuracoes' | 'visual' | 'whatsapp' | 'entrega' | 'metricas'
+    'produtos' | 'vendas' | 'estoque' | 'pedidos' | 'mesas' | 'cozinha' | 'configuracoes' | 'visual' | 'whatsapp' | 'entrega' | 'metricas'
   >('produtos');
 
   // Orders filter
@@ -507,9 +509,10 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
   const allowStorefront = isFeatureAllowed('enableStorefront', currentTenant);
   const allowMetrics = isFeatureAllowed('enableFinancialMetrics', currentTenant);
 
-  // Mesas & Salão ativas se configurado ou se for segmento gastronômico
-  const isTableServiceActive = currentTenant?.config?.enableTableService ?? (isFoodOrPizza || currentTenant?.businessSegment === 'cafeteria');
+  // Mesas & Salão ativas por padrão para restaurantes, lanchonetes, pizzarias, adegas e comércios (salvo se desativado nas configs)
+  const isTableServiceActive = currentTenant?.config?.enableTableService !== false;
   const activeTableOrdersCount = tenantOrders.filter(o => o.deliveryType === 'mesa' && o.status !== 'finalizado' && o.status !== 'cancelado').length;
+  const pendingKitchenCount = tenantOrders.filter(o => o.status === 'novo' || o.status === 'preparando').length;
 
   // Dynamically constructed available tabs based on tenant operational model & Master Permissions
   // Prioridade número 1 solicitada: Catálogo de Produtos / Cardápio sempre em primeiro lugar!
@@ -519,8 +522,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     ] : []),
     ...(isPhysicalEnabled && allowPDV ? [{ id: 'vendas', label: 'Vendas Balcão (PDV)', icon: ShoppingCart }] : []),
     ...(isTableServiceActive ? [
-      { id: 'mesas', label: 'Mesas & Salão', icon: UtensilsCrossed, count: activeTableOrdersCount > 0 ? activeTableOrdersCount : undefined }
+      { id: 'mesas', label: 'Mesas & Salão', icon: UtensilsCrossed, count: activeTableOrdersCount > 0 ? activeTableOrdersCount : undefined },
     ] : []),
+    { id: 'cozinha', label: 'Cozinha (KDS)', icon: ChefHat, count: pendingKitchenCount > 0 ? pendingKitchenCount : undefined },
     // Para Pizzaria e Lanchonete, NÃO exibe a aba de estoque ("Gestão de Cardápio"), mantendo unicamente a aba de "Cardápio & Lanches" / "Cardápio & Pizzas"!
     ...(!isFoodOrPizza && allowStock ? [{ 
       id: 'estoque', 
@@ -631,14 +635,58 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
             </div>
           </div>
 
-          {/* Ações Rápidas do Topo: Somente Ícone sem Fundo Casinha da Vitrine e Ícone Loja Aberta */}
-          <div className="flex items-center gap-1 shrink-0">
+          {/* Ações Rápidas do Topo: Atalhos Diretos para Salão & Cozinha + Ícones de Acesso */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Botão Rápido: Gestão de Salão / Mesas */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('mesas')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer border ${
+                activeTab === 'mesas'
+                  ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/30'
+                  : isLight
+                  ? 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
+                  : 'bg-blue-950/40 border-blue-800/60 text-blue-300 hover:bg-blue-900/50'
+              }`}
+            >
+              <UtensilsCrossed className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Salão & Mesas</span>
+              <span className="sm:hidden">Mesas</span>
+              {activeTableOrdersCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-500 text-white font-bold">
+                  {activeTableOrdersCount}
+                </span>
+              )}
+            </button>
+
+            {/* Botão Rápido: Visão da Cozinha KDS */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('cozinha')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer border ${
+                activeTab === 'cozinha'
+                  ? 'bg-amber-500 text-neutral-950 border-amber-400 shadow-md shadow-amber-500/30'
+                  : isLight
+                  ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100'
+                  : 'bg-amber-950/40 border-amber-800/60 text-amber-300 hover:bg-amber-900/50'
+              }`}
+            >
+              <ChefHat className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Cozinha KDS</span>
+              <span className="sm:hidden">Cozinha</span>
+              {pendingKitchenCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-black font-black animate-pulse">
+                  {pendingKitchenCount}
+                </span>
+              )}
+            </button>
+
             {/* Ícone sem Fundo: Loja Aberta / Fechada */}
             <button
               type="button"
               onClick={handleToggleOpen}
               title={currentTenant.isOpen ? 'Loja Aberta (clique para fechar a loja)' : 'Loja Fechada (clique para abrir a loja)'}
-              className={`p-2.5 rounded-xl transition-all cursor-pointer bg-transparent border-0 outline-none flex items-center justify-center ${
+              className={`p-2 rounded-xl transition-all cursor-pointer bg-transparent border-0 outline-none flex items-center justify-center ${
                 currentTenant.isOpen
                   ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10'
                   : 'text-rose-400 hover:text-rose-300 hover:bg-rose-500/10'
@@ -653,7 +701,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 type="button"
                 onClick={() => setViewRole('storefront')}
                 title="Ver Minha Vitrine (Abrir loja online)"
-                className="p-2.5 rounded-xl transition-all cursor-pointer bg-transparent border-0 outline-none flex items-center justify-center text-sky-400 hover:text-sky-300 hover:bg-sky-500/10"
+                className="p-2 rounded-xl transition-all cursor-pointer bg-transparent border-0 outline-none flex items-center justify-center text-sky-400 hover:text-sky-300 hover:bg-sky-500/10"
               >
                 <Store className="w-5 h-5 stroke-[2.2]" />
               </button>
@@ -712,6 +760,11 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
       {/* TAB: GESTÃO DE MESAS & COMANDAS NO SALÃO */}
       {activeTab === 'mesas' && (
         <DiningTablesView />
+      )}
+
+      {/* TAB: VISÃO DA COZINHA (KDS) & FILA DE PREPARO */}
+      {activeTab === 'cozinha' && (
+        <KitchenKDSView />
       )}
 
       {/* TAB: CONTROLE DE ESTOQUE, RECEBIMENTO DE MERCADORIAS & IMPORTAR EXCEL */}
