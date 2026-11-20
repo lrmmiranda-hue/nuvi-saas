@@ -24,7 +24,9 @@ import {
   MessageCircle,
   Truck,
   Eye,
-  EyeOff
+  EyeOff,
+  UtensilsCrossed,
+  ChefHat
 } from 'lucide-react';
 
 interface StoreUsersManagerProps {
@@ -33,6 +35,8 @@ interface StoreUsersManagerProps {
 
 const ALL_MODULE_PERMISSIONS: { id: StoreModulePermission; label: string; desc: string; icon: any }[] = [
   { id: 'vendas', label: 'Venda de Balcão (PDV)', desc: 'Abrir caixa, bipar produtos e finalizar vendas presenciais', icon: Store },
+  { id: 'mesas', label: 'Mesas & Salão (Dine-in)', desc: 'Gerenciar salão, comandas de mesas e fechamento de conta', icon: UtensilsCrossed },
+  { id: 'cozinha', label: 'Visão da Cozinha (KDS)', desc: 'Monitor de fila de preparo para chapa, pizzaria e bar', icon: ChefHat },
   { id: 'produtos', label: 'Catálogo de Produtos', desc: 'Cadastrar e editar produtos, preços e promoções', icon: ShoppingBag },
   { id: 'estoque', label: 'Controle de Estoque', desc: 'Entrada de mercadorias, conferência e histórico', icon: Boxes },
   { id: 'pedidos', label: 'Gestão de Pedidos', desc: 'Receber e despachar pedidos da vitrine e WhatsApp', icon: ShoppingBag },

@@ -871,7 +871,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       role: 'gerente',
       roleLabel: 'Proprietário / Gerente Geral',
       active: true,
-      permissions: ['produtos', 'vendas', 'estoque', 'pedidos', 'metricas', 'configuracoes', 'visual', 'whatsapp', 'entrega'],
+      permissions: ['produtos', 'vendas', 'mesas', 'cozinha', 'estoque', 'pedidos', 'metricas', 'configuracoes', 'visual', 'whatsapp', 'entrega'],
       createdAt: new Date().toISOString(),
     };
     const defaultCaixa: StoreUser = {

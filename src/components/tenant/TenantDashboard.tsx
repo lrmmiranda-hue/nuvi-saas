@@ -543,15 +543,28 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
   // Filtra as abas pelas permissões do usuário/operador logado
   const availableTabs = useMemo(() => {
-    if (!currentStoreUser?.permissions || currentStoreUser.permissions.length === 0) {
+    // Gerente Geral / Proprietário SEMPRE tem acesso a todas as abas do sistema
+    if (!currentStoreUser?.permissions || currentStoreUser.permissions.length === 0 || currentStoreUser.role === 'gerente') {
       return allSystemTabs;
     }
-    const filtered = allSystemTabs.filter((tab) => currentStoreUser.permissions.includes(tab.id as any));
+    const filtered = allSystemTabs.filter((tab) => {
+      // Se a aba for mesas ou cozinha, libera para quem tem acesso a vendas/pedidos ou permissão direta
+      if (tab.id === 'mesas' || tab.id === 'cozinha') {
+        return (
+          currentStoreUser.permissions.includes(tab.id as any) ||
+          currentStoreUser.permissions.includes('vendas') ||
+          currentStoreUser.permissions.includes('pedidos')
+        );
+      }
+      return currentStoreUser.permissions.includes(tab.id as any);
+    });
     return filtered.length > 0 ? filtered : allSystemTabs;
-  }, [allSystemTabs, currentStoreUser?.permissions]);
+  }, [allSystemTabs, currentStoreUser?.permissions, currentStoreUser?.role]);
 
   // Auto-switch tab if current tab is hidden by disabling online or physical mode
   useEffect(() => {
+    // Abas de salão e cozinha sempre são preservadas
+    if (activeTab === 'mesas' || activeTab === 'cozinha') return;
     const isCurrentValid = availableTabs.some((t) => t.id === activeTab);
     if (!isCurrentValid && availableTabs.length > 0) {
       setActiveTab(availableTabs[0].id as any);

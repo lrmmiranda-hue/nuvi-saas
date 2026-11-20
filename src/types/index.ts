@@ -289,6 +289,8 @@ export type StoreUserRole = 'gerente' | 'caixa' | 'atendente' | 'estoquista' | '
 export type StoreModulePermission =
   | 'produtos'        // Catálogo de Produtos
   | 'vendas'          // Venda de Balcão (PDV)
+  | 'mesas'           // Atendimento em Mesas & Salão
+  | 'cozinha'         // Visão da Cozinha (KDS) & Bar
   | 'estoque'         // Controle de Estoque
   | 'pedidos'         // Gestão de Pedidos
   | 'metricas'        // Gestão Financeira & Resultados
