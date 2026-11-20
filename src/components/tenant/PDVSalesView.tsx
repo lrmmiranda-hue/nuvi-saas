@@ -448,15 +448,19 @@ export const PDVSalesView: React.FC = () => {
   });
 
   return (
-    <div className={isFullscreenPDV ? 'fixed inset-0 z-50 bg-[#0A0E13] text-white p-3 flex flex-col gap-3 overflow-hidden select-none' : 'space-y-4'}>
+    <div className={isFullscreenPDV ? (isLight ? 'fixed inset-0 z-50 bg-[#F1F5F9] text-slate-900 p-3 flex flex-col gap-3 overflow-hidden select-none' : 'fixed inset-0 z-50 bg-[#0A0E13] text-white p-3 flex flex-col gap-3 overflow-hidden select-none') : 'space-y-4'}>
       
       {/* Top Header do PDV: Modo Bipar com Leitor USB vs Modo Cardápio / Catálogo Ágil & Botão Tela Cheia */}
-      <div className="p-3.5 rounded-2xl border border-[#1A2533] bg-[#0D141C] text-white shadow-sm transition-colors">
+      <div className={`p-3.5 rounded-2xl border transition-colors ${
+        isLight ? 'bg-white border-slate-200 text-slate-800 shadow-sm' : 'bg-[#0D141C] border-[#1A2533] text-white shadow-sm'
+      }`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           
           <div className="flex items-center gap-3">
             <div 
-              className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border bg-sky-500/10 text-sky-500 border-sky-500/20"
+              className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${
+                isLight ? 'bg-sky-50 text-sky-600 border-sky-200' : 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+              }`}
             >
               {currentTenant?.businessSegment === 'petshop' ? (
                 <Dog className="w-6 h-6" />
@@ -474,7 +478,7 @@ export const PDVSalesView: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold tracking-tight text-white">
+                <h2 className={`text-base font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   {currentTenant?.name ? `${currentTenant.name} · Balcão` : 'Frente de Caixa (PDV)'}
                 </h2>
                 {isFullscreenPDV && (
@@ -483,16 +487,20 @@ export const PDVSalesView: React.FC = () => {
                   </span>
                 )}
                 {isBarcodeScannerEnabled ? (
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
+                    isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                  }`}>
                     Leitor Pronto
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border bg-sky-500/20 text-sky-400 border-sky-500/30">
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
+                    isLight ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-sky-500/20 text-sky-400 border-sky-500/30'
+                  }`}>
                     Modo Balcão / Tablet
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 {isBarcodeScannerEnabled
                   ? 'Bipe com o leitor USB ou selecione as categorias e produtos acima para vender.'
                   : 'Selecione as categorias no topo e clique nos produtos para vender no balcão.'}
@@ -512,7 +520,11 @@ export const PDVSalesView: React.FC = () => {
                     value={barcodeInput}
                     onChange={(e) => setBarcodeInput(e.target.value)}
                     placeholder="Bipar código de barras..."
-                    className="w-full pl-9 pr-3 py-1.5 rounded-xl font-mono text-xs outline-none transition-colors bg-[#070B0E] border border-[#1E2B3A] text-white placeholder:text-slate-500"
+                    className={`w-full pl-9 pr-3 py-1.5 rounded-xl font-mono text-xs outline-none transition-colors ${
+                      isLight 
+                        ? 'bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400' 
+                        : 'bg-[#070B0E] border border-[#1E2B3A] text-white placeholder:text-slate-500'
+                    }`}
                   />
                 </div>
                 <button
@@ -528,12 +540,16 @@ export const PDVSalesView: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowSwitchOperatorModal(true)}
-              className="px-3.5 py-2.5 rounded-xl border border-sky-500/30 bg-[#0C2340]/70 hover:bg-[#0E2A4D] text-white text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 shrink-0 shadow-sm active:scale-95"
+              className={`px-3.5 py-2.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95 ${
+                isLight 
+                  ? 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200/70' 
+                  : 'bg-[#0C2340]/70 border-sky-500/30 text-white hover:bg-[#0E2A4D]'
+              }`}
               title="Clique para alternar o operador do caixa"
             >
-              <User className="w-3.5 h-3.5 text-sky-400" />
-              <span>Caixa: <strong className="text-sky-200">{currentStoreUser?.name || 'Administrador'}</strong></span>
-              <span className="text-[10px] text-sky-400 underline font-normal ml-0.5">Trocar</span>
+              <User className="w-3.5 h-3.5 text-sky-500" />
+              <span>Caixa: <strong className={isLight ? 'text-sky-800' : 'text-sky-200'}>{currentStoreUser?.name || 'Administrador'}</strong></span>
+              <span className="text-[10px] text-sky-500 underline font-normal ml-0.5">Trocar</span>
             </button>
 
             {/* Botão Modo Balcão Tela Cheia (Tablet / PC) */}
@@ -570,8 +586,10 @@ export const PDVSalesView: React.FC = () => {
 
         {/* Barcode Test Simulator Bar (somente se leitor ativo) */}
         {isBarcodeScannerEnabled && (
-          <div className="mt-3 pt-3 border-t border-[#1A2533] flex items-center gap-2 flex-wrap text-xs">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          <div className={`mt-3 pt-3 border-t flex items-center gap-2 flex-wrap text-xs ${
+            isLight ? 'border-slate-200' : 'border-[#1A2533]'
+          }`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
               Simulador de Leitor (1-Clique):
             </span>
             {testBarcodes.map((item, idx) => (
@@ -579,11 +597,15 @@ export const PDVSalesView: React.FC = () => {
                 key={idx}
                 type="button"
                 onClick={() => handleSimulateScan(item.barcode)}
-                className="px-2.5 py-1 rounded-lg border border-[#1A2533] bg-[#070B0E] hover:bg-[#141E28] text-slate-200 hover:text-white flex items-center gap-1.5 transition-colors text-[11px] font-semibold cursor-pointer"
+                className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 transition-colors text-[11px] font-semibold cursor-pointer ${
+                  isLight 
+                    ? 'border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700' 
+                    : 'border-[#1A2533] bg-[#070B0E] hover:bg-[#141E28] text-slate-200 hover:text-white'
+                }`}
               >
-                <Barcode className="w-3.5 h-3.5 text-sky-400" />
+                <Barcode className="w-3.5 h-3.5 text-sky-500" />
                 <span>{item.label}</span>
-                <span className="font-mono text-[10px] text-slate-500">({item.barcode.slice(-4)})</span>
+                <span className={`font-mono text-[10px] ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>({item.barcode.slice(-4)})</span>
               </button>
             ))}
           </div>
@@ -609,6 +631,8 @@ export const PDVSalesView: React.FC = () => {
               className={`px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 ${
                 categoryFilter === 'todas'
                   ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40'
+                  : isLight
+                  ? 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm'
                   : 'bg-[#0D141C] hover:bg-[#131E2B] text-slate-300 border border-[#1A2533]'
               }`}
             >
@@ -617,7 +641,11 @@ export const PDVSalesView: React.FC = () => {
                 <span>Todas as Categorias</span>
               </div>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                categoryFilter === 'todas' ? 'bg-white/20 text-white' : 'bg-white/10 text-slate-400'
+                categoryFilter === 'todas' 
+                  ? 'bg-white/20 text-white' 
+                  : isLight 
+                  ? 'bg-slate-100 text-slate-600' 
+                  : 'bg-white/10 text-slate-400'
               }`}>
                 {tenantProducts.length}
               </span>
@@ -634,6 +662,8 @@ export const PDVSalesView: React.FC = () => {
                   className={`px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 ${
                     isSelected
                       ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40'
+                      : isLight
+                      ? 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm'
                       : 'bg-[#0D141C] hover:bg-[#131E2B] text-slate-300 border border-[#1A2533]'
                   }`}
                 >
@@ -646,12 +676,24 @@ export const PDVSalesView: React.FC = () => {
                      cat.id.includes('bebida') || cat.id.includes('refri') ? '🥤' :
                      cat.id.includes('porcao') || cat.id.includes('petisco') ? '🍟' :
                      cat.id.includes('destil') || cat.id.includes('whisky') ? '🥃' :
-                     cat.id.includes('sobremesa') || cat.id.includes('doce') ? '🍰' :
+                     cat.id.includes('sobremesa') || cat.id.includes('doce') || cat.id.includes('bolo') ? '🍰' :
+                     cat.id.includes('roupa') || cat.id.includes('moda') ? '👗' :
+                     cat.id.includes('sorvete') || cat.id.includes('acai') ? '🍧' :
+                     cat.id.includes('pao') || cat.id.includes('padaria') ? '🥖' :
+                     cat.id.includes('salgado') || cat.id.includes('coxinha') ? '🥟' :
+                     cat.id.includes('carne') || cat.id.includes('acougue') ? '🥩' :
+                     cat.id.includes('fruta') || cat.id.includes('legume') || cat.id.includes('horti') ? '🍎' :
+                     cat.id.includes('agua') || cat.id.includes('gas') ? '💧' :
+                     cat.id.includes('cafe') ? '☕' :
                      '🏷️'}
                   </span>
                   <span>{cat.label}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    isSelected ? 'bg-white/20 text-white' : 'bg-white/10 text-slate-400'
+                    isSelected 
+                      ? 'bg-white/20 text-white' 
+                      : isLight 
+                      ? 'bg-slate-100 text-slate-600' 
+                      : 'bg-white/10 text-slate-400'
                   }`}>
                     {cat.count}
                   </span>
@@ -664,28 +706,40 @@ export const PDVSalesView: React.FC = () => {
           </div>
 
           {/* Barra de Busca de Produtos */}
-          <div className="p-2.5 rounded-xl border border-[#1A2533] bg-[#0D141C] flex items-center justify-between gap-2 shadow-sm">
+          <div className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 shadow-sm ${
+            isLight ? 'bg-white border-slate-200' : 'border-[#1A2533] bg-[#0D141C]'
+          }`}>
             <div className="relative flex-1">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
+                isLight ? 'text-slate-400' : 'text-slate-400'
+              }`} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar produto por nome ou código..."
-                className="w-full pl-8 pr-7 py-2 rounded-lg text-xs font-semibold outline-none transition-all bg-[#070B0E] border border-[#1E2B3A] text-white focus:border-sky-500 placeholder:text-slate-500"
+                className={`w-full pl-8 pr-7 py-2 rounded-lg text-xs font-semibold outline-none transition-all ${
+                  isLight
+                    ? 'bg-slate-50 border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-sky-500'
+                    : 'bg-[#070B0E] border border-[#1E2B3A] text-white placeholder:text-slate-500 focus:border-sky-500'
+                }`}
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-white"
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-0.5 ${
+                    isLight ? 'text-slate-400 hover:text-slate-700' : 'text-slate-400 hover:text-white'
+                  }`}
                 >
                   <X className="w-3 h-3" />
                 </button>
               )}
             </div>
 
-            <span className="text-[10px] font-bold whitespace-nowrap px-2.5 py-1.5 rounded-lg bg-[#070B0E] text-slate-400 border border-[#1E2B3A]">
+            <span className={`text-[10px] font-bold whitespace-nowrap px-2.5 py-1.5 rounded-lg border ${
+              isLight ? 'bg-slate-50 text-slate-600 border-slate-200' : 'bg-[#070B0E] text-slate-400 border-[#1E2B3A]'
+            }`}>
               {filteredProducts.length} itens encontrados
             </span>
           </div>
@@ -709,23 +763,27 @@ export const PDVSalesView: React.FC = () => {
                     addItemToCart(product);
                     playBeep(true);
                   }}
-                  className={`p-3 rounded-2xl border border-[#1A2533] bg-[#0D141C] hover:bg-[#121B26] hover:border-sky-500/50 flex flex-col justify-between transition-all relative cursor-pointer group active:scale-[0.98] select-none shadow-sm ${
-                    isOutOfStock ? 'opacity-60' : ''
-                  }`}
+                  className={`p-3 rounded-2xl border flex flex-col justify-between transition-all relative cursor-pointer group active:scale-[0.98] select-none shadow-sm ${
+                    isLight
+                      ? 'bg-white border-slate-200 hover:border-sky-400 hover:shadow-md'
+                      : 'border-[#1A2533] bg-[#0D141C] hover:bg-[#121B26] hover:border-sky-500/50'
+                  } ${isOutOfStock ? 'opacity-60' : ''}`}
                 >
                   <div>
                     {/* Header: Volume/Tipo e Estoque */}
                     <div className="flex items-center justify-between text-[10px] mb-1.5">
-                      <span className="truncate font-semibold text-slate-400">
+                      <span className={`truncate font-semibold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                         {product.volume || (isCardapio ? '🍽️ Cardápio' : 'Unidade')}
                       </span>
                       <span className={`px-1.5 py-0.5 rounded font-bold text-[9px] ${
                         isCardapio
-                          ? 'text-emerald-400 bg-emerald-500/20'
+                          ? 'text-emerald-500 bg-emerald-500/15 border border-emerald-500/30'
                           : isOutOfStock 
-                          ? 'text-red-400 bg-red-500/20' 
+                          ? 'text-red-500 bg-red-500/15 border border-red-500/30' 
                           : isLowStock 
-                          ? 'text-amber-400 bg-amber-500/20' 
+                          ? 'text-amber-500 bg-amber-500/15 border border-amber-500/30' 
+                          : isLight 
+                          ? 'text-slate-600 bg-slate-100 border border-slate-200'
                           : 'text-neutral-300 bg-neutral-800'
                       }`}>
                         {isCardapio ? 'Feito na Hora' : `${product.stockQuantity} un`}
@@ -733,30 +791,34 @@ export const PDVSalesView: React.FC = () => {
                     </div>
 
                     {/* Descrição / Nome do Produto no Topo */}
-                    <h4 className="text-xs font-bold leading-snug line-clamp-2 text-white min-h-[30px] mb-2">
+                    <h4 className={`text-xs font-bold leading-snug line-clamp-2 min-h-[30px] mb-2 ${
+                      isLight ? 'text-slate-800' : 'text-white'
+                    }`}>
                       {product.name}
                     </h4>
 
-                    {/* Foto Pequena com a Garrafa ou Lata Abaixo da Descrição */}
-                    {product.imageUrl ? (
-                      <div className="w-full h-20 rounded-xl overflow-hidden mb-2 bg-black/25 flex items-center justify-center p-1.5">
+                    {/* Foto Auto-Adaptável que Estende Completando a Área */}
+                    {product.imageUrl && (
+                      <div className={`w-full aspect-[16/10] sm:aspect-video rounded-xl overflow-hidden mb-2 relative flex items-center justify-center ${
+                        isLight ? 'bg-slate-100' : 'bg-black/30'
+                      }`}>
                         <img
                           src={product.imageUrl}
                           alt={product.name}
-                          className="h-full w-auto max-w-full object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-md"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                      </div>
-                    ) : (
-                      <div className="w-full h-12 rounded-xl mb-2 bg-white/5 flex items-center justify-center">
-                        <span className="text-[10px] text-slate-500 font-medium">Sem imagem</span>
                       </div>
                     )}
                   </div>
 
                   {/* Preço e Botão Adicionar */}
-                  <div className="mt-2.5 pt-2 border-t border-[#1A2533] flex items-center justify-between gap-1.5">
+                  <div className={`mt-2.5 pt-2 border-t flex items-center justify-between gap-1.5 ${
+                    isLight ? 'border-slate-100' : 'border-[#1A2533]'
+                  }`}>
                     <div>
-                      <span className="text-sm font-black tabular-nums text-sky-400 block">
+                      <span className={`text-sm font-black tabular-nums block ${
+                        isLight ? 'text-sky-600' : 'text-sky-400'
+                      }`}>
                         R$ {price.toFixed(2).replace('.', ',')}
                       </span>
                     </div>
@@ -769,7 +831,11 @@ export const PDVSalesView: React.FC = () => {
                             e.stopPropagation();
                             setSelectedProductForPackModal(product);
                           }}
-                          className="px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer bg-[#070B0E] hover:bg-[#141E28] text-sky-400 border-[#1A2533]"
+                          className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
+                            isLight
+                              ? 'bg-slate-100 hover:bg-slate-200 text-sky-700 border-slate-200'
+                              : 'bg-[#070B0E] hover:bg-[#141E28] text-sky-400 border-[#1A2533]'
+                          }`}
                           title="Fardos e caixas"
                         >
                           📦 Fardos
@@ -789,17 +855,21 @@ export const PDVSalesView: React.FC = () => {
         </div>
 
         {/* RIGHT COLUMN: Active Sale Checkout / Cashier Box */}
-        <div className={`w-full lg:w-[380px] xl:w-[420px] shrink-0 rounded-2xl border border-[#1A2533] p-4.5 space-y-4 shadow-xl transition-colors bg-[#0D141C] text-white flex flex-col justify-between ${
-          isFullscreenPDV ? 'overflow-y-auto' : ''
-        }`}>
+        <div className={`w-full lg:w-[380px] xl:w-[420px] shrink-0 rounded-2xl border p-4.5 space-y-4 transition-colors flex flex-col justify-between ${
+          isLight
+            ? 'bg-white border-slate-200 text-slate-800 shadow-xl shadow-slate-200/50'
+            : 'bg-[#0D141C] border-[#1A2533] text-white shadow-xl'
+        } ${isFullscreenPDV ? 'overflow-y-auto' : ''}`}>
           
-          <div className="flex items-center justify-between border-b border-[#1A2533] pb-3">
+          <div className={`flex items-center justify-between border-b pb-3 ${
+            isLight ? 'border-slate-100' : 'border-[#1A2533]'
+          }`}>
             <div className="flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5 text-sky-400" />
-              <h3 className="text-sm font-bold text-white">
+              <ShoppingCart className="w-5 h-5 text-sky-500" />
+              <h3 className={`text-sm font-bold ${isLight ? 'text-slate-800' : 'text-white'}`}>
                 Venda em Andamento
               </h3>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-sky-500/15 text-sky-400 border-sky-500/30">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-sky-500/15 text-sky-500 border-sky-500/30">
                 {cartItems.reduce((acc, i) => acc + (i.packUnits ? i.packUnits * i.quantity : i.quantity), 0)} itens baixados
               </span>
             </div>
@@ -807,7 +877,7 @@ export const PDVSalesView: React.FC = () => {
             {cartItems.length > 0 && (
               <button
                 onClick={clearCart}
-                className="text-xs flex items-center gap-1 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                className="text-xs flex items-center gap-1 text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
                 title="Limpar venda"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -817,14 +887,18 @@ export const PDVSalesView: React.FC = () => {
           </div>
 
           {/* Customer Name */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#1E2B3A] bg-[#070B0E]">
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${
+            isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1E2B3A] bg-[#070B0E]'
+          }`}>
             <User className="w-3.5 h-3.5 text-slate-400" />
             <input
               type="text"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Nome do Cliente (opcional - Padrão: Balcão)"
-              className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 outline-none focus:outline-none"
+              className={`w-full bg-transparent text-xs outline-none focus:outline-none ${
+                isLight ? 'text-slate-800 placeholder:text-slate-400' : 'text-white placeholder:text-slate-500'
+              }`}
             />
           </div>
 
@@ -833,28 +907,36 @@ export const PDVSalesView: React.FC = () => {
             {cartItems.map((item, idx) => (
               <div 
                 key={idx}
-                className="p-3 rounded-xl border border-[#1A2533] bg-[#070B0E] flex items-center justify-between gap-3 text-xs transition-colors"
+                className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs transition-colors ${
+                  isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1A2533] bg-[#070B0E]'
+                }`}
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-bold text-white truncate">
+                    <span className={`font-bold truncate ${isLight ? 'text-slate-800' : 'text-white'}`}>
                       {item.productName}
                     </span>
                     {item.packUnits ? (
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border flex items-center gap-1 bg-sky-500/15 text-sky-400 border-sky-500/30">
-                        <Boxes className="w-2.5 h-2.5 text-sky-400" />
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border flex items-center gap-1 bg-sky-500/15 text-sky-500 border-sky-500/30">
+                        <Boxes className="w-2.5 h-2.5 text-sky-500" />
                         {item.packUnits * item.quantity} un baixadas
                       </span>
                     ) : (
-                      <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-400">
+                      <span className={`text-[9px] font-medium px-1.5 py-0.2 rounded ${
+                        isLight ? 'bg-slate-200 text-slate-600' : 'bg-neutral-800 text-neutral-400'
+                      }`}>
                         Unidade Avulsa
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-[11px] mt-0.5 text-slate-400">
+                  <div className={`flex items-center gap-2 text-[11px] mt-0.5 ${
+                    isLight ? 'text-slate-500' : 'text-slate-400'
+                  }`}>
                     <span>{item.volume}</span>
                     <span>·</span>
-                    <span className="font-mono font-bold text-sky-400">R$ {item.price.toFixed(2)} cada</span>
+                    <span className={`font-mono font-bold ${isLight ? 'text-sky-600' : 'text-sky-400'}`}>
+                      R$ {item.price.toFixed(2)} cada
+                    </span>
                   </div>
                 </div>
 
@@ -862,30 +944,38 @@ export const PDVSalesView: React.FC = () => {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={() => updateQuantity(idx, -1)}
-                    className="w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer bg-[#141E28] hover:bg-[#1E2B3A] text-white"
+                    className={`w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                      isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-[#141E28] hover:bg-[#1E2B3A] text-white'
+                    }`}
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="w-6 text-center font-bold tabular-nums text-white">
+                  <span className={`w-6 text-center font-bold tabular-nums ${
+                    isLight ? 'text-slate-800' : 'text-white'
+                  }`}>
                     {item.quantity}
                   </span>
                   <button
                     onClick={() => updateQuantity(idx, 1)}
-                    className="w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer bg-[#141E28] hover:bg-[#1E2B3A] text-white"
+                    className={`w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                      isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-[#141E28] hover:bg-[#1E2B3A] text-white'
+                    }`}
                   >
                     <Plus className="w-3 h-3" />
                   </button>
                 </div>
 
                 <div className="text-right shrink-0 w-16">
-                  <span className="font-extrabold tabular-nums font-mono text-sky-400">
+                  <span className={`font-extrabold tabular-nums font-mono ${
+                    isLight ? 'text-sky-600' : 'text-sky-400'
+                  }`}>
                     R$ {(item.price * item.quantity).toFixed(2)}
                   </span>
                 </div>
 
                 <button
                   onClick={() => removeItem(idx)}
-                  className="text-slate-400 hover:text-rose-400 p-1 cursor-pointer"
+                  className="text-slate-400 hover:text-rose-500 p-1 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -893,9 +983,11 @@ export const PDVSalesView: React.FC = () => {
             ))}
 
             {cartItems.length === 0 && (
-              <div className="p-8 text-center border border-dashed border-[#1A2533] bg-[#070B0E]/60 rounded-xl space-y-2">
-                <Barcode className="w-8 h-8 mx-auto text-slate-500" />
-                <p className="text-xs font-medium text-slate-400">
+              <div className={`p-8 text-center border border-dashed rounded-xl space-y-2 ${
+                isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1A2533] bg-[#070B0E]/60'
+              }`}>
+                <Barcode className="w-8 h-8 mx-auto text-slate-400" />
+                <p className={`text-xs font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                   Nenhum produto adicionado ao caixa ainda.<br />
                   Clique nos produtos acima para iniciar a venda no balcão.
                 </p>
@@ -904,8 +996,8 @@ export const PDVSalesView: React.FC = () => {
           </div>
 
           {/* Payment Method Selector */}
-          <div className="pt-3 border-t border-[#1A2533] space-y-2">
-            <span className="text-xs font-bold block text-slate-300">
+          <div className={`pt-3 border-t space-y-2 ${isLight ? 'border-slate-100' : 'border-[#1A2533]'}`}>
+            <span className={`text-xs font-bold block ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
               Forma de Pagamento no Balcão:
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -925,6 +1017,8 @@ export const PDVSalesView: React.FC = () => {
                     className={`p-2.5 rounded-xl text-center flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
                       isSelected
                         ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40'
+                        : isLight
+                        ? 'bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                         : 'bg-[#070B0E] border border-[#1A2533] text-slate-400 hover:text-white hover:bg-[#131E2B]'
                     }`}
                   >
@@ -938,33 +1032,43 @@ export const PDVSalesView: React.FC = () => {
 
           {/* Cash Change Calculator (If Dinheiro) */}
           {paymentMethod === 'dinheiro' && (
-            <div className="p-3 rounded-xl border border-[#1A2533] bg-[#070B0E] space-y-2">
+            <div className={`p-3 rounded-xl border space-y-2 ${
+              isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1A2533] bg-[#070B0E]'
+            }`}>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-300">
+                <span className={`font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
                   Valor Entregue pelo Cliente:
                 </span>
                 <div className="relative w-28">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs">R$</span>
+                  <span className={`absolute left-2 top-1/2 -translate-y-1/2 text-xs ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>R$</span>
                   <input
                     type="text"
                     value={cashAmountGiven}
                     onChange={(e) => setCashAmountGiven(e.target.value)}
                     placeholder={total > 0 ? total.toFixed(2) : '0,00'}
                     style={{ outline: 'none', boxShadow: 'none' }}
-                    className="w-full pl-7 pr-2 py-1 rounded text-right text-xs font-mono font-bold outline-none bg-[#121820] border border-[#1E2B3A] text-white focus:border-sky-500"
+                    className={`w-full pl-7 pr-2 py-1 rounded text-right text-xs font-mono font-bold outline-none border focus:border-sky-500 ${
+                      isLight
+                        ? 'bg-white border-slate-200 text-slate-800'
+                        : 'bg-[#121820] border-[#1E2B3A] text-white'
+                    }`}
                   />
                 </div>
               </div>
 
               {/* Quick Cash Buttons */}
               <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[11px]">
-                <span className="text-[10px] font-semibold text-slate-400">Rápido:</span>
+                <span className={`text-[10px] font-semibold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Rápido:</span>
                 {[total, 10, 20, 50, 100].filter(val => val >= total || val === total).slice(0, 4).map((val, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setCashAmountGiven(val.toFixed(2))}
-                    className="px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-colors cursor-pointer bg-[#141E28] hover:bg-[#1E2B3A] text-slate-200 border border-[#1A2533]"
+                    className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-colors cursor-pointer border ${
+                      isLight
+                        ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                        : 'bg-[#141E28] hover:bg-[#1E2B3A] text-slate-200 border-[#1A2533]'
+                    }`}
                   >
                     R$ {val.toFixed(2)}
                   </button>
@@ -972,9 +1076,11 @@ export const PDVSalesView: React.FC = () => {
               </div>
 
               {changeDue > 0 && (
-                <div className="pt-2 border-t border-[#1A2533] flex items-center justify-between text-xs font-semibold text-emerald-400">
+                <div className={`pt-2 border-t flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400 ${
+                  isLight ? 'border-slate-200' : 'border-[#1A2533]'
+                }`}>
                   <span>Troco a Devolver:</span>
-                  <span className="font-mono font-extrabold text-sm text-emerald-400">
+                  <span className="font-mono font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
                     R$ {changeDue.toFixed(2)}
                   </span>
                 </div>
@@ -983,12 +1089,12 @@ export const PDVSalesView: React.FC = () => {
           )}
 
           {/* Total & Finalize Button */}
-          <div className="pt-3 border-t border-[#1A2533] space-y-3">
+          <div className={`pt-3 border-t space-y-3 ${isLight ? 'border-slate-100' : 'border-[#1A2533]'}`}>
             <div className="flex items-baseline justify-between">
-              <span className="text-xs uppercase tracking-wider font-bold text-slate-400">
+              <span className={`text-xs uppercase tracking-wider font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                 Total da Venda:
               </span>
-              <span className="text-2xl font-extrabold font-mono tabular-nums text-sky-400">
+              <span className={`text-2xl font-extrabold font-mono tabular-nums ${isLight ? 'text-sky-600' : 'text-sky-400'}`}>
                 R$ {total.toFixed(2)}
               </span>
             </div>

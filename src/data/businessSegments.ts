@@ -231,6 +231,245 @@ export const BUSINESS_SEGMENTS: BusinessSegmentConfig[] = [
       { id: 'caldo_de_cana', label: 'Caldo de Cana & Sucos Naturais' },
       { id: 'refrigerantes_bebidas', label: 'Refrigerantes & Bebidas' },
     ]
+  },
+  {
+    id: 'loja_roupas',
+    title: 'Loja de Roupas, Moda & Acessórios',
+    shortLabel: 'Moda & Roupas',
+    emoji: '👗',
+    description: 'Moda feminina, masculina, infantil, calçados, bolsas, acessórios e promoções.',
+    pitch: 'Vitrine virtual com fotos elegantes tipo lookbook, grade de tamanhos (P, M, G, GG) e atendimento direto no WhatsApp.',
+    namePlaceholder: 'Ex: Boutique Elegance, Urban Style Store, Maria Bonita Moda',
+    sloganExample: 'As últimas tendências da moda e conforto para o seu estilo',
+    badgeNotice: 'Coleção nova disponível e entrega expressa no mesmo dia',
+    primaryColor: '#4F46E5', // Índigo Fashion
+    accentColor: '#EC4899', // Rosa Pink
+    themeStyle: 'clean_light',
+    bannerUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Kits & Looks',
+    suggestedCategories: [
+      { id: 'feminino', label: 'Moda Feminina' },
+      { id: 'masculino', label: 'Moda Masculina' },
+      { id: 'infantil', label: 'Moda Infantil' },
+      { id: 'calcados', label: 'Calçados & Tênis' },
+      { id: 'acessorios', label: 'Bolsas & Acessórios' },
+      { id: 'promocoes', label: 'Ofertas & Bazar' },
+    ]
+  },
+  {
+    id: 'sorveteria',
+    title: 'Sorveteria, Açaíteria & Gelateria',
+    shortLabel: 'Sorveteria & Açaí',
+    emoji: '🍧',
+    description: 'Sorvetes artesanais por bola ou pote, copos de açaí montados na hora, picolés e milk-shakes.',
+    pitch: 'Cardápio digital refrescante com opções de acompanhamentos e caldas livres para o cliente montar no WhatsApp.',
+    namePlaceholder: 'Ex: Gelato Real, Ponto do Açaí Tropical, Sorveteria da Praça',
+    sloganExample: 'Refrescância, cremosidade irresistível e o puro açaí da Amazônia',
+    badgeNotice: 'Puro creme, frutas frescas e calda liberada',
+    primaryColor: '#7C3AED', // Roxo Açaí
+    accentColor: '#06B6D4', // Ciano Refrescante
+    themeStyle: 'clean_light',
+    bannerUrl: 'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Potes & Copos',
+    suggestedCategories: [
+      { id: 'acai_copos', label: 'Copos & Tigelas de Açaí' },
+      { id: 'sorvetes_potes', label: 'Potes de Sorvete (1L e 2L)' },
+      { id: 'picoles', label: 'Picolés & Paletas Mexicanas' },
+      { id: 'milkshakes', label: 'Milk-Shakes Cremosos' },
+      { id: 'sobremesas_geladas', label: 'Taças & Sobremesas Especiais' },
+      { id: 'bebidas', label: 'Águas & Refrigerantes' },
+    ]
+  },
+  {
+    id: 'padaria',
+    title: 'Padaria, Panificadora & Confeitaria',
+    shortLabel: 'Padaria & Pães',
+    emoji: '🥖',
+    description: 'Pães artesanais quentinhos, frios fatiados na hora, lanches na chapa, cafés, roscas e tortas.',
+    pitch: 'Frente de caixa rápida para o fluxo da manhã e delivery de pães e café da manhã entregues pontualmente.',
+    namePlaceholder: 'Ex: Padaria Estrela da Manhã, Panificadora Pão & Cia',
+    sloganExample: 'O aroma do pão quentinho e café fresco todas as manhãs',
+    badgeNotice: 'Pão francês quentinho saindo do forno a toda hora',
+    primaryColor: '#B45309', // Âmbar Dourado Pão
+    accentColor: '#F59E0B', // Dourado Crosta
+    themeStyle: 'amber_pub',
+    bannerUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Cestas & Combos',
+    suggestedCategories: [
+      { id: 'paes', label: 'Pães Tradicionais & Especiais' },
+      { id: 'frios_laticinios', label: 'Frios & Laticínios Fatiados' },
+      { id: 'cafes_bebidas', label: 'Cafés, Leite & Sucos' },
+      { id: 'lanches_chapa', label: 'Lanches na Chapa & Ovos' },
+      { id: 'bolos_doces', label: 'Bolos, Roscas & Doces' },
+      { id: 'salgados_forno', label: 'Salgados de Forno & Folhados' },
+    ]
+  },
+  {
+    id: 'casa_bolos',
+    title: 'Casa de Bolos, Doceria & Tortas Artesanais',
+    shortLabel: 'Casa de Bolos & Doces',
+    emoji: '🎂',
+    description: 'Bolos caseiros tradicionais tipo vó, bolos vulcão com cobertura farta, tortas doces e sobremesas em pote.',
+    pitch: 'Vitrine visual apaixonante com pedidos de pronta entrega e encomendas de bolos para festas e aniversários.',
+    namePlaceholder: 'Ex: Casa de Bolos da Vovó, Delícias de Açúcar, Doce Sabor Ateliê',
+    sloganExample: 'Bolos caseiros fresquinhos feitos com afeto e receitas de família',
+    badgeNotice: 'Bolo quentinho saindo a toda hora com gostinho de infância',
+    primaryColor: '#BE123C', // Cereja Confeitaria
+    accentColor: '#F59E0B', // Caramelo Dourado
+    themeStyle: 'clean_light',
+    bannerUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Tamanhos & Formas',
+    suggestedCategories: [
+      { id: 'bolos_caseiros', label: 'Bolos Caseiros Tradicionais' },
+      { id: 'bolos_vulcao', label: 'Bolos Vulcão & Cobertura' },
+      { id: 'tortas_doces', label: 'Tortas & Cheesecakes' },
+      { id: 'bolos_pote', label: 'Bolos no Pote & Sobremesas' },
+      { id: 'docinhos_festa', label: 'Docinhos & Brigadeiros Gourmet' },
+      { id: 'bebidas', label: 'Cafés, Refrigerantes & Sucos' },
+    ]
+  },
+  {
+    id: 'salgaderia',
+    title: 'Salgaderia, Fábrica de Salgados & Centos para Festa',
+    shortLabel: 'Salgaderia & Festas',
+    emoji: '🍗',
+    description: 'Coxinhas douradas, quibes crocantes, risoles, empadas, esfihas e centos para festas fritos ou congelados.',
+    pitch: 'Atenda clientes de balcão com agilidade e receba encomendas de centos para festas com cálculo automático.',
+    namePlaceholder: 'Ex: Rei da Coxinha, Fábrica de Salgados Central, Dona Coxinha',
+    sloganExample: 'Salgados sequinhos, recheio generoso e centos perfeitos para a sua festa',
+    badgeNotice: 'Fritura sequinha na hora ou congelados para sua conveniência',
+    primaryColor: '#C2410C', // Laranja Quente Salgado
+    accentColor: '#EAB308', // Dourado Crocante
+    themeStyle: 'amber_pub',
+    bannerUrl: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Centos & Caixas',
+    suggestedCategories: [
+      { id: 'salgados_fritos', label: 'Salgados Fritos Unitários' },
+      { id: 'salgados_assados', label: 'Salgados Assados & Folhados' },
+      { id: 'centos_festa', label: 'Centos para Festas (Fritos)' },
+      { id: 'congelados', label: 'Salgados Congelados para Fritar' },
+      { id: 'churros_doces', label: 'Minis Churros & Doces' },
+      { id: 'refrigerantes', label: 'Refrigerantes 2L & Latas' },
+    ]
+  },
+  {
+    id: 'acougue',
+    title: 'Açougue, Casa de Carnes & Boutique do Churrasco',
+    shortLabel: 'Açougue & Carnes',
+    emoji: '🥩',
+    description: 'Cortes nobres bovinos, aves frescas, suínos, espetinhos prontos, linguiças artesanais e kits churrasco.',
+    pitch: 'Agilidade na pesagem do balcão e delivery de carnes frescas com combos especiais para o fim de semana.',
+    namePlaceholder: 'Ex: Casa de Carnes Boi Nobre, Açougue & Boutique do Churrasco',
+    sloganExample: 'Carnes nobres selecionadas, cortes especiais e o melhor para o seu churrasco',
+    badgeNotice: 'Cortes frescos preparados na hora pelo açougueiro',
+    primaryColor: '#7F1D1D', // Vermelho Carne Escuro
+    accentColor: '#F59E0B', // Dourado Brasa
+    themeStyle: 'amber_pub',
+    bannerUrl: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Kits & Peças',
+    suggestedCategories: [
+      { id: 'bovinos', label: 'Cortes Bovinos Especiais' },
+      { id: 'aves_frangos', label: 'Aves & Frangos Frescos' },
+      { id: 'suinos', label: 'Cortes Suínos & Linguiças' },
+      { id: 'espetinhos', label: 'Espetinhos Prontos para Grelhar' },
+      { id: 'kits_churrasco', label: 'Kits Churrasco & Combos' },
+      { id: 'carvao_temperos', label: 'Carvão, Sal Grosso & Temperos' },
+    ]
+  },
+  {
+    id: 'hortifruti',
+    title: 'Hortifrúti, Quitanda & Sacolão de Bairro',
+    shortLabel: 'Hortifrúti & Quitanda',
+    emoji: '🍎',
+    description: 'Frutas selecionadas, verduras frescas, legumes, ovos caipiras, temperos naturais e grãos.',
+    pitch: 'Receba pedidos de sacolas da feira da semana diretamente no WhatsApp com produtos colhidos no dia.',
+    namePlaceholder: 'Ex: Sacolão da Terra, Hortifrúti Pomar Verde, Quitanda Saudável',
+    sloganExample: 'Frutas, legumes e verduras direto do produtor para a sua mesa todos os dias',
+    badgeNotice: 'Colheita fresca do dia e produtos higienizados com carinho',
+    primaryColor: '#15803D', // Verde Hortifrúti
+    accentColor: '#EAB308', // Amarelo Fruta
+    themeStyle: 'modern_emerald',
+    bannerUrl: 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Sacolas & Bandejas',
+    suggestedCategories: [
+      { id: 'frutas', label: 'Frutas Selecionadas' },
+      { id: 'verduras', label: 'Verduras & Folhas Frescas' },
+      { id: 'legumes', label: 'Legumes & Tubérculos' },
+      { id: 'ovos_laticinios', label: 'Ovos & Queijos Frescos' },
+      { id: 'temperos_graos', label: 'Temperos, Ervas & Grãos' },
+      { id: 'sucos_naturais', label: 'Sucos Naturais & Polpas' },
+    ]
+  },
+  {
+    id: 'agua_gas',
+    title: 'Distribuidora de Água Mineral & Gás de Cozinha',
+    shortLabel: 'Água & Gás',
+    emoji: '💧',
+    description: 'Botijões de gás P13, galões de água mineral 20L, fardos de água garrafa e acessórios seguros.',
+    pitch: 'Venda expressa via WhatsApp e PDV ágil com despacho instantâneo para motoentregadores no bairro.',
+    namePlaceholder: 'Ex: SuperGás & Água Express, Disk Água Central, Ultragás do Bairro',
+    sloganExample: 'Disk entrega mais rápida da região: gás seguro e água mineral na sua porta',
+    badgeNotice: 'Entrega em até 20 minutos com instalação segura e gratuita',
+    primaryColor: '#0369A1', // Azul Gás & Água
+    accentColor: '#F59E0B', // Chama Dourada
+    themeStyle: 'clean_light',
+    bannerUrl: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Fardos & Cascos',
+    suggestedCategories: [
+      { id: 'gas_cozinha', label: 'Gás de Cozinha (P13, P20, P45)' },
+      { id: 'agua_20l', label: 'Galões de Água 20L (Retornável)' },
+      { id: 'agua_garrafas', label: 'Fardos de Água Mineral (500ml e 1.5L)' },
+      { id: 'acessorios_gas', label: 'Reguladores, Mangueiras & Suportes' },
+      { id: 'carvao_gelo', label: 'Gelo & Carvão' },
+    ]
+  },
+  {
+    id: 'cafeteria',
+    title: 'Cafeteria, Bistrô & Casa de Chá',
+    shortLabel: 'Cafeteria & Bistrô',
+    emoji: '☕',
+    description: 'Cafés especiais expressos, cappuccinos cremosos, croissants folhados, brunch e sobremesas finas.',
+    pitch: 'Cardápio charmoso para pedidos de mesa, retirada no balcão e delivery com embalagens térmicas seguras.',
+    namePlaceholder: 'Ex: Grão Nobre Cafeteria, Café Paris Bistrô, Aroma & Grão',
+    sloganExample: 'Cafés selecionados de origem, torra perfeita e um refúgio acolhedor',
+    badgeNotice: 'Grãos moídos na hora por baristas apaixonados',
+    primaryColor: '#451A03', // Marrom Café Nobre
+    accentColor: '#D97706', // Caramelo Quente
+    themeStyle: 'amber_pub',
+    bannerUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Combos & Doses',
+    suggestedCategories: [
+      { id: 'cafes_quentes', label: 'Cafés Quentes & Espressos' },
+      { id: 'cafes_gelados', label: 'Cafés Gelados & Frappés' },
+      { id: 'salgados_folhados', label: 'Croissants & Pães de Queijo' },
+      { id: 'brunch_sanduiches', label: 'Brunch & Sanduíches Especiais' },
+      { id: 'bolos_doces', label: 'Fatias de Bolo & Tortas Finas' },
+      { id: 'graos_moidos', label: 'Pacotes de Café em Grão e Moído' },
+    ]
+  },
+  {
+    id: 'farmacia',
+    title: 'Farmácia, Drogaria & Cuidados Diários',
+    shortLabel: 'Farmácia & Drogaria',
+    emoji: '💊',
+    description: 'Medicamentos isentos de prescrição, vitaminas, fraldas, higiene pessoal e primeiros socorros.',
+    pitch: 'Atendimento de balcão ágil com leitor de código de barras e delivery rápido para medicamentos e cuidados.',
+    namePlaceholder: 'Ex: Drogaria Saúde & Vida, Farmácia Popular Central, DrogaMaster',
+    sloganExample: 'Cuidando da sua saúde e da sua família com preço acessível e entrega rápida',
+    badgeNotice: 'Entrega emergencial rápida no seu bairro com farmacêutico de plantão',
+    primaryColor: '#059669', // Verde Farmácia
+    accentColor: '#0284C7', // Azul Saúde
+    themeStyle: 'modern_emerald',
+    bannerUrl: 'https://images.unsplash.com/photo-1586015555751-63c2c10b7a4f?auto=format&fit=crop&w=1600&q=80',
+    packTerm: 'Caixas & Kits',
+    suggestedCategories: [
+      { id: 'primeiros_socorros', label: 'Primeiros Socorros & Curativos' },
+      { id: 'vitaminas_suplementos', label: 'Vitaminas & Suplementos' },
+      { id: 'infantil_bebe', label: 'Mamãe & Bebê (Fraldas e Lenços)' },
+      { id: 'higiene_pessoal', label: 'Higiene & Cuidados Pessoais' },
+      { id: 'dermocosmeticos', label: 'Dermocosméticos & Protetor Solar' },
+      { id: 'medicamentos_isentos', label: 'Medicamentos Isentos (MIPs)' },
+    ]
   }
 ];
 
@@ -473,6 +712,146 @@ export const SEGMENT_COLOR_OPTIONS: Record<string, SegmentColorOptions> = {
       desc: 'Estética, cuidados pessoais e salões',
       primary: '#6D28D9',
       accent: '#F59E0B',
+    },
+  },
+  loja_roupas: {
+    option1: {
+      name: 'Índigo Chic & Rosa Pink',
+      desc: 'Moderno e sofisticado para boutiques e lojas de moda',
+      primary: '#4F46E5',
+      accent: '#EC4899',
+    },
+    option2: {
+      name: 'Preto Minimalista & Dourado Nobre',
+      desc: 'Estilo de grife e alta costura',
+      primary: '#18181B',
+      accent: '#EAB308',
+    },
+  },
+  sorveteria: {
+    option1: {
+      name: 'Roxo Açaí & Ciano Refrescante',
+      desc: 'Vibrante e irresistível para açaí e gelaterias',
+      primary: '#7C3AED',
+      accent: '#06B6D4',
+    },
+    option2: {
+      name: 'Rosa Chiclete & Amarelo Manga',
+      desc: 'Cores alegres e tropicais de sorveteria artesanal',
+      primary: '#DB2777',
+      accent: '#F59E0B',
+    },
+  },
+  padaria: {
+    option1: {
+      name: 'Âmbar Forno & Dourado Pão',
+      desc: 'Acolhedor e tradicional de panificadora e café',
+      primary: '#B45309',
+      accent: '#F59E0B',
+    },
+    option2: {
+      name: 'Marrom Café & Trigo Claro',
+      desc: 'Estilo rústico artesanal de pães de fermentação natural',
+      primary: '#78350F',
+      accent: '#D97706',
+    },
+  },
+  casa_bolos: {
+    option1: {
+      name: 'Cereja Doce & Caramelo Dourado',
+      desc: 'Doce e afetuoso para bolos caseiros e confeitarias',
+      primary: '#BE123C',
+      accent: '#F59E0B',
+    },
+    option2: {
+      name: 'Chocolate Trufado & Baunilha Suave',
+      desc: 'Cores requintadas de ateliê de doces e tortas',
+      primary: '#451A03',
+      accent: '#FBBF24',
+    },
+  },
+  salgaderia: {
+    option1: {
+      name: 'Laranja Salgado & Amarelo Dourado',
+      desc: 'Estimulante e apetitoso para coxinhas e centos de festa',
+      primary: '#C2410C',
+      accent: '#EAB308',
+    },
+    option2: {
+      name: 'Vermelho Intenso & Ouro Crocante',
+      desc: 'Visual forte e comercial de fábrica de salgados',
+      primary: '#B91C1C',
+      accent: '#F59E0B',
+    },
+  },
+  acougue: {
+    option1: {
+      name: 'Vermelho Brasa & Dourado Fogo',
+      desc: 'Carnes nobres, churrasco e cortes especiais',
+      primary: '#7F1D1D',
+      accent: '#F59E0B',
+    },
+    option2: {
+      name: 'Preto Nobre & Vinho Carmim',
+      desc: 'Boutique de carnes e cortes premium para parrilla',
+      primary: '#18181B',
+      accent: '#DC2626',
+    },
+  },
+  hortifruti: {
+    option1: {
+      name: 'Verde Folha & Laranja Tangerina',
+      desc: 'Frescor, saúde e colheita do dia',
+      primary: '#15803D',
+      accent: '#EA580C',
+    },
+    option2: {
+      name: 'Verde Esmeralda & Amarelo Fruta',
+      desc: 'Visual limpo de quitanda e sacolão de bairro',
+      primary: '#047857',
+      accent: '#FACC15',
+    },
+  },
+  agua_gas: {
+    option1: {
+      name: 'Azul Gás & Chama Dourada',
+      desc: 'Confiança e segurança para distribuidoras de gás e água',
+      primary: '#0369A1',
+      accent: '#F59E0B',
+    },
+    option2: {
+      name: 'Ciano Mineral & Laranja Entrega',
+      desc: 'Disk entrega veloz e água purificada cristalina',
+      primary: '#0891B2',
+      accent: '#EA580C',
+    },
+  },
+  cafeteria: {
+    option1: {
+      name: 'Marrom Café Nobre & Caramelo Quente',
+      desc: 'Aconchegante e sofisticado para bistrôs e cafés especiais',
+      primary: '#451A03',
+      accent: '#D97706',
+    },
+    option2: {
+      name: 'Verde Bistrô & Bege Latte',
+      desc: 'Estilo contemporâneo de cafeteria europeia',
+      primary: '#064E3B',
+      accent: '#D97706',
+    },
+  },
+  farmacia: {
+    option1: {
+      name: 'Verde Farmácia & Azul Saúde',
+      desc: 'Cuidado, bem-estar e credibilidade profissional',
+      primary: '#059669',
+      accent: '#0284C7',
+    },
+    option2: {
+      name: 'Azul Médico & Vermelho Emergência',
+      desc: 'Destaque clássico de drogaria e primeiros socorros',
+      primary: '#1D4ED8',
+      accent: '#DC2626',
     },
   },
 };

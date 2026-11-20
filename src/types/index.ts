@@ -236,7 +236,17 @@ export type BusinessSegmentType =
   | 'tabacaria' 
   | 'cosmeticos_farmacia'
   | 'pesqueiro'
-  | 'pastelaria';
+  | 'pastelaria'
+  | 'loja_roupas'
+  | 'sorveteria'
+  | 'padaria'
+  | 'casa_bolos'
+  | 'salgaderia'
+  | 'acougue'
+  | 'hortifruti'
+  | 'agua_gas'
+  | 'cafeteria'
+  | 'farmacia';
 
 export interface TenantCategory {
   id: string;
