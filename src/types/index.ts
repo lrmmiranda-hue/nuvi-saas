@@ -344,7 +344,7 @@ export interface Tenant {
   monthlyPrice?: number; // Valor da mensalidade do plano
 }
 
-export type ViewRole = 'super_admin' | 'tenant_admin' | 'storefront' | 'register_tenant' | 'login_tenant';
+export type ViewRole = 'super_admin' | 'tenant_admin' | 'storefront' | 'register_tenant' | 'login_tenant' | 'not_found';
 
 export interface SaaSFeaturePermissions {
   enableStorefront: boolean;        // Cardápio & Vitrine Online

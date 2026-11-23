@@ -62,6 +62,19 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
       setIsSubmitting(false);
 
       if (ok) {
+        const found = tenants.find((t) => {
+          const tenantPhone = (t.whatsapp?.phoneNumber || '').replace(/\D/g, '');
+          const ownerPhone = (t.ownerPhone || '').replace(/\D/g, '');
+          const email = (t.ownerEmail || '').toLowerCase();
+          const slug = (t.slug || '').toLowerCase();
+          const cleanDigits = identifier.replace(/\D/g, '');
+          const raw = identifier.trim().toLowerCase();
+          return (cleanDigits && (tenantPhone.includes(cleanDigits) || ownerPhone.includes(cleanDigits))) || email === raw || slug === raw;
+        });
+        if (found && typeof window !== 'undefined') {
+          const slug = found.slug || found.id;
+          window.history.pushState(null, '', `/${slug}/painel`);
+        }
         setViewRole('tenant_admin');
         if (onSuccess) onSuccess();
       } else {

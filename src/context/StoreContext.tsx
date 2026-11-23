@@ -113,6 +113,9 @@ interface StoreContextType {
   loginMaster: (identifier: string, pass: string) => boolean;
   logoutMaster: () => void;
   // Autenticação Lojista
+  authenticatedTenantId: string | null;
+  notFoundSlug: string;
+  setNotFoundSlug: (slug: string) => void;
   isTenantAuthenticated: boolean;
   loginTenant: (identifier: string, pass: string) => boolean;
   logoutTenant: () => void;
@@ -393,6 +396,19 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   });
 
+  // Slug não encontrado para exibição da tela 404
+  const [notFoundSlug, setNotFoundSlug] = useState<string>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const parts = window.location.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+        return parts[0] || '';
+      }
+      return '';
+    } catch {
+      return '';
+    }
+  });
+
   // Active Tenant (detectado de forma inteligente por Rota Limpa ou Parâmetro em todos os tenants criados)
   const [currentTenantId, setCurrentTenantIdState] = useState<string>(() => {
     try {
@@ -409,34 +425,25 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         })();
 
         const route = parseCurrentRoute(allLoadedTenants);
-        if (route.tenantSlugOrId) {
+        if (route.tenantSlugOrId && !route.tenantNotFound) {
           const match = findTenantBySlugOrId(allLoadedTenants, route.tenantSlugOrId);
           if (match) return match.id;
-          return route.tenantSlugOrId;
         }
       }
       const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_TENANT_ID);
-      return saved || 'adega-imperial';
+      return saved || '';
     } catch {
-      return 'adega-imperial';
+      return '';
     }
   });
 
-  // Current view role: 'super_admin' | 'tenant_admin' | 'storefront' | 'login_tenant' | 'register_tenant'
+  // Current view role: 'super_admin' | 'tenant_admin' | 'storefront' | 'login_tenant' | 'register_tenant' | 'not_found'
   const [viewRole, setViewRoleState] = useState<ViewRole>(() => {
     try {
       if (typeof window !== 'undefined') {
         const path = window.location.pathname.toLowerCase();
-        if (
-          path === '/painel' || 
-          path.startsWith('/painel') || 
-          path === '/portal' || 
-          path.startsWith('/portal') || 
-          path === '/acesso_master' || 
-          path === '/admin' || 
-          window.location.search.toLowerCase().includes('portal=master') ||
-          window.location.search.toLowerCase().includes('portal=admin')
-        ) {
+        // APENAS /acesso_master abre o Master diretamente
+        if (path === '/acesso_master' || path.startsWith('/acesso_master')) {
           return 'super_admin';
         }
 
@@ -566,12 +573,21 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setViewRole('login_tenant');
   };
 
-  // Autenticação Lojista
+  // Autenticação Lojista com Isolamento por Estabelecimento
+  const [authenticatedTenantId, setAuthenticatedTenantId] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('nuvi_auth_tenant_id') || null;
+    } catch {
+      return null;
+    }
+  });
+
   const [isTenantAuthenticated, setIsTenantAuthenticated] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(STORAGE_KEYS.TENANT_AUTH) === 'true';
+      const authId = localStorage.getItem('nuvi_auth_tenant_id');
+      return Boolean(authId);
     } catch {
-      return true; // Mantém ativo por padrão para facilitar navegação
+      return false;
     }
   });
 
@@ -611,8 +627,10 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
       setCurrentTenantId(found.id);
       setIsTenantAuthenticated(true);
+      setAuthenticatedTenantId(found.id);
       try {
         localStorage.setItem(STORAGE_KEYS.TENANT_AUTH, 'true');
+        localStorage.setItem('nuvi_auth_tenant_id', found.id);
         localStorage.setItem(STORAGE_KEYS.CURRENT_TENANT_ID, found.id);
       } catch { }
       return true;
@@ -623,9 +641,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const logoutTenant = () => {
     setIsTenantAuthenticated(false);
+    setAuthenticatedTenantId(null);
     try {
       localStorage.removeItem(STORAGE_KEYS.TENANT_AUTH);
+      localStorage.removeItem('nuvi_auth_tenant_id');
     } catch { }
+    setViewRole('login_tenant');
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', '/acesso_lojista');
+    }
   };
 
   // Configurações Globais do SaaS Nuvi (Permissões, 4 Planos de Venda e Promoções)
@@ -749,11 +773,18 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         try {
           if (typeof window !== 'undefined') {
             const route = parseCurrentRoute(remoteTenants);
-            if (route.tenantSlugOrId) {
+            if (route.tenantNotFound) {
+              setViewRoleState('not_found');
+              setNotFoundSlug(route.requestedSlug || '');
+            } else if (route.tenantSlugOrId) {
               const matched = findTenantBySlugOrId(remoteTenants, route.tenantSlugOrId);
               if (matched) {
                 setCurrentTenantIdState(matched.id);
                 localStorage.setItem(STORAGE_KEYS.CURRENT_TENANT_ID, matched.id);
+                setViewRoleState(route.role);
+              } else {
+                setViewRoleState('not_found');
+                setNotFoundSlug(route.tenantSlugOrId);
               }
             }
           }
@@ -874,8 +905,14 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } catch { }
   };
 
-  // Safe current tenant lookup (localiza inteligentemente por id, slug amigável ou nome)
-  const currentTenant = findTenantBySlugOrId(tenants, currentTenantId) || tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId) || tenants[0];
+  // Safe current tenant lookup (apenas localiza se existir id/slug válido; NUNCA faz fallback silencioso em tenants[0]!)
+  const currentTenant = useMemo(() => {
+    if (!currentTenantId) return undefined;
+    return (
+      findTenantBySlugOrId(tenants, currentTenantId) ||
+      tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId)
+    );
+  }, [tenants, currentTenantId]);
 
   // Estado reativo persistido para o tema da vitrine e do painel do lojista
   const [tenantThemeMode, setTenantThemeMode] = useState<'dark' | 'light'>(() => {
@@ -1212,11 +1249,21 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // 3. Remove permanentemente do Firestore (incluindo produtos e pedidos vinculados)
     deleteTenantFirestore(id);
 
+    // 4. Limpa sessões ativas vinculadas à loja excluída
+    if (authenticatedTenantId === id) {
+      setIsTenantAuthenticated(false);
+      setAuthenticatedTenantId(null);
+      try {
+        localStorage.removeItem(STORAGE_KEYS.TENANT_AUTH);
+        localStorage.removeItem('nuvi_auth_tenant_id');
+      } catch { }
+    }
+
     if (currentTenantId === id) {
-      const remaining = tenants.filter((t) => t.id !== id);
-      if (remaining.length > 0) {
-        setCurrentTenantId(remaining[0].id);
-      }
+      setCurrentTenantId('');
+      try {
+        localStorage.removeItem(STORAGE_KEYS.CURRENT_TENANT_ID);
+      } catch { }
     }
   };
 
@@ -2127,6 +2174,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setupMasterPassword,
         loginMaster,
         logoutMaster,
+        authenticatedTenantId,
+        notFoundSlug,
+        setNotFoundSlug,
         isTenantAuthenticated,
         loginTenant,
         logoutTenant,

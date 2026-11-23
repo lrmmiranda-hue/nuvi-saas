@@ -1,12 +1,14 @@
 /**
- * Roteamento Inteligente e URLs Amigáveis para Nuvi SaaS
+ * Roteamento Inteligente e URLs Rigorosas para Nuvi SaaS
  * 
- * Exemplos de Rotas:
- * - /                         -> Site Oficial / Cadastro de Novos Comerciantes
- * - /acesso_master            -> Portal do Dono do SaaS (Administrador Geral)
+ * Regras Estritas:
+ * - /                         -> Site Oficial / Cadastro de Novos Comerciantes (Teste Grátis)
+ * - /acesso_master            -> ÚNICO link exclusivo do Administrador Geral (Master)
  * - /acesso_lojista           -> Login Único de Comerciantes (WhatsApp + Senha)
- * - /:slug/cardapio ou /:slug -> Vitrine Pública & Cardápio da Loja (ex: /donana/cardapio)
- * - /:slug/painel             -> Painel & PDV daquela Loja (ex: /donana/painel)
+ * - /:slug/cardapio ou /:slug -> Vitrine Pública & Cardápio da Loja ESPECÍFICA (ex: /donana/cardapio)
+ * - /:slug/painel             -> Painel & PDV daquela Loja ESPECÍFICA (ex: /donana/painel)
+ * - Links com estabelecimentos excluídos ou inexistentes (ex: /pesqueiro-ademar/painel ou /loja/cardapio)
+ *   NUNCA devem exibir dados de outra loja! Retornam 'not_found' com tela 404 dedicada.
  */
 
 import { ViewRole, Tenant } from '../types';
@@ -15,19 +17,44 @@ export interface RouteResolution {
   role: ViewRole;
   tenantSlugOrId?: string;
   isMaster: boolean;
+  tenantNotFound?: boolean;
+  requestedSlug?: string;
 }
 
 export const OFFICIAL_PLATFORM_ORIGIN = 'https://nuvi-saas.web.app';
 
 /**
- * Busca inteligente de Loja por Slug, ID ou Nome
- * Suporta correspondência exata, variações com/sem hífens e sufixos numéricos
+ * Palavras reservadas do sistema que NUNCA podem ser tratadas como slug de loja
+ */
+export const RESERVED_SYSTEM_WORDS = [
+  'portal',
+  'acesso_master',
+  'acesso_lojista',
+  'cadastro',
+  'criar_loja',
+  'login',
+  'admin',
+  'master',
+  'painel',
+  'loja',
+  'cardapio',
+  'vitrine'
+];
+
+/**
+ * Busca RÍGIDA e SEGURA de Loja por Slug, ID ou Nome
+ * Não permite correspondência frouxa que cause vazamento de dados entre lojistas.
  */
 export function findTenantBySlugOrId(tenants: Tenant[], query?: string): Tenant | undefined {
   if (!query || !tenants || tenants.length === 0) return undefined;
   const q = query.toLowerCase().trim();
   const cleanQ = q.replace(/[^a-z0-9]/g, '');
   if (!cleanQ) return undefined;
+
+  // Se for palavra reservada do sistema, rejeita imediatamente
+  if (RESERVED_SYSTEM_WORDS.includes(q) || RESERVED_SYSTEM_WORDS.includes(cleanQ)) {
+    return undefined;
+  }
 
   // 1. Busca exata por ID ou por Slug
   let match = tenants.find((t) => {
@@ -37,7 +64,7 @@ export function findTenantBySlugOrId(tenants: Tenant[], query?: string): Tenant 
   });
   if (match) return match;
 
-  // 2. Busca exata normalizada (remove hífens, pontuações e acentos)
+  // 2. Busca exata normalizada (remove hífens e caracteres especiais)
   match = tenants.find((t) => {
     const cleanId = (t.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const cleanSlug = (t.slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -45,34 +72,30 @@ export function findTenantBySlugOrId(tenants: Tenant[], query?: string): Tenant 
   });
   if (match) return match;
 
-  // 3. Busca por base sem sufixo numérico (ex: "donana" bate com "donana-3623" ou "donana-3623-3624")
-  const baseQ = q.replace(/-\d+.*$/, '').replace(/[^a-z0-9]/g, '');
+  // 3. Busca por base sem sufixo numérico (ex: "donana" bate com slug "donana-3623-3624")
+  // Apenas correspondência EXATA da base, sem startsWith genérico
+  const baseQ = cleanQ.replace(/-\d+.*$/, '');
   match = tenants.find((t) => {
-    const s = (t.slug || '').toLowerCase();
-    const id = (t.id || '').toLowerCase();
-    const cleanS = s.replace(/[^a-z0-9]/g, '');
-    const baseSlug = s.replace(/-\d+.*$/, '').replace(/[^a-z0-9]/g, '');
-    const baseId = id.replace(/-\d+.*$/, '').replace(/[^a-z0-9]/g, '');
+    const s = (t.slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const id = (t.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const baseSlug = s.replace(/\d+.*$/, '');
+    const baseId = id.replace(/\d+.*$/, '');
 
     return (
-      (baseSlug && baseSlug === cleanQ) ||
-      (baseSlug && baseSlug === baseQ) ||
-      (baseId && baseId === cleanQ) ||
-      (baseId && baseId === baseQ) ||
-      cleanS.startsWith(cleanQ) ||
-      cleanQ.startsWith(cleanS)
+      (baseSlug.length >= 3 && (baseSlug === cleanQ || baseSlug === baseQ)) ||
+      (baseId.length >= 3 && (baseId === cleanQ || baseId === baseQ))
     );
   });
   if (match) return match;
 
-  // 4. Busca por nome do estabelecimento (ex: "donana" bate com "Donana")
+  // 4. Busca por nome completo do estabelecimento (EXATA normalizada, sem acentos)
   match = tenants.find((t) => {
     const cleanName = (t.name || '')
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]/g, '');
-    return cleanName === cleanQ || cleanName.startsWith(cleanQ) || cleanQ.startsWith(cleanName);
+    return cleanName.length >= 3 && cleanName === cleanQ;
   });
   if (match) return match;
 
@@ -85,47 +108,37 @@ export function parseCurrentRoute(tenants: Tenant[]): RouteResolution {
   }
 
   const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
-  const urlParams = new URLSearchParams(window.location.search);
   const port = window.location.port;
-
-  // 1. Suporte por parâmetros de busca (query params)
-  const portalParam = urlParams.get('portal')?.toLowerCase();
-  const lojaParam = urlParams.get('loja') || urlParams.get('vitrine');
-  const painelParam = urlParams.get('painel');
-
-  // 2. Rotas Limpas
   const cleanPath = pathname.toLowerCase();
 
-  // Acesso Master Prioritário do Dono da Plataforma (/painel, /portal, /acesso_master, etc.)
-  if (
-    cleanPath === '/painel' || 
-    cleanPath.startsWith('/painel') || 
-    cleanPath === '/portal' || 
-    cleanPath.startsWith('/portal') || 
-    cleanPath === '/acesso_master' || 
-    cleanPath.startsWith('/acesso_master') ||
-    cleanPath === '/admin' || 
-    cleanPath === '/master' ||
-    portalParam === 'master' || 
-    portalParam === 'admin'
-  ) {
+  // 1. Acesso Master EXCLUSIVO do Administrador Geral da Plataforma (/acesso_master)
+  // REGRA DO USUÁRIO: Apenas /acesso_master abre o Master. Nenhum outro link (como /painel) deve abrir o Master!
+  if (cleanPath === '/acesso_master' || cleanPath.startsWith('/acesso_master')) {
     return { role: 'super_admin', isMaster: true };
   }
 
-  // Acesso Padrão para todos os Lojistas
+  // 2. Acesso do Lojista (/acesso_lojista ou /login)
   if (cleanPath === '/acesso_lojista' || cleanPath === '/login' || cleanPath === '/lojista') {
     return { role: 'login_tenant', isMaster: false };
   }
 
-  // Cadastro de Novos Lojistas (Página Principal ou /cadastro)
+  // 3. /painel, /admin, /portal soltos (sem slug de loja): Redireciona para login do lojista
+  // Nunca dá acesso ao Master nem a uma loja aleatória!
+  if (
+    cleanPath === '/painel' || 
+    cleanPath === '/admin' || 
+    cleanPath === '/portal' || 
+    cleanPath === '/master'
+  ) {
+    return { role: 'login_tenant', isMaster: false };
+  }
+
+  // 4. Cadastro de Novos Lojistas (Página Principal ou /cadastro)
   if (cleanPath === '/cadastro' || cleanPath === '/criar_loja') {
     return { role: 'register_tenant', isMaster: false };
   }
 
-  // Tratamento de portas locais de desenvolvimento:
-  // Se estiver na raiz ('/' ou vazio):
-  // Porta 3005 abre Super Admin (Master)
-  // Porta 3006 abre Loja
+  // 5. Tratamento de portas locais de desenvolvimento:
   if (cleanPath === '/' || cleanPath === '') {
     if (port === '3005') {
       return { role: 'super_admin', isMaster: true };
@@ -136,28 +149,56 @@ export function parseCurrentRoute(tenants: Tenant[]): RouteResolution {
     return { role: 'register_tenant', isMaster: false };
   }
 
-  // Rotas Dinâmicas de Lojas: /:slug/cardapio, /:slug/vitrine ou /:slug/painel
+  // 6. Rotas Dinâmicas de Lojas: /:slug/cardapio, /:slug/vitrine ou /:slug/painel
   const parts = cleanPath.split('/').filter(Boolean);
   if (parts.length >= 1) {
     const slug = parts[0];
     const subRoute = parts[1] || '';
 
-    // Ignora rotas especiais do sistema
-    if (!['portal', 'acesso_master', 'acesso_lojista', 'cadastro', 'criar_loja', 'login', 'admin'].includes(slug)) {
-      const found = findTenantBySlugOrId(tenants, slug);
-      const targetSlug = found ? found.id : slug;
-
-      if (subRoute === 'painel' || subRoute === 'admin') {
-        return { role: 'tenant_admin', tenantSlugOrId: targetSlug, isMaster: false };
-      }
-      return { role: 'storefront', tenantSlugOrId: targetSlug, isMaster: false };
+    // Se o primeiro segmento for palavra reservada (como /loja/cardapio, /cardapio, /vitrine):
+    // Isso NÃO é um comércio cadastrado! Retorna NOT_FOUND imediatamente!
+    if (RESERVED_SYSTEM_WORDS.includes(slug)) {
+      return {
+        role: 'not_found',
+        tenantNotFound: true,
+        requestedSlug: slug,
+        isMaster: false
+      };
     }
+
+    // Busca rígida do estabelecimento
+    const found = findTenantBySlugOrId(tenants, slug);
+
+    // SE NÃO ENCONTRAR O ESTABELECIMENTO (ex: pesqueiro-ademar que foi excluído):
+    // NUNCA fazer fallback na loja de outro lojista! Retorna NOT_FOUND!
+    if (!found) {
+      return {
+        role: 'not_found',
+        tenantNotFound: true,
+        requestedSlug: slug,
+        isMaster: false
+      };
+    }
+
+    // SE ENCONTROU A LOJA:
+    if (subRoute === 'painel') {
+      return {
+        role: 'tenant_admin',
+        tenantSlugOrId: found.id,
+        isMaster: false,
+        tenantNotFound: false
+      };
+    }
+
+    return {
+      role: 'storefront',
+      tenantSlugOrId: found.id,
+      isMaster: false,
+      tenantNotFound: false
+    };
   }
 
-  // Fallback padrão
-  if (port === '3005') {
-    return { role: 'super_admin', isMaster: true };
-  }
+  // Fallback seguro: Cadastro / Página Inicial
   return { role: 'register_tenant', isMaster: false };
 }
 

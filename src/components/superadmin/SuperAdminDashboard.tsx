@@ -120,11 +120,21 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   });
 
   const handleImpersonateTenant = (tenantId: string) => {
+    const t = tenants.find(x => x.id === tenantId);
+    if (t && typeof window !== 'undefined') {
+      const slug = t.slug || t.id;
+      window.history.pushState(null, '', `/${slug}/painel`);
+    }
     setCurrentTenantId(tenantId);
     setViewRole('tenant_admin');
   };
 
   const handleOpenStorefront = (tenantId: string) => {
+    const t = tenants.find(x => x.id === tenantId);
+    if (t && typeof window !== 'undefined') {
+      const slug = t.slug || t.id;
+      window.history.pushState(null, '', `/${slug}/cardapio`);
+    }
     setCurrentTenantId(tenantId);
     setViewRole('storefront');
   };

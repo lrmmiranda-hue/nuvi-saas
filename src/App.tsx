@@ -8,6 +8,7 @@ import { TenantDashboard } from './components/tenant/TenantDashboard';
 import { TenantRegisterView } from './components/tenant/TenantRegisterView';
 import { TenantLoginView } from './components/tenant/TenantLoginView';
 import { StorefrontView } from './components/storefront/StorefrontView';
+import { TenantNotFoundView } from './components/common/TenantNotFoundView';
 import { OnboardingWizardModal } from './components/tenant/OnboardingWizardModal';
 import { NewTenantModal } from './components/superadmin/NewTenantModal';
 import { MasterSettingsModal } from './components/superadmin/MasterSettingsModal';
@@ -25,6 +26,8 @@ const AppContent: React.FC = () => {
     themeMode,
     adminThemeMode,
     isMasterAuthenticated,
+    authenticatedTenantId,
+    notFoundSlug,
   } = useStore();
 
   const [isNewTenantModalOpen, setIsNewTenantModalOpen] = useState(false);
@@ -56,7 +59,7 @@ const AppContent: React.FC = () => {
   // No Painel Master: utiliza adminThemeMode
   // No Painel do Lojista autenticado / Vitrine: utiliza themeMode
   const isMasterView = viewRole === 'super_admin';
-  const isAuthOrRegister = viewRole === 'register_tenant' || viewRole === 'login_tenant';
+  const isAuthOrRegister = viewRole === 'register_tenant' || viewRole === 'login_tenant' || viewRole === 'not_found';
 
   const effectiveThemeMode = 
     isAuthOrRegister
@@ -129,13 +132,30 @@ const AppContent: React.FC = () => {
         ) : (
           /* Visões da Loja Selecionada (Painel, Vitrine ou Login do Lojista) */
           <>
+            {viewRole === 'not_found' && (
+              <TenantNotFoundView requestedSlug={notFoundSlug} />
+            )}
+
             {viewRole === 'tenant_admin' && (
-              <TenantDashboard
-                onOpenOnboarding={() => {
-                  setOnboardingTargetTenant(currentTenant);
-                  setIsOnboardingModalOpen(true);
-                }}
-              />
+              !currentTenant ? (
+                <TenantNotFoundView requestedSlug={notFoundSlug} />
+              ) : (
+                // Se for Master OU estiver autenticado para esta loja específica
+                (isMasterAuthenticated || authenticatedTenantId === currentTenant.id) ? (
+                  <TenantDashboard
+                    onOpenOnboarding={() => {
+                      setOnboardingTargetTenant(currentTenant);
+                      setIsOnboardingModalOpen(true);
+                    }}
+                  />
+                ) : (
+                  <TenantLoginView
+                    onSuccess={() => {
+                      setViewRole('tenant_admin');
+                    }}
+                  />
+                )
+              )
             )}
 
             {viewRole === 'login_tenant' && (
@@ -156,7 +176,11 @@ const AppContent: React.FC = () => {
             )}
 
             {viewRole === 'storefront' && (
-              <StorefrontView />
+              !currentTenant ? (
+                <TenantNotFoundView requestedSlug={notFoundSlug} />
+              ) : (
+                <StorefrontView />
+              )
             )}
           </>
         )}
