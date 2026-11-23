@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Tenant, TenantBranding, TenantAddress, TenantWhatsAppSettings, BusinessSegmentType } from '../../types';
 import { getSegmentById } from '../../data/businessSegments';
-import { STORE_WALLPAPERS, WALLPAPER_CATEGORIES } from '../../data/wallpapers';
+import { STORE_WALLPAPERS, WALLPAPER_CATEGORIES, getSegmentWallpapers } from '../../data/wallpapers';
 import { 
   Building2, 
   Palette, 
@@ -1016,30 +1016,10 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
   const activeSegment: BusinessSegmentType = formData.businessSegment || tenant?.businessSegment || 'adega';
   const segmentConfig = getSegmentById(activeSegment);
 
-  const targetWallpaperCat = (() => {
-    if (activeSegment === 'restaurante_lanchonete') return 'restaurante';
-    if (activeSegment === 'mercadinho_emporio') return 'mercadinho';
-    if (activeSegment === 'cosmeticos_farmacia') return 'cosmeticos';
-    if (activeSegment === 'comida_japonesa') return 'japonesa';
-    if (activeSegment === 'pastelaria') return 'pastelaria';
-    if (activeSegment === 'pesqueiro') return 'pesqueiro';
-    if (activeSegment === 'pizzaria') return 'pizzaria';
-    if (activeSegment === 'petshop') return 'petshop';
-    if (activeSegment === 'tabacaria') return 'tabacaria';
-    return 'adega';
-  })();
-
+  // Imagens prontas e exclusivas do segmento (estritamente 6 imagens do ramo)
   const segmentWallpapers = useMemo(() => {
-    const list = STORE_WALLPAPERS.filter((w) => w.category === targetWallpaperCat);
-    if (list.length > 0) return list;
-    return STORE_WALLPAPERS.filter((w) => w.category === 'restaurante' || w.category === 'adega');
-  }, [targetWallpaperCat]);
-
-  const [activeWallpaperCat, setActiveWallpaperCat] = useState<string>(targetWallpaperCat);
-
-  useEffect(() => {
-    setActiveWallpaperCat(targetWallpaperCat);
-  }, [targetWallpaperCat]);
+    return getSegmentWallpapers(activeSegment);
+  }, [activeSegment]);
 
   // Estados para filtro dropdown de cores no celular
   const [isColorFilterOpen, setIsColorFilterOpen] = useState(false);

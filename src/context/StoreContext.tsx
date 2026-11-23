@@ -689,7 +689,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
               }
             }
           }
-        } catch {}
+        } catch { }
       } else {
         const seeded = localStorage.getItem('nuvi_firestore_seeded_v1');
         if (!seeded) {

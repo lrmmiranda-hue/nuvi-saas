@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { STORE_WALLPAPERS, WALLPAPER_CATEGORIES } from '../../data/wallpapers';
+import { STORE_WALLPAPERS, WALLPAPER_CATEGORIES, getSegmentWallpapers } from '../../data/wallpapers';
 import { PRESET_THEMES, PRESET_BANNERS, getSegmentThemes } from './OnboardingWizardModal';
 import { getSegmentById } from '../../data/businessSegments';
 import {
@@ -98,24 +98,13 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
     return luma > 165;
   };
 
-  const targetWallpaperCat = (() => {
-    const seg = currentTenant?.businessSegment || 'adega';
-    if (seg === 'comida_japonesa') return 'japonesa';
-    if (seg === 'restaurante_lanchonete') return 'restaurante';
-    if (seg === 'mercadinho_emporio') return 'mercadinho';
-    if (seg === 'cosmeticos_farmacia') return 'cosmeticos';
-    return seg;
-  })();
+  const currentSegmentConfig = useMemo(() => {
+    return getSegmentById(currentTenant?.businessSegment || 'adega');
+  }, [currentTenant?.businessSegment]);
 
-  const relevantWallpaperCategories = useMemo(() => {
-    return WALLPAPER_CATEGORIES.filter((cat: { id: string }) => cat.id === targetWallpaperCat || cat.id === 'propaganda');
-  }, [targetWallpaperCat]);
-
-  const [wallpaperCategory, setWallpaperCategory] = useState<string>(targetWallpaperCat);
-
-  useEffect(() => {
-    setWallpaperCategory(targetWallpaperCat);
-  }, [targetWallpaperCat]);
+  const segmentWallpapers = useMemo(() => {
+    return getSegmentWallpapers(currentTenant?.businessSegment);
+  }, [currentTenant?.businessSegment]);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -554,113 +543,87 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
               )}
             </div>
 
-            {/* Abas de Categorias de Papel de Parede */}
-            <div className={`flex items-center gap-1.5 p-1 rounded-xl border text-xs overflow-x-auto ${
+            {/* Barra de identificação do comércio e galeria exclusiva */}
+            <div className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs ${
               isLight ? 'bg-neutral-100 border-neutral-200' : 'bg-neutral-950 border-neutral-800'
             }`}>
-              {relevantWallpaperCategories.map((cat) => {
-                const isActive = wallpaperCategory === cat.id;
+              <div className="flex items-center gap-2">
+                <span className="text-base">{currentSegmentConfig.emoji}</span>
+                <span className={`font-bold ${isLight ? 'text-neutral-900' : 'text-white'}`}>
+                  Imagens Prontas para {currentSegmentConfig.title} ({segmentWallpapers.length} opções exclusivas)
+                </span>
+              </div>
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                Exclusivo do seu Ramo
+              </span>
+            </div>
+
+            {/* Grid com exatamente as 6 imagens do ramo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {segmentWallpapers.map((wallpaper, idx) => {
+                const isSelected = brandingEdits?.bannerUrl === wallpaper.url;
                 return (
                   <button
-                    key={cat.id}
+                    key={wallpaper.id}
                     type="button"
-                    onClick={() => setWallpaperCategory(cat.id)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${
-                      isActive
-                        ? isLight
-                          ? 'bg-white text-neutral-900 shadow-xs border border-neutral-200'
-                          : 'shadow-sm'
+                    onClick={() =>
+                      setBrandingEdits({
+                        ...(brandingEdits || currentTenant.branding),
+                        bannerUrl: wallpaper.url,
+                      })
+                    }
+                    className={`group relative rounded-xl border overflow-hidden text-left transition-all cursor-pointer flex flex-col justify-between ${
+                      isSelected
+                        ? 'shadow-md scale-[1.01]'
                         : isLight
-                        ? 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
-                        : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
+                        ? 'border-neutral-200 bg-white hover:border-neutral-300 shadow-2xs'
+                        : 'border-neutral-800 bg-neutral-950 hover:border-neutral-700'
                     }`}
-                    style={isActive && !isLight ? {
-                      backgroundColor: activeAccent,
-                      color: isLightColor(activeAccent) ? '#09090b' : '#ffffff',
+                    style={isSelected ? {
+                      borderColor: activeAccent,
+                      boxShadow: `0 0 0 2px ${activeAccent}44`,
                     } : {}}
                   >
-                    {cat.id === 'adega' && <Wine className="w-3.5 h-3.5" />}
-                    {cat.id === 'restaurante' && <Sandwich className="w-3.5 h-3.5" />}
-                    {cat.id === 'pizzaria' && <Pizza className="w-3.5 h-3.5" />}
-                    {cat.id === 'japonesa' && <Fish className="w-3.5 h-3.5" />}
-                    {cat.id === 'mercadinho' && <ShoppingCart className="w-3.5 h-3.5" />}
-                    {cat.id === 'petshop' && <Dog className="w-3.5 h-3.5" />}
-                    {cat.id === 'cosmeticos' && <Sparkles className="w-3.5 h-3.5" />}
-                    {cat.id === 'propaganda' && <Megaphone className="w-3.5 h-3.5" />}
-                    <span>{cat.label}</span>
+                    {/* Miniatura da Imagem */}
+                    <div className="relative h-28 w-full overflow-hidden bg-neutral-900">
+                      <img
+                        src={wallpaper.url}
+                        alt={wallpaper.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      
+                      {/* Tag no topo */}
+                      <span className="absolute top-2 left-2 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-black/60 text-white border border-white/20 backdrop-blur-xs">
+                        {wallpaper.tag || `Opção ${idx + 1}`}
+                      </span>
+
+                      {/* Checkmark se selecionado */}
+                      {isSelected && (
+                        <div 
+                          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center font-bold shadow-md"
+                          style={{
+                            backgroundColor: activeAccent,
+                            color: isLightColor(activeAccent) ? '#09090b' : '#ffffff',
+                          }}
+                        >
+                          <Check className="w-4 h-4" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Informações */}
+                    <div className="p-3 space-y-1">
+                      <h4 className={`text-xs font-bold leading-tight ${isLight ? 'text-neutral-900' : 'text-white'}`}>
+                        {wallpaper.title}
+                      </h4>
+                      <p className={`text-[10px] leading-snug line-clamp-2 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                        {wallpaper.subtitle}
+                      </p>
+                    </div>
                   </button>
                 );
               })}
-            </div>
-
-            {/* Grid de Papéis de Parede da Categoria Selecionada */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {STORE_WALLPAPERS
-                .filter((w) => w.category === wallpaperCategory)
-                .map((wallpaper) => {
-                  const isSelected = brandingEdits?.bannerUrl === wallpaper.url;
-                  return (
-                    <button
-                      key={wallpaper.id}
-                      type="button"
-                      onClick={() =>
-                        setBrandingEdits({
-                          ...(brandingEdits || currentTenant.branding),
-                          bannerUrl: wallpaper.url,
-                        })
-                      }
-                      className={`group relative rounded-xl border overflow-hidden text-left transition-all cursor-pointer flex flex-col justify-between ${
-                        isSelected
-                          ? 'shadow-md scale-[1.01]'
-                          : isLight
-                          ? 'border-neutral-200 bg-white hover:border-neutral-300 shadow-2xs'
-                          : 'border-neutral-800 bg-neutral-950 hover:border-neutral-700'
-                      }`}
-                      style={isSelected ? {
-                        borderColor: activeAccent,
-                        boxShadow: `0 0 0 2px ${activeAccent}44`,
-                      } : {}}
-                    >
-                      {/* Miniatura da Imagem */}
-                      <div className="relative h-28 w-full overflow-hidden bg-neutral-900">
-                        <img
-                          src={wallpaper.url}
-                          alt={wallpaper.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        
-                        {/* Tag no topo */}
-                        <span className="absolute top-2 left-2 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-black/60 text-white border border-white/20 backdrop-blur-xs">
-                          {wallpaper.tag}
-                        </span>
-
-                        {/* Checkmark se selecionado */}
-                        {isSelected && (
-                          <div 
-                            className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center font-bold shadow-md"
-                            style={{
-                              backgroundColor: activeAccent,
-                              color: isLightColor(activeAccent) ? '#09090b' : '#ffffff',
-                            }}
-                          >
-                            <Check className="w-4 h-4" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Informações */}
-                      <div className="p-3 space-y-1">
-                        <h4 className={`text-xs font-bold leading-tight ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                          {wallpaper.title}
-                        </h4>
-                        <p className={`text-[10px] leading-snug line-clamp-2 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                          {wallpaper.subtitle}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
             </div>
 
             {/* Opção para Enviar Papel de Parede / Flyer Próprio */}

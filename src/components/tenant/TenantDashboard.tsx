@@ -4,7 +4,6 @@ import { Product, Order, OrderStatus, CategoryType, StoreManagementConfig, Busin
 import { CATEGORIES_CONFIG } from '../../data/mockData';
 import { BUSINESS_SEGMENTS, getSegmentById, getTenantCategories, getCategoryDisplayName, getSegmentColorOptions } from '../../data/businessSegments';
 import { PRESET_THEMES, PRESET_BANNERS, getSegmentThemes } from './OnboardingWizardModal';
-import { STORE_WALLPAPERS, WALLPAPER_CATEGORIES, StoreWallpaper } from '../../data/wallpapers';
 import { ProductEditorModal } from './ProductEditorModal';
 import { PDVSalesView } from './PDVSalesView';
 import { InventoryView } from './InventoryView';
@@ -326,24 +325,6 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     reader.readAsDataURL(file);
   };
 
-  const targetWallpaperCat = (() => {
-    const seg = currentTenant?.businessSegment || 'adega';
-    if (seg === 'comida_japonesa') return 'japonesa';
-    if (seg === 'restaurante_lanchonete') return 'restaurante';
-    if (seg === 'mercadinho_emporio') return 'mercadinho';
-    if (seg === 'cosmeticos_farmacia') return 'cosmeticos';
-    return seg;
-  })();
-
-  const relevantWallpaperCategories = useMemo(() => {
-    return WALLPAPER_CATEGORIES.filter((cat: { id: string }) => cat.id === targetWallpaperCat || cat.id === 'propaganda');
-  }, [targetWallpaperCat]);
-
-  const [wallpaperCategory, setWallpaperCategory] = useState<string>(targetWallpaperCat);
-
-  useEffect(() => {
-    setWallpaperCategory(targetWallpaperCat);
-  }, [targetWallpaperCat]);
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
