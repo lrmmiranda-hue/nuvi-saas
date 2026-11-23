@@ -235,156 +235,92 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                 </div>
               </div>
 
-              {/* Banner Hero Preview com o Papel de Parede / Flyer e Estilo de Iluminação Idêntico à Vitrine */}
+              {/* Banner Hero Preview - Gold Luxury Geometric Sem Imagem com Animação Shimmer */}
               {(() => {
-                const lighting = brandingEdits?.bannerLighting || 'dark_lights';
-                const isWhite = lighting === 'white_lights';
-                const isDarkLights = lighting === 'dark_lights';
-                const isNeutral = lighting === 'neutral';
                 const brandAccent = brandingEdits?.accentColor || currentTenant.branding.accentColor || '#F59E0B';
                 const brandPrimary = brandingEdits?.primaryColor || currentTenant.branding.primaryColor || '#881337';
 
-                // Overlay Dinâmico 100% igual à Vitrine Real
-                let overlayBg = `linear-gradient(105deg, ${brandPrimary}F2 0%, ${brandPrimary}B3 50%, rgba(10, 10, 10, 0.88) 100%)`;
-                let overlayBoxShadow = 'none';
+                const luxuryBg = isLight
+                  ? `linear-gradient(135deg, #ffffff 0%, ${brandPrimary}0A 35%, #ffffff 70%, ${brandAccent}15 100%)`
+                  : `linear-gradient(135deg, #09090b 0%, #141316 45%, ${brandPrimary}22 75%, #050507 100%)`;
 
-                if (isNeutral) {
-                  overlayBg = 'linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.75) 100%)';
-                } else if (isDarkLights) {
-                  overlayBg = `
-                    radial-gradient(circle at 82% 18%, ${brandAccent}45 0%, rgba(14, 165, 233, 0.25) 30%, transparent 65%),
-                    radial-gradient(circle at 95% 82%, rgba(14, 165, 233, 0.20) 0%, transparent 45%),
-                    linear-gradient(130deg, transparent 52%, rgba(255, 255, 255, 0.08) 68%, ${brandAccent}30 73%, transparent 84%),
-                    linear-gradient(to right, 
-                      rgba(8, 8, 8, 0.97) 0%, 
-                      rgba(10, 10, 10, 0.92) 28%, 
-                      rgba(10, 10, 10, 0.68) 50%, 
-                      rgba(10, 10, 10, 0.22) 72%, 
-                      rgba(5, 5, 5, 0.04) 100%
-                    )
-                  `;
-                  overlayBoxShadow = 'none';
-                } else if (isWhite) {
-                  overlayBg = `
-                    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.75) 0%, rgba(254, 243, 199, 0.35) 28%, transparent 62%),
-                    radial-gradient(circle at 95% 82%, ${brandAccent}25 0%, transparent 45%),
-                    linear-gradient(130deg, transparent 52%, rgba(255, 255, 255, 0.45) 68%, rgba(255, 250, 235, 0.65) 73%, transparent 84%),
-                    linear-gradient(to right, 
-                      rgba(255, 255, 255, 0.98) 0%, 
-                      rgba(255, 255, 255, 0.95) 28%, 
-                      rgba(255, 255, 255, 0.76) 50%, 
-                      rgba(255, 255, 255, 0.28) 72%, 
-                      rgba(255, 255, 255, 0.05) 100%
-                    )
-                  `;
-                  overlayBoxShadow = 'none';
-                }
+                const luxuryBorder = `${brandAccent}${isLight ? '40' : '30'}`;
 
                 return (
-                  <div className={`rounded-3xl border-0 ring-0 shadow-2xl overflow-hidden relative transition-all duration-300 ${
-                    isWhite 
-                      ? 'bg-white shadow-[0_15px_40px_-10px_rgba(0,0,0,0.08)]' 
-                      : 'bg-neutral-950 shadow-2xl'
-                  }`}>
-                    {/* Background Wallpaper Flyer Layer com animação cinematográfica contínua */}
-                    {brandingEdits?.bannerUrl ? (
-                      <div
-                        className={`absolute inset-0 bg-cover bg-center animate-banner-kenburns ${
-                          (isWhite || isDarkLights) ? 'contrast-[1.10] saturate-[1.15]' : ''
-                        }`}
-                        style={{ backgroundImage: `url(${brandingEdits.bannerUrl})` }}
-                      />
-                    ) : (
-                      <div 
-                        className="absolute inset-0 transition-colors"
-                        style={{ backgroundColor: isWhite ? '#ffffff' : (brandPrimary || '#0a0a0a') }}
-                      />
-                    )}
+                  <div
+                    className={`rounded-3xl border shadow-xl relative overflow-hidden transition-all duration-300 p-4 sm:p-6 ${
+                      isLight ? 'bg-white text-slate-900' : 'bg-neutral-950 text-white'
+                    }`}
+                    style={{
+                      background: luxuryBg,
+                      borderColor: luxuryBorder,
+                    }}
+                  >
+                    {/* 1. Malha Geométrica Pontilhada de Luxo */}
+                    <div 
+                      className="absolute inset-0 pointer-events-none" 
+                      style={{ 
+                        backgroundImage: `radial-gradient(circle, ${brandAccent} 1px, transparent 1px)`, 
+                        backgroundSize: '20px 20px',
+                        opacity: isLight ? 0.12 : 0.18
+                      }} 
+                    />
 
-                    {/* EFEITOS ESPECIAIS DE LUZ CINEMATOGRÁFICA IDÊNTICOS À VITRINE */}
-                    {/* 1. Feixe de Luz / Varredura Luminosa Periódica (Light Sweep) */}
+                    {/* 2. Feixe de Luz Shimmer Metálico Dinâmico na Diagonal */}
                     <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
                       <div 
-                        className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
+                        className="w-1/2 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-55"
                         style={{
-                          background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 35%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.15) 65%, transparent 100%)'
+                          background: `linear-gradient(90deg, transparent 0%, ${brandAccent}15 30%, rgba(255, 255, 255, 0.70) 50%, ${brandAccent}20 70%, transparent 100%)`
                         }}
                       />
                     </div>
 
-                    {/* 2. Spotlight Pulsante de Iluminação de Estúdio no canto superior direito */}
+                    {/* 3. Spotlight de Iluminação Ambiente */}
                     <div 
-                      className="pointer-events-none absolute -top-16 -right-16 w-80 sm:w-96 h-80 sm:h-96 rounded-full blur-2xl animate-banner-spotlight opacity-75 mix-blend-screen z-10"
+                      className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 rounded-full blur-3xl opacity-35 mix-blend-screen z-10"
                       style={{
-                        background: `radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(254, 240, 138, 0.45) 30%, ${brandAccent}45 60%, transparent 80%)`
+                        background: `radial-gradient(circle, ${brandAccent}40 0%, ${brandPrimary}25 50%, transparent 75%)`
                       }}
                     />
 
-                    {/* 3. Brilho Ambiente no canto inferior */}
-                    <div 
-                      className="pointer-events-none absolute -bottom-10 left-1/4 w-72 h-36 rounded-full blur-3xl opacity-35 mix-blend-screen z-10"
-                      style={{
-                        background: `radial-gradient(ellipse, ${brandAccent}70 0%, transparent 70%)`
-                      }}
-                    />
-
-                    {/* Feixes de Luz Angulares se White ou DarkLights */}
-                    {isWhite && (
-                      <div 
-                        className="pointer-events-none absolute inset-0 opacity-40 mix-blend-overlay"
-                        style={{
-                          background: 'linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.8) 65%, transparent 80%)'
-                        }}
-                      />
-                    )}
-                    {isDarkLights && (
-                      <div 
-                        className="pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay"
-                        style={{
-                          background: 'linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.5) 65%, transparent 80%)'
-                        }}
-                      />
-                    )}
-
-                    {/* Camada de Gradiente Suave com Box Shadow - Versão Compacta Otimizada */}
-                    <div 
-                      className="relative flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 p-3.5 sm:p-5"
-                      style={{
-                        background: overlayBg,
-                        boxShadow: overlayBoxShadow,
-                      }}
-                    >
-                      <div className="space-y-1.5 sm:space-y-2 max-w-2xl">
-                        {/* Notice Badge & Status Aberto/Fechado */}
+                    {/* Conteúdo da Prévia (Idêntico à Vitrine Real) */}
+                    <div className="relative z-20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      
+                      <div className="space-y-2 max-w-xl">
+                        {/* Status + Segmento */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span 
-                            className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border backdrop-blur-sm shadow-xs inline-flex items-center gap-1.5 transition-colors"
-                            style={{
-                              backgroundColor: `${brandAccent}28`,
-                              color: brandAccent,
-                              borderColor: `${brandAccent}60`,
-                            }}
+                          <span
+                            className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border flex items-center gap-1.5 ${
+                              isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                            }`}
                           >
-                            <Sparkles className="w-2.5 h-2.5" />
-                            {brandingEdits?.badgeNotice || currentTenant.branding.badgeNotice || 'Bebidas no ponto certo'}
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Aberto Agora
                           </span>
 
-                          <span className={`text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${
-                            currentTenant.isOpen
-                              ? isWhite ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : isWhite ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${currentTenant.isOpen ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                            {currentTenant.isOpen ? 'Aberto Agora' : 'Fechado no momento'}
+                          <span
+                            className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md border"
+                            style={{
+                              backgroundColor: `${brandAccent}15`,
+                              color: isLight ? '#92400e' : brandAccent,
+                              borderColor: `${brandAccent}35`,
+                            }}
+                          >
+                            ★ {currentTenant.businessSegment === 'pizzaria' ? 'Pizzaria & Forno' : currentTenant.businessSegment === 'adega' ? 'Adega & Bebidas' : 'Seleção Especial'}
                           </span>
                         </div>
 
-                        {/* LOGO, NOME E SLOGAN */}
+                        {/* Logo, Nome e Slogan */}
                         <div className="flex items-center gap-3 pt-0.5">
                           {brandingEdits?.logoUrl ? (
-                            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl p-1 border shrink-0 shadow-md ${
-                              isWhite ? 'bg-white/95 border-slate-300 shadow-sm' : 'bg-black/60 border-white/20'
-                            }`}>
+                            <div 
+                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl p-1 border shrink-0 shadow-md"
+                              style={{
+                                backgroundColor: isLight ? '#ffffff' : 'rgba(10, 10, 10, 0.75)',
+                                borderColor: `${brandAccent}40`,
+                              }}
+                            >
                               <img
                                 src={brandingEdits.logoUrl}
                                 alt="Logo Preview"
@@ -393,37 +329,37 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                             </div>
                           ) : (
                             <div 
-                              className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl shadow-md shrink-0 border ${
-                                isWhite ? 'bg-slate-900 text-white border-slate-700' : 'text-white border-white/20'
-                              }`}
-                              style={!isWhite ? { backgroundColor: brandAccent } : {}}
+                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-md shrink-0 border-2 text-white"
+                              style={{ 
+                                backgroundColor: brandPrimary,
+                                borderColor: brandAccent,
+                                boxShadow: `0 6px 14px -3px ${brandPrimary}50`
+                              }}
                             >
                               {currentTenant.name.charAt(0)}
                             </div>
                           )}
 
                           <div>
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <h1 
-                                className="text-base sm:text-xl font-black tracking-tight drop-shadow-sm flex items-center gap-1.5 leading-snug"
-                                style={{ color: isWhite ? '#0f172a' : '#ffffff' }}
-                              >
-                                <span>{currentTenant.name}</span>
-                                <Info className="w-3.5 h-3.5 opacity-80 shrink-0" style={{ color: brandAccent }} />
-                              </h1>
-                            </div>
-                            <p 
-                              className="text-[11px] sm:text-xs mt-0.5 font-medium drop-shadow-xs line-clamp-1"
-                              style={{ color: isWhite ? '#334155' : '#e2e8f0' }}
+                            <h1 
+                              className="text-base sm:text-xl font-black tracking-tight flex items-center gap-1.5 leading-snug"
+                              style={{ color: isLight ? '#0f172a' : '#ffffff' }}
                             >
-                              {sloganEdit || currentTenant.slogan || getSegmentById(currentTenant.businessSegment).sloganExample}
+                              <span>{currentTenant.name}</span>
+                              <Info className="w-3.5 h-3.5 opacity-80 shrink-0" style={{ color: brandAccent }} />
+                            </h1>
+                            <p 
+                              className="text-[11px] sm:text-xs mt-0.5 font-medium line-clamp-1"
+                              style={{ color: isLight ? '#475569' : '#d4d4d8' }}
+                            >
+                              {sloganEdit || currentTenant.slogan || 'Massa artesanal, borda recheada e forno à lenha'}
                             </p>
                             <span 
-                              className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold mt-0.5 px-2 py-0.5 rounded-full backdrop-blur-sm border shadow-xs"
+                              className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold mt-0.5 px-2 py-0.5 rounded-full border shadow-2xs"
                               style={{
-                                backgroundColor: `${brandAccent}25`,
-                                color: isWhite ? '#0f172a' : brandAccent,
-                                borderColor: `${brandAccent}50`,
+                                backgroundColor: `${brandAccent}15`,
+                                color: isLight ? '#0f172a' : brandAccent,
+                                borderColor: `${brandAccent}40`,
                               }}
                             >
                               <Clock className="w-2.5 h-2.5 shrink-0" style={{ color: brandAccent }} />
@@ -431,72 +367,49 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                             </span>
                           </div>
                         </div>
-
-                        {/* Informações de Endereço & Horários */}
-                        <div 
-                          className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] sm:text-[11px] pt-0.5 drop-shadow-xs"
-                          style={{ color: isWhite ? '#475569' : '#cbd5e1' }}
-                        >
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3 shrink-0" style={{ color: brandAccent }} />
-                            {currentTenant.address?.street || 'Avenida Principal'}, {currentTenant.address?.number || 'S/N'} · {currentTenant.address?.neighborhood || 'Centro'}
-                          </span>
-                          <span>·</span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 shrink-0" style={{ color: brandAccent }} />
-                            {currentTenant.address?.openingHours || 'Seg a Dom: 10h às 23h'}
-                          </span>
-                          {currentTenant.address?.freeDeliveryThreshold && (
-                            <>
-                              <span>·</span>
-                              <span className="font-bold" style={{ color: brandAccent }}>
-                                Frete Grátis &gt; R$ {currentTenant.address.freeDeliveryThreshold.toFixed(2)}
-                              </span>
-                            </>
-                          )}
-                        </div>
                       </div>
 
-                      {/* Header Actions: SOMENTE OS ÍCONES (Modo Escuro, WhatsApp e Sacola) */}
-                      <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
-                        {/* Ícone Modo Escuro com Efeito Animado Shimmer Nuvi */}
-                        <div 
-                          title="Modo Escuro / Claro"
-                          className="nuvi-btn-cyber-blue p-2 sm:p-2.5 rounded-xl font-bold shadow-md border flex items-center justify-center cursor-default"
+                      {/* Lado Direito: Card Dinâmico no Salão / Delivery + Ações */}
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <div
+                          className="rounded-2xl p-2.5 sm:p-3 border backdrop-blur-md flex items-center gap-2.5 shadow-sm"
+                          style={{
+                            borderColor: `${brandAccent}45`,
+                            backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
+                          }}
                         >
-                          <Moon className="w-4 h-4 text-sky-200" />
+                          <div 
+                            className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
+                            style={{ backgroundColor: brandPrimary }}
+                          >
+                            <UtensilsCrossed className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <span className="text-[9px] font-black uppercase tracking-wider block opacity-75" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
+                              No Salão
+                            </span>
+                            <span className="text-xs font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                              Mesa 01
+                            </span>
+                          </div>
                         </div>
 
-                        {/* Ícone WhatsApp */}
-                        <div 
-                          title="Falar no WhatsApp"
-                          className="p-2 sm:p-2.5 rounded-xl font-bold shadow-md bg-emerald-600 text-white opacity-95 flex items-center justify-center cursor-default"
-                        >
+                        {/* WhatsApp & Sacola */}
+                        <div className="p-2 rounded-xl bg-emerald-600 text-white shadow-sm">
                           <MessageSquare className="w-4 h-4" />
                         </div>
-
-                        {/* Ícone Sacola com Badge Flutuante */}
                         <div 
-                          title="Sacola de Compras"
+                          className="p-2 rounded-xl border text-white shadow-sm"
                           style={{
-                            backgroundColor: isWhite ? '#ffffff' : 'rgba(0, 0, 0, 0.75)',
-                            color: isWhite ? '#0f172a' : '#ffffff',
-                            borderColor: isWhite ? '#cbd5e1' : 'rgba(255, 255, 255, 0.25)',
+                            backgroundColor: isLight ? '#ffffff' : 'rgba(15, 15, 18, 0.85)',
+                            borderColor: `${brandAccent}45`,
+                            color: brandAccent
                           }}
-                          className="relative p-2 sm:p-2.5 rounded-xl font-bold shadow-md border flex items-center justify-center cursor-default"
                         >
-                          <ShoppingCart className="w-4 h-4 shrink-0" style={{ color: brandAccent }} />
-                          <span
-                            className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] px-1 rounded-full text-[9px] font-black shadow-md flex items-center justify-center shrink-0"
-                            style={{
-                              backgroundColor: brandAccent,
-                              color: '#09090b',
-                            }}
-                          >
-                            0
-                          </span>
+                          <ShoppingCart className="w-4 h-4" />
                         </div>
                       </div>
+
                     </div>
                   </div>
                 );
@@ -516,169 +429,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
             </div>
           )}
 
-          {/* SEÇÃO 1: PAPEL DE PAREDE / FUNDO DA VITRINE DIVIDIDO POR CATEGORIAS */}
-          <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
-            isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
-          }`}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                  <Sparkles className="w-4 h-4" style={{ color: activeAccent }} />
-                  <span>Papel de Parede & Flyer de Fundo da Vitrine</span>
-                </h3>
-                <p className={`text-xs ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                  Escolha um flyer temático que combine com o seu negócio ou envie sua própria imagem.
-                </p>
-              </div>
-
-              {/* Botão para desativar imagem e deixar apenas cores sólidas */}
-              {brandingEdits?.bannerUrl && (
-                <button
-                  type="button"
-                  onClick={() => setBrandingEdits({ ...(brandingEdits || currentTenant.branding), bannerUrl: '' })}
-                  className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 underline font-semibold self-start sm:self-auto cursor-pointer"
-                >
-                  Usar apenas cores sólidas (Sem imagem)
-                </button>
-              )}
-            </div>
-
-            {/* Barra de identificação do comércio e galeria exclusiva */}
-            <div className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs ${
-              isLight ? 'bg-neutral-100 border-neutral-200' : 'bg-neutral-950 border-neutral-800'
-            }`}>
-              <div className="flex items-center gap-2">
-                <span className="text-base">{currentSegmentConfig.emoji}</span>
-                <span className={`font-bold ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                  Imagens Prontas para {currentSegmentConfig.title} ({segmentWallpapers.length} opções exclusivas)
-                </span>
-              </div>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
-                Exclusivo do seu Ramo
-              </span>
-            </div>
-
-            {/* Grid com exatamente as 6 imagens do ramo */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {segmentWallpapers.map((wallpaper, idx) => {
-                const isSelected = brandingEdits?.bannerUrl === wallpaper.url;
-                return (
-                  <button
-                    key={wallpaper.id}
-                    type="button"
-                    onClick={() =>
-                      setBrandingEdits({
-                        ...(brandingEdits || currentTenant.branding),
-                        bannerUrl: wallpaper.url,
-                      })
-                    }
-                    className={`group relative rounded-xl border overflow-hidden text-left transition-all cursor-pointer flex flex-col justify-between ${
-                      isSelected
-                        ? 'shadow-md scale-[1.01]'
-                        : isLight
-                        ? 'border-neutral-200 bg-white hover:border-neutral-300 shadow-2xs'
-                        : 'border-neutral-800 bg-neutral-950 hover:border-neutral-700'
-                    }`}
-                    style={isSelected ? {
-                      borderColor: activeAccent,
-                      boxShadow: `0 0 0 2px ${activeAccent}44`,
-                    } : {}}
-                  >
-                    {/* Miniatura da Imagem */}
-                    <div className="relative h-28 w-full overflow-hidden bg-neutral-900">
-                      <img
-                        src={wallpaper.url}
-                        alt={wallpaper.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      
-                      {/* Tag no topo */}
-                      <span className="absolute top-2 left-2 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-black/60 text-white border border-white/20 backdrop-blur-xs">
-                        {wallpaper.tag || `Opção ${idx + 1}`}
-                      </span>
-
-                      {/* Checkmark se selecionado */}
-                      {isSelected && (
-                        <div 
-                          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center font-bold shadow-md"
-                          style={{
-                            backgroundColor: activeAccent,
-                            color: isLightColor(activeAccent) ? '#09090b' : '#ffffff',
-                          }}
-                        >
-                          <Check className="w-4 h-4" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Informações */}
-                    <div className="p-3 space-y-1">
-                      <h4 className={`text-xs font-bold leading-tight ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                        {wallpaper.title}
-                      </h4>
-                      <p className={`text-[10px] leading-snug line-clamp-2 ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                        {wallpaper.subtitle}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Opção para Enviar Papel de Parede / Flyer Próprio */}
-            <div className={`p-4 rounded-xl border border-dashed space-y-3 transition-colors ${
-              isLight ? 'bg-neutral-50 border-neutral-300' : 'bg-neutral-950/70 border-neutral-700'
-            }`}>
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <Upload className="w-4 h-4" style={{ color: activeAccent }} />
-                  <span className={`text-xs font-bold ${isLight ? 'text-neutral-900' : 'text-white'}`}>
-                    Enviar Papel de Parede / Flyer Personalizado da sua Loja
-                  </span>
-                </div>
-                <span className={`text-[10px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                  PNG, JPG, WebP até 8MB
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all shadow-2xs ${
-                  isLight
-                    ? 'bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300'
-                    : 'bg-neutral-800 hover:bg-neutral-750 text-neutral-200 border-neutral-700'
-                }`}>
-                  <Upload className="w-4 h-4" style={{ color: activeAccent }} />
-                  <span>Anexar Imagem do Computador / Celular</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleBannerUpload}
-                    className="hidden"
-                  />
-                </label>
-
-                <input
-                  type="text"
-                  value={brandingEdits?.bannerUrl || ''}
-                  onChange={(e) =>
-                    setBrandingEdits({
-                      ...(brandingEdits || currentTenant.branding),
-                      bannerUrl: e.target.value,
-                    })
-                  }
-                  placeholder="Ou cole a URL direta de uma imagem da internet"
-                  className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-none transition-colors ${
-                    isLight
-                      ? 'bg-white border-neutral-300 text-neutral-900 placeholder:text-neutral-400 focus:border-blue-500'
-                      : 'bg-neutral-900 border-neutral-800 text-neutral-200 placeholder:text-neutral-500 focus:border-blue-500'
-                  }`}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* SEÇÃO 2: LOGOTIPO DA LOJA */}
+          {/* SEÇÃO 1: LOGOTIPO DA LOJA */}
           <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
             isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
           }`}>

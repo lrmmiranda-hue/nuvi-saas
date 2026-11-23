@@ -171,15 +171,26 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
   const getTenantSubscriptionInfo = (tenant: Tenant) => {
     const now = new Date();
-    const planPrice = tenant.monthlyPrice || PLAN_PRICES[tenant.plan] || 139.90;
+    const rawPrice = tenant?.monthlyPrice ?? PLAN_PRICES[tenant?.plan] ?? 139.90;
+    const planPrice = typeof rawPrice === 'number' && !isNaN(rawPrice) ? rawPrice : 139.90;
 
-    let expDate: Date;
-    if (tenant.subscriptionExpiresAt) {
-      expDate = new Date(tenant.subscriptionExpiresAt);
-    } else {
-      const created = new Date(tenant.createdAt || Date.now());
-      const days = tenant.status === 'trial' ? 7 : 30;
-      expDate = new Date(created.getTime() + days * 86400000);
+    let expDate = new Date();
+    try {
+      if (tenant?.subscriptionExpiresAt) {
+        const parsed = new Date(tenant.subscriptionExpiresAt);
+        if (!isNaN(parsed.getTime())) {
+          expDate = parsed;
+        } else {
+          expDate = new Date(now.getTime() + 7 * 86400000);
+        }
+      } else {
+        const created = tenant?.createdAt ? new Date(tenant.createdAt) : now;
+        const validCreated = !isNaN(created.getTime()) ? created : now;
+        const days = tenant?.status === 'trial' ? 7 : 30;
+        expDate = new Date(validCreated.getTime() + days * 86400000);
+      }
+    } catch {
+      expDate = new Date(now.getTime() + 7 * 86400000);
     }
 
     const diffMs = expDate.getTime() - now.getTime();
@@ -189,11 +200,11 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
     return {
       expDate,
-      diffDays,
+      diffDays: isNaN(diffDays) ? 0 : diffDays,
       isExpired,
       isExpiringSoon,
       planPrice,
-      planTitle: PLAN_TITLES[tenant.plan] || 'Plano Nuvi SaaS'
+      planTitle: PLAN_TITLES[tenant?.plan] || 'Plano Nuvi SaaS'
     };
   };
 
@@ -1048,7 +1059,10 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
-                onClick={() => setIsPixKeyModalOpen(true)}
+                onClick={() => {
+                  setTempPixKey(masterPixKey);
+                  setIsPixKeyModalOpen(true);
+                }}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                   themeMode === 'light'
                     ? 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-300'
@@ -1308,11 +1322,18 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                             </div>
 
                             <span className="text-[11px] text-slate-400 block font-mono">
-                              Vencimento: {subInfo.expDate.toLocaleDateString('pt-BR')}
+                              Vencimento: {!isNaN(subInfo.expDate.getTime()) ? subInfo.expDate.toLocaleDateString('pt-BR') : 'A definir'}
                             </span>
                             {tenant.lastPaymentDate && (
                               <span className="text-[10px] text-slate-500 block">
-                                Último PIX: {new Date(tenant.lastPaymentDate).toLocaleDateString('pt-BR')}
+                                Último PIX: {(() => {
+                                  try {
+                                    const d = new Date(tenant.lastPaymentDate);
+                                    return !isNaN(d.getTime()) ? d.toLocaleDateString('pt-BR') : tenant.lastPaymentDate;
+                                  } catch {
+                                    return String(tenant.lastPaymentDate);
+                                  }
+                                })()}
                               </span>
                             )}
                           </div>
@@ -1393,8 +1414,8 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
               </label>
               <input
                 type="text"
-                value={newPixKeyInput}
-                onChange={(e) => setNewPixKeyInput(e.target.value)}
+                value={tempPixKey}
+                onChange={(e) => setTempPixKey(e.target.value)}
                 placeholder="Ex: 11999998888 ou pix@suaempresa.com"
                 className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold outline-none border transition-all ${
                   themeMode === 'light'
