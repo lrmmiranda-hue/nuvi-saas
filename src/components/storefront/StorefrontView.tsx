@@ -358,27 +358,23 @@ export const StorefrontView: React.FC = () => {
               {/* Lado Direito: Card Dinâmico (Escolha Mesa no Salão vs Tempo Médio no Delivery) + Ações */}
               <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-2 sm:pt-0">
                 
-                {/* CARD DINÂMICO SOLICITADO: MESA NO SALÃO vs TEMPO MÉDIO NO DELIVERY */}
+                {/* CARD DINÂMICO: MESA COM EXTRATO PARA VISUALIZAR (SEM FUNDO/BORDA CONFORME SOLICITADO) */}
                 {isTableActive ? (
-                  /* Modo Estabelecimento / Salão -> Escolha sua Mesa */
-                  <div
-                    onClick={() => {
-                      setTempTableInput(tableNumber || '');
-                      setIsTableSelectorOpen(true);
-                    }}
-                    className="cursor-pointer group rounded-2xl p-3 sm:p-3.5 border backdrop-blur-md transition-all active:scale-[0.98] shadow-sm hover:brightness-105 flex items-center justify-between gap-3 min-w-[210px]"
-                    style={{
-                      borderColor: `${brandAccent}45`,
-                      backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
-                    }}
-                    title="Toque para definir ou alterar o número da sua mesa"
-                  >
-                    <div className="flex items-center gap-2.5">
+                  /* Modo Estabelecimento / Salão -> Mesa com Extrato */
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <div
+                      onClick={() => {
+                        setTempTableInput(tableNumber || '');
+                        setIsTableSelectorOpen(true);
+                      }}
+                      className="cursor-pointer group flex items-center gap-2 transition-all hover:opacity-90"
+                      title="Toque para definir ou alterar o número da sua mesa"
+                    >
                       <div 
-                        className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0 transition-transform group-hover:scale-105"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0 transition-transform group-hover:scale-105"
                         style={{ backgroundColor: brandPrimary }}
                       >
-                        <UtensilsCrossed className="w-5 h-5" />
+                        <UtensilsCrossed className="w-4 h-4" />
                       </div>
                       <div>
                         <span className="text-[10px] font-black uppercase tracking-wider block opacity-75 flex items-center gap-1" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
@@ -395,35 +391,17 @@ export const StorefrontView: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {tableOrdersTotal > 0 && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsTableOrdersModalOpen(true);
-                          }}
-                          className="px-2.5 py-1 rounded-xl text-[11px] font-black text-white shadow-sm flex items-center gap-1 transition-all hover:opacity-90 active:scale-95"
-                          style={{ backgroundColor: brandPrimary }}
-                          title="Ver conta da comanda"
-                        >
-                          <ReceiptText className="w-3.5 h-3.5" />
-                          <span>R$ {tableOrdersTotal.toFixed(2)}</span>
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        className="px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-colors shadow-2xs group-hover:opacity-90"
-                        style={{
-                          borderColor: `${brandAccent}50`,
-                          color: isLight ? brandPrimary : '#ffffff',
-                          backgroundColor: isLight ? '#ffffff' : 'rgba(255,255,255,0.08)'
-                        }}
-                      >
-                        {tableNumber ? 'Trocar' : 'Informar'}
-                      </button>
-                    </div>
+                    {/* Botão de Extrato da Mesa para Visualizar */}
+                    <button
+                      type="button"
+                      onClick={() => setIsTableOrdersModalOpen(true)}
+                      className="px-2.5 py-1.5 rounded-xl text-xs font-black text-white shadow-sm flex items-center gap-1.5 transition-all hover:opacity-90 active:scale-95 cursor-pointer shrink-0"
+                      style={{ backgroundColor: brandPrimary }}
+                      title="Visualizar extrato da comanda na mesa"
+                    >
+                      <ReceiptText className="w-3.5 h-3.5" />
+                      <span>R$ {tableOrdersTotal.toFixed(2)}</span>
+                    </button>
                   </div>
                 ) : (
                   /* Modo Delivery -> Tempo Médio de Entrega */
@@ -464,21 +442,8 @@ export const StorefrontView: React.FC = () => {
                   </div>
                 )}
 
-                {/* Ações Rápidas: WhatsApp e Sacola de Compras */}
+                {/* Ações Rápidas: Apenas Sacola de Compras (WhatsApp removido conforme solicitado) */}
                 <div className="flex items-center justify-end gap-2 shrink-0">
-                  {/* WhatsApp */}
-                  {currentTenant.whatsapp?.supportLinkEnabled && (
-                    <a
-                      href={generateWhatsAppDirectChatUrl(currentTenant)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Falar no WhatsApp da Loja"
-                      className="p-2.5 rounded-xl font-bold shadow-md transition-all active:scale-95 bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer flex items-center justify-center"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                    </a>
-                  )}
-
                   {/* Sacola de Compras */}
                   <button
                     type="button"

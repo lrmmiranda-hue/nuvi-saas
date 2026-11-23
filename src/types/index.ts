@@ -45,7 +45,7 @@ export interface Product {
 
 export type DeliveryType = 'delivery' | 'pickup' | 'balcao' | 'mesa';
 export type PaymentMethod = 'pix' | 'cartao_entrega' | 'cartao_debito' | 'cartao_credito' | 'dinheiro';
-export type OrderStatus = 'novo' | 'preparando' | 'em_entrega' | 'finalizado' | 'cancelado';
+export type OrderStatus = 'novo' | 'preparando' | 'pronto' | 'entregue' | 'em_entrega' | 'finalizado' | 'cancelado';
 export type OrderChannel = 'online' | 'pdv';
 
 export interface OrderItem {

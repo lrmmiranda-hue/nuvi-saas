@@ -370,15 +370,9 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         </div>
                       </div>
 
-                      {/* Lado Direito: Card Dinâmico no Salão / Delivery + Ações */}
+                      {/* Lado Direito: Mesa com Extrato (sem fundo/borda, sem WhatsApp) */}
                       <div className="flex items-center gap-2.5 shrink-0">
-                        <div
-                          className="rounded-2xl p-2.5 sm:p-3 border backdrop-blur-md flex items-center gap-2.5 shadow-sm"
-                          style={{
-                            borderColor: `${brandAccent}45`,
-                            backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
-                          }}
-                        >
+                        <div className="flex items-center gap-2">
                           <div 
                             className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
                             style={{ backgroundColor: brandPrimary }}
@@ -395,12 +389,17 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           </div>
                         </div>
 
-                        {/* WhatsApp & Sacola */}
-                        <div className="p-2 rounded-xl bg-emerald-600 text-white shadow-sm">
-                          <MessageSquare className="w-4 h-4" />
-                        </div>
+                        {/* Botão de Extrato na Prévia */}
                         <div 
-                          className="p-2 rounded-xl border text-white shadow-sm"
+                          className="px-2.5 py-1 rounded-xl text-[11px] font-black text-white shadow-xs flex items-center gap-1 shrink-0"
+                          style={{ backgroundColor: brandPrimary }}
+                        >
+                          <span>🧾 R$ 149,70</span>
+                        </div>
+
+                        {/* Sacola (WhatsApp removido conforme solicitado) */}
+                        <div 
+                          className="p-2 rounded-xl border text-white shadow-sm shrink-0"
                           style={{
                             backgroundColor: isLight ? '#ffffff' : 'rgba(15, 15, 18, 0.85)',
                             borderColor: `${brandAccent}45`,

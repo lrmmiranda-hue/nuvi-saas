@@ -29,6 +29,7 @@ export const DiningTablesView: React.FC = () => {
     tenantProducts,
     updateOrderStatus,
     createOrder,
+    closeAndConsolidateTableOrders,
     themeMode,
     showAlert
   } = useStore();
@@ -78,6 +79,11 @@ export const DiningTablesView: React.FC = () => {
       ? orders.reduce((prev, curr) => new Date(prev.createdAt) < new Date(curr.createdAt) ? prev : curr) 
       : null;
 
+    // Status da cozinha em tempo real para a mesa
+    const hasReadyItems = orders.some(o => o.status === 'pronto');
+    const hasPreparingItems = orders.some(o => o.status === 'preparando' || o.status === 'novo');
+    const allDelivered = orders.length > 0 && orders.every(o => o.status === 'entregue');
+
     return {
       number: num,
       name: `Mesa ${tableIdStr}`,
@@ -85,7 +91,10 @@ export const DiningTablesView: React.FC = () => {
       orders,
       totalAmount,
       openedAt: earliestOrder ? earliestOrder.createdAt : undefined,
-      customerName: earliestOrder ? earliestOrder.customerName : undefined
+      customerName: earliestOrder ? earliestOrder.customerName : undefined,
+      hasReadyItems,
+      hasPreparingItems,
+      allDelivered,
     };
   });
 
@@ -213,18 +222,22 @@ export const DiningTablesView: React.FC = () => {
     printWin.print();
   };
 
-  // Fechar a mesa, registrar recebimento e liberar mesa
+  // Fechar a mesa, registrar recebimento e liberar mesa com VENDA CONSOLIDADA ÚNICA
   const handleFinalizeAndCloseTable = () => {
     if (!currentTable) return;
 
-    // Atualiza todos os pedidos da mesa para 'finalizado' e comanda 'fechada'
-    currentTable.orders.forEach(order => {
-      updateOrderStatus(order.id, 'finalizado');
-    });
+    // Consolida todos os itens e pedidos da comanda em UMA ÚNICA venda total
+    const consolidated = closeAndConsolidateTableOrders(
+      currentTable.number.toString(),
+      paymentMethod,
+      applyServiceFee
+    );
+
+    const valorTotal = consolidated?.total ?? currentTable.totalAmount;
 
     showAlert({
-      title: 'Mesa Fechada!',
-      message: `A ${currentTable.name} foi encerrada com sucesso e já está livre para novos clientes.`,
+      title: 'Mesa Fechada com Sucesso!',
+      message: `A ${currentTable.name} foi encerrada. Venda total consolidada de R$ ${valorTotal.toFixed(2).replace('.', ',')} lançada no Extrato de Vendas!`,
       variant: 'success'
     });
 
@@ -348,7 +361,11 @@ export const DiningTablesView: React.FC = () => {
                   ? 'ring-2 ring-sky-500 scale-[1.02]'
                   : ''
               } ${
-                table.isOccupied
+                table.hasReadyItems
+                  ? isLight
+                    ? 'bg-emerald-50/80 border-emerald-400 ring-2 ring-emerald-400/40 shadow-md'
+                    : 'bg-emerald-950/30 border-emerald-500/70 ring-2 ring-emerald-500/30 shadow-md'
+                  : table.isOccupied
                   ? isLight
                     ? 'bg-sky-50/70 border-sky-300 shadow-sm hover:shadow-md'
                     : 'bg-[#0E1B2A] border-sky-600/50 hover:border-sky-400 shadow-md'
@@ -360,16 +377,31 @@ export const DiningTablesView: React.FC = () => {
               <div>
                 {/* Header do Card da Mesa */}
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                    table.isOccupied
-                      ? 'bg-sky-500/20 text-sky-500 border border-sky-500/30'
-                      : 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30'
-                  }`}>
-                    {table.isOccupied ? 'Ocupada' : 'Livre'}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                      table.isOccupied
+                        ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30'
+                        : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                    }`}>
+                      {table.isOccupied ? 'Ocupada' : 'Livre'}
+                    </span>
+
+                    {/* Alerta de Cozinha em Tempo Real na Mesa */}
+                    {table.hasReadyItems && (
+                      <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-white flex items-center gap-1 animate-pulse shadow-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                        Pronto!
+                      </span>
+                    )}
+                    {!table.hasReadyItems && table.hasPreparingItems && (
+                      <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                        👨‍🍳 Cozinha
+                      </span>
+                    )}
+                  </div>
                   
                   {table.isOccupied ? (
-                    <Clock className="w-3.5 h-3.5 text-sky-400" />
+                    <Clock className="w-3.5 h-3.5 text-sky-500" />
                   ) : (
                     <UtensilsCrossed className="w-3.5 h-3.5 text-slate-400" />
                   )}
@@ -516,13 +548,33 @@ export const DiningTablesView: React.FC = () => {
                             {new Date(order.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          order.status === 'preparando' 
-                            ? 'bg-amber-500/15 text-amber-500' 
-                            : 'bg-emerald-500/15 text-emerald-500'
-                        }`}>
-                          {order.status === 'preparando' ? '👨‍🍳 Na Cozinha' : '✓ Entregue'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                            order.status === 'novo'
+                              ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30'
+                              : order.status === 'preparando' 
+                              ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30' 
+                              : order.status === 'pronto'
+                              ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/40 font-black animate-pulse'
+                              : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                          }`}>
+                            {order.status === 'novo' && '⏳ Aguardando Cozinha'}
+                            {order.status === 'preparando' && '👨‍🍳 Em Preparo'}
+                            {order.status === 'pronto' && '🟢 Pronto'}
+                            {(order.status === 'entregue' || order.status === 'finalizado') && '✓ Entregue'}
+                          </span>
+
+                          {order.status === 'pronto' && (
+                            <button
+                              type="button"
+                              onClick={() => updateOrderStatus(order.id, 'entregue')}
+                              className="px-2 py-0.5 rounded-md text-[10px] font-black bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs cursor-pointer transition-all"
+                              title="Marcar como entregue na mesa"
+                            >
+                              Servir Mesa
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       <div className="space-y-1.5">

@@ -243,6 +243,19 @@ export const saveOrderFirestore = async (order: Order): Promise<void> => {
 };
 
 /**
+ * Remove um pedido permanentemente do Firestore
+ */
+export const deleteOrderFirestore = async (orderId: string): Promise<void> => {
+  try {
+    if (!orderId) return;
+    const docRef = doc(db, COLLECTIONS.ORDERS, orderId);
+    await deleteDoc(docRef);
+  } catch (err) {
+    console.warn('Falha ao deletar pedido no Firestore:', err);
+  }
+};
+
+/**
  * Escuta em tempo real as configurações globais do SaaS no Firestore
  */
 export const listenToGlobalConfig = (

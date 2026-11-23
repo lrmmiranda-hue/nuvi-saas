@@ -98,10 +98,19 @@ export const FinancialManagementView: React.FC = () => {
     return true;
   };
 
-  // Vendas filtradas por período (apenas pedidos não cancelados)
+  // Vendas filtradas por período (apenas vendas efetivamente concluídas/pagas)
+  // Solicitações parciais feitas em mesas abertas NÃO entram até que a conta seja fechada e paga
   const filteredOrders = useMemo(() => {
     return tenantOrders
       .filter(o => o.status !== 'cancelado')
+      .filter(o => {
+        // Se for pedido de mesa/salão, só entra no extrato de vendas se a conta foi fechada e paga (venda consolidada)
+        if (o.deliveryType === 'mesa' || o.isTableOrder) {
+          return o.status === 'finalizado' || o.tableStatus === 'fechada';
+        }
+        // Vendas no balcão e delivery concluído
+        return o.status === 'finalizado' || o.status === 'em_entrega';
+      })
       .filter(o => isWithinPeriod(o.createdAt))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [tenantOrders, periodFilter]);

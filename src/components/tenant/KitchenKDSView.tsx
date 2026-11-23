@@ -68,11 +68,7 @@ export const KitchenKDSView: React.FC = () => {
     }
     return order.status === filterStatus;
   }).sort((a, b) => {
-    // Ordena: status 'novo' primeiro, depois 'preparando', depois 'pronto', por horário
-    const priority = { novo: 1, preparando: 2, pronto: 3, entregue: 4, finalizado: 5, cancelado: 6 };
-    const pA = priority[a.status as keyof typeof priority] || 99;
-    const pB = priority[b.status as keyof typeof priority] || 99;
-    if (pA !== pB) return pA - pB;
+    // A cozinha deve ver sempre os pedidos do MAIS ANTIGO para o mais novo (ordem cronológica - FIFO)
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   });
 
@@ -342,19 +338,21 @@ export const KitchenKDSView: React.FC = () => {
                     : 'bg-neutral-900 border-emerald-500/70 ring-2 ring-emerald-500/20'
                 }`}
               >
-                {/* Header do Card */}
+                {/* Header do Card: Branco Gelo e Fonte Chumbo conforme solicitado */}
                 <div className={`p-3.5 border-b flex items-center justify-between ${
-                  isMesa
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
-                    : order.deliveryType === 'delivery'
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white'
-                    : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
+                  isLight 
+                    ? 'bg-[#F1F5F9] border-slate-300 text-[#1E293B]' 
+                    : 'bg-[#1E293B] border-slate-700 text-slate-100'
                 }`}>
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider block opacity-90">
+                    <span className={`text-[10px] font-black uppercase tracking-wider block ${
+                      isLight ? 'text-slate-500' : 'text-slate-400'
+                    }`}>
                       {isMesa ? 'Salão / Comanda' : order.deliveryType === 'delivery' ? 'Entrega em Casa' : 'Venda Balcão'}
                     </span>
-                    <h3 className="text-base font-black tracking-tight">
+                    <h3 className={`text-base font-black tracking-tight ${
+                      isLight ? 'text-[#1E293B]' : 'text-white'
+                    }`}>
                       {isMesa ? `🍽️ ${tableLabel}` : order.deliveryType === 'delivery' ? `🛵 PEDIDO #${order.id}` : `🛍️ BALCÃO #${order.id}`}
                     </h3>
                   </div>
@@ -365,12 +363,16 @@ export const KitchenKDSView: React.FC = () => {
                         ? 'bg-rose-500 text-white animate-pulse'
                         : isWarning
                         ? 'bg-amber-400 text-black'
-                        : 'bg-black/30 text-white'
+                        : isLight
+                        ? 'bg-slate-200 border border-slate-300 text-slate-800'
+                        : 'bg-black/40 text-slate-200'
                     }`}>
                       <Clock className="w-3 h-3" />
                       <span>{minutes} min</span>
                     </span>
-                    <span className="text-[10px] block opacity-80 mt-0.5 font-mono">
+                    <span className={`text-[10px] block mt-0.5 font-mono font-bold ${
+                      isLight ? 'text-slate-500' : 'text-slate-400'
+                    }`}>
                       {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>

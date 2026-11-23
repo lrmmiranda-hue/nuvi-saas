@@ -17,6 +17,7 @@ import {
   deleteProductFirestore,
   listenToOrders,
   saveOrderFirestore,
+  deleteOrderFirestore,
   listenToGlobalConfig,
   saveGlobalConfigFirestore,
 } from '../services/firestoreSync';
@@ -78,6 +79,11 @@ interface StoreContextType {
     customerName?: string,
     cashChangeFor?: number | null
   ) => Order;
+  closeAndConsolidateTableOrders: (
+    tableNumber: string,
+    paymentMethod: PaymentMethod,
+    applyServiceFee: boolean
+  ) => Order | undefined;
   findProductByBarcode: (barcode: string) => Product | undefined;
   findProductOrPackByBarcode: (barcode: string) => { product: Product; pack?: import('../types').ProductPackOption } | undefined;
   importProductsFromExcel: (
@@ -1920,8 +1926,78 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
     setAllOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status } : o))
+      prev.map((o) => {
+        if (o.id === orderId) {
+          const updated = { ...o, status };
+          try {
+            saveOrderFirestore(updated);
+          } catch { }
+          return updated;
+        }
+        return o;
+      })
     );
+  };
+
+  const closeAndConsolidateTableOrders = (
+    tableNumber: string,
+    paymentMethod: PaymentMethod,
+    applyServiceFee: boolean
+  ): Order | undefined => {
+    const cleanNum = tableNumber.replace(/\D/g, '');
+    const tableOrders = allOrders.filter(o => {
+      if (o.tenantId !== currentTenantId) return false;
+      const oNum = (o.tableNumber || '').replace(/\D/g, '');
+      return (
+        (o.deliveryType === 'mesa' || o.isTableOrder) &&
+        (oNum === cleanNum || o.tableNumber === tableNumber || o.tableNumber === `Mesa ${cleanNum.padStart(2, '0')}`) &&
+        o.status !== 'finalizado' &&
+        o.status !== 'cancelado' &&
+        o.tableStatus !== 'fechada'
+      );
+    });
+
+    if (tableOrders.length === 0) return undefined;
+
+    const allItems = tableOrders.flatMap(o => o.items);
+    const subtotal = tableOrders.reduce((acc, o) => acc + (o.subtotal || o.total || 0), 0);
+    const serviceFee = applyServiceFee ? subtotal * 0.10 : 0;
+    const finalTotal = subtotal + serviceFee;
+    const customerName = tableOrders.find(o => o.customerName && !o.customerName.includes('Cliente Mesa'))?.customerName || `Cliente Mesa ${cleanNum}`;
+
+    const partialIds = tableOrders.map(o => o.id);
+
+    const consolidatedOrder: Order = {
+      id: `ord-mesa-${cleanNum}-${Date.now().toString().slice(-4)}`,
+      tenantId: currentTenantId,
+      channel: 'pdv',
+      deliveryType: 'mesa',
+      tableNumber: `Mesa ${cleanNum.padStart(2, '0')}`,
+      isTableOrder: true,
+      tableStatus: 'fechada',
+      customerName: customerName,
+      customerPhone: '',
+      items: allItems,
+      subtotal: subtotal,
+      total: finalTotal,
+      deliveryFee: 0,
+      paymentMethod: paymentMethod,
+      status: 'finalizado',
+      notes: `Conta Fechada Mesa ${cleanNum}${applyServiceFee ? ' (inclui taxa de serviço 10%)' : ''}`,
+      createdAt: new Date().toISOString(),
+    };
+
+    setAllOrders(prev => {
+      const remaining = prev.filter(o => !partialIds.includes(o.id));
+      const updated = [consolidatedOrder, ...remaining];
+      try {
+        saveOrderFirestore(consolidatedOrder);
+        partialIds.forEach(id => deleteOrderFirestore(id));
+      } catch { }
+      return updated;
+    });
+
+    return consolidatedOrder;
   };
 
   // WhatsApp Message Generators
@@ -2148,6 +2224,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         tenantStockMovements,
         receiveStock,
         registerPDVSale,
+        closeAndConsolidateTableOrders,
         findProductByBarcode,
         findProductOrPackByBarcode,
         importProductsFromExcel,
