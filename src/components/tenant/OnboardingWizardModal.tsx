@@ -946,7 +946,8 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     ownerPhone: string;
     adminPassword?: string;
     document: string;
-    plan: 'balcao' | 'vitrine' | 'hibrido';
+    plan: 'balcao' | 'vitrine' | 'hibrido' | 'pro' | 'starter';
+    selectedPlanId?: string;
     branding: TenantBranding;
     address: TenantAddress;
     whatsapp: TenantWhatsAppSettings;
@@ -970,6 +971,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
     adminPassword: '',
     document: '',
     plan: 'hibrido',
+    selectedPlanId: 'plan_delivery_estoque',
     branding: {
       logoUrl: '',
       bannerUrl: '',
@@ -1071,13 +1073,20 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
         ownerPhone: tenant.ownerPhone || '',
         adminPassword: tenant.adminPassword || '123456',
         document: tenant.document || '',
-        plan: (tenant.plan === 'balcao' || tenant.plan === 'vitrine' || tenant.plan === 'hibrido')
-          ? tenant.plan
+        plan: (tenant.plan === 'balcao' || tenant.plan === 'vitrine' || tenant.plan === 'hibrido' || tenant.plan === 'pro')
+          ? (tenant.plan as any)
           : (tenant.config?.enablePhysicalStore && !tenant.config?.enableOnlineSales)
           ? 'balcao'
           : (!tenant.config?.enablePhysicalStore && tenant.config?.enableOnlineSales)
           ? 'vitrine'
           : 'hibrido',
+        selectedPlanId: tenant.plan === 'balcao' || (tenant.config?.enablePhysicalStore && !tenant.config?.enableOnlineSales)
+          ? 'plan_balcao_pdv'
+          : tenant.plan === 'vitrine' || (!tenant.config?.enablePhysicalStore && tenant.config?.enableOnlineSales)
+          ? 'plan_cardapio'
+          : tenant.plan === 'pro'
+          ? 'plan_nuvi_pro'
+          : 'plan_delivery_estoque',
         branding: {
           logoUrl: tenant.branding?.logoUrl || '',
           bannerUrl: effectiveBanner,
@@ -1323,17 +1332,23 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                       ]
                   ).map((planItem) => {
                     const lower = `${planItem.id} ${planItem.name}`.toLowerCase();
-                    const isBalcaoPlan = lower.includes('balcao') && !lower.includes('delivery') && !lower.includes('pro') && !lower.includes('hibrido');
-                    const isCardapioPlan = lower.includes('cardapio') || lower.includes('vitrine');
+                    const isBalcaoPlan = planItem.id === 'plan_balcao_pdv' || (lower.includes('balcao') && !lower.includes('delivery') && !lower.includes('pro') && !lower.includes('hibrido'));
+                    const isCardapioPlan = planItem.id === 'plan_cardapio' || (lower.includes('cardapio') || lower.includes('vitrine'));
+                    const isDeliveryPlan = planItem.id === 'plan_delivery_estoque' || (lower.includes('delivery') && !lower.includes('pro'));
+                    const isProPlan = planItem.id === 'plan_nuvi_pro' || lower.includes('pro');
 
-                    // Verifica se este plano está selecionado
-                    const isSelected = isBalcaoPlan
+                    // Identificação 100% individual e estrita para NUNCA selecionar 2 planos simultaneamente
+                    const isSelected = formData.selectedPlanId
+                      ? formData.selectedPlanId === planItem.id
+                      : isBalcaoPlan
                       ? (formData.config.enablePhysicalStore && !formData.config.enableOnlineSales)
                       : isCardapioPlan
                       ? (!formData.config.enablePhysicalStore && formData.config.enableOnlineSales)
-                      : (formData.config.enablePhysicalStore && formData.config.enableOnlineSales);
+                      : isProPlan
+                      ? (formData.plan === 'pro')
+                      : (formData.config.enablePhysicalStore && formData.config.enableOnlineSales && formData.plan !== 'pro');
 
-                    const PlanIcon = isBalcaoPlan ? ShoppingCart : isCardapioPlan ? Globe : lower.includes('pro') ? Sparkles : Store;
+                    const PlanIcon = isBalcaoPlan ? ShoppingCart : isCardapioPlan ? Globe : isProPlan ? Sparkles : Store;
 
                     return (
                       <button
@@ -1343,6 +1358,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                           if (isBalcaoPlan) {
                             setFormData({
                               ...formData,
+                              selectedPlanId: planItem.id,
                               plan: 'balcao',
                               config: { ...formData.config, enablePhysicalStore: true, enableOnlineSales: false },
                               whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: false },
@@ -1350,70 +1366,110 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                           } else if (isCardapioPlan) {
                             setFormData({
                               ...formData,
+                              selectedPlanId: planItem.id,
                               plan: 'vitrine',
                               config: { ...formData.config, enablePhysicalStore: false, enableOnlineSales: true },
                               whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: true },
                             });
-                          } else {
+                          } else if (isDeliveryPlan) {
                             setFormData({
                               ...formData,
+                              selectedPlanId: planItem.id,
                               plan: 'hibrido',
+                              config: { ...formData.config, enablePhysicalStore: true, enableOnlineSales: true },
+                              whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: true },
+                            });
+                          } else {
+                            // Nuvi Pro Total
+                            setFormData({
+                              ...formData,
+                              selectedPlanId: planItem.id,
+                              plan: 'pro' as any,
                               config: { ...formData.config, enablePhysicalStore: true, enableOnlineSales: true },
                               whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: true },
                             });
                           }
                         }}
-                        className={`w-full p-2.5 sm:p-4 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between overflow-hidden ${
+                        className={`group w-full p-2.5 sm:p-4 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between overflow-hidden ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0'
+                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-lg shadow-[#0C2340]/40 ring-2 ring-sky-400 border-0'
                             : isLight
-                            ? 'bg-white border border-neutral-200 text-neutral-700 hover:border-neutral-300 shadow-none'
+                            ? 'bg-white border-2 border-slate-200 text-slate-800 hover:border-slate-300 shadow-xs'
                             : 'bg-neutral-900/80 border border-neutral-800 text-neutral-300 hover:border-neutral-700 shadow-none'
                         }`}
                       >
                         <div className="w-full min-w-0">
                           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-                              <PlanIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isSelected ? 'text-sky-500' : 'text-neutral-400'}`} />
-                              <span className={`font-bold text-xs sm:text-sm leading-snug break-words ${isSelected ? (isLight ? 'text-sky-950 font-extrabold' : 'text-sky-200') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                              <PlanIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isSelected ? 'text-sky-300' : 'text-neutral-400'}`} />
+                              <span className={`font-black text-xs sm:text-sm leading-snug break-words ${
+                                isSelected ? 'text-white' : isLight ? 'text-slate-900' : 'text-white'
+                              }`}>
                                 {planItem.name}
                               </span>
                             </div>
                             {isSelected && (
-                              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-500 shrink-0 mt-0.5" />
+                              <CheckCircle2 className="w-4 h-4 text-sky-400 stroke-[2.5] shrink-0 mt-0.5" />
                             )}
                           </div>
 
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                             <div className="flex items-baseline gap-1">
-                              <span className={`text-base sm:text-xl font-black ${isSelected ? (isLight ? 'text-sky-700' : 'text-sky-400') : (isLight ? 'text-neutral-900' : 'text-white')}`}>
+                              <span className={`text-base sm:text-xl font-black ${
+                                isSelected ? 'text-white' : isLight ? 'text-slate-900' : 'text-white'
+                              }`}>
                                 R$ {planItem.price.toFixed(2).replace('.', ',')}
                               </span>
-                              <span className={`text-[10px] sm:text-xs ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                              <span className={`text-[10px] sm:text-xs font-semibold ${
+                                isSelected ? 'text-sky-200' : isLight ? 'text-slate-500' : 'text-neutral-400'
+                              }`}>
                                 {planItem.period || '/mês'}
                               </span>
                             </div>
                             {planItem.badge && (
-                              <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-sky-500/15 text-sky-600 dark:text-sky-400 uppercase tracking-wide">
+                              <span className={`text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 sm:px-2 py-0.5 rounded tracking-wide ${
+                                isSelected
+                                  ? 'bg-sky-400/25 text-white border border-sky-400/40'
+                                  : 'bg-sky-500/15 text-sky-600 dark:text-sky-400'
+                              }`}>
                                 {planItem.badge}
                               </span>
                             )}
                           </div>
 
-                          <p className={`text-[11px] sm:text-xs leading-relaxed mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-none ${isLight ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                          {/* Descrição: Branco nítido quando selecionado */}
+                          <p className={`text-[11px] sm:text-xs leading-relaxed mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-none ${
+                            isSelected ? 'text-white' : isLight ? 'text-slate-600' : 'text-neutral-400'
+                          }`}>
                             {planItem.description}
                           </p>
 
+                          {/* Features: Branco nítido com divisória clara quando selecionado */}
                           {planItem.features && planItem.features.length > 0 && (
-                            <ul className="space-y-1 sm:space-y-1.5 pt-1.5 sm:pt-2 border-t border-neutral-200/60 dark:border-neutral-800">
+                            <ul className={`space-y-1 sm:space-y-1.5 pt-1.5 sm:pt-2 border-t ${
+                              isSelected ? 'border-white/20' : isLight ? 'border-slate-200' : 'border-neutral-800'
+                            }`}>
                               {planItem.features.slice(0, 3).map((feat, idx) => (
                                 <li key={idx} className="flex items-start gap-1.5 sm:gap-2 text-[10px] sm:text-xs leading-snug">
-                                  <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 mt-0.5 text-sky-500 shrink-0" />
-                                  <span className={`break-words ${isLight ? 'text-neutral-700' : 'text-neutral-300'}`}>{feat}</span>
+                                  <Check className={`w-3 h-3 sm:w-3.5 sm:h-3.5 mt-0.5 shrink-0 ${isSelected ? 'text-sky-300' : 'text-sky-500'}`} />
+                                  <span className={`break-words ${
+                                    isSelected ? 'text-white font-medium' : isLight ? 'text-slate-700' : 'text-neutral-300'
+                                  }`}>{feat}</span>
                                 </li>
                               ))}
                             </ul>
                           )}
+
+                          {/* Indicador de Seleção no Rodapé do Card */}
+                          <div className={`mt-2.5 sm:mt-3 w-full py-1 sm:py-1.5 px-2 rounded-lg text-center font-bold text-[10px] sm:text-[11px] transition-all ${
+                            isSelected
+                              ? 'bg-white text-slate-900 shadow-sm font-black'
+                              : isLight
+                              ? 'bg-slate-100 text-slate-700 group-hover:bg-sky-50 group-hover:text-sky-700'
+                              : 'bg-neutral-800 text-neutral-300 group-hover:bg-neutral-750 group-hover:text-white'
+                          }`}>
+                            {isSelected ? '✓ Plano Selecionado' : 'Selecionar Este Plano'}
+                          </div>
                         </div>
                       </button>
                     );
