@@ -41,6 +41,7 @@ import {
   QrCode,
   ShieldCheck,
   MessageSquare,
+  MessageCircle,
   RefreshCw,
   X,
   Check
@@ -1246,7 +1247,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                                 {tenant.name}
                               </span>
                               <span className="text-[10px] text-slate-400 block truncate">
-                                /{tenant.slug} • {tenant.segment || 'Geral'}
+                                /{tenant.slug} • {tenant.businessSegment || (tenant as any).segment || 'Geral'}
                               </span>
                             </div>
                           </div>

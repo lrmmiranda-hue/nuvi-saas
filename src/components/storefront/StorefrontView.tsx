@@ -446,7 +446,7 @@ export const StorefrontView: React.FC = () => {
                           Tempo Médio
                         </span>
                         <span className="text-xs sm:text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                          {currentTenant.address?.deliveryEstimatedTime || '25 - 40 min'}
+                          {(currentTenant as any).deliveryEstimatedTime || (currentTenant.address as any)?.deliveryEstimatedTime || '25 - 40 min'}
                         </span>
                       </div>
                     </div>

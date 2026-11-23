@@ -31,7 +31,8 @@ import {
   Megaphone,
   Palette,
   X,
-  Plus
+  Plus,
+  UtensilsCrossed
 } from 'lucide-react';
 
 interface StoreBrandingSettingsProps {
