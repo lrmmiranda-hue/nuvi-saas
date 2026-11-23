@@ -679,18 +679,18 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                           }))}
                           className={`p-3 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
                             isSelected
-                              ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0'
-                              : isLight
-                              ? 'border border-slate-200 bg-slate-50 hover:border-slate-300'
-                              : 'border border-[#1C2631] bg-[#121820] hover:border-slate-700'
+                              ? 'border-2 border-sky-500 bg-sky-500/15 shadow-xs text-slate-900 ring-2 ring-sky-500/20'
+                              : 'border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 text-slate-800'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-white flex items-center gap-1.5">
+                            <span className={`font-bold text-xs flex items-center gap-1.5 ${
+                              isSelected ? 'text-sky-950 font-extrabold' : 'text-slate-700'
+                            }`}>
                               {t.name}
                             </span>
                             {isSelected && (
-                              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                              <span className="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" />
                             )}
                           </div>
                           <div className={`h-6 rounded-lg bg-gradient-to-r ${t.colorPreview} border border-white/20 shadow-inner flex items-center px-2`}>
@@ -698,7 +698,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                               {t.badge}
                             </span>
                           </div>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-tight">
+                          <p className="text-[10px] text-slate-500 line-clamp-2 leading-tight">
                             {t.description}
                           </p>
                         </button>

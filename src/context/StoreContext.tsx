@@ -451,13 +451,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Customer Shopping Cart (per current session)
   const [cart, setCart] = useState<OrderItem[]>([]);
 
-  // Tema Independente do Super Admin (pode ser alternado para escuro ou claro no painel master)
+  // Tema Independente do Super Admin (padrão: Modo Claro)
   const [adminThemeMode, setAdminThemeModeState] = useState<'dark' | 'light'>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.ADMIN_THEME_MODE);
-      return (saved === 'dark' || saved === 'light') ? saved : 'dark';
+      return (saved === 'light' || saved === 'dark') ? saved : 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 
@@ -863,10 +863,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Safe current tenant lookup (localiza inteligentemente por id, slug amigável ou nome)
   const currentTenant = findTenantBySlugOrId(tenants, currentTenantId) || tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId) || tenants[0];
 
-  // Layout padronizado exclusivamente em Modo Claro
+  // Layout contextual: no Master segue adminThemeMode, no resto segue light
   const [tenantThemeMode] = useState<'dark' | 'light'>('light');
 
-  const themeMode: 'dark' | 'light' = 'light';
+  const themeMode: 'dark' | 'light' =
+    viewRole === 'super_admin'
+      ? adminThemeMode
+      : 'light';
 
   const setThemeMode = (_mode: 'dark' | 'light') => {
     try {
