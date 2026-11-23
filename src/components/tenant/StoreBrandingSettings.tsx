@@ -966,14 +966,12 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         themeStyle: theme.style,
                       });
                     }}
-                    className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer ${
+                    className={`text-left p-3.5 rounded-xl transition-all cursor-pointer ${
                       isSelected
-                        ? isLight
-                          ? 'border-2 border-sky-500 bg-sky-500/15 text-sky-950 font-bold shadow-none'
-                          : 'btn-graphite border-neutral-700 bg-neutral-800 ring-2 ring-neutral-600 text-white shadow-none font-bold'
+                        ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0 ring-0 outline-none'
                         : isLight
-                        ? 'border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-none'
-                        : 'border-neutral-800 bg-neutral-900 hover:border-neutral-700 shadow-none'
+                        ? 'border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-2xs'
+                        : 'border border-neutral-800 bg-neutral-900 hover:border-neutral-700 shadow-none'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
@@ -986,17 +984,17 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           className="w-4 h-4 rounded-full border border-black/20 shrink-0 -ml-1 shadow-xs"
                           style={{ backgroundColor: theme.accent }}
                         />
-                        <span className={`text-xs font-bold ${isSelected ? (isLight ? 'text-sky-950 font-extrabold' : 'text-white') : isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
+                        <span className={`text-xs font-bold ${isSelected ? 'text-white' : isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
                           {theme.name}
                         </span>
                       </div>
                       {isSelected && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500 text-white shrink-0">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-sky-500 text-white shrink-0">
                           Ativa
                         </span>
                       )}
                     </div>
-                    <p className={`text-[11px] leading-snug ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                    <p className={`text-[11px] leading-snug ${isSelected ? 'text-white' : isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
                       {theme.desc}
                     </p>
                   </button>

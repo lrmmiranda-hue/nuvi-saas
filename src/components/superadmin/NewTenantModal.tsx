@@ -573,7 +573,7 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
                             onClick={() => setSelectedPlanId(p.id)}
                             className={`p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between relative group ${
                               isSelected
-                                ? 'nuvi-btn-cyber-blue text-white shadow-xl shadow-[#0C2340]/50 ring-2 ring-sky-400 border-0 scale-[1.01]'
+                                ? 'nuvi-btn-cyber-blue text-white shadow-xl shadow-[#0C2340]/50 border-0 ring-0 outline-none scale-[1.01]'
                                 : isLight
                                 ? 'bg-white hover:bg-slate-50 border-slate-200 hover:border-sky-300 text-slate-800 shadow-sm'
                                 : 'bg-[#121820] hover:bg-[#182230] border-[#1C2631] hover:border-slate-700 text-white'

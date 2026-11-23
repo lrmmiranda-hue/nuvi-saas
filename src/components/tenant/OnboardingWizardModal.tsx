@@ -1392,7 +1392,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         }}
                         className={`group w-full p-2.5 sm:p-4 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between overflow-hidden ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-lg shadow-[#0C2340]/40 ring-2 ring-sky-400 border-0'
+                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-lg shadow-[#0C2340]/40 border-0 ring-0 outline-none'
                             : isLight
                             ? 'bg-white border-2 border-slate-200 text-slate-800 hover:border-slate-300 shadow-xs'
                             : 'bg-neutral-900/80 border border-neutral-800 text-neutral-300 hover:border-neutral-700 shadow-none'
@@ -2074,7 +2074,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         }
                         className={`text-left p-3.5 rounded-xl transition-all cursor-pointer relative ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0'
+                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0 ring-0 outline-none'
                             : isLight
                             ? 'border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-2xs'
                             : 'border border-neutral-800 bg-neutral-900 hover:border-neutral-700'
@@ -2090,15 +2090,15 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                               className="w-4 h-4 rounded-full border border-black/20 shrink-0 -ml-1.5 shadow-xs"
                               style={{ backgroundColor: theme.accent }}
                             />
-                            <span className={`text-xs font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                            <span className={`text-xs font-bold ${isSelected ? 'text-white' : isLight ? 'text-slate-900' : 'text-white'}`}>
                               {theme.name}
                             </span>
                           </div>
                           {isSelected && (
-                            <CheckCircle2 className="w-4 h-4 text-sky-500 shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
                           )}
                         </div>
-                        <p className={`text-[11px] leading-snug ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                        <p className={`text-[11px] leading-snug ${isSelected ? 'text-white' : isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
                           {theme.desc}
                         </p>
                       </button>
