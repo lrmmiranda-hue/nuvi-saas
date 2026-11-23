@@ -501,25 +501,34 @@ export const StorefrontView: React.FC = () => {
 
       {/* Barra de Atendimento em Mesas (Salão / Dine-in) */}
       {isTableActive && (
-        <div className={`p-3 sm:p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-sm transition-all ${
-          isLight 
-            ? 'bg-gradient-to-r from-blue-50 via-indigo-50/50 to-white border-blue-200 text-blue-950' 
-            : 'bg-gradient-to-r from-blue-950/40 via-neutral-900 to-neutral-900 border-blue-800/60 text-white'
-        }`}>
+        <div 
+          className={`p-3 sm:p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-sm transition-all ${
+            isLight 
+              ? 'bg-gradient-to-r from-slate-50 via-white to-slate-50 text-slate-900' 
+              : 'bg-gradient-to-r from-neutral-900/90 via-neutral-900 to-neutral-950 text-white'
+          }`}
+          style={{ borderColor: `${brandPrimary}35` }}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+            <div 
+              className="w-10 h-10 rounded-xl text-white flex items-center justify-center shadow-md shrink-0 transition-transform"
+              style={{ backgroundColor: brandPrimary, boxShadow: `0 6px 14px -3px ${brandPrimary}50` }}
+            >
               <UtensilsCrossed className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-500 border border-blue-500/25">
+                <span 
+                  className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border"
+                  style={{ backgroundColor: `${brandPrimary}15`, color: brandPrimary, borderColor: `${brandPrimary}30` }}
+                >
                   Cardápio da Mesa
                 </span>
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
               <h3 className="text-sm font-black flex items-center gap-1.5 mt-0.5">
                 {tableNumber ? (
-                  <>Você está na <span className="text-blue-500">Mesa {tableNumber.replace(/[^0-9]/g, '') || tableNumber}</span></>
+                  <>Você está na <span style={{ color: brandPrimary }}>Mesa {tableNumber.replace(/[^0-9]/g, '') || tableNumber}</span></>
                 ) : (
                   <>Atendimento no Salão • Informe sua Mesa</>
                 )}
@@ -537,7 +546,12 @@ export const StorefrontView: React.FC = () => {
                 setTempTableInput(tableNumber || '');
                 setIsTableSelectorOpen(true);
               }}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold border border-blue-300 dark:border-blue-700/60 bg-white dark:bg-neutral-800 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-neutral-700 transition-all cursor-pointer shadow-2xs"
+              className="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-2xs hover:opacity-90"
+              style={{ 
+                borderColor: `${brandPrimary}40`, 
+                backgroundColor: isLight ? '#ffffff' : 'rgba(255,255,255,0.06)', 
+                color: isLight ? brandPrimary : '#ffffff' 
+              }}
             >
               {tableNumber ? 'Trocar Mesa' : 'Informar Mesa'}
             </button>
@@ -546,7 +560,8 @@ export const StorefrontView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsTableOrdersModalOpen(true)}
-                className="px-3 py-1.5 rounded-xl text-xs font-black bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl text-xs font-black text-white shadow-md transition-all cursor-pointer flex items-center gap-1.5 hover:opacity-90"
+                style={{ backgroundColor: brandPrimary, boxShadow: `0 6px 14px -3px ${brandPrimary}50` }}
               >
                 <ReceiptText className="w-3.5 h-3.5" />
                 <span>Ver Conta (R$ {tableOrdersTotal.toFixed(2)})</span>
@@ -1803,9 +1818,10 @@ export const StorefrontView: React.FC = () => {
                         setTableNumber(mesaStr);
                         setIsTableSelectorOpen(false);
                       }}
+                      style={isSelected ? { backgroundColor: brandPrimary, borderColor: brandPrimary } : {}}
                       className={`p-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-blue-600 border-blue-500 text-white shadow-sm'
+                          ? 'text-white shadow-sm'
                           : isLight
                           ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                           : 'bg-neutral-950 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
@@ -1839,7 +1855,8 @@ export const StorefrontView: React.FC = () => {
                   }
                   setIsTableSelectorOpen(false);
                 }}
-                className="flex-1 py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20"
+                style={{ backgroundColor: brandPrimary }}
+                className="flex-1 py-2.5 rounded-xl font-bold text-xs hover:opacity-90 text-white transition-all shadow-md"
               >
                 Confirmar Mesa
               </button>
@@ -1857,7 +1874,10 @@ export const StorefrontView: React.FC = () => {
           }`}>
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800 shrink-0">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-blue-600 text-white">
+                <div 
+                  className="p-2 rounded-xl text-white shadow-sm"
+                  style={{ backgroundColor: brandPrimary }}
+                >
                   <ReceiptText className="w-5 h-5" />
                 </div>
                 <div>
@@ -1888,7 +1908,7 @@ export const StorefrontView: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-blue-500">
+                    <span className="font-bold" style={{ color: brandPrimary }}>
                       Rodada #{idx + 1} • {ord.id}
                     </span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
@@ -1922,16 +1942,19 @@ export const StorefrontView: React.FC = () => {
             </div>
 
             {/* Total Acumulado */}
-            <div className={`p-3.5 rounded-2xl border shrink-0 space-y-1.5 ${
-              isLight ? 'bg-blue-50 border-blue-200 text-blue-950' : 'bg-blue-950/30 border-blue-800/60 text-white'
-            }`}>
+            <div 
+              className={`p-3.5 rounded-2xl border shrink-0 space-y-1.5 ${
+                isLight ? 'bg-slate-50 text-slate-900' : 'bg-neutral-950/80 text-white'
+              }`}
+              style={{ borderColor: `${brandPrimary}40` }}
+            >
               <div className="flex justify-between items-baseline font-black">
                 <span className="text-xs uppercase tracking-wider">Total Consumido:</span>
-                <span className="text-lg text-blue-600 dark:text-blue-400 font-black">
+                <span className="text-lg font-black" style={{ color: brandPrimary }}>
                   R$ {tableOrdersTotal.toFixed(2)}
                 </span>
               </div>
-              <p className="text-[10px] text-blue-600 dark:text-blue-300 font-medium">
+              <p className="text-[10px] text-slate-500 dark:text-neutral-400 font-medium">
                 💳 Para fechar sua conta e efetuar o pagamento, solicite o encerramento ao garçom ou dirija-se ao caixa informando sua mesa.
               </p>
             </div>
@@ -1940,7 +1963,8 @@ export const StorefrontView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsTableOrdersModalOpen(false)}
-                className="w-full py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20"
+                style={{ backgroundColor: brandPrimary }}
+                className="w-full py-2.5 rounded-xl font-bold text-xs hover:opacity-90 text-white transition-all shadow-md"
               >
                 Voltar ao Cardápio & Pedir Mais
               </button>

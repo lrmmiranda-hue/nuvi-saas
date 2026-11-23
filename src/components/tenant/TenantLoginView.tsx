@@ -218,18 +218,6 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
               Criar Loja Grátis (7 Dias)
             </button>
           </p>
-
-          <div className="pt-3 border-t border-slate-200">
-            <button
-              type="button"
-              onClick={() => setViewRole('super_admin')}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-800 hover:underline transition-colors cursor-pointer font-medium"
-              title="Acesso exclusivo ao Administrador Geral"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-slate-600" />
-              <span>Acesso Administrador Geral</span>
-            </button>
-          </div>
         </div>
       </div>
     </div>

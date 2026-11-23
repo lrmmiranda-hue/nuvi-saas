@@ -746,18 +746,6 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                     Entrar no Painel do Lojista
                   </button>
                 </div>
-
-                <div className="pt-2 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => setViewRole('super_admin')}
-                    className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-800 hover:underline transition-colors cursor-pointer font-medium"
-                    title="Acesso exclusivo ao Administrador Geral"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-slate-600" />
-                    <span>Acesso Administrador Geral</span>
-                  </button>
-                </div>
               </div>
 
             </form>
