@@ -39,7 +39,7 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const isLight = themeMode === 'light';
+  const isLight = true;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

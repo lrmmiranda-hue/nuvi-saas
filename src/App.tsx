@@ -52,12 +52,18 @@ const AppContent: React.FC = () => {
   const accentColor = currentTenant?.branding?.accentColor || '#38BDF8';
 
   // Separação de temas sincronizada:
+  // Nas telas de Cadastro (Teste Grátis) e Acesso do Lojista (/acesso_lojista): SEMPRE modo claro
   // No Painel Master: utiliza adminThemeMode
-  // No Painel do Lojista / Vitrine: utiliza themeMode
+  // No Painel do Lojista autenticado / Vitrine: utiliza themeMode
+  const isMasterView = viewRole === 'super_admin';
+  const isAuthOrRegister = viewRole === 'register_tenant' || viewRole === 'login_tenant';
+
   const effectiveThemeMode = 
-    viewRole === 'super_admin'
-      ? adminThemeMode
-      : themeMode;
+    isAuthOrRegister
+      ? 'light'
+      : isMasterView
+        ? adminThemeMode
+        : themeMode;
 
   // Sincroniza classes no elemento <html> e <body> para garantir o tema correto
   React.useEffect(() => {
@@ -85,11 +91,6 @@ const AppContent: React.FC = () => {
     document.documentElement.style.setProperty('--brand-primary', primaryColor);
     document.documentElement.style.setProperty('--brand-accent', accentColor);
   }, [primaryColor, accentColor]);
-
-  // Se for visão do Master e NÃO estiver autenticado:
-  // Renderiza a página de login limpa e segura
-  const isMasterView = viewRole === 'super_admin';
-  const isAuthOrRegister = viewRole === 'register_tenant' || viewRole === 'login_tenant';
 
   if (isMasterView && !isMasterAuthenticated) {
     return (

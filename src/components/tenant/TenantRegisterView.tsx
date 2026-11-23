@@ -43,7 +43,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
     tenants
   } = useStore();
 
-  const isLight = themeMode === 'light';
+  const isLight = true;
 
   // Ramo selecionado (padrão: adega)
   const [selectedSegment, setSelectedSegment] = useState<BusinessSegmentType>('adega');
