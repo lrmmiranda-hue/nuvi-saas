@@ -312,12 +312,27 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
             </div>
           </div>
 
-          {/* Selo de Segurança */}
-          <div className={`p-3.5 rounded-xl border flex items-center gap-3 text-xs ${
+          {/* Selo de Segurança & Botão de Informações dos Planos */}
+          <div className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
             isLight ? 'bg-white border-slate-200 text-slate-600 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631] text-slate-300'
           }`}>
-            <ShieldCheck className="w-5 h-5 text-sky-500 shrink-0" />
-            <span>Sem necessidade de cartão de crédito. Configure seu sistema em menos de 2 minutos!</span>
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-5 h-5 text-sky-500 shrink-0" />
+              <span>Sem necessidade de cartão de crédito. Configure seu sistema em menos de 2 minutos!</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsPlansInfoModalOpen(true)}
+              className={`flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all shrink-0 cursor-pointer ${
+                isLight
+                  ? 'bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200 shadow-xs'
+                  : 'bg-[#142334] hover:bg-[#1a2f45] text-sky-300 border-sky-500/30'
+              }`}
+            >
+              <Info className="w-4 h-4 text-sky-500" />
+              <span>Informações dos Planos</span>
+            </button>
           </div>
 
         </div>
@@ -539,48 +554,6 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                         : 'bg-[#121820] border border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
                     }`}
                   />
-                </div>
-              </div>
-
-              {/* 3. AVISO DE TESTE GRATUITO & CONSULTA DE PLANOS */}
-              <div className={`p-4 rounded-2xl border transition-all ${
-                isLight
-                  ? 'bg-gradient-to-r from-sky-50/80 via-blue-50/60 to-indigo-50/70 border-sky-200 text-slate-800'
-                  : 'bg-gradient-to-r from-[#0C2340]/40 via-[#0E2A4D]/30 to-[#0A1E37]/40 border-sky-500/25 text-slate-200'
-              }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-500 flex items-center justify-center shrink-0 mt-0.5">
-                      <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-extrabold text-xs text-sky-600 dark:text-sky-400 uppercase tracking-wider">
-                          Teste Grátis com Acesso Completo
-                        </span>
-                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500 text-white">
-                          Sem Cartão de Crédito
-                        </span>
-                      </div>
-                      <p className={`text-xs mt-1 leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
-                        <strong>Não é necessário cadastrar cartão para pagamento</strong>. Você testa todos os recursos da plataforma gratuitamente. O pagamento é realizado <strong>via PIX somente após o término do período de teste</strong>, caso decida fazer a contratação.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Botão de Consulta dos Planos */}
-                  <button
-                    type="button"
-                    onClick={() => setIsPlansInfoModalOpen(true)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                      isLight
-                        ? 'bg-white hover:bg-sky-50 text-sky-700 border border-sky-300 shadow-xs'
-                        : 'bg-[#142334] hover:bg-[#1a2f45] text-sky-300 border border-sky-500/30'
-                    }`}
-                  >
-                    <Info className="w-4 h-4 text-sky-500" />
-                    <span>Informações dos Planos</span>
-                  </button>
                 </div>
               </div>
 

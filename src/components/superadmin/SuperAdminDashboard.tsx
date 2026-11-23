@@ -72,7 +72,8 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   const [mainTab, setMainTab] = useState<'stores' | 'subscriptions'>('stores');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [subFilter, setSubFilter] = useState<'all' | 'expiring' | 'expired' | 'trial' | 'active'>('all');
+  const [subscriptionFilter, setSubscriptionFilter] = useState<'all' | 'expiring' | 'expired' | 'trial' | 'active'>('all');
+  const [subscriptionSearch, setSubscriptionSearch] = useState('');
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isPixKeyModalOpen, setIsPixKeyModalOpen] = useState(false);
   const [masterPixKey, setMasterPixKey] = useState<string>(() => {
@@ -212,18 +213,20 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
   // Lojas filtradas na aba de assinaturas
   const filteredSubscriptionTenants = tenants.filter(t => {
-    const matchesSearch =
-      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (t.ownerPhone || '').includes(searchTerm);
+    const q = (subscriptionSearch || '').toLowerCase().trim();
+    const matchesSearch = !q ||
+      t.name.toLowerCase().includes(q) ||
+      (t.ownerName || '').toLowerCase().includes(q) ||
+      (t.ownerPhone || '').includes(q) ||
+      (t.whatsapp?.phoneNumber || '').includes(q);
 
     if (!matchesSearch) return false;
 
     const info = getTenantSubscriptionInfo(t);
-    if (subFilter === 'expiring') return info.isExpiringSoon && t.status !== 'suspended';
-    if (subFilter === 'expired') return info.isExpired && t.status !== 'suspended';
-    if (subFilter === 'trial') return t.status === 'trial';
-    if (subFilter === 'active') return t.status === 'active' && !info.isExpired;
+    if (subscriptionFilter === 'expiring') return info.isExpiringSoon && t.status !== 'suspended';
+    if (subscriptionFilter === 'expired') return info.isExpired && t.status !== 'suspended';
+    if (subscriptionFilter === 'trial') return t.status === 'trial';
+    if (subscriptionFilter === 'active') return t.status === 'active' && !info.isExpired;
     return true;
   });
 
