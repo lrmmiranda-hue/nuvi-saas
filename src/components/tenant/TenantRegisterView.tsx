@@ -221,16 +221,9 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
         {/* Coluna Esquerda (ou Topo no Celular): Apresentação com Identidade Visual Nuvi Master */}
         <div className="w-full lg:col-span-5 space-y-6 text-left lg:sticky lg:top-8">
 
-          {/* Logo Nuvi em Destaque à Esquerda (clicável para alternar Modo Claro / Escuro) */}
+          {/* Logo Nuvi em Destaque à Esquerda */}
           <div className="pb-1">
-            <button
-              type="button"
-              onClick={toggleThemeMode}
-              title="Clique na logo para alternar entre Modo Claro e Escuro"
-              className="cursor-pointer transition-transform hover:scale-105 active:scale-95 focus:outline-none"
-            >
-              <NuviLogo size="lg" isLight={isLight} showSubtitle={false} />
-            </button>
+            <NuviLogo size="lg" isLight={true} showSubtitle={false} />
           </div>
 
           <div className="space-y-3">
@@ -767,17 +760,31 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
               </div>
 
               {/* Link de login se já tiver loja */}
-              <div className="pt-2 border-t border-slate-200 dark:border-[#1C2631] text-center">
-                <span className={`text-xs ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                  Já possui uma loja cadastrada?{' '}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setViewRole('login_tenant')}
-                  className="text-xs font-bold text-sky-500 hover:underline cursor-pointer ml-1"
-                >
-                  Entrar no Painel do Lojista
-                </button>
+              <div className="pt-2 border-t border-slate-200 text-center space-y-2">
+                <div>
+                  <span className="text-xs text-slate-600">
+                    Já possui uma loja cadastrada?{' '}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setViewRole('login_tenant')}
+                    className="text-xs font-bold text-sky-600 hover:underline cursor-pointer ml-1"
+                  >
+                    Entrar no Painel do Lojista
+                  </button>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setViewRole('super_admin')}
+                    className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-800 hover:underline transition-colors cursor-pointer font-medium"
+                    title="Acesso exclusivo ao Administrador Geral"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Acesso Administrador Geral</span>
+                  </button>
+                </div>
               </div>
 
             </form>

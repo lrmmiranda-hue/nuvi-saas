@@ -87,34 +87,19 @@ export const TenantHeader: React.FC<TenantHeaderProps> = () => {
           </button>
         </div>
 
-        {/* Lado Direito: Tema Claro/Escuro e Sair (Somente Ícone sem Fundo) */}
+        {/* Lado Direito: Sair */}
         <div className="flex items-center gap-1 sm:gap-2">
-          
-          {/* Alternador de Tema da Loja (Somente Ícone sem Fundo) */}
-          <button
-            onClick={toggleThemeMode}
-            title={isLight ? 'Ativar Modo Escuro' : 'Ativar Modo Claro'}
-            className="p-2 text-slate-400 hover:text-amber-400 bg-transparent border-0 transition-colors cursor-pointer outline-none"
-          >
-            {isLight ? (
-              <Moon className="w-5 h-5 text-slate-600 hover:text-blue-600" />
-            ) : (
-              <Sun className="w-5 h-5 text-slate-400 hover:text-amber-400" />
-            )}
-          </button>
-
-          {/* Botão de Sair do Painel do Lojista (Somente Ícone sem Fundo) */}
+          {/* Botão de Sair do Painel do Lojista */}
           <button
             onClick={() => {
               logoutTenant();
               setViewRole('login_tenant');
             }}
             title="Encerrar sessão do lojista"
-            className="p-2 text-slate-400 hover:text-rose-400 bg-transparent border-0 transition-colors cursor-pointer outline-none"
+            className="p-2 text-slate-400 hover:text-rose-500 bg-transparent border-0 transition-colors cursor-pointer outline-none"
           >
             <LogOut className="w-5 h-5" />
           </button>
-
         </div>
 
       </div>

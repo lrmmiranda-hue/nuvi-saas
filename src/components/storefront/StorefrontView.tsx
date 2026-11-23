@@ -448,28 +448,8 @@ export const StorefrontView: React.FC = () => {
                 )}
               </div>
 
-              {/* Header Actions: Somente Ícones do Modo Escuro, WhatsApp e Sacola */}
+              {/* Header Actions: WhatsApp e Sacola */}
               <div className="flex items-center gap-2 shrink-0">
-                {/* Ícone Modo Escuro / Claro com Efeito Animado no Selecionado Modo Escuro */}
-                <button
-                  type="button"
-                  onClick={toggleThemeMode}
-                  title={isLight ? 'Visualizar Vitrine em Modo Escuro' : 'Visualizar Vitrine em Modo Claro'}
-                  style={isLight ? {
-                    backgroundColor: isWhite ? '#ffffff' : 'rgba(0, 0, 0, 0.75)',
-                    color: isWhite ? '#0f172a' : '#ffffff',
-                    borderColor: isWhite ? '#cbd5e1' : 'rgba(255, 255, 255, 0.25)',
-                  } : {}}
-                  className={`p-2 sm:p-2.5 rounded-xl font-bold shadow-md transition-all cursor-pointer border flex items-center justify-center ${
-                    !isLight
-                      ? 'nuvi-btn-cyber-blue'
-                      : isWhite
-                      ? 'hover:bg-slate-100 text-slate-800'
-                      : 'hover:bg-black/90 text-white'
-                  }`}
-                >
-                  {isLight ? <Moon className="w-4 h-4 text-slate-800" /> : <Sun className="w-4 h-4 text-amber-300" />}
-                </button>
 
                 {/* Ícone WhatsApp */}
                 {!isGastronomy && !isMenuOnly && currentTenant.whatsapp.supportLinkEnabled && (

@@ -110,8 +110,8 @@ export function parseCurrentRoute(tenants: Tenant[]): RouteResolution {
   // 2. Rotas Limpas
   const cleanPath = pathname.toLowerCase();
 
-  // Acesso Master do Dono da Plataforma
-  if (cleanPath === '/acesso_master' || cleanPath === '/admin' || cleanPath === '/master') {
+  // Acesso Master do Dono da Plataforma (/portal ou /acesso_master)
+  if (cleanPath === '/portal' || cleanPath === '/acesso_master' || cleanPath === '/admin' || cleanPath === '/master') {
     return { role: 'super_admin', isMaster: true };
   }
 

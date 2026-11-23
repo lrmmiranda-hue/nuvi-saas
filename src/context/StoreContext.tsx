@@ -108,7 +108,9 @@ interface StoreContextType {
   toggleThemeMode: () => void;
   // Autenticação Master Admin
   isMasterAuthenticated: boolean;
-  loginMaster: (email: string, pass: string) => boolean;
+  isMasterPasswordSet: () => boolean;
+  setupMasterPassword: (username: string, pass: string) => boolean;
+  loginMaster: (identifier: string, pass: string) => boolean;
   logoutMaster: () => void;
   // Autenticação Lojista
   isTenantAuthenticated: boolean;
@@ -449,13 +451,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Customer Shopping Cart (per current session)
   const [cart, setCart] = useState<OrderItem[]>([]);
 
-  // Tema Independente e Isolado do Super Admin (persistido separadamente)
+  // Tema Independente do Super Admin (pode ser alternado para escuro ou claro no painel master)
   const [adminThemeMode, setAdminThemeModeState] = useState<'dark' | 'light'>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.ADMIN_THEME_MODE);
-      return (saved === 'light' || saved === 'dark') ? saved : 'light';
+      return (saved === 'dark' || saved === 'light') ? saved : 'dark';
     } catch {
-      return 'light';
+      return 'dark';
     }
   });
 
@@ -479,14 +481,65 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   });
 
-  const loginMaster = (email: string, pass: string): boolean => {
-    // Credencial padrão master admin
-    if (email.toLowerCase() === 'admin@adegasaas.com' && pass === 'admin123') {
+  const MASTER_STORAGE_KEY = 'nuvi_master_admin_password';
+
+  const isMasterPasswordSet = (): boolean => {
+    try {
+      const saved = localStorage.getItem(MASTER_STORAGE_KEY);
+      return Boolean(saved && saved.trim().length > 0);
+    } catch {
+      return false;
+    }
+  };
+
+  const setupMasterPassword = (username: string, pass: string): boolean => {
+    try {
+      localStorage.setItem('nuvi_master_admin_username', username.trim());
+      localStorage.setItem(MASTER_STORAGE_KEY, pass.trim());
       setIsMasterAuthenticated(true);
-      try {
-        localStorage.setItem(STORAGE_KEYS.MASTER_AUTH, 'true');
-      } catch { }
+      localStorage.setItem(STORAGE_KEYS.MASTER_AUTH, 'true');
       return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const loginMaster = (identifier: string, pass: string): boolean => {
+    const cleanId = identifier.toLowerCase().trim();
+    const cleanPass = pass.trim();
+
+    // Senha salva pelo usuário lrm.miranda no primeiro acesso
+    const savedPassword = localStorage.getItem(MASTER_STORAGE_KEY);
+    const savedUser = (localStorage.getItem('nuvi_master_admin_username') || 'lrm.miranda').toLowerCase().trim();
+
+    // Aceita lrm.miranda (ou variações como lrm.miranda@...)
+    const isUserMatch = (
+      cleanId === 'lrm.miranda' ||
+      cleanId === savedUser ||
+      cleanId.startsWith('lrm.miranda@') ||
+      cleanId === 'admin@nuvisaas.com.br' ||
+      cleanId === 'admin@adegasaas.com'
+    );
+
+    if (isUserMatch) {
+      if (savedPassword) {
+        if (cleanPass === savedPassword) {
+          setIsMasterAuthenticated(true);
+          try {
+            localStorage.setItem(STORAGE_KEYS.MASTER_AUTH, 'true');
+          } catch { }
+          return true;
+        }
+      } else {
+        // Se ainda não cadastrou senha, permite entrar com admin123 provisório
+        if (cleanPass === 'admin123') {
+          setIsMasterAuthenticated(true);
+          try {
+            localStorage.setItem(STORAGE_KEYS.MASTER_AUTH, 'true');
+          } catch { }
+          return true;
+        }
+      }
     }
     return false;
   };
@@ -496,6 +549,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       localStorage.removeItem(STORAGE_KEYS.MASTER_AUTH);
     } catch { }
+    setViewRole('login_tenant');
   };
 
   // Autenticação Lojista
@@ -792,7 +846,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         const slug = tenant?.slug || tenant?.id || 'loja';
 
         if (role === 'super_admin') {
-          window.history.pushState({}, '', '/acesso_master');
+          window.history.pushState({}, '', '/portal');
         } else if (role === 'login_tenant') {
           window.history.pushState({}, '', '/acesso_lojista');
         } else if (role === 'register_tenant') {
@@ -809,46 +863,18 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Safe current tenant lookup (localiza inteligentemente por id, slug amigável ou nome)
   const currentTenant = findTenantBySlugOrId(tenants, currentTenantId) || tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId) || tenants[0];
 
-  // Estado reativo persistido para o tema da vitrine e do painel do lojista
-  const [tenantThemeMode, setTenantThemeMode] = useState<'dark' | 'light'>(() => {
+  // Layout padronizado exclusivamente em Modo Claro
+  const [tenantThemeMode] = useState<'dark' | 'light'>('light');
+
+  const themeMode: 'dark' | 'light' = 'light';
+
+  const setThemeMode = (_mode: 'dark' | 'light') => {
     try {
-      const saved = localStorage.getItem('adegasaas_tenant_theme_mode');
-      if (saved === 'dark' || saved === 'light') return saved;
-      return currentTenant?.branding?.colorMode || 'dark';
-    } catch {
-      return 'dark';
-    }
-  });
-
-  // Tema contextual: Super Admin usa adminThemeMode, Lojista e Vitrine usam tenantThemeMode
-  const themeMode: 'dark' | 'light' =
-    viewRole === 'super_admin'
-      ? adminThemeMode
-      : tenantThemeMode;
-
-  const setThemeMode = (mode: 'dark' | 'light') => {
-    if (viewRole === 'super_admin') {
-      setAdminThemeMode(mode);
-    } else {
-      setTenantThemeMode(mode);
-      try {
-        localStorage.setItem('adegasaas_tenant_theme_mode', mode);
-      } catch { }
-      if (currentTenant) {
-        updateTenant(currentTenant.id, {
-          branding: {
-            ...currentTenant.branding,
-            colorMode: mode,
-          },
-        });
-      }
-    }
+      localStorage.setItem('adegasaas_tenant_theme_mode', 'light');
+    } catch { }
   };
 
-  const toggleThemeMode = () => {
-    const nextMode = themeMode === 'dark' ? 'light' : 'dark';
-    setThemeMode(nextMode);
-  };
+  const toggleThemeMode = () => {};
 
   // Isolated products, orders, expenses and movements for currentTenant
   const tenantProducts = allProducts.filter((p) => p.tenantId === currentTenant?.id);
@@ -2056,6 +2082,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setThemeMode,
         toggleThemeMode,
         isMasterAuthenticated,
+        isMasterPasswordSet,
+        setupMasterPassword,
         loginMaster,
         logoutMaster,
         isTenantAuthenticated,

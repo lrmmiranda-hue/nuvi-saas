@@ -51,15 +51,15 @@ const AppContent: React.FC = () => {
   const primaryColor = currentTenant?.branding?.primaryColor || '#0284C7';
   const accentColor = currentTenant?.branding?.accentColor || '#38BDF8';
 
-  // Separação de temas padronizada:
-  // No Painel Master: utiliza adminThemeMode
-  // No Painel do Lojista / Vitrine / Cadastro: utiliza themeMode
+  // Separação de temas:
+  // No Painel Master: utiliza adminThemeMode (suporta alternar modo escuro / claro)
+  // No Painel do Lojista / Vitrine / Cadastro: fixado em modo claro
   const effectiveThemeMode = 
     viewRole === 'super_admin'
       ? adminThemeMode
-      : themeMode;
+      : 'light';
 
-  // Sincroniza classes no elemento <html> e <body> para garantir que o tema correto seja aplicado
+  // Sincroniza classes no elemento <html> e <body> para garantir o tema correto
   React.useEffect(() => {
     const root = document.documentElement;
     const body = document.body;
@@ -76,7 +76,6 @@ const AppContent: React.FC = () => {
       root.classList.remove('light');
       body.classList.add('dark');
       body.classList.remove('light');
-      // Modo Escuro: Black Carbon (#0B0F12) padronizado em todos os sistemas
       body.style.backgroundColor = '#0B0F12';
       body.style.color = '#f5f5f5';
     }
@@ -88,14 +87,13 @@ const AppContent: React.FC = () => {
   }, [primaryColor, accentColor]);
 
   // Se for visão do Master e NÃO estiver autenticado:
-  // Renderiza a página de login limpa e profissional
+  // Renderiza a página de login limpa e segura
   const isMasterView = viewRole === 'super_admin';
   const isAuthOrRegister = viewRole === 'register_tenant' || viewRole === 'login_tenant';
-  const showTenantHeader = !isMasterView && !isAuthOrRegister;
 
   if (isMasterView && !isMasterAuthenticated) {
     return (
-      <div className={`min-h-screen ${adminThemeMode === 'light' ? 'light' : 'dark'}`}>
+      <div className="min-h-screen light bg-slate-50">
         <MasterLoginView />
       </div>
     );
