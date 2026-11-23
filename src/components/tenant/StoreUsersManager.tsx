@@ -223,7 +223,11 @@ export const StoreUsersManager: React.FC<StoreUsersManagerProps> = ({ isLight })
         <button
           type="button"
           onClick={handleOpenNew}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] text-white font-bold text-xs shadow-md shadow-[#0C2340]/40 border-0 transition-all active:scale-95 cursor-pointer shrink-0"
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs shadow-md border-0 transition-all active:scale-95 cursor-pointer shrink-0 ${
+            isLight
+              ? 'bg-gradient-to-r from-[#184C8A]/75 via-[#1E5CA6]/78 to-[#144278]/80 hover:from-[#1E5CA6]/85 hover:to-[#2563EB]/85 text-white shadow-sky-900/15 backdrop-blur-md'
+              : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] text-white shadow-[#0C2340]/40'
+          }`}
         >
           <UserPlus className="w-4 h-4" />
           <span>Novo Operador / Caixa</span>
@@ -632,7 +636,11 @@ export const StoreUsersManager: React.FC<StoreUsersManagerProps> = ({ isLight })
 
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] text-white font-bold text-xs shadow-md shadow-[#0C2340]/40 border-0 transition-all active:scale-95 cursor-pointer"
+                  className={`px-5 py-2 rounded-xl font-bold text-xs shadow-md border-0 transition-all active:scale-95 cursor-pointer ${
+                    isLight
+                      ? 'bg-gradient-to-r from-[#184C8A]/75 via-[#1E5CA6]/78 to-[#144278]/80 hover:from-[#1E5CA6]/85 hover:to-[#2563EB]/85 text-white shadow-sky-900/15 backdrop-blur-md'
+                      : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] text-white shadow-[#0C2340]/40'
+                  }`}
                 >
                   {editingUserId ? 'Salvar Alterações' : 'Cadastrar Operador'}
                 </button>

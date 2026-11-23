@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Tenant } from '../../types';
+import { Tenant, TenantPlan } from '../../types';
 import { buildStoreUrl } from '../../utils/routes';
 import { getSegmentById } from '../../data/businessSegments';
 import { MasterSettingsModal } from './MasterSettingsModal';
@@ -32,7 +32,18 @@ import {
   List,
   LayoutGrid,
   Phone,
-  MapPin
+  MapPin,
+  CreditCard,
+  AlertTriangle,
+  Calendar,
+  CheckCircle2,
+  Zap,
+  QrCode,
+  ShieldCheck,
+  MessageSquare,
+  RefreshCw,
+  X,
+  Check
 } from 'lucide-react';
 
 interface SuperAdminDashboardProps {
@@ -46,6 +57,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 }) => {
   const {
     tenants,
+    updateTenant,
     deleteTenant,
     setCurrentTenantId,
     setViewRole,
@@ -57,9 +69,20 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     logoutMaster,
   } = useStore();
 
+  const [mainTab, setMainTab] = useState<'stores' | 'subscriptions'>('stores');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [subFilter, setSubFilter] = useState<'all' | 'expiring' | 'expired' | 'trial' | 'active'>('all');
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isPixKeyModalOpen, setIsPixKeyModalOpen] = useState(false);
+  const [masterPixKey, setMasterPixKey] = useState<string>(() => {
+    try {
+      return localStorage.getItem('nuvi_master_pix_key') || 'financeiro@nuvisaas.com.br';
+    } catch {
+      return 'financeiro@nuvisaas.com.br';
+    }
+  });
+  const [tempPixKey, setTempPixKey] = useState('');
 
   // Modo de Exibição das Lojas: 'grid_4' (Miniaturas em 4 Colunas) ou 'list' (Lista)
   const [viewMode, setViewMode] = useState<'grid_4' | 'list'>(() => {
@@ -122,6 +145,161 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     showAlert({
       title: 'Link do Painel Copiado!',
       message: `O link do painel e PDV de "${tenant.name}" foi copiado:\n\n${url}\n\nEnvie este link para o dono/gerente do estabelecimento acessar o sistema!`,
+      variant: 'success'
+    });
+  };
+
+  // Preços oficiais de referência dos 4 planos
+  const PLAN_PRICES: Record<string, number> = {
+    vitrine: 49.90,
+    balcao: 89.90,
+    starter: 139.90,
+    hibrido: 139.90,
+    pro: 199.90,
+    enterprise: 199.90
+  };
+
+  const PLAN_TITLES: Record<string, string> = {
+    vitrine: 'Cardápio Digital & Pedidos',
+    balcao: 'Balcão & PDV Caixa Rápido',
+    starter: 'Delivery & Estoque Profissional',
+    hibrido: 'Delivery & Estoque Profissional',
+    pro: 'Nuvi Pro Total (Completo)',
+    enterprise: 'Nuvi Pro Total (Completo)'
+  };
+
+  const getTenantSubscriptionInfo = (tenant: Tenant) => {
+    const now = new Date();
+    const planPrice = tenant.monthlyPrice || PLAN_PRICES[tenant.plan] || 139.90;
+
+    let expDate: Date;
+    if (tenant.subscriptionExpiresAt) {
+      expDate = new Date(tenant.subscriptionExpiresAt);
+    } else {
+      const created = new Date(tenant.createdAt || Date.now());
+      const days = tenant.status === 'trial' ? 7 : 30;
+      expDate = new Date(created.getTime() + days * 86400000);
+    }
+
+    const diffMs = expDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const isExpired = diffDays <= 0;
+    const isExpiringSoon = diffDays > 0 && diffDays <= 5;
+
+    return {
+      expDate,
+      diffDays,
+      isExpired,
+      isExpiringSoon,
+      planPrice,
+      planTitle: PLAN_TITLES[tenant.plan] || 'Plano Nuvi SaaS'
+    };
+  };
+
+  // Contadores para os filtros rápidos solicitados pelo usuário
+  const expiringCount = tenants.filter(t => {
+    const info = getTenantSubscriptionInfo(t);
+    return info.isExpiringSoon && t.status !== 'suspended';
+  }).length;
+
+  const expiredCount = tenants.filter(t => {
+    const info = getTenantSubscriptionInfo(t);
+    return info.isExpired && t.status !== 'suspended';
+  }).length;
+
+  const trialCount = tenants.filter(t => t.status === 'trial').length;
+  const activeSubsCount = tenants.filter(t => t.status === 'active' && !getTenantSubscriptionInfo(t).isExpired).length;
+
+  // Lojas filtradas na aba de assinaturas
+  const filteredSubscriptionTenants = tenants.filter(t => {
+    const matchesSearch =
+      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.ownerPhone || '').includes(searchTerm);
+
+    if (!matchesSearch) return false;
+
+    const info = getTenantSubscriptionInfo(t);
+    if (subFilter === 'expiring') return info.isExpiringSoon && t.status !== 'suspended';
+    if (subFilter === 'expired') return info.isExpired && t.status !== 'suspended';
+    if (subFilter === 'trial') return t.status === 'trial';
+    if (subFilter === 'active') return t.status === 'active' && !info.isExpired;
+    return true;
+  });
+
+  const handleLiberarPlano = (tenant: Tenant, dias: number = 30) => {
+    const now = new Date();
+    const info = getTenantSubscriptionInfo(tenant);
+    const baseDate = info.isExpired ? now : info.expDate;
+    const newExpDate = new Date(baseDate.getTime() + dias * 86400000);
+
+    updateTenant(tenant.id, {
+      status: 'active',
+      subscriptionExpiresAt: newExpDate.toISOString(),
+      lastPaymentDate: now.toISOString(),
+      lastPaymentMethod: 'PIX',
+    });
+
+    showAlert({
+      title: 'Plano Liberado com Sucesso! ⚡',
+      message: `A loja "${tenant.name}" foi ativada/renovada por mais ${dias} dias!\n\nNovo vencimento: ${newExpDate.toLocaleDateString('pt-BR')}\nPagamento via PIX registrado no sistema.`,
+      variant: 'success'
+    });
+  };
+
+  const handleSendPixCobrançaWhatsApp = (tenant: Tenant) => {
+    const info = getTenantSubscriptionInfo(tenant);
+    const cleanPhone = (tenant.ownerPhone || tenant.whatsapp?.phoneNumber || '').replace(/\D/g, '');
+    if (!cleanPhone) {
+      showAlert({
+        title: 'WhatsApp não informado',
+        message: `O lojista de "${tenant.name}" não possui número de WhatsApp cadastrado.`,
+        variant: 'warning'
+      });
+      return;
+    }
+
+    const texto = encodeURIComponent(
+      `Olá ${tenant.ownerName || 'Lojista'}! 👋\n\n` +
+      `Passando para avisar sobre a assinatura da sua loja *${tenant.name}* no sistema Nuvi:\n\n` +
+      `📦 *Plano Contratado:* ${info.planTitle}\n` +
+      `💰 *Valor da Mensalidade:* R$ ${info.planPrice.toFixed(2).replace('.', ',')}\n` +
+      `📅 *Vencimento:* ${info.expDate.toLocaleDateString('pt-BR')} ${info.isExpired ? '*(Vencido)*' : `*(Faltam ${info.diffDays} dias)*`}\n\n` +
+      `Para liberar e manter todos os módulos operacionais (PDV, Mesas, Vitrine e WhatsApp) ativos, realize o pagamento via PIX:\n\n` +
+      `🔑 *Chave PIX:* ${masterPixKey}\n` +
+      `🏦 *Titular:* Nuvi SaaS Tecnologia\n\n` +
+      `Assim que efetuar a transferência, envie o comprovante por aqui para realizarmos a liberação imediata. Muito obrigado!`
+    );
+
+    const waUrl = cleanPhone.startsWith('55')
+      ? `https://wa.me/${cleanPhone}?text=${texto}`
+      : `https://wa.me/55${cleanPhone}?text=${texto}`;
+
+    window.open(waUrl, '_blank');
+  };
+
+  const handleChangeTenantPlan = (tenantId: string, newPlan: TenantPlan) => {
+    updateTenant(tenantId, {
+      plan: newPlan,
+      monthlyPrice: PLAN_PRICES[newPlan] || 139.90,
+    });
+    showAlert({
+      title: 'Plano Alterado!',
+      message: 'O plano do lojista foi atualizado com sucesso.',
+      variant: 'success'
+    });
+  };
+
+  const handleSaveMasterPixKey = () => {
+    if (!tempPixKey.trim()) return;
+    setMasterPixKey(tempPixKey.trim());
+    try {
+      localStorage.setItem('nuvi_master_pix_key', tempPixKey.trim());
+    } catch {}
+    setIsPixKeyModalOpen(false);
+    showAlert({
+      title: 'Chave PIX Atualizada!',
+      message: 'A sua chave PIX de cobrança do SaaS foi salva com sucesso e será enviada nas mensagens de WhatsApp aos clientes.',
       variant: 'success'
     });
   };
@@ -290,7 +468,55 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* Stores List Section */}
+      {/* Abas Principais: Lojas vs Gestão de Assinaturas & Planos */}
+      <div className={`p-1.5 rounded-2xl border flex flex-wrap items-center gap-2 ${
+        themeMode === 'light' ? 'bg-slate-100/90 border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+      }`}>
+        <button
+          type="button"
+          onClick={() => setMainTab('stores')}
+          className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+            mainTab === 'stores'
+              ? 'nuvi-btn-cyber-blue text-white shadow-md'
+              : themeMode === 'light'
+              ? 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              : 'text-slate-400 hover:text-white hover:bg-neutral-800'
+          }`}
+        >
+          <Store className="w-4 h-4" />
+          <span>Lojas & Estabelecimentos ({tenants.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMainTab('subscriptions')}
+          className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer relative ${
+            mainTab === 'subscriptions'
+              ? 'nuvi-btn-cyber-blue text-white shadow-md'
+              : themeMode === 'light'
+              ? 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              : 'text-slate-400 hover:text-white hover:bg-neutral-800'
+          }`}
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>Gestão de Assinaturas, Planos & PIX</span>
+          {expiringCount > 0 && (
+            <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 animate-pulse">
+              {expiringCount} vencendo
+            </span>
+          )}
+          {expiredCount > 0 && (
+            <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-rose-500 text-white">
+              {expiredCount} vencidos
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* ======================================================== */}
+      {/* ABA 1: LISTAGEM DE LOJAS & ESTABELECIMENTOS              */}
+      {/* ======================================================== */}
+      {mainTab === 'stores' && (
       <div className="space-y-4">
         
         {/* Search & Filter Toolbar */}
@@ -781,6 +1007,419 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         )}
 
       </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* ABA 2: GESTÃO DE ASSINATURAS, PLANOS & COBRANÇA PIX      */}
+      {/* ======================================================== */}
+      {mainTab === 'subscriptions' && (
+        <div className="space-y-6">
+
+          {/* Header da Aba com Chave PIX e Ações */}
+          <div className={`p-5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+            themeMode === 'light' ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+          }`}>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className={`text-base font-bold flex items-center gap-2 ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                  <CreditCard className="w-5 h-5 text-sky-500" />
+                  <span>Painel de Assinaturas, Planos & Cobrança PIX</span>
+                </h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                  Cobrança Direta via PIX
+                </span>
+              </div>
+              <p className={`text-xs ${themeMode === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>
+                Acompanhe quem está vencendo, altere planos de clientes e libere acessos imediatamente com +30 dias ao receber o PIX.
+              </p>
+              <div className="flex items-center gap-2 pt-1 text-xs">
+                <span className={`font-semibold ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                  Sua Chave PIX Atual:
+                </span>
+                <span className="font-mono font-bold px-2 py-0.5 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                  {masterPixKey || 'Não configurada (clique ao lado)'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsPixKeyModalOpen(true)}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                  themeMode === 'light'
+                    ? 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-300'
+                    : 'bg-[#161D24] hover:bg-[#1E2732] text-white border-[#2A3746]'
+                }`}
+              >
+                <Settings className="w-4 h-4 text-sky-500" />
+                <span>⚙️ Configurar Chave PIX</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Cards de Métricas e Filtros Rápidos de Vencimento */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Card 1: Vencendo em Breve */}
+            <button
+              type="button"
+              onClick={() => setSubscriptionFilter('expiring')}
+              className={`p-3.5 sm:p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                subscriptionFilter === 'expiring'
+                  ? 'border-amber-500 bg-amber-500/10 ring-2 ring-amber-500/30'
+                  : themeMode === 'light'
+                  ? 'bg-white border-slate-200 hover:border-slate-300'
+                  : 'bg-[#11161B] border-[#1C2631] hover:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-500">⏳ Vencendo em Breve</span>
+                <span className="text-xl sm:text-2xl font-black text-amber-500">{expiringCount}</span>
+              </div>
+              <span className={`text-[10px] block mt-1 ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                Próximos 5 dias para cobrança
+              </span>
+            </button>
+
+            {/* Card 2: Vencidos / Bloqueados */}
+            <button
+              type="button"
+              onClick={() => setSubscriptionFilter('expired')}
+              className={`p-3.5 sm:p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                subscriptionFilter === 'expired'
+                  ? 'border-rose-500 bg-rose-500/10 ring-2 ring-rose-500/30'
+                  : themeMode === 'light'
+                  ? 'bg-white border-slate-200 hover:border-slate-300'
+                  : 'bg-[#11161B] border-[#1C2631] hover:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-rose-500">🚨 Vencidos</span>
+                <span className="text-xl sm:text-2xl font-black text-rose-500">{expiredCount}</span>
+              </div>
+              <span className={`text-[10px] block mt-1 ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                Necessitam renovação imediata
+              </span>
+            </button>
+
+            {/* Card 3: Em Teste / Trial */}
+            <button
+              type="button"
+              onClick={() => setSubscriptionFilter('trial')}
+              className={`p-3.5 sm:p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                subscriptionFilter === 'trial'
+                  ? 'border-sky-500 bg-sky-500/10 ring-2 ring-sky-500/30'
+                  : themeMode === 'light'
+                  ? 'bg-white border-slate-200 hover:border-slate-300'
+                  : 'bg-[#11161B] border-[#1C2631] hover:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-sky-500">🚀 Em Teste Grátis</span>
+                <span className="text-xl sm:text-2xl font-black text-sky-500">{trialCount}</span>
+              </div>
+              <span className={`text-[10px] block mt-1 ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                Período de avaliação de 7 dias
+              </span>
+            </button>
+
+            {/* Card 4: Ativos em Dia */}
+            <button
+              type="button"
+              onClick={() => setSubscriptionFilter('active')}
+              className={`p-3.5 sm:p-4 rounded-xl border text-left transition-all cursor-pointer ${
+                subscriptionFilter === 'active'
+                  ? 'border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/30'
+                  : themeMode === 'light'
+                  ? 'bg-white border-slate-200 hover:border-slate-300'
+                  : 'bg-[#11161B] border-[#1C2631] hover:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-500">✅ Assinantes Ativos</span>
+                <span className="text-xl sm:text-2xl font-black text-emerald-500">{activeSubsCount}</span>
+              </div>
+              <span className={`text-[10px] block mt-1 ${themeMode === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                Mensalidade em dia
+              </span>
+            </button>
+          </div>
+
+          {/* Barra de Filtro e Busca */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {[
+                { id: 'all', label: 'Todos' },
+                { id: 'expiring', label: `⏳ Vencendo (${expiringCount})` },
+                { id: 'expired', label: `🚨 Vencidos (${expiredCount})` },
+                { id: 'trial', label: `🚀 Em Teste (${trialCount})` },
+                { id: 'active', label: `✅ Ativos (${activeSubsCount})` },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSubscriptionFilter(tab.id as any)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    subscriptionFilter === tab.id
+                      ? 'bg-sky-600 text-white shadow-xs'
+                      : themeMode === 'light'
+                      ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                      : 'bg-[#11161B] hover:bg-[#18212B] text-slate-400 hover:text-white border border-[#1C2631]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative w-full sm:w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={subscriptionSearch}
+                onChange={(e) => setSubscriptionSearch(e.target.value)}
+                placeholder="Buscar por loja, dono ou whatsapp..."
+                className={`w-full pl-9 pr-3 py-2 rounded-xl text-xs outline-none transition-all ${
+                  themeMode === 'light'
+                    ? 'bg-white border border-slate-300 text-slate-900 focus:border-sky-500'
+                    : 'bg-[#11161B] border border-[#1C2631] text-white focus:border-sky-500'
+                }`}
+              />
+            </div>
+          </div>
+
+          {/* Tabela de Assinaturas e Ações de Liberação */}
+          <div className={`rounded-2xl border overflow-hidden ${
+            themeMode === 'light' ? 'bg-white border-slate-200 shadow-xs' : 'bg-[#11161B] border-[#1C2631]'
+          }`}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className={`border-b ${
+                    themeMode === 'light' ? 'bg-slate-50 border-slate-200 text-slate-600' : 'bg-[#0B0F12] border-[#1C2631] text-slate-400'
+                  }`}>
+                    <th className="py-3 px-4 font-bold">Estabelecimento</th>
+                    <th className="py-3 px-4 font-bold">Contato & WhatsApp</th>
+                    <th className="py-3 px-4 font-bold">Plano Atual & Valor</th>
+                    <th className="py-3 px-4 font-bold">Vencimento & Status</th>
+                    <th className="py-3 px-4 font-bold text-right">Ação de Liberação PIX</th>
+                  </tr>
+                </thead>
+                <tbody className={`divide-y ${
+                  themeMode === 'light' ? 'divide-slate-200' : 'divide-[#1C2631]'
+                }`}>
+                  {filteredSubscriptionTenants.map((tenant) => {
+                    const subInfo = getTenantSubscriptionInfo(tenant);
+                    return (
+                      <tr key={tenant.id} className={`transition-colors ${
+                        themeMode === 'light' ? 'hover:bg-slate-50/80' : 'hover:bg-[#161D24]'
+                      }`}>
+                        {/* Estabelecimento */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center font-bold overflow-hidden shrink-0">
+                              {tenant.branding?.logoUrl ? (
+                                <img src={tenant.branding.logoUrl} alt={tenant.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-sky-500 text-xs">{tenant.name.slice(0, 2).toUpperCase()}</span>
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <span className={`font-bold block truncate ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                                {tenant.name}
+                              </span>
+                              <span className="text-[10px] text-slate-400 block truncate">
+                                /{tenant.slug} • {tenant.segment || 'Geral'}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Contato & WhatsApp */}
+                        <td className="py-3 px-4">
+                          <div className="space-y-0.5">
+                            <span className={`block font-medium ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-200'}`}>
+                              {tenant.ownerName || 'Não informado'}
+                            </span>
+                            {tenant.ownerPhone ? (
+                              <a
+                                href={`https://wa.me/55${tenant.ownerPhone.replace(/\D/g, '')}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-semibold"
+                              >
+                                <MessageCircle className="w-3 h-3" />
+                                <span>{tenant.ownerPhone}</span>
+                              </a>
+                            ) : (
+                              <span className="text-[10px] text-slate-400">Sem telefone</span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Plano Atual & Seletor de Troca */}
+                        <td className="py-3 px-4">
+                          <div className="space-y-1.5">
+                            <select
+                              value={tenant.plan}
+                              onChange={(e) => handleChangeTenantPlan(tenant.id, e.target.value as any)}
+                              className={`px-2 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                                themeMode === 'light'
+                                  ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white'
+                                  : 'bg-[#151D24] border-[#253342] text-white focus:bg-[#1E2732]'
+                              }`}
+                            >
+                              <option value="vitrine">🛍️ Cardápio Digital (R$ 49,90)</option>
+                              <option value="balcao">⚡ Balcão & PDV (R$ 89,90)</option>
+                              <option value="starter">📦 Delivery & Estoque (R$ 139,90)</option>
+                              <option value="hibrido">📦 Delivery & Estoque (R$ 139,90)</option>
+                              <option value="pro">👑 Nuvi Pro Total (R$ 199,90)</option>
+                              <option value="enterprise">👑 Nuvi Pro Total (R$ 199,90)</option>
+                            </select>
+                            <span className="text-[11px] font-black text-sky-600 dark:text-sky-400 block">
+                              R$ {subInfo.planPrice.toFixed(2).replace('.', ',')}/mês
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Vencimento & Status */}
+                        <td className="py-3 px-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {subInfo.isExpired ? (
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500 text-white flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3" />
+                                  <span>Vencido há {Math.abs(subInfo.diffDays)} dias</span>
+                                </span>
+                              ) : subInfo.isExpiringSoon ? (
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 flex items-center gap-1 animate-pulse">
+                                  <Clock className="w-3 h-3" />
+                                  <span>Vence em {subInfo.diffDays} dias</span>
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  <span>{tenant.status === 'trial' ? 'Trial' : 'Ativo'} ({subInfo.diffDays}d)</span>
+                                </span>
+                              )}
+                            </div>
+
+                            <span className="text-[11px] text-slate-400 block font-mono">
+                              Vencimento: {subInfo.expDate.toLocaleDateString('pt-BR')}
+                            </span>
+                            {tenant.lastPaymentDate && (
+                              <span className="text-[10px] text-slate-500 block">
+                                Último PIX: {new Date(tenant.lastPaymentDate).toLocaleDateString('pt-BR')}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Ações de Liberação e Cobrança */}
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* Botão de Cobrar via WhatsApp */}
+                            <button
+                              type="button"
+                              onClick={() => handleSendPixCobrançaWhatsApp(tenant)}
+                              title="Enviar cobrança formatada com valor e chave PIX no WhatsApp"
+                              className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Cobrar PIX</span>
+                            </button>
+
+                            {/* Botão Principal: Liberar +30 Dias */}
+                            <button
+                              type="button"
+                              onClick={() => handleLiberarPlano(tenant)}
+                              title="Recebeu o PIX? Clique para renovar a assinatura por +30 dias"
+                              className="px-3 py-1.5 rounded-lg text-xs font-extrabold bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+                            >
+                              <Zap className="w-3.5 h-3.5 fill-white" />
+                              <span>Liberar +30 Dias</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {filteredSubscriptionTenants.length === 0 && (
+                <div className="p-8 text-center text-slate-400 space-y-2">
+                  <CreditCard className="w-8 h-8 mx-auto text-slate-500" />
+                  <p className="text-xs font-medium">Nenhum lojista encontrado para o filtro selecionado.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* Modal para Configurar Chave PIX do Master */}
+      {isPixKeyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className={`w-full max-w-md rounded-2xl p-6 border shadow-2xl space-y-4 ${
+            themeMode === 'light' ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11161B] border-[#1C2631] text-white'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-500 flex items-center justify-center font-bold">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Chave PIX do Master</h3>
+                  <p className="text-[11px] text-slate-400">Usada nas mensagens de cobrança aos lojistas</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPixKeyModalOpen(false)}
+                className="text-slate-400 hover:text-white cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold block">
+                Sua Chave PIX (CNPJ, Celular, E-mail ou Chave Aleatória):
+              </label>
+              <input
+                type="text"
+                value={newPixKeyInput}
+                onChange={(e) => setNewPixKeyInput(e.target.value)}
+                placeholder="Ex: 11999998888 ou pix@suaempresa.com"
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold outline-none border transition-all ${
+                  themeMode === 'light'
+                    ? 'bg-slate-50 border-slate-300 text-slate-900 focus:border-sky-500'
+                    : 'bg-[#161D24] border-[#253342] text-white focus:border-sky-500'
+                }`}
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsPixKeyModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveMasterPixKey}
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-md cursor-pointer"
+              >
+                Salvar Chave PIX
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* White-Label Sales Engine Info Strip */}
       <div className={`rounded-2xl border p-6 space-y-4 ${

@@ -338,6 +338,10 @@ export interface Tenant {
   createdAt: string;
   totalRevenue: number;
   ordersCount: number;
+  subscriptionExpiresAt?: string; // Data de vencimento da assinatura
+  lastPaymentDate?: string; // Data do último pagamento recebido
+  lastPaymentMethod?: string; // Método de pagamento (ex: 'PIX')
+  monthlyPrice?: number; // Valor da mensalidade do plano
 }
 
 export type ViewRole = 'super_admin' | 'tenant_admin' | 'storefront' | 'register_tenant' | 'login_tenant';

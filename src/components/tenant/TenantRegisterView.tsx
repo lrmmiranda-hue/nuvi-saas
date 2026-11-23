@@ -22,7 +22,9 @@ import {
   ShieldCheck,
   Zap,
   Eye,
-  EyeOff
+  EyeOff,
+  Info,
+  CreditCard
 } from 'lucide-react';
 
 interface TenantRegisterViewProps {
@@ -47,8 +49,9 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   const [selectedSegment, setSelectedSegment] = useState<BusinessSegmentType>('adega');
   const currentSegmentConfig = getSegmentById(selectedSegment);
 
-  // Plano selecionado
+  // Plano selecionado e modal de consulta
   const [selectedPlanId, setSelectedPlanId] = useState<string>('plan_nuvi_pro');
+  const [isPlansInfoModalOpen, setIsPlansInfoModalOpen] = useState(false);
 
   // Estados do Filtro de Ramo no Celular (conforme Imagem 2)
   const [isBranchFilterOpen, setIsBranchFilterOpen] = useState(false);
@@ -546,84 +549,45 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 </div>
               </div>
 
-              {/* 3. SELEÇÃO DO PLANO DO SAAS (4 PLANOS OFICIAIS) */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center justify-between">
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                    3. Escolha seu Plano Nuvi SaaS *
-                  </label>
-                  <span className="text-[11px] font-bold text-sky-500">
-                    {currentSelectedPlan.name}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                  {officialNuviPlans.map((p) => {
-                    const isSelected = selectedPlanId === p.id;
-                    return (
-                      <div
-                        key={p.id}
-                        onClick={() => setSelectedPlanId(p.id)}
-                        className={`p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between relative group ${
-                          isSelected
-                            ? 'nuvi-btn-cyber-blue text-white shadow-xl shadow-[#0C2340]/50 border-0 ring-0 outline-none scale-[1.01]'
-                            : isLight
-                            ? 'bg-slate-50 hover:bg-white border-slate-200 hover:border-sky-300 text-slate-800 shadow-sm'
-                            : 'bg-[#121820] hover:bg-[#182230] border-[#1C2631] hover:border-slate-700 text-white'
-                        }`}
-                      >
-                        <div>
-                          <div className="flex items-center justify-between gap-1 mb-1.5">
-                            <span className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-full shrink-0 ${
-                              isSelected 
-                                ? 'bg-white/20 text-white' 
-                                : 'bg-sky-500/15 text-sky-500 border border-sky-500/30'
-                            }`}>
-                              {p.tag}
-                            </span>
-                            {isSelected ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5] shrink-0" />
-                            ) : (
-                              <span className="text-sm leading-none">{p.icon}</span>
-                            )}
-                          </div>
-
-                          <h4 className={`font-black text-xs leading-snug mb-1 ${
-                            isSelected ? 'text-white' : isLight ? 'text-slate-900' : 'text-white'
-                          }`}>
-                            {p.name}
-                          </h4>
-
-                          <p className={`text-[10px] leading-relaxed line-clamp-2 mb-2 ${
-                            isSelected ? 'text-sky-100' : isLight ? 'text-slate-500' : 'text-slate-400'
-                          }`}>
-                            {p.description}
-                          </p>
-                        </div>
-
-                        <div className={`pt-2 border-t flex items-baseline justify-between ${
-                          isSelected ? 'border-white/20' : isLight ? 'border-slate-200' : 'border-[#1C2631]'
-                        }`}>
-                          <div className="flex items-baseline gap-1">
-                            <span className={`text-base font-black ${
-                              isSelected ? 'text-white' : 'text-sky-500'
-                            }`}>
-                              R$ {p.price.toFixed(2).replace('.', ',')}
-                            </span>
-                            <span className={`text-[9px] font-semibold ${
-                              isSelected ? 'text-sky-200' : isLight ? 'text-slate-400' : 'text-slate-500'
-                            }`}>/mês</span>
-                          </div>
-
-                          <span className={`text-[10px] font-bold ${
-                            isSelected ? 'text-white' : 'text-sky-500'
-                          }`}>
-                            {isSelected ? '✓ Ativo' : 'Escolher'}
-                          </span>
-                        </div>
+              {/* 3. AVISO DE TESTE GRATUITO & CONSULTA DE PLANOS */}
+              <div className={`p-4 rounded-2xl border transition-all ${
+                isLight
+                  ? 'bg-gradient-to-r from-sky-50/80 via-blue-50/60 to-indigo-50/70 border-sky-200 text-slate-800'
+                  : 'bg-gradient-to-r from-[#0C2340]/40 via-[#0E2A4D]/30 to-[#0A1E37]/40 border-sky-500/25 text-slate-200'
+              }`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-500 flex items-center justify-center shrink-0 mt-0.5">
+                      <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-extrabold text-xs text-sky-600 dark:text-sky-400 uppercase tracking-wider">
+                          Teste Grátis com Acesso Completo
+                        </span>
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500 text-white">
+                          Sem Cartão de Crédito
+                        </span>
                       </div>
-                    );
-                  })}
+                      <p className={`text-xs mt-1 leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+                        <strong>Não é necessário cadastrar cartão para pagamento</strong>. Você testa todos os recursos da plataforma gratuitamente. O pagamento é realizado <strong>via PIX somente após o término do período de teste</strong>, caso decida fazer a contratação.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Botão de Consulta dos Planos */}
+                  <button
+                    type="button"
+                    onClick={() => setIsPlansInfoModalOpen(true)}
+                    className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                      isLight
+                        ? 'bg-white hover:bg-sky-50 text-sky-700 border border-sky-300 shadow-xs'
+                        : 'bg-[#142334] hover:bg-[#1a2f45] text-sky-300 border border-sky-500/30'
+                    }`}
+                  >
+                    <Info className="w-4 h-4 text-sky-500" />
+                    <span>Informações dos Planos</span>
+                  </button>
                 </div>
               </div>
 
@@ -822,6 +786,118 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
         </div>
 
       </div>
+
+      {/* Modal de Informações e Consulta de Planos */}
+      {isPlansInfoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className={`relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden ${
+            isLight ? 'bg-white border-slate-200' : 'bg-[#0F1722] border-[#1C2631]'
+          }`}>
+            {/* Header do Modal */}
+            <div className={`p-4 sm:p-5 border-b flex items-center justify-between ${
+              isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121B27] border-[#1C2631]'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-500 flex items-center justify-center shrink-0">
+                  <Info className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className={`text-base font-black flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    Planos & Valores Nuvi SaaS
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 uppercase border border-emerald-500/30">
+                      Apenas Consulta
+                    </span>
+                  </h3>
+                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                    Conheça os planos disponíveis para quando o seu período de teste gratuito for concluído.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsPlansInfoModalOpen(false)}
+                className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                  isLight ? 'hover:bg-slate-200 text-slate-500' : 'hover:bg-neutral-800 text-slate-400'
+                }`}
+                title="Fechar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Conteúdo com os 4 Cards */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-4">
+              {/* Banner de Observação Importante */}
+              <div className={`p-3.5 rounded-2xl border text-xs flex items-start gap-3 ${
+                isLight ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950' : 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
+              }`}>
+                <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <span className="font-bold block text-sm">
+                    Você não precisa cadastrar nenhum cartão de crédito agora!
+                  </span>
+                  <p className={`text-xs ${isLight ? 'text-emerald-800' : 'text-emerald-300'}`}>
+                    Seu cadastro libera um período de teste gratuito para experimentar todas as ferramentas na prática. O pagamento só acontece após o término do teste, caso decida contratar, de forma direta e sem burocracia <strong>via PIX</strong>.
+                  </p>
+                </div>
+              </div>
+
+              {/* Grid com os 4 Planos */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {officialNuviPlans.map((p) => (
+                  <div
+                    key={p.id}
+                    className={`p-4 rounded-2xl border flex flex-col justify-between transition-all ${
+                      isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#121B27] border-[#1C2631] text-white'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-1 mb-2">
+                        <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">
+                          {p.tag}
+                        </span>
+                        <span className="text-base">{p.icon}</span>
+                      </div>
+                      <h4 className="font-black text-xs leading-snug mb-1">
+                        {p.name}
+                      </h4>
+                      <p className={`text-[11px] leading-relaxed line-clamp-3 mb-3 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                        {p.description}
+                      </p>
+                    </div>
+
+                    <div className={`pt-3 border-t flex items-baseline gap-1 ${isLight ? 'border-slate-200' : 'border-[#1C2631]'}`}>
+                      <span className="text-xl font-black text-sky-500">
+                        R$ {p.price.toFixed(2).replace('.', ',')}
+                      </span>
+                      <span className={`text-[10px] font-semibold ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
+                        /mês
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer do Modal */}
+            <div className={`p-4 border-t flex items-center justify-between ${
+              isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121B27] border-[#1C2631]'
+            }`}>
+              <span className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                A escolha definitiva do modelo de foco ocorre na tela seguinte de configuração.
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsPlansInfoModalOpen(false)}
+                className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition-all cursor-pointer"
+              >
+                Fechar Consulta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

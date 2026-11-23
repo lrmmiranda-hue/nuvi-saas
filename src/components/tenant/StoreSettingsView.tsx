@@ -240,7 +240,7 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
         <button
           type="button"
           onClick={handleSaveAll}
-          className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] text-white font-bold text-xs shadow-md shadow-[#0C2340]/40 border-0 transition-all active:scale-95 cursor-pointer shrink-0"
+          className="nuvi-btn-cyber-blue flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs shadow-md border-0 transition-all active:scale-95 cursor-pointer shrink-0 text-white"
         >
           <Check className="w-4 h-4 stroke-[2.5]" />
           <span>Salvar Todas as Configurações</span>
@@ -270,9 +270,9 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
                   key={item.id}
                   type="button"
                   onClick={() => setActiveSubTab(item.id)}
-                  className={`w-full p-3 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                  className={`w-full p-3 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between gap-3 border-0 ring-0 outline-none ${
                     isSelected
-                      ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0'
+                      ? 'nuvi-btn-cyber-blue text-white shadow-md'
                       : isLight
                       ? 'hover:bg-slate-200/60 text-slate-700'
                       : 'hover:bg-[#151D24] text-slate-300'
@@ -281,7 +281,9 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
                   <div className="flex items-start gap-3 min-w-0">
                     <div className={`p-2 rounded-lg shrink-0 mt-0.5 ${
                       isSelected
-                        ? 'bg-[#16365c] text-sky-300'
+                        ? isLight
+                          ? 'bg-white/20 text-white'
+                          : 'bg-[#16365c] text-sky-300'
                         : isLight
                         ? 'bg-slate-200 text-slate-600'
                         : 'bg-neutral-800 text-slate-400'
@@ -660,7 +662,7 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
                         <button
                           type="button"
                           onClick={() => setIsTableQRCodeModalOpen(true)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg nuvi-btn-cyber-blue text-white font-bold text-xs shadow-md shadow-[#0C2340]/40 transition-all cursor-pointer hover:brightness-110 shrink-0"
+                          className="nuvi-btn-cyber-blue flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs shadow-md transition-all cursor-pointer hover:brightness-110 shrink-0 text-white"
                         >
                           <QrCode className="w-3.5 h-3.5" />
                           <span>Imprimir Plaquinhas QR Code das Mesas</span>

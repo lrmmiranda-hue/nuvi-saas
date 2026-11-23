@@ -968,7 +968,9 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                     }}
                     className={`text-left p-3.5 rounded-xl transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0 ring-0 outline-none'
+                        ? isLight
+                          ? 'bg-gradient-to-r from-[#184C8A]/75 via-[#1E5CA6]/78 to-[#144278]/80 text-white shadow-md shadow-sky-900/15 backdrop-blur-md border-0 ring-0 outline-none'
+                          : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0 ring-0 outline-none'
                         : isLight
                         ? 'border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-2xs'
                         : 'border border-neutral-800 bg-neutral-900 hover:border-neutral-700 shadow-none'

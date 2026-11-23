@@ -1332,21 +1332,23 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                       ]
                   ).map((planItem) => {
                     const lower = `${planItem.id} ${planItem.name}`.toLowerCase();
-                    const isBalcaoPlan = planItem.id === 'plan_balcao_pdv' || (lower.includes('balcao') && !lower.includes('delivery') && !lower.includes('pro') && !lower.includes('hibrido'));
-                    const isCardapioPlan = planItem.id === 'plan_cardapio' || (lower.includes('cardapio') || lower.includes('vitrine'));
-                    const isDeliveryPlan = planItem.id === 'plan_delivery_estoque' || (lower.includes('delivery') && !lower.includes('pro'));
-                    const isProPlan = planItem.id === 'plan_nuvi_pro' || lower.includes('pro');
+                    const isBalcaoPlan = planItem.id === 'plan_balcao_pdv' || planItem.id === 'balcao' || (lower.includes('balcao') && !lower.includes('delivery'));
+                    const isCardapioPlan = planItem.id === 'plan_cardapio' || planItem.id === 'vitrine' || lower.includes('cardapio');
+                    const isDeliveryPlan = planItem.id === 'plan_delivery_estoque' || planItem.id === 'starter' || (lower.includes('delivery') && !lower.includes('nuvi pro'));
+                    const isProPlan = planItem.id === 'plan_nuvi_pro' || planItem.id === 'pro' || lower.includes('nuvi pro') || lower.includes('completo vip');
 
                     // Identificação 100% individual e estrita para NUNCA selecionar 2 planos simultaneamente
                     const isSelected = formData.selectedPlanId
                       ? formData.selectedPlanId === planItem.id
                       : isBalcaoPlan
-                      ? (formData.config.enablePhysicalStore && !formData.config.enableOnlineSales)
+                      ? (formData.plan === 'balcao')
                       : isCardapioPlan
-                      ? (!formData.config.enablePhysicalStore && formData.config.enableOnlineSales)
+                      ? (formData.plan === 'vitrine')
+                      : isDeliveryPlan
+                      ? (formData.plan === 'starter' || (formData.plan === 'hibrido' && formData.selectedPlanId !== 'plan_nuvi_pro'))
                       : isProPlan
                       ? (formData.plan === 'pro')
-                      : (formData.config.enablePhysicalStore && formData.config.enableOnlineSales && formData.plan !== 'pro');
+                      : false;
 
                     const PlanIcon = isBalcaoPlan ? ShoppingCart : isCardapioPlan ? Globe : isProPlan ? Sparkles : Store;
 
@@ -1375,7 +1377,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             setFormData({
                               ...formData,
                               selectedPlanId: planItem.id,
-                              plan: 'hibrido',
+                              plan: 'starter',
                               config: { ...formData.config, enablePhysicalStore: true, enableOnlineSales: true },
                               whatsapp: { ...formData.whatsapp, enableWhatsAppOrders: true },
                             });
@@ -1392,7 +1394,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         }}
                         className={`group w-full p-2.5 sm:p-4 rounded-xl text-left transition-all cursor-pointer relative flex flex-col justify-between overflow-hidden ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-lg shadow-[#0C2340]/40 border-0 ring-0 outline-none'
+                            ? isLight
+                              ? 'nuvi-btn-cyber-blue text-white shadow-lg border-0 ring-0 outline-none backdrop-blur-md'
+                              : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-lg shadow-[#0C2340]/40 border-0 ring-0 outline-none'
                             : isLight
                             ? 'bg-white border-2 border-slate-200 text-slate-800 hover:border-slate-300 shadow-xs'
                             : 'bg-neutral-900/80 border border-neutral-800 text-neutral-300 hover:border-neutral-700 shadow-none'
@@ -1401,7 +1405,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         <div className="w-full min-w-0">
                           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-                              <PlanIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isSelected ? 'text-sky-300' : 'text-neutral-400'}`} />
+                              <PlanIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isSelected ? 'text-white' : 'text-neutral-400'}`} />
                               <span className={`font-black text-xs sm:text-sm leading-snug break-words ${
                                 isSelected ? 'text-white' : isLight ? 'text-slate-900' : 'text-white'
                               }`}>
@@ -1409,7 +1413,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                               </span>
                             </div>
                             {isSelected && (
-                              <CheckCircle2 className="w-4 h-4 text-sky-400 stroke-[2.5] shrink-0 mt-0.5" />
+                              <CheckCircle2 className="w-4 h-4 text-white stroke-[2.5] shrink-0 mt-0.5" />
                             )}
                           </div>
 
@@ -1421,7 +1425,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                                 R$ {planItem.price.toFixed(2).replace('.', ',')}
                               </span>
                               <span className={`text-[10px] sm:text-xs font-semibold ${
-                                isSelected ? 'text-sky-200' : isLight ? 'text-slate-500' : 'text-neutral-400'
+                                isSelected ? 'text-white/90' : isLight ? 'text-slate-500' : 'text-neutral-400'
                               }`}>
                                 {planItem.period || '/mês'}
                               </span>
@@ -1429,7 +1433,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             {planItem.badge && (
                               <span className={`text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 sm:px-2 py-0.5 rounded tracking-wide ${
                                 isSelected
-                                  ? 'bg-sky-400/25 text-white border border-sky-400/40'
+                                  ? 'bg-white/25 text-white border border-white/40'
                                   : 'bg-sky-500/15 text-sky-600 dark:text-sky-400'
                               }`}>
                                 {planItem.badge}
@@ -1439,7 +1443,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
 
                           {/* Descrição: Branco nítido quando selecionado */}
                           <p className={`text-[11px] sm:text-xs leading-relaxed mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-none ${
-                            isSelected ? 'text-white' : isLight ? 'text-slate-600' : 'text-neutral-400'
+                            isSelected ? 'text-white font-medium' : isLight ? 'text-slate-600' : 'text-neutral-400'
                           }`}>
                             {planItem.description}
                           </p>
@@ -1451,7 +1455,7 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             }`}>
                               {planItem.features.slice(0, 3).map((feat, idx) => (
                                 <li key={idx} className="flex items-start gap-1.5 sm:gap-2 text-[10px] sm:text-xs leading-snug">
-                                  <Check className={`w-3 h-3 sm:w-3.5 sm:h-3.5 mt-0.5 shrink-0 ${isSelected ? 'text-sky-300' : 'text-sky-500'}`} />
+                                  <Check className={`w-3 h-3 sm:w-3.5 sm:h-3.5 mt-0.5 shrink-0 ${isSelected ? 'text-white' : 'text-sky-500'}`} />
                                   <span className={`break-words ${
                                     isSelected ? 'text-white font-medium' : isLight ? 'text-slate-700' : 'text-neutral-300'
                                   }`}>{feat}</span>
@@ -2074,7 +2078,9 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                         }
                         className={`text-left p-3.5 rounded-xl transition-all cursor-pointer relative ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0 ring-0 outline-none'
+                            ? isLight
+                              ? 'nuvi-btn-cyber-blue text-white shadow-md border-0 ring-0 outline-none backdrop-blur-md'
+                              : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0 ring-0 outline-none'
                             : isLight
                             ? 'border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-2xs'
                             : 'border border-neutral-800 bg-neutral-900 hover:border-neutral-700'
@@ -2095,10 +2101,10 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
                             </span>
                           </div>
                           {isSelected && (
-                            <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-white stroke-[2.5] shrink-0" />
                           )}
                         </div>
-                        <p className={`text-[11px] leading-snug ${isSelected ? 'text-white' : isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                        <p className={`text-[11px] leading-snug ${isSelected ? 'text-white font-medium' : isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
                           {theme.desc}
                         </p>
                       </button>
@@ -2910,7 +2916,11 @@ export const OnboardingWizardModal: React.FC<OnboardingWizardModalProps> = ({
               <button
                 type="button"
                 onClick={handleSaveAndAdvance}
-                className="btn-graphite flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 text-xs font-bold transition-all shadow-md cursor-pointer"
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer ${
+                  isLight
+                    ? 'nuvi-btn-cyber-blue text-white hover:brightness-110 border-0'
+                    : 'btn-graphite bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700'
+                }`}
               >
                 Próximo Passo
                 <ArrowRight className="w-3.5 h-3.5" />

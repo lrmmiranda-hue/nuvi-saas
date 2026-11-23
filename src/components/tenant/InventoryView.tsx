@@ -510,7 +510,11 @@ export const InventoryView: React.FC<InventoryViewProps> = ({ onOpenProductModal
           <button
             type="button"
             onClick={() => setIsActionsMenuOpen(!isActionsMenuOpen)}
-            className="flex items-center justify-center p-2.5 rounded-xl text-white font-bold text-xs shadow-md shadow-[#0C2340]/40 transition-all active:scale-95 cursor-pointer bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] border-0"
+            className={`flex items-center justify-center p-2.5 rounded-xl text-white font-bold text-xs shadow-md border-0 transition-all active:scale-95 cursor-pointer ${
+              isLight
+                ? 'bg-gradient-to-r from-[#184C8A]/75 via-[#1E5CA6]/78 to-[#144278]/80 hover:from-[#1E5CA6]/85 hover:to-[#2563EB]/85 shadow-sky-900/15 backdrop-blur-md'
+                : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] shadow-[#0C2340]/40'
+            }`}
             title="Menu de Ações do Estoque (Novo Produto, Entrada, Planilha, Categorias)"
           >
             <Menu className="w-5 h-5 stroke-[2.5]" />

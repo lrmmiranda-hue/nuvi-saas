@@ -329,15 +329,43 @@ select optgroup {
 }
 
 /* ======================================================== */
-/* Botão / Card Selecionado Modo Escuro                      */
-/* Azul Mais Escuro Transparente Sem Borda e Sem Animação    */
+/* Botão / Card Selecionado Modo Escuro & Modo Claro        */
+/* Mais Claro e Translúcido no Modo Claro, Sem Borda e      */
+/* Fontes 100% Brancas de Alto Contraste                    */
 /* ======================================================== */
 .nuvi-btn-cyber-blue {
-  background: linear-gradient(135deg, rgba(12, 35, 64, 0.88) 0%, rgba(14, 42, 77, 0.92) 50%, rgba(10, 30, 55, 0.95) 100%) !important;
+  background: linear-gradient(135deg, rgba(12, 35, 64, 0.92) 0%, rgba(14, 42, 77, 0.94) 50%, rgba(10, 30, 55, 0.96) 100%) !important;
   border: 0 !important;
   color: #ffffff !important;
   box-shadow: 0 4px 14px -2px rgba(12, 35, 64, 0.45) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.nuvi-btn-cyber-blue *,
+.nuvi-btn-cyber-blue span,
+.nuvi-btn-cyber-blue p,
+.nuvi-btn-cyber-blue h3,
+.nuvi-btn-cyber-blue h4,
+.nuvi-btn-cyber-blue svg {
+  color: #ffffff !important;
+}
+
+.light .nuvi-btn-cyber-blue {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.82) 0%, rgba(37, 99, 235, 0.80) 50%, rgba(30, 64, 175, 0.82) 100%) !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: 0 4px 16px -2px rgba(37, 99, 235, 0.28) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.light .nuvi-btn-cyber-blue *,
+.light .nuvi-btn-cyber-blue span,
+.light .nuvi-btn-cyber-blue p,
+.light .nuvi-btn-cyber-blue h3,
+.light .nuvi-btn-cyber-blue h4,
+.light .nuvi-btn-cyber-blue svg {
+  color: #ffffff !important;
 }
 
