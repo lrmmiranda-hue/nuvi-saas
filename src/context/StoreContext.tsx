@@ -863,21 +863,45 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Safe current tenant lookup (localiza inteligentemente por id, slug amigável ou nome)
   const currentTenant = findTenantBySlugOrId(tenants, currentTenantId) || tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId) || tenants[0];
 
-  // Layout contextual: no Master segue adminThemeMode, no resto segue light
-  const [tenantThemeMode] = useState<'dark' | 'light'>('light');
+  // Estado reativo persistido para o tema da vitrine e do painel do lojista
+  const [tenantThemeMode, setTenantThemeMode] = useState<'dark' | 'light'>(() => {
+    try {
+      const saved = localStorage.getItem('adegasaas_tenant_theme_mode');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return currentTenant?.branding?.colorMode || 'light';
+    } catch {
+      return 'light';
+    }
+  });
 
+  // Tema contextual: no Master segue adminThemeMode, no Lojista/Vitrine segue tenantThemeMode
   const themeMode: 'dark' | 'light' =
     viewRole === 'super_admin'
       ? adminThemeMode
-      : 'light';
+      : tenantThemeMode;
 
-  const setThemeMode = (_mode: 'dark' | 'light') => {
-    try {
-      localStorage.setItem('adegasaas_tenant_theme_mode', 'light');
-    } catch { }
+  const setThemeMode = (mode: 'dark' | 'light') => {
+    if (viewRole === 'super_admin') {
+      setAdminThemeMode(mode);
+    } else {
+      setTenantThemeMode(mode);
+      try {
+        localStorage.setItem('adegasaas_tenant_theme_mode', mode);
+      } catch { }
+      if (currentTenant) {
+        updateTenant(currentTenant.id, {
+          branding: {
+            ...currentTenant.branding,
+            colorMode: mode,
+          },
+        });
+      }
+    }
   };
 
-  const toggleThemeMode = () => {};
+  const toggleThemeMode = () => {
+    setThemeMode(themeMode === 'dark' ? 'light' : 'dark');
+  };
 
   // Isolated products, orders, expenses and movements for currentTenant
   const tenantProducts = allProducts.filter((p) => p.tenantId === currentTenant?.id);

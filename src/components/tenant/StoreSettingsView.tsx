@@ -746,42 +746,56 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Tema Escuro */}
                   <button
                     type="button"
                     onClick={() => setThemeMode('dark')}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                    className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
                       themeMode === 'dark'
-                        ? 'border-sky-500 bg-[#0C2340]/40 ring-1 ring-sky-500/30'
-                        : 'border-[#1C2631] bg-[#121820]'
+                        ? 'border-sky-500 bg-sky-500/10'
+                        : isLight ? 'bg-slate-50 border-slate-200 hover:border-slate-300' : 'bg-[#121820] border-[#1C2631] hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Moon className="w-4 h-4 text-sky-400" />
-                      <div>
-                        <span className="font-bold text-xs text-white block">Tema Escuro (Dark Carbon)</span>
-                        <span className="text-[10px] text-slate-400">Recomendado para balcão e menor cansaço</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <Moon className={`w-4 h-4 ${themeMode === 'dark' ? 'text-sky-500' : 'text-slate-400'}`} />
+                        <span className={`font-bold text-xs ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                          Tema Escuro (Dark Carbon)
+                        </span>
                       </div>
+                      {themeMode === 'dark' && (
+                        <CheckCircle2 className="w-4 h-4 text-sky-500" />
+                      )}
                     </div>
-                    {themeMode === 'dark' && <CheckCircle2 className="w-4 h-4 text-sky-400" />}
+                    <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      Recomendado para balcão e menor cansaço visual.
+                    </p>
                   </button>
 
+                  {/* Tema Claro */}
                   <button
                     type="button"
                     onClick={() => setThemeMode('light')}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                    className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
                       themeMode === 'light'
-                        ? 'border-sky-500 bg-sky-50 ring-1 ring-sky-500/30 text-slate-900'
-                        : isLight ? 'bg-slate-50 border-slate-200' : 'border-[#1C2631] bg-[#121820]'
+                        ? 'border-sky-500 bg-sky-500/10'
+                        : isLight ? 'bg-slate-50 border-slate-200 hover:border-slate-300' : 'bg-[#121820] border-[#1C2631] hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Sun className="w-4 h-4 text-amber-500" />
-                      <div>
-                        <span className="font-bold text-xs block">Tema Claro (Clean Light)</span>
-                        <span className="text-[10px] text-slate-500">Visual clássico de escritório</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <Sun className={`w-4 h-4 ${themeMode === 'light' ? 'text-sky-500' : 'text-slate-400'}`} />
+                        <span className={`font-bold text-xs ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                          Tema Claro (Clean Light)
+                        </span>
                       </div>
+                      {themeMode === 'light' && (
+                        <CheckCircle2 className="w-4 h-4 text-sky-500" />
+                      )}
                     </div>
-                    {themeMode === 'light' && <CheckCircle2 className="w-4 h-4 text-sky-500" />}
+                    <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      Visual clássico e iluminado de escritório.
+                    </p>
                   </button>
                 </div>
               </div>

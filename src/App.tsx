@@ -51,13 +51,13 @@ const AppContent: React.FC = () => {
   const primaryColor = currentTenant?.branding?.primaryColor || '#0284C7';
   const accentColor = currentTenant?.branding?.accentColor || '#38BDF8';
 
-  // Separação de temas:
-  // No Painel Master: utiliza adminThemeMode (suporta alternar modo escuro / claro)
-  // No Painel do Lojista / Vitrine / Cadastro: fixado em modo claro
+  // Separação de temas sincronizada:
+  // No Painel Master: utiliza adminThemeMode
+  // No Painel do Lojista / Vitrine: utiliza themeMode
   const effectiveThemeMode = 
     viewRole === 'super_admin'
       ? adminThemeMode
-      : 'light';
+      : themeMode;
 
   // Sincroniza classes no elemento <html> e <body> para garantir o tema correto
   React.useEffect(() => {
