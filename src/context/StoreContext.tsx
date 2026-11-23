@@ -426,6 +426,20 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [viewRole, setViewRoleState] = useState<ViewRole>(() => {
     try {
       if (typeof window !== 'undefined') {
+        const path = window.location.pathname.toLowerCase();
+        if (
+          path === '/painel' || 
+          path.startsWith('/painel') || 
+          path === '/portal' || 
+          path.startsWith('/portal') || 
+          path === '/acesso_master' || 
+          path === '/admin' || 
+          window.location.search.toLowerCase().includes('portal=master') ||
+          window.location.search.toLowerCase().includes('portal=admin')
+        ) {
+          return 'super_admin';
+        }
+
         const allLoadedTenants = (() => {
           try {
             const saved = localStorage.getItem(STORAGE_KEYS.TENANTS);
@@ -846,7 +860,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         const slug = tenant?.slug || tenant?.id || 'loja';
 
         if (role === 'super_admin') {
-          window.history.pushState({}, '', '/portal');
+          window.history.pushState({}, '', '/painel');
         } else if (role === 'login_tenant') {
           window.history.pushState({}, '', '/acesso_lojista');
         } else if (role === 'register_tenant') {

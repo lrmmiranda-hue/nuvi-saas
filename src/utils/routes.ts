@@ -93,25 +93,22 @@ export function parseCurrentRoute(tenants: Tenant[]): RouteResolution {
   const lojaParam = urlParams.get('loja') || urlParams.get('vitrine');
   const painelParam = urlParams.get('painel');
 
-  if (portalParam === 'master' || portalParam === 'admin') {
-    return { role: 'super_admin', isMaster: true };
-  }
-
-  if (lojaParam) {
-    const matched = findTenantBySlugOrId(tenants, lojaParam);
-    return { role: 'storefront', tenantSlugOrId: matched ? matched.id : lojaParam, isMaster: false };
-  }
-
-  if (painelParam) {
-    const matched = findTenantBySlugOrId(tenants, painelParam);
-    return { role: 'tenant_admin', tenantSlugOrId: matched ? matched.id : painelParam, isMaster: false };
-  }
-
   // 2. Rotas Limpas
   const cleanPath = pathname.toLowerCase();
 
-  // Acesso Master do Dono da Plataforma (/portal ou /acesso_master)
-  if (cleanPath === '/portal' || cleanPath === '/acesso_master' || cleanPath === '/admin' || cleanPath === '/master') {
+  // Acesso Master Prioritário do Dono da Plataforma (/painel, /portal, /acesso_master, etc.)
+  if (
+    cleanPath === '/painel' || 
+    cleanPath.startsWith('/painel') || 
+    cleanPath === '/portal' || 
+    cleanPath.startsWith('/portal') || 
+    cleanPath === '/acesso_master' || 
+    cleanPath.startsWith('/acesso_master') ||
+    cleanPath === '/admin' || 
+    cleanPath === '/master' ||
+    portalParam === 'master' || 
+    portalParam === 'admin'
+  ) {
     return { role: 'super_admin', isMaster: true };
   }
 
@@ -146,7 +143,7 @@ export function parseCurrentRoute(tenants: Tenant[]): RouteResolution {
     const subRoute = parts[1] || '';
 
     // Ignora rotas especiais do sistema
-    if (!['acesso_master', 'acesso_lojista', 'cadastro', 'criar_loja'].includes(slug)) {
+    if (!['portal', 'acesso_master', 'acesso_lojista', 'cadastro', 'criar_loja', 'login', 'admin'].includes(slug)) {
       const found = findTenantBySlugOrId(tenants, slug);
       const targetSlug = found ? found.id : slug;
 
