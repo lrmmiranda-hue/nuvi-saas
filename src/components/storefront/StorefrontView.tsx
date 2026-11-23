@@ -209,172 +209,98 @@ export const StorefrontView: React.FC = () => {
   return (
     <div className="space-y-6 pb-28" style={{ '--brand-accent': brandAccent, '--brand-primary': brandPrimary } as React.CSSProperties}>
 
-      {/* Brand Hero Banner with Tenant Colors & Flyer Wallpaper */}
+      {/* Brand Hero Banner - Gold Luxury Geometric Sem Imagem com Animação Shimmer */}
       {(() => {
-        const lighting = currentTenant.branding.bannerLighting || 'dark_lights';
-        const isWhite = lighting === 'white_lights';
-        const isDarkLights = lighting === 'dark_lights';
-        const isNeutral = lighting === 'neutral';
+        const luxuryBg = isLight
+          ? `linear-gradient(135deg, #ffffff 0%, ${brandPrimary}0A 35%, #ffffff 70%, ${brandAccent}15 100%)`
+          : `linear-gradient(135deg, #09090b 0%, #141316 45%, ${brandPrimary}22 75%, #050507 100%)`;
 
-        let overlayBg = `linear-gradient(105deg, ${brandPrimary}F2 0%, ${brandPrimary}B3 50%, rgba(10, 10, 10, 0.88) 100%)`;
-        let overlayBoxShadow = 'none';
-
-        if (isNeutral) {
-          overlayBg = 'linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.75) 100%)';
-        } else if (isDarkLights) {
-          overlayBg = `
-            radial-gradient(circle at 82% 18%, ${brandAccent}45 0%, rgba(14, 165, 233, 0.25) 30%, transparent 65%),
-            radial-gradient(circle at 95% 82%, rgba(14, 165, 233, 0.20) 0%, transparent 45%),
-            linear-gradient(130deg, transparent 52%, rgba(255, 255, 255, 0.08) 68%, ${brandAccent}30 73%, transparent 84%),
-            linear-gradient(to right, 
-              rgba(8, 8, 8, 0.97) 0%, 
-              rgba(10, 10, 10, 0.92) 28%, 
-              rgba(10, 10, 10, 0.68) 50%, 
-              rgba(10, 10, 10, 0.22) 72%, 
-              rgba(5, 5, 5, 0.04) 100%
-            )
-          `;
-          overlayBoxShadow = 'none';
-        } else if (isWhite) {
-          overlayBg = `
-            radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.75) 0%, rgba(254, 243, 199, 0.35) 28%, transparent 62%),
-            radial-gradient(circle at 95% 82%, ${brandAccent}25 0%, transparent 45%),
-            linear-gradient(130deg, transparent 52%, rgba(255, 255, 255, 0.45) 68%, rgba(255, 250, 235, 0.65) 73%, transparent 84%),
-            linear-gradient(to right, 
-              rgba(255, 255, 255, 0.98) 0%, 
-              rgba(255, 255, 255, 0.95) 28%, 
-              rgba(255, 255, 255, 0.76) 50%, 
-              rgba(255, 255, 255, 0.28) 72%, 
-              rgba(255, 255, 255, 0.05) 100%
-            )
-          `;
-          overlayBoxShadow = 'none';
-        }
+        const luxuryBorder = `${brandAccent}${isLight ? '40' : '30'}`;
 
         return (
           <div
-            className={`rounded-3xl border-0 ring-0 shadow-2xl overflow-hidden relative mb-6 transition-all duration-300 ${
-              isWhite 
-                ? 'bg-white shadow-[0_15px_40px_-10px_rgba(0,0,0,0.08)]' 
-                : 'bg-neutral-950 shadow-2xl'
+            className={`rounded-3xl border shadow-xl relative mb-4 sm:mb-6 overflow-hidden transition-all duration-300 p-4 sm:p-6 md:p-8 ${
+              isLight ? 'bg-white text-slate-900' : 'bg-neutral-950 text-white'
             }`}
+            style={{
+              background: luxuryBg,
+              borderColor: luxuryBorder,
+            }}
           >
-            {/* Background Wallpaper Flyer Layer com animação cinematográfica contínua */}
-            {currentTenant.branding.bannerUrl ? (
-              <div
-                className={`absolute inset-0 bg-cover bg-center animate-banner-kenburns ${
-                  (isWhite || isDarkLights) ? 'contrast-[1.10] saturate-[1.15]' : ''
-                }`}
-                style={{ backgroundImage: `url(${currentTenant.branding.bannerUrl})` }}
-              />
-            ) : (
-              <div
-                className="absolute inset-0 transition-colors"
-                style={{ backgroundColor: isWhite ? '#ffffff' : (currentTenant.branding.primaryColor || '#881337') }}
-              />
-            )}
+            {/* 1. Malha Geométrica Pontilhada de Luxo */}
+            <div 
+              className="absolute inset-0 pointer-events-none" 
+              style={{ 
+                backgroundImage: `radial-gradient(circle, ${brandAccent} 1px, transparent 1px)`, 
+                backgroundSize: '20px 20px',
+                opacity: isLight ? 0.12 : 0.18
+              }} 
+            />
 
-            {/* EFEITOS ESPECIAIS DE LUZ CINEMATOGRÁFICA SOBRE A IMAGEM ESCOLHIDA */}
-            {/* 1. Feixe de Luz / Varredura Luminosa Periódica (Light Sweep) */}
+            {/* 2. Feixe de Luz Shimmer Metálico Dinâmico na Diagonal */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
               <div 
-                className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
+                className="w-1/2 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-55"
                 style={{
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 35%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.15) 65%, transparent 100%)'
+                  background: `linear-gradient(90deg, transparent 0%, ${brandAccent}15 30%, rgba(255, 255, 255, 0.70) 50%, ${brandAccent}20 70%, transparent 100%)`
                 }}
               />
             </div>
 
-            {/* 2. Spotlight Pulsante de Iluminação de Estúdio no canto superior direito */}
+            {/* 3. Spotlight de Iluminação Ambiente no Canto Superior */}
             <div 
-              className="pointer-events-none absolute -top-16 -right-16 w-80 sm:w-96 h-80 sm:h-96 rounded-full blur-2xl animate-banner-spotlight opacity-75 mix-blend-screen z-10"
+              className="pointer-events-none absolute -top-16 -right-16 w-80 sm:w-96 h-80 sm:h-96 rounded-full blur-3xl opacity-35 mix-blend-screen z-10"
               style={{
-                background: `radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(254, 240, 138, 0.45) 30%, ${brandAccent}45 60%, transparent 80%)`
+                background: `radial-gradient(circle, ${brandAccent}40 0%, ${brandPrimary}25 50%, transparent 75%)`
               }}
             />
 
-            {/* 3. Brilho Ambiente no canto inferior */}
-            <div 
-              className="pointer-events-none absolute -bottom-10 left-1/4 w-72 h-36 rounded-full blur-3xl opacity-35 mix-blend-screen z-10"
-              style={{
-                background: `radial-gradient(ellipse, ${brandAccent}70 0%, transparent 70%)`
-              }}
-            />
-
-            {/* Efeitos Especiais de Luzes Focadas e Feixes quando isWhite */}
-            {isWhite && (
-              <>
-                {/* Feixe de Luz Angular / Prisma translúcido sobre a imagem */}
-                <div 
-                  className="pointer-events-none absolute inset-0 opacity-40 mix-blend-overlay"
-                  style={{
-                    background: 'linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.8) 65%, transparent 80%)'
-                  }}
-                />
-              </>
-            )}
-
-            {/* Efeitos Especiais de Luzes Focadas e Feixes quando isDarkLights */}
-            {isDarkLights && (
-              <>
-                {/* Feixe de Luz Angular / Cyber Streak translúcido */}
-                <div 
-                  className="pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay"
-                  style={{
-                    background: 'linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.5) 65%, transparent 80%)'
-                  }}
-                />
-              </>
-            )}
-
-            {/* Soft Contrast Gradient Layer */}
-            <div
-              className={`relative flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 ${
-                isGastronomy || isMenuOnly ? 'p-4 sm:p-6 md:p-8' : 'p-4 sm:p-8 md:p-10'
-              }`}
-              style={{
-                background: overlayBg,
-                boxShadow: overlayBoxShadow,
-              }}
-            >
+            {/* Conteúdo Principal do Banner (Totalmente Adaptado para Celular & Desktop) */}
+            <div className="relative z-20 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+              
+              {/* Lado Esquerdo: Identidade da Loja */}
               <div className="space-y-2 sm:space-y-3 max-w-2xl">
-                {/* Notice Badge & Horário: Removido em cardápios digitais para deixar limpo */}
-                {!isGastronomy && !isMenuOnly && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span
-                      className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border backdrop-blur-sm shadow-xs inline-flex items-center gap-1.5 transition-colors"
-                      style={{
-                        backgroundColor: `${brandAccent}28`,
-                        color: brandAccent,
-                        borderColor: `${brandAccent}60`,
-                      }}
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      {currentTenant.branding.badgeNotice || 'Bebidas no ponto certo'}
-                    </span>
+                
+                {/* Status Aberto/Fechado + Selo Destaque */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-2xs flex items-center gap-1.5 ${
+                      currentTenant.isOpen
+                        ? isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                        : isLight ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${currentTenant.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                    {currentTenant.isOpen ? 'Aberto Agora' : 'Fechado no momento'}
+                  </span>
 
-                    {/* Open / Closed Status */}
-                    <span
-                      className={`text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${currentTenant.isOpen
-                          ? isWhite ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                          : isWhite ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                        }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${currentTenant.isOpen ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                      {currentTenant.isOpen ? 'Aberto Agora' : 'Fechado no momento'}
-                    </span>
-                  </div>
-                )}
+                  <span
+                    className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md border"
+                    style={{
+                      backgroundColor: `${brandAccent}15`,
+                      color: isLight ? '#92400e' : brandAccent,
+                      borderColor: `${brandAccent}35`,
+                    }}
+                  >
+                    ★ {currentTenant.businessSegment === 'pizzaria' ? 'Pizzaria & Forno' : currentTenant.businessSegment === 'adega' ? 'Adega & Bebidas' : 'Seleção Especial'}
+                  </span>
+                </div>
 
-                {/* LOGO, NOME E SLOGAN (CLICÁVEIS PARA ABRIR INFORMAÇÕES DA LOJA) */}
+                {/* Logo, Nome e Slogan (Toque para Ver Detalhes) */}
                 <div 
                   onClick={() => setIsStoreInfoModalOpen(true)}
-                  className="flex items-center gap-3.5 sm:gap-4 pt-1 cursor-pointer group select-none transition-all active:scale-[0.99]"
+                  className="flex items-start sm:items-center gap-3 sm:gap-4 pt-1 cursor-pointer group select-none transition-all active:scale-[0.99]"
                   title="Toque para ver horários, cartões aceitos e endereço do estabelecimento"
                 >
+                  {/* Logo Box Luxo */}
                   {currentTenant.branding.logoUrl ? (
-                    <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl p-1.5 border shrink-0 shadow-md transition-transform group-hover:scale-105 ${isWhite ? 'bg-white/95 border-slate-300 shadow-sm' : 'bg-black/60 border-white/20'
-                      }`}>
+                    <div 
+                      className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl p-1.5 border shrink-0 shadow-lg transition-transform group-hover:scale-105"
+                      style={{
+                        backgroundColor: isLight ? '#ffffff' : 'rgba(10, 10, 10, 0.75)',
+                        borderColor: `${brandAccent}40`,
+                      }}
+                    >
                       <img
                         src={currentTenant.branding.logoUrl}
                         alt={currentTenant.name}
@@ -383,101 +309,187 @@ export const StorefrontView: React.FC = () => {
                     </div>
                   ) : (
                     <div
-                      className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center font-bold text-xl sm:text-2xl shadow-md shrink-0 border transition-transform group-hover:scale-105 ${isWhite ? 'bg-slate-900 text-white border-slate-700' : 'text-white border-white/20'
-                        }`}
-                      style={!isWhite ? { backgroundColor: brandAccent } : {}}
+                      className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl flex items-center justify-center font-black text-2xl sm:text-3xl shadow-lg shrink-0 border-2 transition-transform group-hover:scale-105 text-white"
+                      style={{ 
+                        backgroundColor: brandPrimary,
+                        borderColor: brandAccent,
+                        boxShadow: `0 8px 20px -4px ${brandPrimary}50`
+                      }}
                     >
                       {currentTenant.name.charAt(0)}
                     </div>
                   )}
 
+                  {/* Textos da Loja */}
                   <div>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <h1 
-                        className="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-sm group-hover:underline flex items-center gap-1.5"
-                        style={{ color: isWhite ? '#0f172a' : '#ffffff' }}
-                      >
-                        <span>{currentTenant.name}</span>
-                        <Info className="w-4 h-4 sm:w-5 sm:h-5 opacity-80 group-hover:opacity-100 shrink-0 transition-opacity" style={{ color: brandAccent }} />
-                      </h1>
-                    </div>
+                    <h1 
+                      className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight group-hover:underline flex items-center gap-1.5"
+                      style={{ color: isLight ? '#0f172a' : '#ffffff' }}
+                    >
+                      <span>{currentTenant.name}</span>
+                      <Info className="w-4 h-4 opacity-80 group-hover:opacity-100 shrink-0 transition-opacity" style={{ color: brandAccent }} />
+                    </h1>
+
                     <p 
-                      className="text-xs sm:text-sm mt-0.5 font-medium drop-shadow-xs"
-                      style={{ color: isWhite ? '#334155' : '#e2e8f0' }}
+                      className="text-xs sm:text-sm mt-0.5 font-medium line-clamp-2 max-w-lg"
+                      style={{ color: isLight ? '#475569' : '#d4d4d8' }}
                     >
-                      {currentTenant.slogan || (isGastronomy ? 'Cardápio Digital Oficial' : 'Sua distribuidora com entrega rápida e os melhores rótulos')}
+                      {currentTenant.slogan || 'Massa artesanal, borda recheada e forno à lenha todos os dias'}
                     </p>
-                    <span 
-                      className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold mt-1 px-2.5 py-0.5 rounded-full backdrop-blur-sm border shadow-xs group-hover:brightness-110 transition-all"
-                      style={{
-                        backgroundColor: `${brandAccent}25`,
-                        color: isWhite ? '#0f172a' : brandAccent,
-                        borderColor: `${brandAccent}50`,
-                      }}
-                    >
-                      <Clock className="w-3 h-3 shrink-0" style={{ color: brandAccent }} />
-                      <span>Ver horários, endereço e cartões ℹ️</span>
-                    </span>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <span 
+                        className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-2xs group-hover:brightness-110 transition-all"
+                        style={{
+                          backgroundColor: `${brandAccent}15`,
+                          color: isLight ? '#0f172a' : brandAccent,
+                          borderColor: `${brandAccent}40`,
+                        }}
+                      >
+                        <Clock className="w-3 h-3 shrink-0" style={{ color: brandAccent }} />
+                        <span>Ver horários, endereço e cartões ℹ️</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Address & Operational Info: Removido em cardápios digitais para deixar visual limpo */}
-                {!isGastronomy && !isMenuOnly && (
-                  <div 
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs pt-0.5 drop-shadow-xs"
-                    style={{ color: isWhite ? '#475569' : '#cbd5e1' }}
-                  >
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color: brandAccent }} />
-                      {currentTenant.address.street}, {currentTenant.address.number} · {currentTenant.address.neighborhood}
-                    </span>
-                    <span>·</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: brandAccent }} />
-                      {currentTenant.address.openingHours}
-                    </span>
-                    {!isTableActive && currentTenant.address.freeDeliveryThreshold && (
-                      <>
-                        <span>·</span>
-                        <span className="font-bold" style={{ color: brandAccent }}>
-                          Frete Grátis acima de R$ {currentTenant.address.freeDeliveryThreshold.toFixed(2)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                )}
               </div>
 
-              {/* Header Actions: WhatsApp e Sacola */}
-              <div className="flex items-center gap-2 shrink-0">
-
-                {/* Ícone WhatsApp */}
-                {!isGastronomy && !isMenuOnly && currentTenant.whatsapp.supportLinkEnabled && (
-                  <a
-                    href={generateWhatsAppDirectChatUrl(currentTenant)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Falar no WhatsApp da Loja"
-                    className="p-2 sm:p-2.5 rounded-xl font-bold shadow-md transition-all active:scale-95 bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer flex items-center justify-center"
+              {/* Lado Direito: Card Dinâmico (Escolha Mesa no Salão vs Tempo Médio no Delivery) + Ações */}
+              <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-2 sm:pt-0">
+                
+                {/* CARD DINÂMICO SOLICITADO: MESA NO SALÃO vs TEMPO MÉDIO NO DELIVERY */}
+                {isTableActive ? (
+                  /* Modo Estabelecimento / Salão -> Escolha sua Mesa */
+                  <div
+                    onClick={() => {
+                      setTempTableInput(tableNumber || '');
+                      setIsTableSelectorOpen(true);
+                    }}
+                    className="cursor-pointer group rounded-2xl p-3 sm:p-3.5 border backdrop-blur-md transition-all active:scale-[0.98] shadow-sm hover:brightness-105 flex items-center justify-between gap-3 min-w-[210px]"
+                    style={{
+                      borderColor: `${brandAccent}45`,
+                      backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
+                    }}
+                    title="Toque para definir ou alterar o número da sua mesa"
                   >
-                    <MessageSquare className="w-4 h-4" />
-                  </a>
+                    <div className="flex items-center gap-2.5">
+                      <div 
+                        className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0 transition-transform group-hover:scale-105"
+                        style={{ backgroundColor: brandPrimary }}
+                      >
+                        <UtensilsCrossed className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider block opacity-75 flex items-center gap-1" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          No Estabelecimento
+                        </span>
+                        <span className="text-xs sm:text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                          {tableNumber ? (
+                            <>Mesa <span style={{ color: brandPrimary }}>{tableNumber.replace(/[^0-9]/g, '') || tableNumber}</span></>
+                          ) : (
+                            <>Escolha sua Mesa ➔</>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {tableOrdersTotal > 0 && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsTableOrdersModalOpen(true);
+                          }}
+                          className="px-2.5 py-1 rounded-xl text-[11px] font-black text-white shadow-sm flex items-center gap-1 transition-all hover:opacity-90 active:scale-95"
+                          style={{ backgroundColor: brandPrimary }}
+                          title="Ver conta da comanda"
+                        >
+                          <ReceiptText className="w-3.5 h-3.5" />
+                          <span>R$ {tableOrdersTotal.toFixed(2)}</span>
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        className="px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-colors shadow-2xs group-hover:opacity-90"
+                        style={{
+                          borderColor: `${brandAccent}50`,
+                          color: isLight ? brandPrimary : '#ffffff',
+                          backgroundColor: isLight ? '#ffffff' : 'rgba(255,255,255,0.08)'
+                        }}
+                      >
+                        {tableNumber ? 'Trocar' : 'Informar'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Modo Delivery -> Tempo Médio de Entrega */
+                  <div
+                    className="rounded-2xl p-3 sm:p-3.5 border backdrop-blur-md transition-all shadow-sm flex items-center justify-between gap-3 min-w-[200px]"
+                    style={{
+                      borderColor: `${brandAccent}45`,
+                      backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
+                    }}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div 
+                        className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
+                        style={{ backgroundColor: brandPrimary }}
+                      >
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider block opacity-75" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
+                          Tempo Médio
+                        </span>
+                        <span className="text-xs sm:text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                          {currentTenant.address?.deliveryEstimatedTime || '25 - 40 min'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <span 
+                      className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0"
+                      style={{
+                        backgroundColor: `${brandAccent}15`,
+                        borderColor: `${brandAccent}35`,
+                        color: isLight ? '#92400e' : brandAccent
+                      }}
+                    >
+                      Delivery
+                    </span>
+                  </div>
                 )}
 
-                {/* Ícone Sacola com Contador Badge */}
-                {!isMenuOnly && (
+                {/* Ações Rápidas: WhatsApp e Sacola de Compras */}
+                <div className="flex items-center justify-end gap-2 shrink-0">
+                  {/* WhatsApp */}
+                  {currentTenant.whatsapp?.supportLinkEnabled && (
+                    <a
+                      href={generateWhatsAppDirectChatUrl(currentTenant)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Falar no WhatsApp da Loja"
+                      className="p-2.5 rounded-xl font-bold shadow-md transition-all active:scale-95 bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer flex items-center justify-center"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                    </a>
+                  )}
+
+                  {/* Sacola de Compras */}
                   <button
                     type="button"
                     onClick={() => setIsCartOpen(true)}
                     title="Ver Sacola de Compras"
                     style={{
-                      backgroundColor: isWhite ? '#ffffff' : 'rgba(0, 0, 0, 0.75)',
-                      color: isWhite ? '#0f172a' : '#ffffff',
-                      borderColor: isWhite ? '#cbd5e1' : 'rgba(255, 255, 255, 0.25)',
+                      backgroundColor: isLight ? '#ffffff' : 'rgba(15, 15, 18, 0.85)',
+                      color: isLight ? '#0f172a' : '#ffffff',
+                      borderColor: `${brandAccent}45`,
                     }}
-                    className={`relative p-2 sm:p-2.5 rounded-xl font-bold shadow-md transition-all cursor-pointer border flex items-center justify-center ${
-                      isWhite ? 'hover:bg-slate-100' : 'hover:bg-black/90'
-                    }`}
+                    className="relative p-2.5 rounded-xl font-bold shadow-md transition-all cursor-pointer border flex items-center justify-center hover:opacity-90 active:scale-95"
                   >
                     <ShoppingBag className="w-4 h-4 shrink-0" style={{ color: brandAccent }} />
                     {totalCartItems > 0 && (
@@ -492,8 +504,10 @@ export const StorefrontView: React.FC = () => {
                       </span>
                     )}
                   </button>
-                )}
+                </div>
+
               </div>
+
             </div>
           </div>
         );
