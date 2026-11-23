@@ -122,6 +122,7 @@ interface StoreContextType {
   authenticatedTenantId: string | null;
   notFoundSlug: string;
   setNotFoundSlug: (slug: string) => void;
+  isInitialSyncDone: boolean;
   isTenantAuthenticated: boolean;
   loginTenant: (identifier: string, pass: string) => boolean;
   logoutTenant: () => void;
@@ -413,6 +414,18 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } catch {
       return '';
     }
+  });
+
+  // Flag de carregamento inicial do Firestore (evita tela preta ou falso 404 no reload)
+  const [isInitialSyncDone, setIsInitialSyncDone] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.TENANTS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return true;
+      }
+    } catch { }
+    return false;
   });
 
   // Active Tenant (detectado de forma inteligente por Rota Limpa ou Parâmetro em todos os tenants criados)
@@ -772,8 +785,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     // 1. Escuta Lojas em Tempo Real
     const unsubTenants = listenToTenants((remoteTenants) => {
+      setIsInitialSyncDone(true);
       if (remoteTenants && remoteTenants.length > 0) {
         setTenants(remoteTenants);
+        try {
+          localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(remoteTenants));
+        } catch { }
 
         // Se a rota na URL for de uma loja específica, sincroniza o currentTenantId imediatamente com a loja encontrada
         try {
@@ -2254,6 +2271,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         authenticatedTenantId,
         notFoundSlug,
         setNotFoundSlug,
+        isInitialSyncDone,
         isTenantAuthenticated,
         loginTenant,
         logoutTenant,

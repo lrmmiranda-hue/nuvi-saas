@@ -28,6 +28,7 @@ const AppContent: React.FC = () => {
     isMasterAuthenticated,
     authenticatedTenantId,
     notFoundSlug,
+    isInitialSyncDone,
   } = useStore();
 
   const [isNewTenantModalOpen, setIsNewTenantModalOpen] = useState(false);
@@ -99,6 +100,17 @@ const AppContent: React.FC = () => {
     return (
       <div className="min-h-screen light bg-slate-50">
         <MasterLoginView />
+      </div>
+    );
+  }
+
+  // Enquanto sincroniza os dados do Firestore no primeiro carregamento/reload (F5),
+  // exibe tela de carregamento suave em vez de tela escura ou falso 404
+  if (!isInitialSyncDone && !currentTenant && (viewRole === 'tenant_admin' || viewRole === 'storefront' || viewRole === 'not_found')) {
+    return (
+      <div className="min-h-screen light bg-[#F8FAFC] flex flex-col items-center justify-center space-y-4 px-4 text-center">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-sm font-semibold text-slate-600">Carregando dados da loja...</p>
       </div>
     );
   }
