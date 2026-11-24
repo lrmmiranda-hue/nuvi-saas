@@ -974,7 +974,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // 4. Escuta Configurações Globais do SaaS em Tempo Real
     const unsubConfig = listenToGlobalConfig((remoteConfig) => {
       if (remoteConfig) {
-        setGlobalConfigState(remoteConfig);
+        const mergedPlans = DEFAULT_GLOBAL_CONFIG.plans.map(defPlan => {
+          const existing = remoteConfig.plans?.find((p: any) => p.id === defPlan.id);
+          return existing ? { ...defPlan, ...existing } : defPlan;
+        });
+        setGlobalConfigState({
+          ...DEFAULT_GLOBAL_CONFIG,
+          ...remoteConfig,
+          plans: mergedPlans
+        });
       }
     });
 

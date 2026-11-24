@@ -68,7 +68,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Os 5 Planos Oficiais do Nuvi SaaS com preços integrados às configurações globais
+  // Os 5 Planos Oficiais do Nuvi SaaS com preços integrados às configurações globais (filtrados pelos que estão ativos no Master)
   const officialNuviPlans = [
     {
       id: 'plan_cardapio',
@@ -120,9 +120,21 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
       description: 'A solução definitiva sem limites: Frente de Caixa (PDV) + Vitrine Web + Estoque Automático + Delivery + Gestão Financeira.',
       icon: '👑'
     }
-  ];
+  ].filter(p => {
+    const configPlan = globalConfig?.plans?.find(cp => cp.id === p.id);
+    return configPlan ? configPlan.active !== false : true;
+  });
 
-  const currentSelectedPlan = officialNuviPlans.find(p => p.id === selectedPlanId) || officialNuviPlans[3];
+  const currentSelectedPlan = officialNuviPlans.find(p => p.id === selectedPlanId) || officialNuviPlans[0] || {
+    id: 'plan_nuvi_pro',
+    tenantPlan: 'hibrido' as const,
+    name: 'Nuvi Pro Total (Completo)',
+    badge: 'Mais Recomendado',
+    tag: 'Tudo Incluso',
+    price: 199.90,
+    description: 'A solução definitiva sem limites.',
+    icon: '👑'
+  };
 
   // Lista de ramos filtrados para a busca no celular (Imagem 2)
   const filteredBranches = BUSINESS_SEGMENTS.filter(seg =>
@@ -715,6 +727,52 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* 3. Seleção do Plano Ativo para Teste Gratuito */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className={`block text-xs font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                    3. Escolha seu Plano ({officialNuviPlans.length} opções disponíveis) *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsPlansInfoModalOpen(true)}
+                    className="text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Info className="w-3.5 h-3.5 text-sky-500" />
+                    <span>Comparar planos</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  {officialNuviPlans.map((plan) => {
+                    const isSelected = selectedPlanId === plan.id;
+                    return (
+                      <button
+                        key={plan.id}
+                        type="button"
+                        onClick={() => setSelectedPlanId(plan.id)}
+                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
+                          isSelected
+                            ? 'border-sky-500 bg-sky-500/10 ring-2 ring-sky-500/25'
+                            : isLight
+                            ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
+                            : 'bg-[#121820] hover:bg-[#182230] border-[#1C2631] text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-base">{plan.icon}</span>
+                          <span className="text-xs font-black text-sky-500">
+                            R$ {plan.price.toFixed(2).replace('.', ',')}
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold truncate block">{plan.name}</span>
+                        <span className="text-[10px] text-slate-400 truncate block">{plan.tag}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

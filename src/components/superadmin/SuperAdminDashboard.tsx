@@ -686,7 +686,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
               <tbody className={`divide-y ${
                 themeMode === 'light' ? 'divide-slate-200' : 'divide-[#1C2631]'
               }`}>
-                {filteredTenants.map((tenant) => {
+                {filteredTenants.map((tenant, index) => {
                   const subInfo = getTenantSubscriptionInfo(tenant);
                   const isMonthly = (tenant.billingType || 'mensal') === 'mensal';
                   const segConfig = tenant.businessSegment ? getSegmentById(tenant.businessSegment) : undefined;
@@ -744,10 +744,10 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                         </div>
                       </td>
 
-                      {/* 3. Plano Contratado */}
+                      {/* 3. Plano Contratado (5 Opções Oficiais Sem Duplicidade) */}
                       <td className="py-3 px-3.5">
                         <select
-                          value={tenant.plan}
+                          value={tenant.plan === 'hibrido' ? 'starter' : tenant.plan === 'enterprise' ? 'pro' : tenant.plan}
                           onChange={(e) => handleChangeTenantPlan(tenant.id, e.target.value as any)}
                           className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             themeMode === 'light'
@@ -759,13 +759,11 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                           <option value="balcao_estoque">📦 Balcão & Estoque [Sem Vitrine] (R$ 69,90)</option>
                           <option value="balcao">⚡ Balcão & PDV (R$ 89,90)</option>
                           <option value="starter">🚚 Delivery & Estoque (R$ 139,90)</option>
-                          <option value="hibrido">🚚 Delivery & Estoque (R$ 139,90)</option>
                           <option value="pro">👑 Nuvi Pro Total (R$ 199,90)</option>
-                          <option value="enterprise">👑 Nuvi Pro Total (R$ 199,90)</option>
                         </select>
                       </td>
 
-                      {/* 4. Renovação & Vencimento (Compacto com Janelinha ao Passar o Mouse) */}
+                      {/* 4. Renovação & Vencimento (Janelinha Acima de Tudo na Frente) */}
                       <td className="py-3 px-3.5">
                         <div className="relative group inline-block">
                           {/* Badge Compacto */}
@@ -788,45 +786,51 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                             )}
                           </div>
 
-                          {/* Janelinha Flutuante de Detalhes no Hover */}
-                          <div className={`invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 z-50 w-64 p-3.5 rounded-2xl border shadow-2xl backdrop-blur-md pointer-events-none text-left ${
-                            themeMode === 'light' ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#121922] border-[#222E3C] text-white'
+                          {/* Janelinha Flutuante Acima de Tudo na Frente (z-[9999] e fundo 100% nítido) */}
+                          <div className={`invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150 absolute left-0 ${
+                            index === 0 ? 'top-full mt-2' : 'bottom-full mb-2'
+                          } z-[9999] w-72 sm:w-80 p-4 rounded-2xl border-2 shadow-[0_25px_60px_rgba(0,0,0,0.85)] pointer-events-none text-left drop-shadow-2xl ${
+                            themeMode === 'light' 
+                              ? 'bg-white border-sky-400 text-slate-900 shadow-slate-400/40' 
+                              : 'bg-[#0B0F14] border-sky-500/60 text-white'
                           }`}>
-                            <div className="space-y-1.5 text-xs">
-                              <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-neutral-800">
-                                <span className="font-extrabold flex items-center gap-1.5">
-                                  <Calendar className="w-3.5 h-3.5 text-sky-500" />
+                            <div className="space-y-2 text-xs">
+                              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-neutral-800">
+                                <span className="font-extrabold flex items-center gap-1.5 text-sm text-sky-500">
+                                  <Calendar className="w-4 h-4 text-sky-500" />
                                   <span>Assinatura & Prazos</span>
                                 </span>
-                                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${
-                                  subInfo.isExpired ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'
+                                <span className={`text-[11px] font-black px-2 py-0.5 rounded-full ${
+                                  subInfo.isExpired 
+                                    ? 'bg-rose-500/20 text-rose-500 border border-rose-500/30' 
+                                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                 }`}>
                                   {subInfo.isExpired ? 'Vencida' : 'Regular'}
                                 </span>
                               </div>
 
                               <div className="flex items-center justify-between">
-                                <span className="text-slate-400 text-[11px]">Vencimento:</span>
-                                <span className="font-mono font-bold">
+                                <span className="text-slate-400 text-xs">Vencimento da Loja:</span>
+                                <span className="font-mono font-bold text-xs">
                                   {!isNaN(subInfo.expDate.getTime()) ? subInfo.expDate.toLocaleDateString('pt-BR') : 'A definir'}
                                 </span>
                               </div>
 
                               <div className="flex items-center justify-between">
-                                <span className="text-slate-400 text-[11px]">Dias de Acesso:</span>
-                                <span className="font-bold text-sky-500">
+                                <span className="text-slate-400 text-xs">Tempo Restante:</span>
+                                <span className={`font-black text-xs ${subInfo.diffDays < 0 ? 'text-rose-400' : 'text-sky-400'}`}>
                                   {subInfo.diffDays >= 0 ? `${subInfo.diffDays} dias restantes` : `Vencido há ${Math.abs(subInfo.diffDays)} dias`}
                                 </span>
                               </div>
 
                               <div className="flex items-center justify-between">
-                                <span className="text-slate-400 text-[11px]">Cobrança:</span>
-                                <span className="font-semibold">{isMonthly ? 'Mensal Recorrente' : 'Pré-Pago Manual'}</span>
+                                <span className="text-slate-400 text-xs">Modelo de Cobrança:</span>
+                                <span className="font-bold text-xs">{isMonthly ? 'Mensal Recorrente' : 'Pré-Pago Manual'}</span>
                               </div>
 
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-400 text-[11px]">Valor:</span>
-                                <span className="font-black text-emerald-500">
+                              <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-neutral-800">
+                                <span className="text-slate-400 text-xs">Valor do Plano:</span>
+                                <span className="font-black text-emerald-400 text-sm">
                                   R$ {subInfo.planPrice.toFixed(2).replace('.', ',')}/mês
                                 </span>
                               </div>

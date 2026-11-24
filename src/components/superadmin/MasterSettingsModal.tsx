@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useStore } from '../../context/StoreContext';
+import { useStore, DEFAULT_GLOBAL_CONFIG } from '../../context/StoreContext';
 import { BUSINESS_SEGMENTS } from '../../data/businessSegments';
 import { BusinessSegmentType, SaaSFeaturePermissions, SaaSSubscriptionPlan, SaaSPromoBannerTheme } from '../../types';
 import { PromoFlyerBanner, PROMO_BANNER_THEMES } from '../common/PromoFlyerBanner';
@@ -71,7 +71,11 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
 
   useEffect(() => {
     if (globalConfig.plans) {
-      setPlansState(globalConfig.plans);
+      const merged = DEFAULT_GLOBAL_CONFIG.plans.map(defPlan => {
+        const existing = globalConfig.plans.find((p: any) => p.id === defPlan.id);
+        return existing ? { ...defPlan, ...existing } : defPlan;
+      });
+      setPlansState(merged);
     }
   }, [globalConfig.plans]);
 
@@ -202,14 +206,14 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
       
-      <div className={`relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden transition-all ${
+      <div className={`relative w-full max-w-6xl max-h-[92vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden transition-all ${
         isLight 
           ? 'bg-white border-slate-200 text-slate-800' 
           : 'bg-[#0E1318] border-sky-950/70 text-slate-100'
       }`}>
         
         {/* Header do Modal com Ícone de Engrenagem */}
-        <div className={`px-6 py-5 border-b flex items-center justify-between ${
+        <div className={`px-6 py-4 border-b flex items-center justify-between ${
           isLight ? 'bg-slate-50/90 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
         }`}>
           <div className="flex items-center gap-3">
@@ -226,7 +230,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Gerencie permissões de módulos, preços dos 4 planos de venda e banners promocionais.
+                Gerencie permissões de módulos, preços dos 5 planos de venda e banners promocionais.
               </p>
             </div>
           </div>
@@ -244,12 +248,12 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
         </div>
 
         {/* Abas Internas de Navegação */}
-        <div className={`px-6 pt-3 border-b flex items-center gap-2 overflow-x-auto ${
+        <div className={`px-6 pt-2 border-b flex items-center gap-2 overflow-x-auto ${
           isLight ? 'bg-white border-slate-200' : 'bg-[#0E1318] border-[#1C2631]'
         }`}>
           <button
             onClick={() => setActiveTab('permissions')}
-            className={`flex items-center gap-2 px-4 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'permissions'
                 ? 'border-sky-500 text-sky-600 dark:text-sky-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -261,14 +265,14 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
 
           <button
             onClick={() => setActiveTab('plans')}
-            className={`flex items-center gap-2 px-4 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'plans'
                 ? 'border-sky-500 text-sky-600 dark:text-sky-400'
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <DollarSign className="w-4 h-4" />
-            <span>Preços dos 4 Planos de Venda</span>
+            <span>Preços dos 5 Planos de Venda</span>
           </button>
 
           <button
@@ -569,129 +573,119 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
           )}
 
           {/* ============================================================ */}
-          {/* ABA 2: PREÇOS DAS 4 OPÇÕES DE ASSINATURA                      */}
+          {/* ABA 2: PREÇOS DAS 5 OPÇÕES DE ASSINATURA                      */}
           {/* ============================================================ */}
           {activeTab === 'plans' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
-                  Tabela Oficial de Preços dos Planos Nuvi SaaS
+                  Tabela Oficial de Preços dos 5 Planos Nuvi SaaS
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Defina os valores mensais e ative ou configure os módulos e permissões que cada plano terá direito.
                 </p>
               </div>
 
-              {/* Grid dos Planos */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Grid dos 5 Planos Compactos */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5">
                 {plansState.map((plan, index) => (
                   <div
                     key={plan.id}
-                    className={`p-5 rounded-2xl border flex flex-col justify-between transition-all ${
+                    className={`p-3.5 rounded-2xl border flex flex-col justify-between transition-all ${
                       isLight 
-                        ? 'bg-slate-50/70 border-slate-200 hover:border-sky-300' 
+                        ? 'bg-slate-50/80 border-slate-200 hover:border-sky-300' 
                         : 'bg-[#121820] border-[#1C2631] hover:border-sky-800'
                     }`}
                   >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 uppercase tracking-wider">
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 uppercase tracking-tight truncate max-w-[120px]">
                           Opção {index + 1} • {plan.badge || 'Plano'}
                         </span>
                         
                         {/* Botão Chave Liga/Desliga de Ativação do Plano */}
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[11px] font-bold ${
-                            plan.active 
-                              ? 'text-emerald-600 dark:text-emerald-400' 
-                              : 'text-slate-400 dark:text-slate-500'
-                          }`}>
-                            {plan.active ? 'Ativo no Cadastro' : 'Desativado'}
-                          </span>
+                        <div className="flex items-center gap-1">
                           <button
                             type="button"
                             onClick={() => handleTogglePlanActive(plan.id)}
-                            title={plan.active ? 'Clique para desativar esta opção no cadastro' : 'Clique para ativar esta opção no cadastro'}
-                            className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                            title={plan.active ? 'Ativo no Cadastro (clique para desativar)' : 'Desativado no Cadastro (clique para ativar)'}
+                            className={`relative w-8 h-4.5 rounded-full transition-colors cursor-pointer shrink-0 ${
                               plan.active ? 'bg-emerald-600' : 'bg-slate-400 dark:bg-neutral-700'
                             }`}
                           >
-                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                              plan.active ? 'translate-x-5' : 'translate-x-0'
+                            <span className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full bg-white transition-transform ${
+                              plan.active ? 'translate-x-3.5' : 'translate-x-0'
                             }`} />
                           </button>
                         </div>
                       </div>
 
                       <div>
-                        <h4 className="text-base font-extrabold text-slate-900 dark:text-white">
+                        <h4 className="text-xs font-black text-slate-900 dark:text-white leading-snug line-clamp-1" title={plan.name}>
                           {plan.name}
                         </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 h-7 leading-tight">
                           {plan.description}
                         </p>
                       </div>
 
-                      {/* Campo de Preço do Plano */}
-                      <div className="pt-2">
-                        <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                          Preço da Assinatura (R$):
+                      {/* Campo de Preço do Plano Compacto */}
+                      <div className="pt-1">
+                        <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-0.5">
+                          Assinatura Mensal:
                         </label>
-                        <div className="flex items-center gap-2">
-                          <span className="text-base font-black text-slate-500">R$</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-black text-slate-400">R$</span>
                           <input
                             type="number"
                             step="0.10"
                             min="0"
                             value={plan.price}
                             onChange={(e) => handlePlanPriceChange(plan.id, e.target.value)}
-                            className={`w-36 px-3 py-2 text-sm font-black rounded-xl border outline-none transition-all ${
+                            className={`w-20 px-2 py-1 text-xs font-black rounded-lg border outline-none transition-all ${
                               isLight 
-                                ? 'bg-white border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20' 
-                                : 'bg-[#0B0F12] border-[#1C2631] text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
+                                ? 'bg-white border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-1 focus:ring-sky-500/20' 
+                                : 'bg-[#0B0F12] border-[#1C2631] text-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500/20'
                             }`}
                           />
-                          <span className="text-xs text-slate-500 font-semibold">{plan.period}</span>
+                          <span className="text-[10px] text-slate-500 font-semibold">{plan.period}</span>
                         </div>
                       </div>
 
-                      {/* Recursos Inclusos Dinâmicos e Inteligentes */}
-                      <div className="pt-2 space-y-1.5 border-t border-slate-200 dark:border-[#1C2631]">
+                      {/* Recursos Inclusos Dinâmicos e Inteligentes Compactos */}
+                      <div className="pt-1.5 space-y-1 border-t border-slate-200 dark:border-[#1C2631]">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            Recursos Inclusos:
-                          </span>
-                          <span className="text-[9px] font-mono font-bold text-sky-500">
-                            (dinâmico por permissão)
+                          <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                            Recursos:
                           </span>
                         </div>
-                        {getPlanDynamicFeatures(plan).slice(0, 4).map((feat, i) => (
-                          <div key={i} className={`flex items-center gap-1.5 text-xs ${
+                        {getPlanDynamicFeatures(plan).slice(0, 3).map((feat, i) => (
+                          <div key={i} className={`flex items-center gap-1 text-[10px] ${
                             feat.enabled 
                               ? 'text-slate-700 dark:text-slate-200 font-medium' 
                               : 'text-slate-400 dark:text-slate-500 line-through'
                           }`}>
                             {feat.enabled ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                              <Check className="w-3 h-3 text-emerald-500 shrink-0" />
                             ) : (
-                              <X className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <X className="w-3 h-3 text-slate-400 shrink-0" />
                             )}
                             <span className="truncate">{feat.label}</span>
                           </div>
                         ))}
                       </div>
 
-                      {/* Botão de Configuração de Permissões deste Plano */}
-                      <div className="pt-2">
+                      {/* Botão de Configuração de Permissões deste Plano Compacto */}
+                      <div className="pt-1">
                         <button
                           type="button"
                           onClick={() => setEditingPermissionsPlanId(plan.id)}
-                          className="w-full py-2 px-3 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-[1.01] active:scale-95"
-                          title="Clique para configurar e ativar permissões específicas para este plano"
+                          className="w-full py-1.5 px-2 rounded-lg border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 font-bold text-[10px] flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
+                          title="Configurar permissões deste plano"
                         >
-                          <Sliders className="w-3.5 h-3.5" />
-                          <span>Configurar Permissões do Plano</span>
+                          <Sliders className="w-3 h-3" />
+                          <span>Permissões do Plano</span>
                         </button>
                       </div>
 
