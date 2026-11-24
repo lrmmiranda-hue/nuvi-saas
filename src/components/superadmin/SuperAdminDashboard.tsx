@@ -228,7 +228,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     return true;
   });
 
-  // Acesso direto ao painel do lojista
+  // Acesso direto ao painel do lojista (Impersonate Master)
   const handleImpersonateTenant = (tenantId: string) => {
     const t = tenants.find(x => x.id === tenantId);
     if (t && typeof window !== 'undefined') {
@@ -237,6 +237,11 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       window.history.pushState(null, '', `/${cleanSlug}/painel`);
     }
     setCurrentTenantId(tenantId);
+    setAuthenticatedTenantId(tenantId);
+    setIsTenantAuthenticated(true);
+    try {
+      localStorage.setItem('nuvi_authenticated_store_v4', tenantId);
+    } catch { }
     setViewRole('tenant_admin');
   };
 

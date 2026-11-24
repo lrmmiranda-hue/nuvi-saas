@@ -131,23 +131,32 @@ export function parseCurrentRoute(tenants: Tenant[]): RouteResolution {
     return { role: 'login_tenant', isMaster: false };
   }
 
-  // 3. /painel, /admin, /portal soltos (sem slug de loja):
-  // RÍGIDO: O painel só pode ser acessado pelo link oficial /{slug}/painel.
-  // Links soltos redirecionam obrigatoriamente para a tela de login do lojista (/acesso_lojista).
+  // 3. /painel solto (sem slug de loja):
+  // RÍGIDO: O painel NUNCA funciona solto. O lojista só pode acessar via /{nome-da-loja}/painel.
+  // Links soltos retornam NOT_FOUND para não confundir com /acesso_lojista ou abrir lojas erradas.
   if (
     cleanPath === '/painel' || 
     cleanPath === '/admin' || 
     cleanPath === '/portal' || 
     cleanPath === '/master'
   ) {
-    return { role: 'login_tenant', isMaster: false };
+    return {
+      role: 'not_found',
+      tenantNotFound: true,
+      requestedSlug: 'painel',
+      isMaster: false
+    };
   }
 
   // 4. /cardapio ou /vitrine soltos (sem slug de loja):
-  // RÍGIDO: O cardápio só pode ser acessado pelo link oficial /{slug}/cardapio.
-  // Links soltos redirecionam para a página inicial / cadastro.
+  // RÍGIDO: O cardápio NUNCA funciona solto. Clientes só acessam via /{nome-da-loja}/cardapio.
   if (cleanPath === '/cardapio' || cleanPath === '/vitrine') {
-    return { role: 'register_tenant', isMaster: false };
+    return {
+      role: 'not_found',
+      tenantNotFound: true,
+      requestedSlug: 'cardapio',
+      isMaster: false
+    };
   }
 
   // 4. Cadastro de Novos Lojistas (Página Principal ou /cadastro)
