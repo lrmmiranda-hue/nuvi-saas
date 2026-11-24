@@ -417,16 +417,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
 
   // Flag de carregamento inicial do Firestore (evita tela preta ou falso 404 no reload)
-  const [isInitialSyncDone, setIsInitialSyncDone] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.TENANTS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return true;
-      }
-    } catch { }
-    return false;
-  });
+  const [isInitialSyncDone, setIsInitialSyncDone] = useState<boolean>(false);
+
+  // Timeout de contingência (máximo 1.5s para liberar tela caso rede esteja oscilando)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialSyncDone(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Active Tenant (detectado de forma inteligente por Rota Limpa ou Parâmetro em todos os tenants criados)
   const [currentTenantId, setCurrentTenantIdState] = useState<string>(() => {
@@ -784,59 +783,70 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Sincronização em tempo real com o Firebase Firestore (Localhost <-> Web App)
   useEffect(() => {
     // 1. Escuta Lojas em Tempo Real
-    const unsubTenants = listenToTenants((remoteTenants) => {
-      setIsInitialSyncDone(true);
-      if (remoteTenants && remoteTenants.length > 0) {
-        setTenants(remoteTenants);
-        try {
-          localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(remoteTenants));
-        } catch { }
+    const unsubTenants = listenToTenants(
+      (remoteTenants) => {
+        setIsInitialSyncDone(true);
+        if (remoteTenants && remoteTenants.length > 0) {
+          setTenants(remoteTenants);
+          try {
+            localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(remoteTenants));
+          } catch { }
 
-        // Se a rota na URL for de uma loja específica, sincroniza o currentTenantId imediatamente com a loja encontrada
-        try {
-          if (typeof window !== 'undefined') {
-            const route = parseCurrentRoute(remoteTenants);
-            if (route.tenantNotFound) {
-              setViewRoleState('not_found');
-              setNotFoundSlug(route.requestedSlug || '');
-            } else if (route.tenantSlugOrId) {
-              const matched = findTenantBySlugOrId(remoteTenants, route.tenantSlugOrId);
-              if (matched) {
-                setCurrentTenantIdState(matched.id);
-                localStorage.setItem(STORAGE_KEYS.CURRENT_TENANT_ID, matched.id);
-                setViewRoleState(route.role);
-              } else {
+          // Se a rota na URL for de uma loja específica, sincroniza o currentTenantId imediatamente com a loja encontrada
+          try {
+            if (typeof window !== 'undefined') {
+              const route = parseCurrentRoute(remoteTenants);
+              if (route.tenantNotFound) {
                 setViewRoleState('not_found');
-                setNotFoundSlug(route.tenantSlugOrId);
+                setNotFoundSlug(route.requestedSlug || '');
+              } else if (route.tenantSlugOrId) {
+                const matched = findTenantBySlugOrId(remoteTenants, route.tenantSlugOrId);
+                if (matched) {
+                  setCurrentTenantIdState(matched.id);
+                  setAuthenticatedTenantId(matched.id);
+                  localStorage.setItem(STORAGE_KEYS.CURRENT_TENANT_ID, matched.id);
+                  localStorage.setItem('nuvi_auth_tenant_id', matched.id);
+                  setViewRoleState(route.role);
+                } else {
+                  setViewRoleState('not_found');
+                  setNotFoundSlug(route.tenantSlugOrId);
+                }
+              } else {
+                setViewRoleState(route.role);
               }
             }
-          }
-        } catch { }
-      } else {
-        const seeded = localStorage.getItem('nuvi_firestore_seeded_v1');
-        if (!seeded) {
-          localStorage.setItem('nuvi_firestore_seeded_v1', 'true');
-          saveAllTenantsFirestore(INITIAL_TENANTS);
+          } catch { }
         } else {
-          setTenants([]);
+          const seeded = localStorage.getItem('nuvi_firestore_seeded_v1');
+          if (!seeded) {
+            localStorage.setItem('nuvi_firestore_seeded_v1', 'true');
+            saveAllTenantsFirestore(INITIAL_TENANTS);
+          }
         }
+      },
+      (err) => {
+        console.warn('Firestore fallback listener:', err);
+        setIsInitialSyncDone(true);
       }
-    });
+    );
 
     // 2. Escuta Produtos em Tempo Real
-    const unsubProducts = listenToProducts((remoteProducts) => {
-      if (remoteProducts && remoteProducts.length > 0) {
-        setAllProducts(enrichProductsWithDefaultPacks(remoteProducts));
-      } else {
-        const seeded = localStorage.getItem('nuvi_firestore_prods_seeded_v1');
-        if (!seeded) {
-          localStorage.setItem('nuvi_firestore_prods_seeded_v1', 'true');
-          saveAllProductsFirestore(INITIAL_PRODUCTS);
+    const unsubProducts = listenToProducts(
+      (remoteProducts) => {
+        if (remoteProducts && remoteProducts.length > 0) {
+          setAllProducts(enrichProductsWithDefaultPacks(remoteProducts));
         } else {
-          setAllProducts([]);
+          const seeded = localStorage.getItem('nuvi_firestore_prods_seeded_v1');
+          if (!seeded) {
+            localStorage.setItem('nuvi_firestore_prods_seeded_v1', 'true');
+            saveAllProductsFirestore(INITIAL_PRODUCTS);
+          }
         }
+      },
+      (err) => {
+        console.warn('Firestore products listener warning:', err);
       }
-    });
+    );
 
     // 3. Escuta Pedidos em Tempo Real
     const unsubOrders = listenToOrders((remoteOrders) => {
@@ -911,18 +921,19 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         if (port === '3005' || port === '3006') return;
 
         const tenant = tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId);
-        const slug = tenant?.slug || tenant?.id || 'loja';
+        const rawSlug = tenant?.slug || tenant?.id || '';
+        const cleanSlug = rawSlug.replace(/^\/+|\/+$/g, '');
 
         if (role === 'super_admin') {
-          window.history.pushState({}, '', '/painel');
+          window.history.pushState({}, '', '/acesso_master');
         } else if (role === 'login_tenant') {
           window.history.pushState({}, '', '/acesso_lojista');
         } else if (role === 'register_tenant') {
           window.history.pushState({}, '', '/');
         } else if (role === 'storefront') {
-          window.history.pushState({}, '', `/${slug}/cardapio`);
+          window.history.pushState({}, '', cleanSlug ? `/${cleanSlug}/cardapio` : '/cardapio');
         } else if (role === 'tenant_admin') {
-          window.history.pushState({}, '', `/${slug}/painel`);
+          window.history.pushState({}, '', cleanSlug ? `/${cleanSlug}/painel` : '/acesso_lojista');
         }
       }
     } catch { }

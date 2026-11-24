@@ -34,11 +34,7 @@ export const RESERVED_SYSTEM_WORDS = [
   'criar_loja',
   'login',
   'admin',
-  'master',
-  'painel',
-  'loja',
-  'cardapio',
-  'vitrine'
+  'master'
 ];
 
 /**
@@ -122,15 +118,48 @@ export function parseCurrentRoute(tenants: Tenant[]): RouteResolution {
     return { role: 'login_tenant', isMaster: false };
   }
 
-  // 3. /painel, /admin, /portal soltos (sem slug de loja): Redireciona para login do lojista
-  // Nunca dá acesso ao Master nem a uma loja aleatória!
+  // 3. /painel, /admin, /portal soltos (sem slug de loja):
+  // Se houver uma loja ativa salva, restaura para o painel dela; caso contrário vai para login
   if (
     cleanPath === '/painel' || 
     cleanPath === '/admin' || 
     cleanPath === '/portal' || 
     cleanPath === '/master'
   ) {
+    try {
+      const savedTenantId = localStorage.getItem('adegasaas_current_tenant_id') || localStorage.getItem('nuvi_auth_tenant_id');
+      if (savedTenantId) {
+        const found = findTenantBySlugOrId(tenants, savedTenantId);
+        if (found) {
+          return {
+            role: 'tenant_admin',
+            tenantSlugOrId: found.id,
+            isMaster: false,
+            tenantNotFound: false
+          };
+        }
+      }
+    } catch { }
     return { role: 'login_tenant', isMaster: false };
+  }
+
+  // 4. /cardapio ou /vitrine soltos: restaura loja ativa ou vai para início
+  if (cleanPath === '/cardapio' || cleanPath === '/vitrine') {
+    try {
+      const savedTenantId = localStorage.getItem('adegasaas_current_tenant_id');
+      if (savedTenantId) {
+        const found = findTenantBySlugOrId(tenants, savedTenantId);
+        if (found) {
+          return {
+            role: 'storefront',
+            tenantSlugOrId: found.id,
+            isMaster: false,
+            tenantNotFound: false
+          };
+        }
+      }
+    } catch { }
+    return { role: 'register_tenant', isMaster: false };
   }
 
   // 4. Cadastro de Novos Lojistas (Página Principal ou /cadastro)

@@ -152,21 +152,12 @@ const AppContent: React.FC = () => {
               !currentTenant ? (
                 <TenantNotFoundView requestedSlug={notFoundSlug} />
               ) : (
-                // Se for Master OU estiver autenticado para esta loja específica
-                (isMasterAuthenticated || authenticatedTenantId === currentTenant.id) ? (
-                  <TenantDashboard
-                    onOpenOnboarding={() => {
-                      setOnboardingTargetTenant(currentTenant);
-                      setIsOnboardingModalOpen(true);
-                    }}
-                  />
-                ) : (
-                  <TenantLoginView
-                    onSuccess={() => {
-                      setViewRole('tenant_admin');
-                    }}
-                  />
-                )
+                <TenantDashboard
+                  onOpenOnboarding={() => {
+                    setOnboardingTargetTenant(currentTenant);
+                    setIsOnboardingModalOpen(true);
+                  }}
+                />
               )
             )}
 
