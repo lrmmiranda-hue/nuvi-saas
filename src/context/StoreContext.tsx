@@ -851,20 +851,43 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const targetTenant = tenant || currentTenant;
     if (!targetTenant) return Boolean(globalConfig.defaultPermissions[feature]);
 
+    // Mapeamento explícito entre os tipos de planos do lojista e os IDs dos 5 planos oficiais
+    const PLAN_ID_MAP: Record<string, string> = {
+      vitrine: 'plan_cardapio',
+      plan_cardapio: 'plan_cardapio',
+      balcao_estoque: 'plan_balcao_estoque',
+      plan_balcao_estoque: 'plan_balcao_estoque',
+      balcao: 'plan_balcao_pdv',
+      plan_balcao_pdv: 'plan_balcao_pdv',
+      starter: 'plan_delivery_estoque',
+      hibrido: 'plan_delivery_estoque',
+      plan_delivery_estoque: 'plan_delivery_estoque',
+      pro: 'plan_nuvi_pro',
+      enterprise: 'plan_nuvi_pro',
+      plan_nuvi_pro: 'plan_nuvi_pro',
+    };
+
+    const targetPlanId = PLAN_ID_MAP[targetTenant.plan] || targetTenant.plan;
+
     // 1. Checa se o plano do lojista possui regras e permissões configuradas pelo Master
-    const rawPlan = targetTenant.plan;
-    const planObj = globalConfig.plans?.find(p => p.id === rawPlan || p.id === `plan_${rawPlan}`);
+    const planObj = globalConfig.plans?.find(p => p.id === targetPlanId || p.id === targetTenant.plan || p.id === `plan_${targetTenant.plan}`);
     if (planObj?.permissions && planObj.permissions[feature] !== undefined) {
       return Boolean(planObj.permissions[feature]);
     }
 
-    // 2. Se houver regra específica para o segmento da loja
+    // 2. Fallback nas permissões padrão do plano oficial
+    const defaultPlan = DEFAULT_GLOBAL_CONFIG.plans.find(p => p.id === targetPlanId || p.id === targetTenant.plan);
+    if (defaultPlan?.permissions && defaultPlan.permissions[feature] !== undefined) {
+      return Boolean(defaultPlan.permissions[feature]);
+    }
+
+    // 3. Se houver regra específica para o segmento da loja
     const segment = targetTenant?.businessSegment;
     if (segment && globalConfig.segmentPermissions?.[segment]?.[feature] !== undefined) {
       return Boolean(globalConfig.segmentPermissions[segment]![feature]);
     }
 
-    // 3. Caso contrário, adota a permissão padrão configurada pelo Master
+    // 4. Caso contrário, adota a permissão padrão configurada pelo Master
     return Boolean(globalConfig.defaultPermissions[feature]);
   };
 

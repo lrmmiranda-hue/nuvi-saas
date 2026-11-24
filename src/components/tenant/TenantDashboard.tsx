@@ -486,36 +486,35 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     }
   }, [currentTenant.businessSegment]);
 
-  // Permissões de Módulos definidas pelo Administrador Master
+  // Permissões de Módulos definidas pelo Administrador Master ou Plano Contratado
   const allowPDV = isFeatureAllowed('enablePDVBalcao', currentTenant);
   const allowStock = isFeatureAllowed('enableStockControl', currentTenant);
   const allowStorefront = isFeatureAllowed('enableStorefront', currentTenant);
   const allowMetrics = isFeatureAllowed('enableFinancialMetrics', currentTenant);
+  const allowDiningTables = isFeatureAllowed('enableDiningTables', currentTenant);
+  const allowKitchenKDS = isFeatureAllowed('enableKitchenKDS', currentTenant);
 
-  // Mesas & Salão ativas por padrão para restaurantes, lanchonetes, pizzarias, adegas e comércios (salvo se desativado nas configs)
-  const isTableServiceActive = currentTenant?.config?.enableTableService !== false;
+  // Mesas & Salão ativas caso permitido pelo plano e não desativado nas configs
+  const isTableServiceActive = (currentTenant?.config?.enableTableService !== false) && allowDiningTables;
   const activeTableOrdersCount = tenantOrders.filter(o => o.deliveryType === 'mesa' && o.status !== 'finalizado' && o.status !== 'cancelado').length;
   const pendingKitchenCount = tenantOrders.filter(o => o.status === 'novo' || o.status === 'preparando').length;
 
   // Dynamically constructed available tabs based on tenant operational model & Master Permissions
   // Prioridade número 1 solicitada: Catálogo de Produtos / Cardápio sempre em primeiro lugar!
   const allSystemTabs = [
-    ...((isFoodOrPizza || isOnlineEnabled || true) && allowStorefront ? [
-      { id: 'produtos', label: productsTabLabel, icon: productsTabIcon, count: tenantProducts.length },
-    ] : []),
-    ...(isPhysicalEnabled && allowPDV ? [{ id: 'vendas', label: 'Vendas Balcão (PDV)', icon: ShoppingCart }] : []),
+    { id: 'produtos', label: productsTabLabel, icon: productsTabIcon, count: tenantProducts.length },
+    ...(allowPDV ? [{ id: 'vendas', label: 'Vendas Balcão (PDV)', icon: ShoppingCart }] : []),
     ...(isTableServiceActive ? [
       { id: 'mesas', label: 'Mesas & Salão', icon: UtensilsCrossed, count: activeTableOrdersCount > 0 ? activeTableOrdersCount : undefined },
     ] : []),
-    { id: 'cozinha', label: 'Cozinha (KDS)', icon: ChefHat, count: pendingKitchenCount > 0 ? pendingKitchenCount : undefined },
-    // Para Pizzaria e Lanchonete, NÃO exibe a aba de estoque ("Gestão de Cardápio"), mantendo unicamente a aba de "Cardápio & Lanches" / "Cardápio & Pizzas"!
+    ...(allowKitchenKDS ? [{ id: 'cozinha', label: 'Cozinha (KDS)', icon: ChefHat, count: pendingKitchenCount > 0 ? pendingKitchenCount : undefined }] : []),
     ...(!isFoodOrPizza && allowStock ? [{ 
       id: 'estoque', 
       label: isAdega ? 'Estoque & Recebimento' : 'Controle de Estoque', 
       icon: Boxes, 
       count: tenantProducts.length 
     }] : []),
-    ...(isOnlineEnabled && allowStorefront ? [
+    ...(allowStorefront ? [
       { id: 'pedidos', label: 'Gestão de Pedidos', icon: ShoppingBag, count: tenantOrders.length },
     ] : []),
     ...(allowMetrics ? [
@@ -544,10 +543,8 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     return filtered.length > 0 ? filtered : allSystemTabs;
   }, [allSystemTabs, currentStoreUser?.permissions, currentStoreUser?.role]);
 
-  // Auto-switch tab if current tab is hidden by disabling online or physical mode
+  // Auto-switch tab if current tab is hidden by disabling online or physical mode or plan permissions
   useEffect(() => {
-    // Abas de salão e cozinha sempre são preservadas
-    if (activeTab === 'mesas' || activeTab === 'cozinha') return;
     const isCurrentValid = availableTabs.some((t) => t.id === activeTab);
     if (!isCurrentValid && availableTabs.length > 0) {
       setActiveTab(availableTabs[0].id as any);
