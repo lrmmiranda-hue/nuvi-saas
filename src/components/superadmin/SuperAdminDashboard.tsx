@@ -198,7 +198,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   }).length;
 
   const trialCount = tenants.filter(t => t.status === 'trial').length;
-  const mensualCount = tenants.filter(t => (t.billingType || 'mensal') === 'mensal').length;
+  const mensalCount = tenants.filter(t => (t.billingType || 'mensal') === 'mensal').length;
   const prepagoCount = tenants.filter(t => t.billingType === 'prepago').length;
 
   // Filtro inteligente de lojas
