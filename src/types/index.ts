@@ -176,7 +176,7 @@ export interface StoreManagementConfig {
   soundAlerts: boolean;
 }
 
-export type TenantPlan = 'balcao' | 'vitrine' | 'hibrido' | 'starter' | 'pro' | 'enterprise';
+export type TenantPlan = 'balcao' | 'balcao_estoque' | 'vitrine' | 'hibrido' | 'starter' | 'pro' | 'enterprise';
 
 export interface PlanConfig {
   id: 'balcao' | 'vitrine' | 'hibrido';
@@ -348,12 +348,14 @@ export interface Tenant {
 export type ViewRole = 'super_admin' | 'tenant_admin' | 'storefront' | 'register_tenant' | 'login_tenant' | 'not_found';
 
 export interface SaaSFeaturePermissions {
-  enableStorefront: boolean;        // Cardápio & Vitrine Online
+  enableStorefront: boolean;        // Cardápio & Vitrine Online Aberto
+  enableDiningTables?: boolean;     // Mesas & Cardápio QR Code
   enablePDVBalcao: boolean;         // Vendas no Balcão (PDV Frente de Caixa)
   enableStockControl: boolean;      // Controle de Estoque & Reposição
   enableDeliveryRadius: boolean;    // Delivery & Taxa por Raio / WhatsApp
   enableFinancialMetrics: boolean;  // Relatórios & Métricas Financeiras
   enableBarcodeScanner: boolean;    // Leitor de Código de Barras USB / Bluetooth
+  enableKitchenKDS?: boolean;       // KDS Cozinha / Painel de Pedidos
 }
 
 export interface SaaSSubscriptionPlan {
@@ -366,6 +368,7 @@ export interface SaaSSubscriptionPlan {
   badge?: string; // ex: 'Mais Popular', 'Econômico', 'Completo'
   features: string[];
   active: boolean;
+  permissions?: Partial<SaaSFeaturePermissions>;
 }
 
 export type SaaSPromoBannerTheme = 'cyber_neon' | 'sunset_gold' | 'emerald_turbo';

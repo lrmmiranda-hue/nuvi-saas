@@ -190,28 +190,65 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
   plans: [
     {
       id: 'plan_cardapio',
-      name: 'Cardápio Digital & Pedidos',
-      tagline: 'Ideal para iniciar sem custos elevados',
+      name: 'Cardápio QR Code Mesas',
+      tagline: 'Ideal para quem usa cardápio digital na mesa',
       price: 49.90,
       period: '/mês',
-      description: 'Vitrine digital com fotos, descrições e pedidos no WhatsApp sem taxas de comissão.',
-      badge: 'Iniciante',
+      description: 'Acesso a cardápio digital de mesa para clientes visualizarem via QR Code, sem PDV balcão.',
+      badge: 'Básico / QR Mesas',
       features: [
-        'Vitrine Web Exclusiva com link próprio',
         'Cardápio Digital com QR Code para mesas e balcão',
+        'Visualização ultra-rápida no celular do cliente',
+        'Fotos de produtos, descrições e categorias',
         'Pedidos formatados direto no WhatsApp',
-        'Banners promocionais e fotos ilimitadas',
         'Suporte técnico via WhatsApp'
       ],
       active: true,
+      permissions: {
+        enableStorefront: true,
+        enableDiningTables: true,
+        enablePDVBalcao: false,
+        enableStockControl: false,
+        enableDeliveryRadius: false,
+        enableFinancialMetrics: false,
+        enableBarcodeScanner: false,
+        enableKitchenKDS: false
+      }
+    },
+    {
+      id: 'plan_balcao_estoque',
+      name: 'Balcão, Venda & Estoque (Sem Vitrine)',
+      tagline: 'Foco em loja física e controle de estoque',
+      price: 69.90,
+      period: '/mês',
+      description: 'Frente de Caixa (PDV), vendas no balcão e controle de estoque físico, sem vitrine online.',
+      badge: 'Balcão & Estoque',
+      features: [
+        'Frente de Caixa Balcão (PDV Ágil)',
+        'Controle de Estoque e baixa automática',
+        'Bipe com leitor USB / Bluetooth',
+        'Fechamento de caixa diário',
+        'Sem vitrine ou cardápio público na web'
+      ],
+      active: true,
+      permissions: {
+        enableStorefront: false,
+        enableDiningTables: false,
+        enablePDVBalcao: true,
+        enableStockControl: true,
+        enableBarcodeScanner: true,
+        enableDeliveryRadius: false,
+        enableFinancialMetrics: false,
+        enableKitchenKDS: false
+      }
     },
     {
       id: 'plan_balcao_pdv',
       name: 'Balcão & PDV Caixa Rápido',
-      tagline: 'Para quem vende no balcão físico',
+      tagline: 'Para quem vende no balcão físico e online',
       price: 89.90,
       period: '/mês',
-      description: 'Frente de Caixa (PDV) ultra-rápida no toque e leitor de código de barras.',
+      description: 'Frente de Caixa (PDV) ultra-rápida no toque e leitor de código de barras com vitrine web.',
       badge: 'Mais Vendido',
       features: [
         'Tudo do Plano Cardápio Digital',
@@ -221,6 +258,16 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
         'Fechamento de caixa diário'
       ],
       active: true,
+      permissions: {
+        enableStorefront: true,
+        enableDiningTables: true,
+        enablePDVBalcao: true,
+        enableStockControl: false,
+        enableBarcodeScanner: true,
+        enableDeliveryRadius: false,
+        enableFinancialMetrics: false,
+        enableKitchenKDS: false
+      }
     },
     {
       id: 'plan_delivery_estoque',
@@ -238,6 +285,16 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
         'Controle de pedidos em tempo real (Separando / A Caminho)'
       ],
       active: true,
+      permissions: {
+        enableStorefront: true,
+        enableDiningTables: true,
+        enablePDVBalcao: true,
+        enableStockControl: true,
+        enableDeliveryRadius: true,
+        enableFinancialMetrics: true,
+        enableBarcodeScanner: true,
+        enableKitchenKDS: false
+      }
     },
     {
       id: 'plan_nuvi_pro',
@@ -251,10 +308,20 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
         'Acesso Ilimitado a Todos os Recursos e Módulos',
         'Relatórios Financeiros e Margem de Lucro Bruta',
         'Múltiplos Caixas e Usuários Simultâneos',
-        'Backup Diário em Nuvem Garantido',
+        'Salão de Mesas com QR Code e KDS Cozinha',
         'Atendimento e Consultoria VIP Prioritária'
       ],
       active: true,
+      permissions: {
+        enableStorefront: true,
+        enableDiningTables: true,
+        enablePDVBalcao: true,
+        enableStockControl: true,
+        enableDeliveryRadius: true,
+        enableFinancialMetrics: true,
+        enableBarcodeScanner: true,
+        enableKitchenKDS: true
+      }
     }
   ],
   promoBanner: {
@@ -695,7 +762,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             ...DEFAULT_GLOBAL_CONFIG.defaultPermissions,
             ...(parsed.defaultPermissions || {})
           },
-          plans: parsed.plans && parsed.plans.length === 4 ? parsed.plans : DEFAULT_GLOBAL_CONFIG.plans,
+          plans: (() => {
+            if (!parsed.plans || !Array.isArray(parsed.plans)) return DEFAULT_GLOBAL_CONFIG.plans;
+            // Garante que todos os planos padrão existam (incluindo o novo plano de balcão e estoque)
+            const merged = DEFAULT_GLOBAL_CONFIG.plans.map(defPlan => {
+              const existing = parsed.plans.find((p: any) => p.id === defPlan.id);
+              return existing ? { ...defPlan, ...existing } : defPlan;
+            });
+            return merged;
+          })(),
           promoBanner: {
             ...DEFAULT_GLOBAL_CONFIG.promoBanner,
             ...(parsed.promoBanner || {})
@@ -770,17 +845,25 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     });
   };
 
-  // Verifica se uma funcionalidade está liberada para um lojista/segmento
+  // Verifica se uma funcionalidade está liberada para um lojista/segmento/plano
   const isFeatureAllowed = (feature: keyof SaaSFeaturePermissions, tenant?: Tenant): boolean => {
     const targetTenant = tenant || currentTenant;
-    const segment = targetTenant?.businessSegment;
+    if (!targetTenant) return Boolean(globalConfig.defaultPermissions[feature]);
 
-    // Se houver regra específica para o segmento da loja
+    // 1. Checa se o plano do lojista possui regras e permissões configuradas pelo Master
+    const rawPlan = targetTenant.plan;
+    const planObj = globalConfig.plans?.find(p => p.id === rawPlan || p.id === `plan_${rawPlan}`);
+    if (planObj?.permissions && planObj.permissions[feature] !== undefined) {
+      return Boolean(planObj.permissions[feature]);
+    }
+
+    // 2. Se houver regra específica para o segmento da loja
+    const segment = targetTenant?.businessSegment;
     if (segment && globalConfig.segmentPermissions?.[segment]?.[feature] !== undefined) {
       return Boolean(globalConfig.segmentPermissions[segment]![feature]);
     }
 
-    // Caso contrário, adota a permissão padrão configurada pelo Master
+    // 3. Caso contrário, adota a permissão padrão configurada pelo Master
     return Boolean(globalConfig.defaultPermissions[feature]);
   };
 

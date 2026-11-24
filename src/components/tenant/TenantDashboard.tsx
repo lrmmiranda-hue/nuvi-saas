@@ -72,7 +72,8 @@ import {
   ChevronDown,
   Copy,
   Printer,
-  User
+  User,
+  ShieldCheck
 } from 'lucide-react';
 import { TableQRCodeModal } from './TableQRCodeModal';
 import { generatePixPayload, getQRCodeUrl } from '../../utils/pixPayload';
@@ -94,6 +95,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     generateWhatsAppOrderUrl,
     generateWhatsAppStatusUpdateUrl,
     generateWhatsAppDirectChatUrl,
+    isMasterAuthenticated,
     setViewRole,
     showAlert,
     showConfirm,
@@ -698,6 +700,19 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 className="p-2 rounded-xl transition-all cursor-pointer bg-transparent border-0 outline-none flex items-center justify-center text-sky-400 hover:text-sky-300 hover:bg-sky-500/10"
               >
                 <Store className="w-5 h-5 stroke-[2.2]" />
+              </button>
+            )}
+
+            {/* Botão Retornar ao Painel Master (quando acessado pelo SuperAdmin) */}
+            {isMasterAuthenticated && (
+              <button
+                type="button"
+                onClick={() => setViewRole('super_admin')}
+                title="Voltar ao Painel Master NUVI"
+                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer mr-1"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span className="hidden sm:inline">Painel Master</span>
               </button>
             )}
 

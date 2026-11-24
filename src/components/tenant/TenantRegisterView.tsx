@@ -68,17 +68,27 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Os 4 Planos Oficiais do Nuvi SaaS com preços integrados às configurações globais
+  // Os 5 Planos Oficiais do Nuvi SaaS com preços integrados às configurações globais
   const officialNuviPlans = [
     {
       id: 'plan_cardapio',
       tenantPlan: 'vitrine' as const,
-      name: 'Cardápio Digital & Pedidos',
-      badge: 'Iniciante / Delivery',
-      tag: 'WhatsApp',
+      name: 'Cardápio QR Code Mesas',
+      badge: 'Básico / QR Mesas',
+      tag: 'Mesas & QR',
       price: globalConfig?.plans?.find(p => p.id === 'plan_cardapio')?.price ?? 49.90,
-      description: 'Vitrine online exclusiva, QR Code de mesa/balcão e pedidos direto no WhatsApp sem cobrança de taxas por venda.',
-      icon: '🛍️'
+      description: 'Acesso exclusivo a cardápio digital de mesa para clientes visualizarem via QR Code, sem PDV balcão.',
+      icon: '📱'
+    },
+    {
+      id: 'plan_balcao_estoque',
+      tenantPlan: 'balcao_estoque' as const,
+      name: 'Balcão, Venda & Estoque (Sem Vitrine)',
+      badge: 'Balcão & Estoque',
+      tag: 'Sem Vitrine',
+      price: globalConfig?.plans?.find(p => p.id === 'plan_balcao_estoque')?.price ?? 69.90,
+      description: 'Frente de Caixa (PDV), vendas no balcão e controle de estoque físico com leitor, sem vitrine pública online.',
+      icon: '🏪'
     },
     {
       id: 'plan_balcao_pdv',
@@ -811,8 +821,8 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 </div>
               </div>
 
-              {/* Grid com os 4 Planos */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Grid com os 5 Planos */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 {officialNuviPlans.map((p) => (
                   <div
                     key={p.id}

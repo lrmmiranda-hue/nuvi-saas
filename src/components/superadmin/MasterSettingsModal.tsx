@@ -26,7 +26,10 @@ import {
   Unlock,
   Layers,
   ArrowRight,
-  Database
+  Database,
+  QrCode,
+  UtensilsCrossed,
+  CheckCircle2
 } from 'lucide-react';
 
 interface MasterSettingsModalProps {
@@ -71,6 +74,24 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
       setPlansState(globalConfig.plans);
     }
   }, [globalConfig.plans]);
+
+  // Estado do plano que está tendo suas permissões configuradas
+  const [editingPermissionsPlanId, setEditingPermissionsPlanId] = useState<string | null>(null);
+
+  const handleTogglePlanPermission = (planId: string, feature: keyof SaaSFeaturePermissions) => {
+    setPlansState(prev => prev.map(p => {
+      if (p.id !== planId) return p;
+      const currentPerms = p.permissions || {};
+      const currentVal = currentPerms[feature] ?? true;
+      return {
+        ...p,
+        permissions: {
+          ...currentPerms,
+          [feature]: !currentVal
+        }
+      };
+    }));
+  };
 
   if (!isOpen) return null;
 
@@ -500,14 +521,14 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
               
               <div className="space-y-1">
                 <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
-                  Tabela Oficial de Preços dos 4 Planos Nuvi SaaS
+                  Tabela Oficial de Preços dos Planos Nuvi SaaS
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Defina os valores mensais que você cobrará dos comerciantes ao assinarem a plataforma.
+                  Defina os valores mensais e ative ou configure os módulos e permissões que cada plano terá direito.
                 </p>
               </div>
 
-              {/* Grid dos 4 Planos */}
+              {/* Grid dos Planos */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {plansState.map((plan, index) => (
                   <div
@@ -592,10 +613,184 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                           </div>
                         ))}
                       </div>
+
+                      {/* Botão de Configuração de Permissões deste Plano */}
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setEditingPermissionsPlanId(plan.id)}
+                          className="w-full py-2 px-3 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-[1.01] active:scale-95"
+                          title="Clique para configurar e ativar permissões específicas para este plano"
+                        >
+                          <Sliders className="w-3.5 h-3.5" />
+                          <span>Configurar Permissões do Plano</span>
+                        </button>
+                      </div>
+
                     </div>
                   </div>
                 ))}
               </div>
+
+              {/* Modal de Configuração de Permissões do Plano Selecionado */}
+              {editingPermissionsPlanId && (() => {
+                const targetPlan = plansState.find(p => p.id === editingPermissionsPlanId);
+                if (!targetPlan) return null;
+                const perms = targetPlan.permissions || {};
+
+                const planFeaturesConfig: { key: keyof SaaSFeaturePermissions; label: string; desc: string; icon: any }[] = [
+                  {
+                    key: 'enableStorefront',
+                    label: 'Vitrine Web & Cardápio Aberto',
+                    desc: 'Catálogo público online com link próprio para visualização externa dos produtos.',
+                    icon: Store
+                  },
+                  {
+                    key: 'enableDiningTables',
+                    label: 'Cardápio Digital & QR Code Mesas',
+                    desc: 'Acesso às comandas/mesas do salão e visualização de QR Code nas mesas.',
+                    icon: QrCode
+                  },
+                  {
+                    key: 'enablePDVBalcao',
+                    label: 'Frente de Caixa Balcão (PDV Ágil)',
+                    desc: 'Terminal de vendas no balcão físico ultra-rápido com fechamento de caixa.',
+                    icon: ShoppingCart
+                  },
+                  {
+                    key: 'enableStockControl',
+                    label: 'Controle de Estoque & Reposição',
+                    desc: 'Baixa automática no inventário e registro de entradas e reposições.',
+                    icon: Boxes
+                  },
+                  {
+                    key: 'enableDeliveryRadius',
+                    label: 'Delivery & Taxa por Raio / WhatsApp',
+                    desc: 'Módulo de entregas a domicílio com taxa calculada por raio em KM.',
+                    icon: Truck
+                  },
+                  {
+                    key: 'enableFinancialMetrics',
+                    label: 'Relatórios & Métricas Financeiras',
+                    desc: 'Faturamento bruto, ticket médio e demonstrativo de lucros da loja.',
+                    icon: BarChart3
+                  },
+                  {
+                    key: 'enableBarcodeScanner',
+                    label: 'Leitor de Código de Barras',
+                    desc: 'Bipe direto com leitor USB / Bluetooth na frente de caixa.',
+                    icon: Barcode
+                  },
+                  {
+                    key: 'enableKitchenKDS',
+                    label: 'KDS Cozinha / Monitor de Pedidos',
+                    desc: 'Tela de preparação de pedidos em tempo real para a cozinha.',
+                    icon: UtensilsCrossed
+                  }
+                ];
+
+                return (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className={`relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden ${
+                      isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#0F1722] border-[#1C2631] text-white'
+                    }`}>
+                      {/* Top Header */}
+                      <div className={`p-5 border-b flex items-center justify-between ${
+                        isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0B0F15] border-[#1C2631]'
+                      }`}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-sky-500/15 text-sky-500 flex items-center justify-center font-bold">
+                            <Sliders className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-extrabold flex items-center gap-2">
+                              <span>Permissões: {targetPlan.name}</span>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-500 font-mono font-bold uppercase">
+                                R$ {targetPlan.price.toFixed(2).replace('.', ',')}
+                              </span>
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              Ative ou desative as telas e funcionalidades que os clientes deste plano terão acesso.
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setEditingPermissionsPlanId(null)}
+                          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      {/* Lista de Permissões do Plano com Switches */}
+                      <div className="p-5 overflow-y-auto space-y-3 max-h-[60vh]">
+                        {planFeaturesConfig.map(({ key, label, desc, icon: IconComponent }) => {
+                          const isEnabled = perms[key] !== false; // Padrão true se não especificado
+                          return (
+                            <div
+                              key={key}
+                              onClick={() => handleTogglePlanPermission(targetPlan.id, key)}
+                              className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 cursor-pointer transition-all select-none ${
+                                isEnabled
+                                  ? isLight
+                                    ? 'bg-sky-50/70 border-sky-300/80 shadow-2xs'
+                                    : 'bg-sky-950/20 border-sky-500/40 shadow-2xs'
+                                  : isLight
+                                  ? 'bg-slate-100/60 border-slate-200 opacity-60'
+                                  : 'bg-[#141C25] border-[#222E3C] opacity-60'
+                              }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                                  isEnabled ? 'bg-sky-500 text-white shadow-xs' : 'bg-slate-300 dark:bg-neutral-800 text-slate-500'
+                                }`}>
+                                  <IconComponent className="w-4 h-4" />
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-extrabold">{label}</h4>
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug mt-0.5">
+                                    {desc}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Toggle Switch */}
+                              <div className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                                isEnabled ? 'bg-emerald-600' : 'bg-slate-400 dark:bg-neutral-700'
+                              }`}>
+                                <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                                  isEnabled ? 'translate-x-5' : 'translate-x-0'
+                                }`} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Rodapé do Modal */}
+                      <div className={`p-4 border-t flex items-center justify-between ${
+                        isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0B0F15] border-[#1C2631]'
+                      }`}>
+                        <span className="text-xs text-slate-400">
+                          As alterações deste plano serão gravadas no sistema.
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingPermissionsPlanId(null);
+                            handleSavePlans();
+                          }}
+                          className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs shadow-md shadow-sky-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Salvar Permissões do Plano</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Botão de Salvar Planos */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-[#1C2631]">

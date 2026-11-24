@@ -116,6 +116,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   // Preços oficiais de referência dos planos
   const PLAN_PRICES: Record<string, number> = {
     vitrine: 49.90,
+    balcao_estoque: 69.90,
     balcao: 89.90,
     starter: 139.90,
     hibrido: 139.90,
@@ -124,8 +125,9 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   };
 
   const PLAN_TITLES: Record<string, string> = {
-    vitrine: 'Cardápio Digital (R$ 49,90)',
-    balcao: 'Balcão & PDV (R$ 89,90)',
+    vitrine: 'Cardápio Digital & QR Mesas (R$ 49,90)',
+    balcao_estoque: 'Balcão & Estoque (Sem Vitrine) (R$ 69,90)',
+    balcao: 'Balcão & PDV Caixa Rápido (R$ 89,90)',
     starter: 'Delivery & Estoque (R$ 139,90)',
     hibrido: 'Delivery & Estoque (R$ 139,90)',
     pro: 'Nuvi Pro Total (R$ 199,90)',
@@ -228,7 +230,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     return true;
   });
 
-  // Acesso direto ao painel do lojista (Impersonate Master)
+  // Acesso direto ao painel do lojista (Impersonate Master com Permissão Total)
   const handleImpersonateTenant = (tenantId: string) => {
     const t = tenants.find(x => x.id === tenantId);
     if (t && typeof window !== 'undefined') {
@@ -241,6 +243,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     setIsTenantAuthenticated(true);
     try {
       localStorage.setItem('nuvi_authenticated_store_v4', tenantId);
+      localStorage.setItem('nuvi_current_tenant_id', tenantId);
     } catch { }
     setViewRole('tenant_admin');
   };
@@ -755,29 +758,25 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                         </div>
                       </td>
 
-                      {/* 3. Plano Contratado & Valor */}
+                      {/* 3. Plano Contratado */}
                       <td className="py-3 px-3.5">
-                        <div className="space-y-1">
-                          <select
-                            value={tenant.plan}
-                            onChange={(e) => handleChangeTenantPlan(tenant.id, e.target.value as any)}
-                            className={`px-2 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
-                              themeMode === 'light'
-                                ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white'
-                                : 'bg-[#151D24] border-[#253342] text-white focus:bg-[#1E2732]'
-                            }`}
-                          >
-                            <option value="vitrine">🛍️ Cardápio Digital (R$ 49,90)</option>
-                            <option value="balcao">⚡ Balcão & PDV (R$ 89,90)</option>
-                            <option value="starter">📦 Delivery & Estoque (R$ 139,90)</option>
-                            <option value="hibrido">📦 Delivery & Estoque (R$ 139,90)</option>
-                            <option value="pro">👑 Nuvi Pro Total (R$ 199,90)</option>
-                            <option value="enterprise">👑 Nuvi Pro Total (R$ 199,90)</option>
-                          </select>
-                          <span className="text-[11px] font-black text-sky-600 dark:text-sky-400 block">
-                            R$ {subInfo.planPrice.toFixed(2).replace('.', ',')}/mês
-                          </span>
-                        </div>
+                        <select
+                          value={tenant.plan}
+                          onChange={(e) => handleChangeTenantPlan(tenant.id, e.target.value as any)}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                            themeMode === 'light'
+                              ? 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white'
+                              : 'bg-[#151D24] border-[#253342] text-white focus:bg-[#1E2732]'
+                          }`}
+                        >
+                          <option value="vitrine">🛍️ Cardápio QR Mesas (R$ 49,90)</option>
+                          <option value="balcao_estoque">📦 Balcão & Estoque [Sem Vitrine] (R$ 69,90)</option>
+                          <option value="balcao">⚡ Balcão & PDV (R$ 89,90)</option>
+                          <option value="starter">🚚 Delivery & Estoque (R$ 139,90)</option>
+                          <option value="hibrido">🚚 Delivery & Estoque (R$ 139,90)</option>
+                          <option value="pro">👑 Nuvi Pro Total (R$ 199,90)</option>
+                          <option value="enterprise">👑 Nuvi Pro Total (R$ 199,90)</option>
+                        </select>
                       </td>
 
                       {/* 4. Modelo de Cobrança (Mensal Automático vs Pré-Pago) */}
@@ -806,31 +805,73 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                         </button>
                       </td>
 
-                      {/* 5. Renovação & Vencimento */}
+                      {/* 5. Renovação & Vencimento (Compacto com Janelinha ao Passar o Mouse) */}
                       <td className="py-3 px-3.5">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
+                        <div className="relative group inline-block">
+                          {/* Badge Compacto */}
+                          <div className="cursor-help">
                             {subInfo.isExpired ? (
-                              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500 text-white flex items-center gap-1">
-                                <AlertTriangle className="w-3 h-3" />
-                                <span>Vencido há {Math.abs(subInfo.diffDays)}d</span>
+                              <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center gap-1">
+                                <AlertTriangle className="w-3 h-3 text-rose-500" />
+                                <span>Vencido ({Math.abs(subInfo.diffDays)}d)</span>
                               </span>
                             ) : subInfo.isExpiringSoon ? (
-                              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 flex items-center gap-1 animate-pulse">
-                                <Clock className="w-3 h-3" />
+                              <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
                                 <span>Vence em {subInfo.diffDays}d</span>
                               </span>
                             ) : (
-                              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" />
+                              <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                                 <span>{tenant.status === 'trial' ? 'Trial' : 'Ativo'} ({subInfo.diffDays}d)</span>
                               </span>
                             )}
                           </div>
 
-                          <span className="text-[10px] text-slate-400 block font-mono">
-                            Venc: {!isNaN(subInfo.expDate.getTime()) ? subInfo.expDate.toLocaleDateString('pt-BR') : 'A definir'}
-                          </span>
+                          {/* Janelinha Flutuante de Detalhes no Hover */}
+                          <div className={`invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute left-0 bottom-full mb-2 z-50 w-64 p-3.5 rounded-2xl border shadow-2xl backdrop-blur-md pointer-events-none text-left ${
+                            themeMode === 'light' ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#121922] border-[#222E3C] text-white'
+                          }`}>
+                            <div className="space-y-1.5 text-xs">
+                              <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-neutral-800">
+                                <span className="font-extrabold flex items-center gap-1.5">
+                                  <Calendar className="w-3.5 h-3.5 text-sky-500" />
+                                  <span>Assinatura & Prazos</span>
+                                </span>
+                                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${
+                                  subInfo.isExpired ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'
+                                }`}>
+                                  {subInfo.isExpired ? 'Vencida' : 'Regular'}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400 text-[11px]">Vencimento:</span>
+                                <span className="font-mono font-bold">
+                                  {!isNaN(subInfo.expDate.getTime()) ? subInfo.expDate.toLocaleDateString('pt-BR') : 'A definir'}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400 text-[11px]">Dias de Acesso:</span>
+                                <span className="font-bold text-sky-500">
+                                  {subInfo.diffDays >= 0 ? `${subInfo.diffDays} dias restantes` : `Vencido há ${Math.abs(subInfo.diffDays)} dias`}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400 text-[11px]">Cobrança:</span>
+                                <span className="font-semibold">{isMonthly ? 'Mensal Recorrente' : 'Pré-Pago Manual'}</span>
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400 text-[11px]">Valor:</span>
+                                <span className="font-black text-emerald-500">
+                                  R$ {subInfo.planPrice.toFixed(2).replace('.', ',')}/mês
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </td>
 
@@ -842,7 +883,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                             type="button"
                             onClick={() => handleImpersonateTenant(tenant.id)}
                             className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1 transition-all shadow-xs cursor-pointer active:scale-95"
-                            title="Acessar o Painel Administrativo e PDV desta loja"
+                            title="Entrar imediatamente no Painel Administrativo desta loja"
                           >
                             <Sliders className="w-3 h-3" />
                             <span>Painel</span>
@@ -861,60 +902,52 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                         </div>
                       </td>
 
-                      {/* 7. Ações & Links Rápidos Compactos com Menu */}
+                      {/* 7. Ações & Links Compactos (Ícones Ghost Sem Fundo e Sem Repetições) */}
                       <td className="py-3 px-3.5 text-right relative">
-                        <div className="inline-flex items-center gap-1 action-menu-container">
+                        <div className="inline-flex items-center gap-0.5 action-menu-container">
                           
-                          {/* Botão Rápido: Liberar +30 Dias (em destaque se for pré-pago ou vencendo) */}
+                          {/* Botão Ghost: Liberar +30 Dias */}
                           <button
                             type="button"
                             onClick={() => handleLiberarPlano(tenant)}
                             title="Renovar por +30 dias via PIX"
-                            className="px-2 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-bold text-[11px] flex items-center gap-1 transition-all cursor-pointer"
+                            className="px-2 py-1.5 rounded-lg text-sky-500 hover:text-sky-400 hover:bg-sky-500/10 font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
                           >
-                            <Zap className="w-3 h-3 fill-sky-500" />
-                            <span className="hidden xl:inline">+30d</span>
+                            <Zap className="w-3.5 h-3.5 fill-sky-500" />
+                            <span>+30d</span>
                           </button>
 
-                          {/* Ícone Rápido: Cobrança PIX WhatsApp */}
+                          {/* Ícone Ghost: Cobrança PIX WhatsApp */}
                           <button
                             type="button"
                             onClick={() => handleSendPixCobrançaWhatsApp(tenant)}
-                            title="Enviar mensagem de cobrança PIX no WhatsApp do lojista"
-                            className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 transition-all cursor-pointer"
+                            title="Enviar cobrança PIX no WhatsApp do comerciante"
+                            className="p-1.5 rounded-lg text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors cursor-pointer"
                           >
-                            <MessageCircle className="w-3.5 h-3.5" />
+                            <MessageCircle className="w-4 h-4" />
                           </button>
 
-                          {/* Ícone Rápido: Copiar Link Vitrine */}
+                          {/* Ícone Ghost: Copiar Link Vitrine */}
                           <button
                             type="button"
                             onClick={() => handleCopyStorefrontUrl(tenant)}
                             title="Copiar Link da Vitrine / Cardápio"
-                            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                              themeMode === 'light'
-                                ? 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                                : 'bg-[#151D24] border-[#253342] text-slate-300 hover:text-white'
-                            }`}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/30 transition-colors cursor-pointer"
                           >
-                            <Link2 className="w-3.5 h-3.5" />
+                            <Link2 className="w-4 h-4" />
                           </button>
 
-                          {/* Ícone Rápido: Copiar Link Painel */}
+                          {/* Ícone Ghost: Copiar Link Painel */}
                           <button
                             type="button"
                             onClick={() => handleCopyDashboardUrl(tenant)}
                             title="Copiar Link do Painel do Lojista"
-                            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                              themeMode === 'light'
-                                ? 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                                : 'bg-[#151D24] border-[#253342] text-slate-300 hover:text-white'
-                            }`}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/30 transition-colors cursor-pointer"
                           >
-                            <Copy className="w-3.5 h-3.5" />
+                            <Copy className="w-4 h-4" />
                           </button>
 
-                          {/* Botão de Menu de Opções (Dropdown) */}
+                          {/* Botão Ghost: Menu de Opções */}
                           <div className="relative">
                             <button
                               type="button"
@@ -922,61 +955,21 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                                 e.stopPropagation();
                                 setActiveMenuTenantId(isMenuOpen ? null : tenant.id);
                               }}
-                              title="Mais opções e configurações"
-                              className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                              title="Mais opções"
+                              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                                 isMenuOpen
-                                  ? 'bg-blue-600 text-white border-blue-500'
-                                  : themeMode === 'light'
-                                  ? 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
-                                  : 'bg-[#1E2732] border-[#2C3B4C] text-slate-300 hover:text-white'
+                                  ? 'bg-blue-600 text-white'
+                                  : 'text-slate-400 hover:text-white hover:bg-slate-700/30'
                               }`}
                             >
-                              <MoreVertical className="w-3.5 h-3.5" />
+                              <MoreVertical className="w-4 h-4" />
                             </button>
 
-                            {/* Dropdown Menu Flutuante */}
+                            {/* Dropdown Menu Flutuante Despoluído (Apenas Ações Reais) */}
                             {isMenuOpen && (
-                              <div className={`absolute right-0 top-8 z-50 w-52 rounded-xl p-1.5 border shadow-xl space-y-0.5 text-left ${
+                              <div className={`absolute right-0 top-8 z-50 w-48 rounded-xl p-1.5 border shadow-xl space-y-0.5 text-left ${
                                 themeMode === 'light' ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#151D24] border-[#2C3B4C] text-slate-200'
                               }`}>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleToggleBillingType(tenant);
-                                    setActiveMenuTenantId(null);
-                                  }}
-                                  className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-500/10 hover:text-blue-500 flex items-center gap-2 transition-colors cursor-pointer"
-                                >
-                                  <Repeat className="w-3.5 h-3.5 text-blue-500" />
-                                  <span>{isMonthly ? 'Mudar para Pré-Pago' : 'Mudar para Mensal Auto'}</span>
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleLiberarPlano(tenant);
-                                    setActiveMenuTenantId(null);
-                                  }}
-                                  className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-emerald-500/10 hover:text-emerald-500 flex items-center gap-2 transition-colors cursor-pointer"
-                                >
-                                  <Zap className="w-3.5 h-3.5 text-emerald-500" />
-                                  <span>Liberar +30 Dias PIX</span>
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleSendPixCobrançaWhatsApp(tenant);
-                                    setActiveMenuTenantId(null);
-                                  }}
-                                  className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-emerald-500/10 hover:text-emerald-500 flex items-center gap-2 transition-colors cursor-pointer"
-                                >
-                                  <MessageCircle className="w-3.5 h-3.5 text-emerald-500" />
-                                  <span>Cobrar via WhatsApp</span>
-                                </button>
-
-                                <div className="border-t border-slate-200 dark:border-neutral-700 my-1" />
-
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -985,32 +978,26 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                                   }}
                                   className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-sky-500/10 hover:text-sky-500 flex items-center gap-2 transition-colors cursor-pointer"
                                 >
-                                  <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-                                  <span>Visual, Cores & Logo</span>
+                                  <Settings className="w-3.5 h-3.5 text-sky-500" />
+                                  <span>Configurações da Loja</span>
                                 </button>
+
+                                <div className="border-t border-slate-200 dark:border-neutral-700 my-1" />
 
                                 <button
                                   type="button"
                                   onClick={() => {
+                                    handleDeleteTenantPrompt(tenant);
                                     setActiveMenuTenantId(null);
-                                    showConfirm({
-                                      title: 'Excluir Estabelecimento',
-                                      message: `Deseja realmente excluir a loja "${tenant.name}"?\nTodos os dados deste estabelecimento serão removidos.`,
-                                      confirmText: 'Sim, excluir loja',
-                                      cancelText: 'Cancelar',
-                                      variant: 'danger',
-                                      onConfirm: () => deleteTenant(tenant.id),
-                                    });
                                   }}
                                   className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-rose-500 hover:bg-rose-500/10 flex items-center gap-2 transition-colors cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
-                                  <span>Excluir Estabelecimento</span>
+                                  <span>Excluir Loja</span>
                                 </button>
                               </div>
                             )}
                           </div>
-
                         </div>
                       </td>
                     </tr>
@@ -1265,25 +1252,13 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                           <button
                             type="button"
                             onClick={() => {
-                              handleToggleBillingType(tenant);
-                              setActiveMenuTenantId(null);
-                            }}
-                            className="w-full px-2 py-1 rounded-lg text-xs font-medium hover:bg-blue-500/10 hover:text-blue-500 flex items-center gap-2 cursor-pointer"
-                          >
-                            <Repeat className="w-3.5 h-3.5 text-blue-500" />
-                            <span>{isMonthly ? 'Mudar para Pré-Pago' : 'Mudar para Mensal Auto'}</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
                               onOpenOnboardingForTenant(tenant);
                               setActiveMenuTenantId(null);
                             }}
-                            className="w-full px-2 py-1 rounded-lg text-xs font-medium hover:bg-sky-500/10 hover:text-sky-500 flex items-center gap-2 cursor-pointer"
+                            className="w-full px-2 py-1.5 rounded-lg text-xs font-medium hover:bg-sky-500/10 hover:text-sky-500 flex items-center gap-2 cursor-pointer"
                           >
-                            <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-                            <span>Visual & Onboarding</span>
+                            <Settings className="w-3.5 h-3.5 text-sky-400" />
+                            <span>Configurações da Loja</span>
                           </button>
 
                           <button
