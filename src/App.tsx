@@ -149,9 +149,9 @@ const AppContent: React.FC = () => {
             )}
 
             {viewRole === 'tenant_admin' && (
-              (!currentTenant && !isMasterAuthenticated) ? (
+              !currentTenant ? (
                 <TenantNotFoundView requestedSlug={notFoundSlug} />
-              ) : (authenticatedTenantId !== currentTenant?.id && !isMasterAuthenticated) ? (
+              ) : authenticatedTenantId !== currentTenant?.id ? (
                 <TenantLoginView
                   onSuccess={() => {
                     setViewRole('tenant_admin');
