@@ -34,7 +34,20 @@ export const RESERVED_SYSTEM_WORDS = [
   'criar_loja',
   'login',
   'admin',
-  'master'
+  'master',
+  'loja',
+  'lojas',
+  'store',
+  'stores',
+  'cardapio',
+  'vitrine',
+  'painel',
+  'mesas',
+  'cozinha',
+  'kds',
+  'pdv',
+  'comanda',
+  'caixa'
 ];
 
 /**
@@ -119,46 +132,21 @@ export function parseCurrentRoute(tenants: Tenant[]): RouteResolution {
   }
 
   // 3. /painel, /admin, /portal soltos (sem slug de loja):
-  // Se houver uma loja ativa salva, restaura para o painel dela; caso contrário vai para login
+  // RÍGIDO: O painel só pode ser acessado pelo link oficial /{slug}/painel.
+  // Links soltos redirecionam obrigatoriamente para a tela de login do lojista (/acesso_lojista).
   if (
     cleanPath === '/painel' || 
     cleanPath === '/admin' || 
     cleanPath === '/portal' || 
     cleanPath === '/master'
   ) {
-    try {
-      const savedTenantId = localStorage.getItem('adegasaas_current_tenant_id') || localStorage.getItem('nuvi_auth_tenant_id');
-      if (savedTenantId) {
-        const found = findTenantBySlugOrId(tenants, savedTenantId);
-        if (found) {
-          return {
-            role: 'tenant_admin',
-            tenantSlugOrId: found.id,
-            isMaster: false,
-            tenantNotFound: false
-          };
-        }
-      }
-    } catch { }
     return { role: 'login_tenant', isMaster: false };
   }
 
-  // 4. /cardapio ou /vitrine soltos: restaura loja ativa ou vai para início
+  // 4. /cardapio ou /vitrine soltos (sem slug de loja):
+  // RÍGIDO: O cardápio só pode ser acessado pelo link oficial /{slug}/cardapio.
+  // Links soltos redirecionam para a página inicial / cadastro.
   if (cleanPath === '/cardapio' || cleanPath === '/vitrine') {
-    try {
-      const savedTenantId = localStorage.getItem('adegasaas_current_tenant_id');
-      if (savedTenantId) {
-        const found = findTenantBySlugOrId(tenants, savedTenantId);
-        if (found) {
-          return {
-            role: 'storefront',
-            tenantSlugOrId: found.id,
-            isMaster: false,
-            tenantNotFound: false
-          };
-        }
-      }
-    } catch { }
     return { role: 'register_tenant', isMaster: false };
   }
 

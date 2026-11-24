@@ -443,13 +443,20 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         })();
 
         const route = parseCurrentRoute(allLoadedTenants);
-        if (route.tenantSlugOrId && !route.tenantNotFound) {
+        // Se a rota for inválida/404 ou não encontrou a loja solicitada na URL: NUNCA faz fallback para outra loja!
+        if (route.tenantNotFound) {
+          return '';
+        }
+        if (route.tenantSlugOrId) {
           const match = findTenantBySlugOrId(allLoadedTenants, route.tenantSlugOrId);
           if (match) return match.id;
+          return '';
+        }
+        if (route.isMaster || route.role === 'register_tenant' || route.role === 'login_tenant') {
+          return '';
         }
       }
-      const saved = localStorage.getItem(STORAGE_KEYS.CURRENT_TENANT_ID);
-      return saved || '';
+      return '';
     } catch {
       return '';
     }
@@ -797,6 +804,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             if (typeof window !== 'undefined') {
               const route = parseCurrentRoute(remoteTenants);
               if (route.tenantNotFound) {
+                setCurrentTenantIdState('');
+                setAuthenticatedTenantId(null);
+                try {
+                  localStorage.removeItem(STORAGE_KEYS.CURRENT_TENANT_ID);
+                  localStorage.removeItem('nuvi_auth_tenant_id');
+                } catch { }
                 setViewRoleState('not_found');
                 setNotFoundSlug(route.requestedSlug || '');
               } else if (route.tenantSlugOrId) {
@@ -808,6 +821,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                   localStorage.setItem('nuvi_auth_tenant_id', matched.id);
                   setViewRoleState(route.role);
                 } else {
+                  setCurrentTenantIdState('');
+                  setAuthenticatedTenantId(null);
+                  try {
+                    localStorage.removeItem(STORAGE_KEYS.CURRENT_TENANT_ID);
+                    localStorage.removeItem('nuvi_auth_tenant_id');
+                  } catch { }
                   setViewRoleState('not_found');
                   setNotFoundSlug(route.tenantSlugOrId);
                 }

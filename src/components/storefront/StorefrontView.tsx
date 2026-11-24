@@ -1823,9 +1823,11 @@ export const StorefrontView: React.FC = () => {
                         ? 'bg-amber-500/15 text-amber-500'
                         : ord.status === 'preparando'
                         ? 'bg-blue-500/15 text-blue-500'
-                        : 'bg-emerald-500/15 text-emerald-500'
+                        : ord.status === 'pronto'
+                        ? 'bg-emerald-500/15 text-emerald-500 font-black'
+                        : 'bg-slate-500/15 text-slate-500'
                     }`}>
-                      {ord.status === 'novo' ? 'Na Cozinha' : ord.status === 'preparando' ? 'Em Preparo' : 'Entregue'}
+                      {ord.status === 'novo' ? 'Na Cozinha' : ord.status === 'preparando' ? 'Em Preparo' : ord.status === 'pronto' ? 'Pronto para Servir' : 'Entregue'}
                     </span>
                   </div>
 
