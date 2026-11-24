@@ -78,6 +78,56 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
   // Estado do plano que está tendo suas permissões configuradas
   const [editingPermissionsPlanId, setEditingPermissionsPlanId] = useState<string | null>(null);
 
+  // Descrição inteligente e dinâmica dos recursos inclusos de cada plano com base nas permissões ativas
+  const getPlanDynamicFeatures = (plan: SaaSSubscriptionPlan): { label: string; enabled: boolean }[] => {
+    const perms = plan.permissions || {};
+    const list: { label: string; enabled: boolean }[] = [];
+
+    // Vitrine Web
+    if (perms.enableStorefront === false) {
+      list.push({ label: 'Sem Vitrine Online (Operação 100% Balcão)', enabled: false });
+    } else {
+      list.push({ label: 'Vitrine Web Exclusiva com link próprio', enabled: true });
+    }
+
+    // Mesas & QR Code
+    if (perms.enableDiningTables !== false) {
+      list.push({ label: 'Cardápio Digital & QR Code nas Mesas', enabled: true });
+    }
+
+    // PDV Balcão
+    if (perms.enablePDVBalcao !== false) {
+      list.push({ label: 'Frente de Caixa Balcão (PDV Ágil)', enabled: true });
+    }
+
+    // Estoque
+    if (perms.enableStockControl !== false) {
+      list.push({ label: 'Controle de Estoque & Reposição', enabled: true });
+    }
+
+    // Delivery por Raio
+    if (perms.enableDeliveryRadius !== false) {
+      list.push({ label: 'Delivery & Frete Dinâmico por Raio (KM)', enabled: true });
+    }
+
+    // Financeiro
+    if (perms.enableFinancialMetrics !== false) {
+      list.push({ label: 'Relatórios Financeiros & Lucro Real', enabled: true });
+    }
+
+    // Leitor de Código de Barras
+    if (perms.enableBarcodeScanner !== false) {
+      list.push({ label: 'Leitor de Código de Barras USB / Bluetooth', enabled: true });
+    }
+
+    // Cozinha KDS
+    if (perms.enableKitchenKDS !== false) {
+      list.push({ label: 'Monitor KDS de Cozinha para Pedidos', enabled: true });
+    }
+
+    return list;
+  };
+
   const handleTogglePlanPermission = (planId: string, feature: keyof SaaSFeaturePermissions) => {
     setPlansState(prev => prev.map(p => {
       if (p.id !== planId) return p;
@@ -127,10 +177,15 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
   };
 
   const handleSavePlans = () => {
-    updateGlobalConfig({ plans: plansState });
+    const plansWithUpdatedFeatures = plansState.map(p => ({
+      ...p,
+      features: getPlanDynamicFeatures(p).filter(f => f.enabled).map(f => f.label)
+    }));
+    setPlansState(plansWithUpdatedFeatures);
+    updateGlobalConfig({ plans: plansWithUpdatedFeatures });
     showAlert({
       title: 'Planos Atualizados!',
-      message: 'Os preços e ativações das opções de assinatura foram atualizados. Apenas os planos ativos aparecerão na tela de cadastro.',
+      message: 'Os preços, permissões e descrições dos recursos foram gravados com sucesso. As lojas com este plano terão acesso imediato aos módulos configurados.',
       variant: 'success'
     });
   };
@@ -601,15 +656,28 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                         </div>
                       </div>
 
-                      {/* Recursos Inclusos */}
+                      {/* Recursos Inclusos Dinâmicos e Inteligentes */}
                       <div className="pt-2 space-y-1.5 border-t border-slate-200 dark:border-[#1C2631]">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                          Recursos Inclusos:
-                        </span>
-                        {plan.features.slice(0, 3).map((feat, i) => (
-                          <div key={i} className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
-                            <Check className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                            <span className="truncate">{feat}</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            Recursos Inclusos:
+                          </span>
+                          <span className="text-[9px] font-mono font-bold text-sky-500">
+                            (dinâmico por permissão)
+                          </span>
+                        </div>
+                        {getPlanDynamicFeatures(plan).slice(0, 4).map((feat, i) => (
+                          <div key={i} className={`flex items-center gap-1.5 text-xs ${
+                            feat.enabled 
+                              ? 'text-slate-700 dark:text-slate-200 font-medium' 
+                              : 'text-slate-400 dark:text-slate-500 line-through'
+                          }`}>
+                            {feat.enabled ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            ) : (
+                              <X className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            )}
+                            <span className="truncate">{feat.label}</span>
                           </div>
                         ))}
                       </div>

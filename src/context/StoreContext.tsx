@@ -27,8 +27,9 @@ interface StoreContextType {
   currentTenantId: string;
   currentTenant: Tenant | undefined;
   viewRole: ViewRole;
-  setViewRole: (role: ViewRole) => void;
+  setViewRole: (role: ViewRole, explicitTenantId?: string) => void;
   setCurrentTenantId: (id: string) => void;
+  impersonateTenant: (tenantId: string) => void;
   allProducts: Product[];
   tenantProducts: Product[];
   allOrders: Order[];
@@ -1025,7 +1026,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setCart([]);
   };
 
-  const setViewRole = (role: ViewRole) => {
+  const setViewRole = (role: ViewRole, explicitTenantId?: string) => {
     setViewRoleState(role);
     localStorage.setItem(STORAGE_KEYS.VIEW_ROLE, role);
 
@@ -1035,8 +1036,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         // Não altera rotas em portas separadas locais 3005 e 3006
         if (port === '3005' || port === '3006') return;
 
-        const tenant = tenants.find((t) => t.id === currentTenantId || t.slug === currentTenantId);
-        const rawSlug = tenant?.slug || tenant?.id || '';
+        const effectiveId = explicitTenantId || currentTenantId;
+        const tenant = tenants.find((t) => t.id === effectiveId || t.slug === effectiveId);
+        const rawSlug = tenant?.slug || tenant?.id || effectiveId || '';
         const cleanSlug = rawSlug.replace(/^\/+|\/+$/g, '');
 
         if (role === 'super_admin') {
@@ -1050,6 +1052,28 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         } else if (role === 'tenant_admin') {
           window.history.pushState({}, '', cleanSlug ? `/${cleanSlug}/painel` : '/acesso_lojista');
         }
+      }
+    } catch { }
+  };
+
+  // Acesso direto do Master ao Painel do Lojista (Garante persistência imediata e sem bloqueio)
+  const impersonateTenant = (tenantId: string) => {
+    const t = tenants.find((x) => x.id === tenantId || x.slug === tenantId);
+    const slug = (t?.slug || t?.id || tenantId).replace(/^\/+|\/+$/g, '');
+
+    setCurrentTenantIdState(tenantId);
+    setAuthenticatedTenantId(tenantId);
+    setIsTenantAuthenticated(true);
+    setViewRoleState('tenant_admin');
+    setCart([]);
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.CURRENT_TENANT_ID, tenantId);
+      localStorage.setItem(STORAGE_KEYS.VIEW_ROLE, 'tenant_admin');
+      localStorage.setItem('nuvi_authenticated_store_v4', tenantId);
+      localStorage.setItem('nuvi_current_tenant_id', tenantId);
+      if (typeof window !== 'undefined' && window.history) {
+        window.history.pushState({}, '', `/${slug}/painel`);
       }
     } catch { }
   };
@@ -2345,6 +2369,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         viewRole,
         setViewRole,
         setCurrentTenantId,
+        impersonateTenant,
         allProducts,
         tenantProducts,
         allOrders,

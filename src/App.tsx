@@ -149,9 +149,9 @@ const AppContent: React.FC = () => {
             )}
 
             {viewRole === 'tenant_admin' && (
-              !currentTenant ? (
+              (!currentTenant && !isMasterAuthenticated) ? (
                 <TenantNotFoundView requestedSlug={notFoundSlug} />
-              ) : (authenticatedTenantId !== currentTenant.id && !isMasterAuthenticated) ? (
+              ) : (authenticatedTenantId !== currentTenant?.id && !isMasterAuthenticated) ? (
                 <TenantLoginView
                   onSuccess={() => {
                     setViewRole('tenant_admin');
@@ -160,8 +160,10 @@ const AppContent: React.FC = () => {
               ) : (
                 <TenantDashboard
                   onOpenOnboarding={() => {
-                    setOnboardingTargetTenant(currentTenant);
-                    setIsOnboardingModalOpen(true);
+                    if (currentTenant) {
+                      setOnboardingTargetTenant(currentTenant);
+                      setIsOnboardingModalOpen(true);
+                    }
                   }}
                 />
               )

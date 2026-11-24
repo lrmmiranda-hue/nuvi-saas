@@ -61,6 +61,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     deleteTenant,
     setCurrentTenantId,
     setViewRole,
+    impersonateTenant,
     showConfirm,
     showAlert,
     themeMode,
@@ -230,22 +231,9 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     return true;
   });
 
-  // Acesso direto ao painel do lojista (Impersonate Master com Permissão Total)
+  // Acesso direto do Master ao painel do lojista (Impersonate sem bloqueio)
   const handleImpersonateTenant = (tenantId: string) => {
-    const t = tenants.find(x => x.id === tenantId);
-    if (t && typeof window !== 'undefined') {
-      const rawSlug = t.slug || t.id;
-      const cleanSlug = rawSlug.replace(/^\/+|\/+$/g, '');
-      window.history.pushState(null, '', `/${cleanSlug}/painel`);
-    }
-    setCurrentTenantId(tenantId);
-    setAuthenticatedTenantId(tenantId);
-    setIsTenantAuthenticated(true);
-    try {
-      localStorage.setItem('nuvi_authenticated_store_v4', tenantId);
-      localStorage.setItem('nuvi_current_tenant_id', tenantId);
-    } catch { }
-    setViewRole('tenant_admin');
+    impersonateTenant(tenantId);
   };
 
   // Acesso direto à vitrine pública da loja
@@ -691,10 +679,8 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                   <th className="py-3 px-3.5">Estabelecimento</th>
                   <th className="py-3 px-3.5">Responsável & Contato</th>
                   <th className="py-3 px-3.5">Plano Contratado</th>
-                  <th className="py-3 px-3.5 text-center">Modelo de Cobrança</th>
                   <th className="py-3 px-3.5">Renovação & Vencimento</th>
-                  <th className="py-3 px-3.5 text-center">Acessar Sistema</th>
-                  <th className="py-3 px-3.5 text-right">Ações & Links</th>
+                  <th className="py-3 px-3.5 text-right">Ações Rápidas</th>
                 </tr>
               </thead>
               <tbody className={`divide-y ${
@@ -779,33 +765,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                         </select>
                       </td>
 
-                      {/* 4. Modelo de Cobrança (Mensal Automático vs Pré-Pago) */}
-                      <td className="py-3 px-3.5 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleBillingType(tenant)}
-                          title="Clique para alternar entre Plano Mensal (Recorrente) e Pré-Pago"
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold border transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xs ${
-                            isMonthly
-                              ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/25'
-                              : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/25'
-                          }`}
-                        >
-                          {isMonthly ? (
-                            <>
-                              <Repeat className="w-3 h-3 animate-spin-slow" />
-                              <span>Mensal Auto</span>
-                            </>
-                          ) : (
-                            <>
-                              <Zap className="w-3 h-3 text-amber-500" />
-                              <span>Pré-Pago</span>
-                            </>
-                          )}
-                        </button>
-                      </td>
-
-                      {/* 5. Renovação & Vencimento (Compacto com Janelinha ao Passar o Mouse) */}
+                      {/* 4. Renovação & Vencimento (Compacto com Janelinha ao Passar o Mouse) */}
                       <td className="py-3 px-3.5">
                         <div className="relative group inline-block">
                           {/* Badge Compacto */}
@@ -875,79 +835,32 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                         </div>
                       </td>
 
-                      {/* 6. Acessar Sistema (Botões Diretos: Painel e Vitrine) */}
-                      <td className="py-3 px-3.5 text-center">
-                        <div className="inline-flex items-center gap-1.5">
-                          {/* Botão Acesso ao Painel */}
-                          <button
-                            type="button"
-                            onClick={() => handleImpersonateTenant(tenant.id)}
-                            className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1 transition-all shadow-xs cursor-pointer active:scale-95"
-                            title="Entrar imediatamente no Painel Administrativo desta loja"
-                          >
-                            <Sliders className="w-3 h-3" />
-                            <span>Painel</span>
-                          </button>
-
-                          {/* Botão Acesso à Vitrine */}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenStorefront(tenant.id)}
-                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 transition-all shadow-xs cursor-pointer active:scale-95"
-                            title="Visualizar a Vitrine e Cardápio Online dos clientes"
-                          >
-                            <Eye className="w-3 h-3" />
-                            <span>Vitrine</span>
-                          </button>
-                        </div>
-                      </td>
-
-                      {/* 7. Ações & Links Compactos (Ícones Ghost Sem Fundo e Sem Repetições) */}
+                      {/* 5. Ações Rápidas & Menu Completo de 3 Pontinhos */}
                       <td className="py-3 px-3.5 text-right relative">
-                        <div className="inline-flex items-center gap-0.5 action-menu-container">
+                        <div className="inline-flex items-center gap-1.5 action-menu-container">
                           
-                          {/* Botão Ghost: Liberar +30 Dias */}
+                          {/* Botão Rápido: Liberar +30 Dias */}
                           <button
                             type="button"
                             onClick={() => handleLiberarPlano(tenant)}
                             title="Renovar por +30 dias via PIX"
-                            className="px-2 py-1.5 rounded-lg text-sky-500 hover:text-sky-400 hover:bg-sky-500/10 font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
+                            className="px-2.5 py-1 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/20 font-bold text-[11px] flex items-center gap-1 transition-all cursor-pointer shadow-2xs active:scale-95"
                           >
                             <Zap className="w-3.5 h-3.5 fill-sky-500" />
                             <span>+30d</span>
                           </button>
 
-                          {/* Ícone Ghost: Cobrança PIX WhatsApp */}
+                          {/* Ícone Rápido: Cobrança PIX WhatsApp */}
                           <button
                             type="button"
                             onClick={() => handleSendPixCobrançaWhatsApp(tenant)}
                             title="Enviar cobrança PIX no WhatsApp do comerciante"
-                            className="p-1.5 rounded-lg text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-xl text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/15 border border-emerald-500/20 transition-all cursor-pointer shadow-2xs active:scale-95"
                           >
                             <MessageCircle className="w-4 h-4" />
                           </button>
 
-                          {/* Ícone Ghost: Copiar Link Vitrine */}
-                          <button
-                            type="button"
-                            onClick={() => handleCopyStorefrontUrl(tenant)}
-                            title="Copiar Link da Vitrine / Cardápio"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/30 transition-colors cursor-pointer"
-                          >
-                            <Link2 className="w-4 h-4" />
-                          </button>
-
-                          {/* Ícone Ghost: Copiar Link Painel */}
-                          <button
-                            type="button"
-                            onClick={() => handleCopyDashboardUrl(tenant)}
-                            title="Copiar Link do Painel do Lojista"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/30 transition-colors cursor-pointer"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
-
-                          {/* Botão Ghost: Menu de Opções */}
+                          {/* Botão de 3 Pontinhos (Menu Completo Compacto com todas as Ações Secundárias) */}
                           <div className="relative">
                             <button
                               type="button"
@@ -955,45 +868,115 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                                 e.stopPropagation();
                                 setActiveMenuTenantId(isMenuOpen ? null : tenant.id);
                               }}
-                              title="Mais opções"
-                              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              title="Mais opções e links da loja"
+                              className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
                                 isMenuOpen
-                                  ? 'bg-blue-600 text-white'
-                                  : 'text-slate-400 hover:text-white hover:bg-slate-700/30'
+                                  ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                                  : 'text-slate-400 hover:text-white hover:bg-slate-700/30 border-transparent hover:border-slate-700'
                               }`}
                             >
                               <MoreVertical className="w-4 h-4" />
                             </button>
 
-                            {/* Dropdown Menu Flutuante Despoluído (Apenas Ações Reais) */}
+                            {/* Dropdown Menu Flutuante Completo */}
                             {isMenuOpen && (
-                              <div className={`absolute right-0 top-8 z-50 w-48 rounded-xl p-1.5 border shadow-xl space-y-0.5 text-left ${
+                              <div className={`absolute right-0 top-9 z-50 w-56 rounded-2xl p-1.5 border shadow-2xl space-y-0.5 text-left animate-in fade-in zoom-in-95 duration-150 ${
                                 themeMode === 'light' ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#151D24] border-[#2C3B4C] text-slate-200'
                               }`}>
+                                
+                                {/* Acesso ao Painel */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleImpersonateTenant(tenant.id);
+                                    setActiveMenuTenantId(null);
+                                  }}
+                                  className="w-full px-2.5 py-2 rounded-xl text-xs font-bold bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white flex items-center gap-2 transition-all cursor-pointer"
+                                >
+                                  <Sliders className="w-3.5 h-3.5" />
+                                  <span>Acessar Painel da Loja</span>
+                                </button>
+
+                                {/* Acesso à Vitrine */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleOpenStorefront(tenant.id);
+                                    setActiveMenuTenantId(null);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 rounded-xl text-xs font-medium hover:bg-emerald-500/10 hover:text-emerald-500 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Eye className="w-3.5 h-3.5 text-emerald-500" />
+                                  <span>Abrir Vitrine / Cardápio</span>
+                                </button>
+
+                                <div className="border-t border-slate-200 dark:border-neutral-800 my-1" />
+
+                                {/* Alternar Modelo de Cobrança */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleToggleBillingType(tenant);
+                                    setActiveMenuTenantId(null);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 rounded-xl text-xs font-medium hover:bg-blue-500/10 hover:text-blue-500 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Repeat className="w-3.5 h-3.5 text-blue-500" />
+                                  <span>{isMonthly ? 'Mudar para Pré-Pago' : 'Mudar para Mensal Auto'}</span>
+                                </button>
+
+                                {/* Copiar Link da Vitrine */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleCopyStorefrontUrl(tenant);
+                                    setActiveMenuTenantId(null);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 rounded-xl text-xs font-medium hover:bg-slate-100 dark:hover:bg-neutral-800 text-slate-600 dark:text-slate-300 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Link2 className="w-3.5 h-3.5 text-sky-500" />
+                                  <span>Copiar Link da Vitrine</span>
+                                </button>
+
+                                {/* Copiar Link do Painel */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleCopyDashboardUrl(tenant);
+                                    setActiveMenuTenantId(null);
+                                  }}
+                                  className="w-full px-2.5 py-1.5 rounded-xl text-xs font-medium hover:bg-slate-100 dark:hover:bg-neutral-800 text-slate-600 dark:text-slate-300 flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  <Copy className="w-3.5 h-3.5 text-sky-500" />
+                                  <span>Copiar Link do Painel</span>
+                                </button>
+
+                                {/* Configurações da Loja */}
                                 <button
                                   type="button"
                                   onClick={() => {
                                     onOpenOnboardingForTenant(tenant);
                                     setActiveMenuTenantId(null);
                                   }}
-                                  className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-sky-500/10 hover:text-sky-500 flex items-center gap-2 transition-colors cursor-pointer"
+                                  className="w-full px-2.5 py-1.5 rounded-xl text-xs font-medium hover:bg-sky-500/10 hover:text-sky-500 flex items-center gap-2 transition-colors cursor-pointer"
                                 >
                                   <Settings className="w-3.5 h-3.5 text-sky-500" />
                                   <span>Configurações da Loja</span>
                                 </button>
 
-                                <div className="border-t border-slate-200 dark:border-neutral-700 my-1" />
+                                <div className="border-t border-slate-200 dark:border-neutral-800 my-1" />
 
+                                {/* Excluir Loja */}
                                 <button
                                   type="button"
                                   onClick={() => {
                                     handleDeleteTenantPrompt(tenant);
                                     setActiveMenuTenantId(null);
                                   }}
-                                  className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-rose-500 hover:bg-rose-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                  className="w-full px-2.5 py-1.5 rounded-xl text-xs font-medium text-rose-500 hover:bg-rose-500/10 flex items-center gap-2 transition-colors cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
-                                  <span>Excluir Loja</span>
+                                  <span>Excluir Estabelecimento</span>
                                 </button>
                               </div>
                             )}
