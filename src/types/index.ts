@@ -342,6 +342,7 @@ export interface Tenant {
   lastPaymentDate?: string; // Data do último pagamento recebido
   lastPaymentMethod?: string; // Método de pagamento (ex: 'PIX')
   monthlyPrice?: number; // Valor da mensalidade do plano
+  billingType?: 'mensal' | 'prepago'; // 'mensal' = Renovação Automática Recorrente | 'prepago' = Pré-pago Manual (+30 dias)
 }
 
 export type ViewRole = 'super_admin' | 'tenant_admin' | 'storefront' | 'register_tenant' | 'login_tenant' | 'not_found';
