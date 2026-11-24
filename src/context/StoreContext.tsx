@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
 import { Tenant, Product, Order, OrderItem, ViewRole, OrderStatus, StockMovement, PaymentMethod, GlobalSaaSConfig, SaaSFeaturePermissions, SaaSSubscriptionPlan, SaaSPromoBanner, BusinessSegmentType, Expense, StoreUser } from '../types';
 import { INITIAL_TENANTS, INITIAL_PRODUCTS, INITIAL_ORDERS } from '../data/mockData';
 import { ConfirmModal, ConfirmDialogOptions, AlertDialogOptions, DialogVariant } from '../components/common/ConfirmModal';
@@ -940,7 +940,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   // Safe current tenant lookup (apenas localiza se existir id/slug válido; NUNCA faz fallback silencioso em tenants[0]!)
-  const currentTenant = useMemo(() => {
+  const currentTenant = React.useMemo(() => {
     if (!currentTenantId) return undefined;
     return (
       findTenantBySlugOrId(tenants, currentTenantId) ||
