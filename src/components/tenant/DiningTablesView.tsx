@@ -21,6 +21,7 @@ import {
   Boxes,
   Check
 } from 'lucide-react';
+import { PDVPixModal } from './PDVPixModal';
 
 export const DiningTablesView: React.FC = () => {
   const {
@@ -50,13 +51,14 @@ export const DiningTablesView: React.FC = () => {
 
   // Modal de fechamento de conta
   const [isClosingModalOpen, setIsClosingModalOpen] = useState(false);
+  const [isPixPaymentModalOpen, setIsPixPaymentModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
   const [applyServiceFee, setApplyServiceFee] = useState(true);
   const [cashAmountGiven, setCashAmountGiven] = useState('');
 
   // Pedidos de mesa ativos (não finalizados nem cancelados)
   const activeTableOrders = tenantOrders.filter(o => 
-    o.deliveryType === 'mesa' && 
+    (o.deliveryType === 'mesa' || o.isTableOrder) && 
     o.status !== 'finalizado' && 
     o.status !== 'cancelado' &&
     o.tableStatus !== 'fechada'
@@ -67,10 +69,13 @@ export const DiningTablesView: React.FC = () => {
     const num = idx + 1;
     const tableIdStr = num.toString().padStart(2, '0');
     
-    // Pedidos vinculados a essa mesa (podem estar como "01", "1", "Mesa 01", etc.)
+    // Pedidos vinculados a essa mesa com comparação robusta por número inteiro
     const orders = activeTableOrders.filter(o => {
       const tNum = (o.tableNumber || '').replace(/\D/g, '');
-      return tNum === num.toString() || o.tableNumber === `Mesa ${tableIdStr}` || o.tableNumber === tableIdStr;
+      const tInt = parseInt(tNum, 10);
+      if (!isNaN(tInt) && tInt === num) return true;
+      const cleanT = (o.tableNumber || '').trim().toLowerCase();
+      return cleanT === `mesa ${num}` || cleanT === `mesa ${tableIdStr}` || cleanT === tableIdStr || cleanT === num.toString();
     });
 
     const isOccupied = orders.length > 0;
@@ -222,18 +227,18 @@ export const DiningTablesView: React.FC = () => {
     printWin.print();
   };
 
-  // Fechar a mesa, registrar recebimento e liberar mesa com VENDA CONSOLIDADA ÚNICA
-  const handleFinalizeAndCloseTable = () => {
+  // Executa o encerramento e consolidação definitiva da mesa
+  const executeCloseTable = (methodToUse: PaymentMethod = paymentMethod) => {
     if (!currentTable) return;
 
     // Consolida todos os itens e pedidos da comanda em UMA ÚNICA venda total
     const consolidated = closeAndConsolidateTableOrders(
       currentTable.number.toString(),
-      paymentMethod,
+      methodToUse,
       applyServiceFee
     );
 
-    const valorTotal = consolidated?.total ?? currentTable.totalAmount;
+    const valorTotal = consolidated?.total ?? (currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0));
 
     showAlert({
       title: 'Mesa Fechada com Sucesso!',
@@ -242,7 +247,19 @@ export const DiningTablesView: React.FC = () => {
     });
 
     setIsClosingModalOpen(false);
+    setIsPixPaymentModalOpen(false);
     setSelectedTableNum(null);
+    setCashAmountGiven('');
+  };
+
+  // Fechar a mesa, registrar recebimento e liberar mesa
+  const handleFinalizeAndCloseTable = () => {
+    if (!currentTable) return;
+    if (paymentMethod === 'pix') {
+      setIsPixPaymentModalOpen(true);
+      return;
+    }
+    executeCloseTable(paymentMethod);
   };
 
   return (
@@ -730,13 +747,94 @@ export const DiningTablesView: React.FC = () => {
               </div>
             </div>
 
+            {/* Detalhes Específicos da Forma de Pagamento */}
+            {paymentMethod === 'pix' && (
+              <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-center space-y-2">
+                <div className="flex items-center justify-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-black text-xs">
+                  <QrCode className="w-4 h-4" />
+                  <span>Pagamento Instantâneo via PIX com QR Code</span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Ao confirmar ou clicar no botão abaixo, o QR Code dinâmico será gerado na tela com o valor exato para o cliente escanear.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsPixPaymentModalOpen(true)}
+                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
+                >
+                  <QrCode className="w-4 h-4" />
+                  <span>Exibir QR Code PIX na Tela 📱</span>
+                </button>
+              </div>
+            )}
+
+            {paymentMethod === 'dinheiro' && (() => {
+              const totalComTaxa = currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0);
+              const valorDado = parseFloat(cashAmountGiven.replace(',', '.')) || 0;
+              const troco = valorDado > totalComTaxa ? valorDado - totalComTaxa : 0;
+              return (
+                <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 space-y-2 text-xs">
+                  <span className="font-bold block text-amber-700 dark:text-amber-400">
+                    Cálculo de Troco (Dinheiro)
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={cashAmountGiven}
+                      onChange={(e) => setCashAmountGiven(e.target.value)}
+                      placeholder="Valor Entregue (Ex: 50,00)"
+                      className="flex-1 px-3 py-2 rounded-xl border bg-white dark:bg-black/40 text-xs font-bold focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setCashAmountGiven(totalComTaxa.toFixed(2))}
+                      className="px-2.5 py-2 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold text-[11px] hover:bg-amber-500/30 cursor-pointer"
+                    >
+                      Exato
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-1.5 pt-1">
+                    {[20, 50, 100, 200].map((val) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setCashAmountGiven(val.toString())}
+                        className="flex-1 py-1 rounded-lg border text-[10px] font-bold bg-white dark:bg-neutral-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 cursor-pointer"
+                      >
+                        R${val}
+                      </button>
+                    ))}
+                  </div>
+                  {valorDado > 0 && (
+                    <div className="flex justify-between items-center pt-1 font-bold border-t border-amber-500/20">
+                      <span>Troco a devolver:</span>
+                      <span className="text-emerald-500 font-black text-sm">
+                        R$ {troco.toFixed(2).replace('.', ',')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {(paymentMethod === 'cartao_debito' || paymentMethod === 'cartao_credito') && (
+              <div className="p-3.5 rounded-2xl border border-sky-500/30 bg-sky-500/10 text-center text-xs space-y-1">
+                <span className="font-bold text-sky-700 dark:text-sky-400 block">
+                  Maquininha de Cartão ({paymentMethod === 'cartao_debito' ? 'Débito' : 'Crédito'})
+                </span>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Passe o cartão do cliente na maquininha física no valor de <strong>R$ {(currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)).toFixed(2).replace('.', ',')}</strong>
+                </p>
+              </div>
+            )}
+
             <button
               type="button"
               onClick={handleFinalizeAndCloseTable}
               className="w-full py-3.5 rounded-2xl nuvi-btn-cyber-blue text-white font-black text-sm shadow-xl shadow-[#0C2340]/40 transition-all cursor-pointer hover:brightness-110 active:scale-95 flex items-center justify-center gap-2"
             >
               <Check className="w-5 h-5 text-white stroke-[3]" />
-              <span>Confirmar Pagamento & Liberar Mesa</span>
+              <span>{paymentMethod === 'pix' ? 'Gerar PIX & Liberar Mesa' : 'Confirmar Pagamento & Liberar Mesa'}</span>
             </button>
           </div>
         </div>
@@ -868,6 +966,17 @@ export const DiningTablesView: React.FC = () => {
           tenant={currentTenant}
           onClose={() => setIsQRCodeModalOpen(false)}
           isLight={isLight}
+        />
+      )}
+
+      {/* Modal de Pagamento PIX com QR Code Dinâmico na Tela */}
+      {isPixPaymentModalOpen && currentTable && currentTenant && (
+        <PDVPixModal
+          totalAmount={currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)}
+          tenant={currentTenant}
+          isLight={isLight}
+          onConfirmPayment={() => executeCloseTable('pix')}
+          onClose={() => setIsPixPaymentModalOpen(false)}
         />
       )}
 

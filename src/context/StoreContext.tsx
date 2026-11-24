@@ -647,7 +647,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (found) {
       // Valida a senha cadastrada pelo lojista (ou padrão '123456' se não definida)
       const expectedPassword = (found.adminPassword && found.adminPassword.trim()) ? found.adminPassword.trim() : '123456';
-      if (pass.trim() && pass.trim() !== expectedPassword) {
+      if (!pass || pass.trim() !== expectedPassword) {
         return false;
       }
       setCurrentTenantId(found.id);
@@ -816,9 +816,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 const matched = findTenantBySlugOrId(remoteTenants, route.tenantSlugOrId);
                 if (matched) {
                   setCurrentTenantIdState(matched.id);
-                  setAuthenticatedTenantId(matched.id);
-                  localStorage.setItem(STORAGE_KEYS.CURRENT_TENANT_ID, matched.id);
-                  localStorage.setItem('nuvi_auth_tenant_id', matched.id);
+                  // Verifica se este navegador já possui login ativo e autenticado para ESTA loja específica
+                  const savedAuthTenant = localStorage.getItem('nuvi_auth_tenant_id');
+                  if (savedAuthTenant === matched.id) {
+                    setAuthenticatedTenantId(matched.id);
+                    setIsTenantAuthenticated(true);
+                  } else {
+                    setAuthenticatedTenantId(null);
+                    setIsTenantAuthenticated(false);
+                  }
                   setViewRoleState(route.role);
                 } else {
                   setCurrentTenantIdState('');
@@ -1992,16 +1998,24 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     applyServiceFee: boolean
   ): Order | undefined => {
     const cleanNum = tableNumber.replace(/\D/g, '');
+    const targetInt = parseInt(cleanNum, 10);
+
     const tableOrders = allOrders.filter(o => {
       if (o.tenantId !== currentTenantId) return false;
+      if (o.status === 'cancelado' || o.tableStatus === 'fechada') return false;
+      if (o.status === 'finalizado') return false;
+      if (o.deliveryType !== 'mesa' && !o.isTableOrder) return false;
+
       const oNum = (o.tableNumber || '').replace(/\D/g, '');
-      return (
-        (o.deliveryType === 'mesa' || o.isTableOrder) &&
-        (oNum === cleanNum || o.tableNumber === tableNumber || o.tableNumber === `Mesa ${cleanNum.padStart(2, '0')}`) &&
-        o.status !== 'finalizado' &&
-        o.status !== 'cancelado' &&
-        o.tableStatus !== 'fechada'
-      );
+      const oInt = parseInt(oNum, 10);
+
+      if (!isNaN(targetInt) && !isNaN(oInt) && targetInt === oInt) {
+        return true;
+      }
+
+      const oStr = (o.tableNumber || '').trim().toLowerCase();
+      const tStr = tableNumber.trim().toLowerCase();
+      return oStr === tStr || oStr.includes(tStr) || tStr.includes(oStr);
     });
 
     if (tableOrders.length === 0) return undefined;
@@ -2010,16 +2024,17 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const subtotal = tableOrders.reduce((acc, o) => acc + (o.subtotal || o.total || 0), 0);
     const serviceFee = applyServiceFee ? subtotal * 0.10 : 0;
     const finalTotal = subtotal + serviceFee;
-    const customerName = tableOrders.find(o => o.customerName && !o.customerName.includes('Cliente Mesa'))?.customerName || `Cliente Mesa ${cleanNum}`;
+    const customerName = tableOrders.find(o => o.customerName && !o.customerName.includes('Cliente Mesa'))?.customerName || `Cliente Mesa ${cleanNum || tableNumber}`;
 
     const partialIds = tableOrders.map(o => o.id);
+    const padNum = !isNaN(targetInt) ? String(targetInt).padStart(2, '0') : (cleanNum || tableNumber);
 
     const consolidatedOrder: Order = {
-      id: `ord-mesa-${cleanNum}-${Date.now().toString().slice(-4)}`,
+      id: `ord-mesa-${padNum}-${Date.now().toString().slice(-4)}`,
       tenantId: currentTenantId,
       channel: 'pdv',
       deliveryType: 'mesa',
-      tableNumber: `Mesa ${cleanNum.padStart(2, '0')}`,
+      tableNumber: `Mesa ${padNum}`,
       isTableOrder: true,
       tableStatus: 'fechada',
       customerName: customerName,
@@ -2030,7 +2045,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       deliveryFee: 0,
       paymentMethod: paymentMethod,
       status: 'finalizado',
-      notes: `Conta Fechada Mesa ${cleanNum}${applyServiceFee ? ' (inclui taxa de serviço 10%)' : ''}`,
+      notes: `Conta Fechada Mesa ${padNum}${applyServiceFee ? ' (inclui taxa de serviço 10%)' : ''}`,
       createdAt: new Date().toISOString(),
     };
 

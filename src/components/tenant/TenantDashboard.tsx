@@ -700,6 +700,16 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 <Store className="w-5 h-5 stroke-[2.2]" />
               </button>
             )}
+
+            {/* Ícone Sair / Desconectar da Loja */}
+            <button
+              type="button"
+              onClick={logoutTenant}
+              title="Sair do Painel (Desconectar sessão)"
+              className="p-2 rounded-xl transition-all cursor-pointer bg-transparent border-0 outline-none flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"
+            >
+              <LogOut className="w-5 h-5 stroke-[2.2]" />
+            </button>
           </div>
 
         </div>

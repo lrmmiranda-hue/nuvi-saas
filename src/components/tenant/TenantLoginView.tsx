@@ -33,11 +33,20 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
     showAlert
   } = useStore();
 
-  const [identifier, setIdentifier] = useState('');
+  const [identifier, setIdentifier] = useState(() => {
+    return currentTenant?.whatsapp?.phoneNumber || currentTenant?.ownerPhone || currentTenant?.ownerEmail || currentTenant?.slug || '';
+  });
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Atualiza identifier quando o currentTenant é carregado
+  React.useEffect(() => {
+    if (currentTenant && !identifier) {
+      setIdentifier(currentTenant.whatsapp?.phoneNumber || currentTenant.ownerPhone || currentTenant.ownerEmail || currentTenant.slug || '');
+    }
+  }, [currentTenant]);
 
   const isLight = true;
 
@@ -98,17 +107,35 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
       isLight ? 'bg-slate-50' : 'bg-transparent'
     }`}>
       <div className="w-full max-w-md">
-        {/* Header Card com Logo Nuvi */}
+        {/* Header Card com Logo Nuvi e Loja */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
             <NuviLogo size="lg" isLight={true} showSubtitle={false} />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Painel do Lojista
-          </h1>
-          <p className="text-xs mt-1.5 text-slate-600">
-            Acesso exclusivo do proprietário e equipe do estabelecimento.
-          </p>
+          {currentTenant ? (
+            <div className="mt-2 p-3 bg-white border border-slate-200 rounded-2xl shadow-xs inline-flex flex-col items-center max-w-sm">
+              <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200 mb-1 flex items-center gap-1">
+                <Lock className="w-3 h-3" /> Acesso Privado ao Painel
+              </span>
+              <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                {currentTenant.name}
+              </h2>
+              {currentTenant.slogan && (
+                <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                  {currentTenant.slogan}
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                Painel do Lojista
+              </h1>
+              <p className="text-xs mt-1.5 text-slate-600">
+                Acesso exclusivo do proprietário e equipe do estabelecimento.
+              </p>
+            </>
+          )}
         </div>
 
         {/* Form Container */}
@@ -221,7 +248,27 @@ export const TenantLoginView: React.FC<TenantLoginViewProps> = ({ onSuccess }) =
         </div>
 
         {/* Footer Navigation */}
-        <div className="mt-6 text-center space-y-4">
+        <div className="mt-6 text-center space-y-3">
+          {currentTenant && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-900 flex flex-col sm:flex-row items-center justify-between gap-2 shadow-2xs">
+              <span className="font-semibold text-[11px]">Você é cliente e deseja ver o cardápio?</span>
+              <button
+                type="button"
+                onClick={() => {
+                  const slug = currentTenant.slug || currentTenant.id;
+                  if (typeof window !== 'undefined') {
+                    window.history.pushState(null, '', `/${slug}/cardapio`);
+                  }
+                  setViewRole('storefront');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+              >
+                <span>Acessar Cardápio Público</span>
+                <ExternalLink className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
           <p className="text-xs text-slate-600">
             Ainda não tem o sistema no seu comércio?{' '}
             <button
