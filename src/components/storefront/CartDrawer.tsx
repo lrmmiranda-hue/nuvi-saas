@@ -52,9 +52,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   } = useStore();
 
   const isLight = themeMode === 'light';
-  const hasTableService = isTableServiceEnabled || tenant.config?.enableTableService || !!tableNumber;
+  const isTablesOnly = tenant.config?.storefrontServiceMode === 'tables_only';
+  const isDeliveryOnly = tenant.config?.storefrontServiceMode === 'delivery_only';
+  const hasTableService = !isDeliveryOnly && Boolean(isTableServiceEnabled ?? (tenant.config?.enableTableService || tableNumber));
 
-  const [deliveryType, setDeliveryType] = useState<DeliveryType>(tableNumber ? 'mesa' : 'delivery');
+  const [deliveryType, setDeliveryType] = useState<DeliveryType>(() => {
+    if (isTablesOnly || tableNumber) return 'mesa';
+    return 'delivery';
+  });
   const [selectedTable, setSelectedTable] = useState<string>(tableNumber || '');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -63,11 +68,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [orderNotes, setOrderNotes] = useState('');
 
   useEffect(() => {
-    if (tableNumber) {
-      setSelectedTable(tableNumber);
+    if (isTablesOnly || tableNumber) {
+      if (tableNumber) setSelectedTable(tableNumber);
       setDeliveryType('mesa');
     }
-  }, [tableNumber]);
+  }, [tableNumber, isTablesOnly]);
 
   // Address
   const [address, setAddress] = useState({
@@ -417,17 +422,32 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (onSetTableNumber) onSetTableNumber('');
-                        setSelectedTable('');
-                        setDeliveryType('delivery');
-                      }}
-                      className="px-2.5 py-1 rounded-lg text-xs font-bold border border-blue-300 dark:border-blue-700/60 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
-                    >
-                      Mudar
-                    </button>
+                    {(!isTablesOnly && tenant.config?.tableSelectionMode !== 'qrcode_fixed') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onSetTableNumber) onSetTableNumber('');
+                          setSelectedTable('');
+                          setDeliveryType('delivery');
+                        }}
+                        className="px-2.5 py-1 rounded-lg text-xs font-bold border border-blue-300 dark:border-blue-700/60 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                      >
+                        Mudar
+                      </button>
+                    )}
+                  </div>
+                ) : isTablesOnly ? (
+                  /* Modo Exclusivo de Mesas / Salão */
+                  <div className={`p-3.5 rounded-2xl border space-y-2 ${
+                    isLight ? 'bg-blue-50/80 border-blue-200 text-blue-950' : 'bg-blue-950/30 border-blue-800/60 text-white'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <UtensilsCrossed className="w-4 h-4 text-blue-500" />
+                      <span className="text-xs font-bold">Consumo Exclusivo no Salão (Mesa)</span>
+                    </div>
+                    <p className={`text-[11px] ${isLight ? 'text-blue-700' : 'text-blue-300'}`}>
+                      Selecione ou confirme sua mesa abaixo para enviar seu pedido diretamente para a cozinha.
+                    </p>
                   </div>
                 ) : (
                   <div className={`space-y-2 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-neutral-800'}`}>

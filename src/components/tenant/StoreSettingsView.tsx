@@ -54,7 +54,8 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
     showAlert,
     logoutTenant,
     setViewRole,
-    generateWhatsAppDirectChatUrl
+    generateWhatsAppDirectChatUrl,
+    isFeatureAllowed,
   } = useStore();
 
   const [activeSubTab, setActiveSubTab] = useState<SettingsSubmenuTab>('cadastrais');
@@ -150,6 +151,24 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
   const handleSaveAll = () => {
     if (!currentTenant) return;
 
+    // Bloqueia e desativa recursos não permitidos pelo plano contratado
+    const canPDV = isFeatureAllowed('enablePDVBalcao');
+    const canOnline = isFeatureAllowed('enableStorefront');
+    const canScanner = isFeatureAllowed('enableBarcodeScanner') && canPDV;
+    const canTables = isFeatureAllowed('enableDiningTables');
+
+    const sanitizedConfigEdits = {
+      ...currentTenant.config,
+      ...configEdits,
+      enablePhysicalStore: canPDV ? (configEdits.enablePhysicalStore ?? true) : false,
+      enableOnlineSales: canOnline ? (configEdits.enableOnlineSales ?? true) : false,
+      enableBarcodeScanner: canScanner ? (configEdits.enableBarcodeScanner ?? true) : false,
+      enableTableService: canTables ? (configEdits.enableTableService ?? false) : false,
+      storefrontServiceMode: canTables ? (configEdits.storefrontServiceMode || 'hybrid') : 'delivery_only',
+      tableSelectionMode: canTables ? (configEdits.tableSelectionMode || 'both') : 'qrcode_fixed',
+      pixKey: pixKeyEdit.trim(),
+    };
+
     updateTenant(currentTenant.id, {
       name: storeNameEdit,
       slogan: sloganEdit,
@@ -157,11 +176,7 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
       ownerPhone: ownerPhoneEdit,
       ownerEmail: ownerEmailEdit,
       document: documentEdit,
-      config: {
-        ...currentTenant.config,
-        ...configEdits,
-        pixKey: pixKeyEdit.trim(),
-      },
+      config: sanitizedConfigEdits,
       whatsapp: {
         ...currentTenant.whatsapp,
         ...whatsAppEdits,
@@ -548,193 +563,338 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
           {/* ======================================================== */}
           {activeSubTab === 'layout' && (
             <div className="space-y-6">
-              {/* Modelo Operacional (Físico vs Online) */}
-              <div className={`p-5 rounded-2xl border space-y-4 ${
-                isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631]'
-              }`}>
-                <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  <Store className="w-4 h-4 text-sky-500" />
-                  <span>Modelo Operacional da Loja</span>
-                </h3>
+              {/* Modelo Operacional (Físico vs Online) com Regras Estritas de Permissão por Plano */}
+              {(() => {
+                const canPDV = isFeatureAllowed('enablePDVBalcao');
+                const canOnline = isFeatureAllowed('enableStorefront');
+                const canScanner = isFeatureAllowed('enableBarcodeScanner') && canPDV;
+                const canTables = isFeatureAllowed('enableDiningTables');
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  {/* Toggle Venda Balcão */}
-                  <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
-                  }`}>
-                    <div>
-                      <span className="font-bold block">Frente de Caixa (PDV Balcão)</span>
-                      <span className="text-[10px] text-slate-400">Ativar vendas rápidas no balcão e mesas</span>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={configEdits.enablePhysicalStore ?? true}
-                      onChange={(e) => setConfigEdits({ ...configEdits, enablePhysicalStore: e.target.checked })}
-                      className="w-4 h-4 rounded cursor-pointer"
-                    />
-                  </div>
+                const PLAN_NAME_MAP: Record<string, string> = {
+                  vitrine: 'Cardápio Digital & QR Mesas',
+                  plan_cardapio: 'Cardápio Digital & QR Mesas',
+                  balcao_estoque: 'Balcão & Estoque (Sem Vitrine)',
+                  plan_balcao_estoque: 'Balcão & Estoque (Sem Vitrine)',
+                  balcao: 'Balcão & PDV Caixa Rápido',
+                  plan_balcao_pdv: 'Balcão & PDV Caixa Rápido',
+                  starter: 'Delivery & Estoque Profissional',
+                  hibrido: 'Delivery & Estoque Profissional',
+                  plan_delivery_estoque: 'Delivery & Estoque Profissional',
+                  pro: 'Nuvi Pro Total',
+                  enterprise: 'Nuvi Pro Total',
+                  plan_nuvi_pro: 'Nuvi Pro Total',
+                };
+                const planDisplayName = PLAN_NAME_MAP[currentTenant?.plan || ''] || 'Plano Personalizado';
 
-                  {/* Toggle Vendas Online / Vitrine */}
-                  <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                return (
+                  <div className={`p-5 rounded-2xl border space-y-4 ${
+                    isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631]'
                   }`}>
-                    <div>
-                      <span className="font-bold block">Vitrine & Cardápio Digital Online</span>
-                      <span className="text-[10px] text-slate-400">Permitir pedidos pelo link/WhatsApp</span>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={configEdits.enableOnlineSales ?? true}
-                      onChange={(e) => setConfigEdits({ ...configEdits, enableOnlineSales: e.target.checked })}
-                      className="w-4 h-4 rounded cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Toggle Leitor Código de Barras */}
-                  <div className={`p-3 rounded-xl border flex items-center justify-between sm:col-span-2 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
-                  }`}>
-                    <div className="flex items-center gap-2">
-                      <Barcode className="w-4 h-4 text-sky-500" />
-                      <div>
-                        <span className="font-bold block">Leitor de Código de Barras USB / Bluetooth</span>
-                        <span className="text-[10px] text-slate-400">Bipar produtos instantaneamente no PDV</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                        <Store className="w-4 h-4 text-sky-500" />
+                        <span>Modelo Operacional da Loja</span>
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 uppercase tracking-tight">
+                          Plano: {planDisplayName}
+                        </span>
                       </div>
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={configEdits.enableBarcodeScanner ?? true}
-                      onChange={(e) => setConfigEdits({ ...configEdits, enableBarcodeScanner: e.target.checked })}
-                      className="w-4 h-4 rounded cursor-pointer"
-                    />
-                  </div>
 
-                  {/* Toggle Atendimento em Mesas & Comandas (Dine-in) */}
-                  <div className={`p-4 rounded-xl border space-y-3 sm:col-span-2 ${
-                    configEdits.enableTableService
-                      ? isLight ? 'bg-sky-50 border-sky-300' : 'bg-sky-950/20 border-sky-500/40'
-                      : isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <UtensilsCrossed className="w-5 h-5 text-sky-500" />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold block text-xs sm:text-sm">
-                              Atendimento em Mesas & Comandas (Dine-in)
-                            </span>
-                            <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-500">
-                              Restaurante & Bar
-                            </span>
+                    <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      Ative ou desative os recursos operacionais liberados de acordo com a contratação do seu plano.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      {/* 1. Toggle Venda Balcão (Apenas se o plano contemplar PDV Balcão) */}
+                      {canPDV && (
+                        <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                          isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                        }`}>
+                          <div>
+                            <span className="font-bold block">Frente de Caixa (PDV Balcão)</span>
+                            <span className="text-[10px] text-slate-400">Ativar vendas rápidas no balcão e comandas</span>
                           </div>
-                          <span className="text-[11px] text-slate-400">
-                            Ao ativar, os pedidos feitos no salão indicam a Mesa e vão direto para a Cozinha sem WhatsApp, acumulando na conta da mesa para recebimento no caixa.
-                          </span>
-                        </div>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={configEdits.enableTableService ?? false}
-                        onChange={(e) => setConfigEdits({ ...configEdits, enableTableService: e.target.checked })}
-                        className="w-5 h-5 rounded text-sky-500 cursor-pointer"
-                      />
-                    </div>
-
-                    {configEdits.enableTableService && (
-                      <div className="pt-3 border-t border-sky-200 dark:border-sky-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                            Mesas no Salão:
-                          </label>
                           <input
-                            type="number"
-                            min="1"
-                            max="60"
-                            value={configEdits.tableCount || 12}
-                            onChange={(e) => setConfigEdits({ ...configEdits, tableCount: Math.max(1, parseInt(e.target.value) || 1) })}
-                            className={`w-20 px-2.5 py-1 rounded-lg text-xs font-bold border outline-none ${
-                              isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#0B0F14] border-[#1C2631] text-white'
-                            }`}
+                            type="checkbox"
+                            checked={configEdits.enablePhysicalStore ?? true}
+                            onChange={(e) => setConfigEdits({ ...configEdits, enablePhysicalStore: e.target.checked })}
+                            className="w-4 h-4 rounded cursor-pointer"
                           />
-                          <span className="text-xs text-slate-400">mesas ativas</span>
                         </div>
+                      )}
 
-                        <button
-                          type="button"
-                          onClick={() => setIsTableQRCodeModalOpen(true)}
-                          className="nuvi-btn-cyber-blue flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs shadow-md transition-all cursor-pointer hover:brightness-110 shrink-0 text-white"
-                        >
-                          <QrCode className="w-3.5 h-3.5" />
-                          <span>Imprimir Plaquinhas QR Code das Mesas</span>
-                        </button>
+                      {/* 2. Toggle Vendas Online / Vitrine (Apenas se o plano contemplar Vitrine) */}
+                      {canOnline && (
+                        <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                          isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                        }`}>
+                          <div>
+                            <span className="font-bold block">Vitrine & Cardápio Digital Online</span>
+                            <span className="text-[10px] text-slate-400">Permitir pedidos pelo link/WhatsApp</span>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={configEdits.enableOnlineSales ?? true}
+                            onChange={(e) => setConfigEdits({ ...configEdits, enableOnlineSales: e.target.checked })}
+                            className="w-4 h-4 rounded cursor-pointer"
+                          />
+                        </div>
+                      )}
+
+                      {/* 3. Toggle Leitor Código de Barras (Apenas se o plano permitir Leitor e PDV) */}
+                      {canScanner && (
+                        <div className={`p-3 rounded-xl border flex items-center justify-between sm:col-span-2 ${
+                          isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <Barcode className="w-4 h-4 text-sky-500" />
+                            <div>
+                              <span className="font-bold block">Leitor de Código de Barras USB / Bluetooth</span>
+                              <span className="text-[10px] text-slate-400">Bipar produtos instantaneamente no PDV</span>
+                            </div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={configEdits.enableBarcodeScanner ?? true}
+                            onChange={(e) => setConfigEdits({ ...configEdits, enableBarcodeScanner: e.target.checked })}
+                            className="w-4 h-4 rounded cursor-pointer"
+                          />
+                        </div>
+                      )}
+
+                      {/* 4. Toggle Atendimento em Mesas & Comandas (Apenas se o plano permitir Mesas) */}
+                      {canTables && (
+                        <div className={`p-4 rounded-xl border space-y-3 sm:col-span-2 ${
+                          configEdits.enableTableService
+                            ? isLight ? 'bg-sky-50 border-sky-300' : 'bg-sky-950/20 border-sky-500/40'
+                            : isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                        }`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <UtensilsCrossed className="w-5 h-5 text-sky-500" />
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold block text-xs sm:text-sm">
+                                    Atendimento em Mesas & Comandas (Dine-in)
+                                  </span>
+                                  <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-500">
+                                    Restaurante & Bar
+                                  </span>
+                                </div>
+                                <span className="text-[11px] text-slate-400">
+                                  Ao ativar, os pedidos feitos no salão indicam a Mesa e vão direto para a Cozinha sem WhatsApp, acumulando na conta da mesa para recebimento no caixa.
+                                </span>
+                              </div>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={configEdits.enableTableService ?? false}
+                              onChange={(e) => setConfigEdits({ ...configEdits, enableTableService: e.target.checked })}
+                              className="w-5 h-5 rounded text-sky-500 cursor-pointer"
+                            />
+                          </div>
+
+                          {configEdits.enableTableService && (
+                            <div className="pt-3 border-t border-sky-200 dark:border-sky-800/40 space-y-4">
+                              {/* 1. Modo de Atendimento do Cardápio */}
+                              <div>
+                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                  Como você deseja operar seu Cardápio Digital?
+                                </label>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfigEdits({ ...configEdits, storefrontServiceMode: 'hybrid' })}
+                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                      (configEdits.storefrontServiceMode || 'hybrid') === 'hybrid'
+                                        ? 'bg-sky-500/15 border-sky-500 text-sky-600 dark:text-sky-400 font-bold shadow-xs'
+                                        : isLight ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-[#0B0F14] border-[#1C2631] text-slate-300 hover:bg-[#151D24]'
+                                    }`}
+                                  >
+                                    <span className="block text-xs font-bold">🔄 Híbrido Completo</span>
+                                    <span className="block text-[10px] text-slate-400 mt-0.5">Delivery em casa + Pedidos na Mesa</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfigEdits({ ...configEdits, storefrontServiceMode: 'tables_only' })}
+                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                      configEdits.storefrontServiceMode === 'tables_only'
+                                        ? 'bg-sky-500/15 border-sky-500 text-sky-600 dark:text-sky-400 font-bold shadow-xs'
+                                        : isLight ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-[#0B0F14] border-[#1C2631] text-slate-300 hover:bg-[#151D24]'
+                                    }`}
+                                  >
+                                    <span className="block text-xs font-bold">🍽️ Somente Salão / Mesas</span>
+                                    <span className="block text-[10px] text-slate-400 mt-0.5">100% focado no consumo local</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfigEdits({ ...configEdits, storefrontServiceMode: 'delivery_only' })}
+                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                      configEdits.storefrontServiceMode === 'delivery_only'
+                                        ? 'bg-sky-500/15 border-sky-500 text-sky-600 dark:text-sky-400 font-bold shadow-xs'
+                                        : isLight ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-[#0B0F14] border-[#1C2631] text-slate-300 hover:bg-[#151D24]'
+                                    }`}
+                                  >
+                                    <span className="block text-xs font-bold">🛵 Somente Delivery</span>
+                                    <span className="block text-[10px] text-slate-400 mt-0.5">Oculta mesas no cardápio online</span>
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* 2. Método de Identificação da Mesa pelos Clientes */}
+                              {configEdits.storefrontServiceMode !== 'delivery_only' && (
+                                <div>
+                                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                    Identificação da Mesa pelo Cliente:
+                                  </label>
+                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => setConfigEdits({ ...configEdits, tableSelectionMode: 'both' })}
+                                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                        (configEdits.tableSelectionMode || 'both') === 'both'
+                                          ? 'bg-sky-500/15 border-sky-500 text-sky-600 dark:text-sky-400 font-bold shadow-xs'
+                                          : isLight ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-[#0B0F14] border-[#1C2631] text-slate-300 hover:bg-[#151D24]'
+                                      }`}
+                                    >
+                                      <span className="block text-xs font-bold">🔀 Ambos (Recomendado)</span>
+                                      <span className="block text-[10px] text-slate-400 mt-0.5">QR Code na mesa ou escolha livre</span>
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => setConfigEdits({ ...configEdits, tableSelectionMode: 'client_select' })}
+                                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                        configEdits.tableSelectionMode === 'client_select'
+                                          ? 'bg-sky-500/15 border-sky-500 text-sky-600 dark:text-sky-400 font-bold shadow-xs'
+                                          : isLight ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-[#0B0F14] border-[#1C2631] text-slate-300 hover:bg-[#151D24]'
+                                      }`}
+                                    >
+                                      <span className="block text-xs font-bold">👆 Cliente Escolhe Mesa</span>
+                                      <span className="block text-[10px] text-slate-400 mt-0.5">Cardápio pergunta em qual mesa ele está</span>
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => setConfigEdits({ ...configEdits, tableSelectionMode: 'qrcode_fixed' })}
+                                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                                        configEdits.tableSelectionMode === 'qrcode_fixed'
+                                          ? 'bg-sky-500/15 border-sky-500 text-sky-600 dark:text-sky-400 font-bold shadow-xs'
+                                          : isLight ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50' : 'bg-[#0B0F14] border-[#1C2631] text-slate-300 hover:bg-[#151D24]'
+                                      }`}
+                                    >
+                                      <span className="block text-xs font-bold">📱 QR Code Fixo na Mesa</span>
+                                      <span className="block text-[10px] text-slate-400 mt-0.5">Mesa travada pela plaquinha lida</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 3. Quantidade de Mesas e Botão de Plaquinhas */}
+                              <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-2">
+                                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                                    Mesas no Salão:
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="60"
+                                    value={configEdits.tableCount || 12}
+                                    onChange={(e) => setConfigEdits({ ...configEdits, tableCount: Math.max(1, parseInt(e.target.value) || 1) })}
+                                    className={`w-20 px-2.5 py-1 rounded-lg text-xs font-bold border outline-none ${
+                                      isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#0B0F14] border-[#1C2631] text-white'
+                                    }`}
+                                  />
+                                  <span className="text-xs text-slate-400">mesas ativas</span>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setIsTableQRCodeModalOpen(true)}
+                                  className="nuvi-btn-cyber-blue flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs shadow-md transition-all cursor-pointer hover:brightness-110 shrink-0 text-white"
+                                >
+                                  <QrCode className="w-3.5 h-3.5" />
+                                  <span>Imprimir Plaquinhas QR Code das Mesas</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Modelo de Exibição dos Itens (Grade vs Lista) - Apenas se o plano contemplar Vitrine */}
+              {isFeatureAllowed('enableStorefront') && (
+                <div className={`p-5 rounded-2xl border space-y-4 ${
+                  isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631]'
+                }`}>
+                  <div>
+                    <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      <Sliders className="w-4 h-4 text-sky-500" />
+                      <span>Estilo Visual da Vitrine & Cardápio</span>
+                    </h3>
+                    <p className={`text-xs mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      Como seus clientes visualizarão os produtos na vitrine digital.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setConfigEdits({ ...configEdits, catalogLayout: 'grid' })}
+                      className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                        (configEdits.catalogLayout || 'grid') === 'grid'
+                          ? 'border-sky-500 bg-sky-500/10'
+                          : isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <LayoutGrid className="w-4 h-4 text-sky-500" />
+                          <span className="font-bold text-xs">Grade com Fotos Grandes</span>
+                        </div>
+                        {(configEdits.catalogLayout || 'grid') === 'grid' && (
+                          <CheckCircle2 className="w-4 h-4 text-sky-500" />
+                        )}
                       </div>
-                    )}
+                      <p className="text-[11px] text-slate-400">
+                        Ideal para adegas, empórios e conveniências com fotos em destaque.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setConfigEdits({ ...configEdits, catalogLayout: 'list' })}
+                      className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                        configEdits.catalogLayout === 'list'
+                          ? 'border-sky-500 bg-sky-500/10'
+                          : isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <List className="w-4 h-4 text-sky-500" />
+                          <span className="font-bold text-xs">Lista Compacta com Miniatura</span>
+                        </div>
+                        {configEdits.catalogLayout === 'list' && (
+                          <CheckCircle2 className="w-4 h-4 text-sky-500" />
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-400">
+                        Ideal para cardápios rápidos estilo restaurante, lanchonete e delivery.
+                      </p>
+                    </button>
                   </div>
                 </div>
-              </div>
-
-              {/* Modelo de Exibição dos Itens (Grade vs Lista) */}
-              <div className={`p-5 rounded-2xl border space-y-4 ${
-                isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631]'
-              }`}>
-                <div>
-                  <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    <Sliders className="w-4 h-4 text-sky-500" />
-                    <span>Estilo Visual da Vitrine & Cardápio</span>
-                  </h3>
-                  <p className={`text-xs mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                    Como seus clientes visualizarão os produtos na vitrine digital.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setConfigEdits({ ...configEdits, catalogLayout: 'grid' })}
-                    className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
-                      (configEdits.catalogLayout || 'grid') === 'grid'
-                        ? 'border-sky-500 bg-sky-500/10'
-                        : isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <LayoutGrid className="w-4 h-4 text-sky-500" />
-                        <span className="font-bold text-xs">Grade com Fotos Grandes</span>
-                      </div>
-                      {(configEdits.catalogLayout || 'grid') === 'grid' && (
-                        <CheckCircle2 className="w-4 h-4 text-sky-500" />
-                      )}
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      Ideal para adegas, empórios e conveniências com fotos em destaque.
-                    </p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setConfigEdits({ ...configEdits, catalogLayout: 'list' })}
-                    className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
-                      configEdits.catalogLayout === 'list'
-                        ? 'border-sky-500 bg-sky-500/10'
-                        : isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <List className="w-4 h-4 text-sky-500" />
-                        <span className="font-bold text-xs">Lista Compacta com Miniatura</span>
-                      </div>
-                      {configEdits.catalogLayout === 'list' && (
-                        <CheckCircle2 className="w-4 h-4 text-sky-500" />
-                      )}
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      Ideal para cardápios rápidos estilo restaurante, lanchonete e delivery.
-                    </p>
-                  </button>
-                </div>
-              </div>
+              )}
 
               {/* Tema de Cores do Painel do Lojista */}
               <div className={`p-5 rounded-2xl border space-y-4 ${

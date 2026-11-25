@@ -165,6 +165,8 @@ export interface StoreManagementConfig {
   enableBarcodeScanner?: boolean; // Trabalhar com leitor de código de barras (USB/Bluetooth)
   enableMenuOnlyMode?: boolean; // Modo Somente Cardápio / Consulta: desativa botão adicionar e carrinho, operando como cardápio puro de mesa
   enableTableService?: boolean; // Atendimento em Mesas & Comandas (Dine-in): pedidos no cardápio vão direto para a cozinha acumulando na mesa
+  storefrontServiceMode?: 'delivery_only' | 'tables_only' | 'hybrid'; // Modalidade de operação: somente delivery, somente mesas no salão, ou híbrido
+  tableSelectionMode?: 'qrcode_fixed' | 'client_select' | 'both'; // Identificação das mesas: QR Code fixo por mesa, escolha manual no cardápio, ou ambos
   tableCount?: number; // Quantidade de mesas do salão (padrão: 12)
   serviceFeePercentage?: number; // Taxa de serviço opcional para fechamento de mesa (ex: 10%)
   catalogLayout?: 'grid' | 'list'; // 'grid': Grade com fotos grandes; 'list': Lista compacta com miniatura

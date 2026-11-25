@@ -192,18 +192,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                 Escolha as cores da marca, o papel de parede (estilo flyer) de acordo com seu comércio e o logotipo da vitrine web.
               </p>
             </div>
-
-            <button
-              onClick={handleSaveBranding}
-              style={{
-                backgroundColor: activeAccent,
-                color: isLightColor(activeAccent) ? '#09090b' : '#ffffff',
-              }}
-              className="px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
-            >
-              <Check className="w-4 h-4" />
-              <span>Salvar Visual & Vitrine</span>
-            </button>
           </div>
 
           {/* PRÉVIA EM TEMPO REAL DA VITRINE ONLINE */}
@@ -304,7 +292,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                             className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md border"
                             style={{
                               backgroundColor: `${brandAccent}15`,
-                              color: isLight ? '#92400e' : brandAccent,
+                              color: brandAccent,
                               borderColor: `${brandAccent}35`,
                             }}
                           >

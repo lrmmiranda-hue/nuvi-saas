@@ -56,9 +56,23 @@ export const StorefrontView: React.FC = () => {
     setViewRole,
     themeMode,
     toggleThemeMode,
+    isFeatureAllowed,
+    showAlert,
   } = useStore();
 
   const isLight = themeMode === 'light';
+
+  // Validação de Permissão de Mesas pelo Plano e Configuração Operacional do Lojista
+  const isDiningTablesPlanAllowed = isFeatureAllowed('enableDiningTables');
+  const serviceMode = currentTenant?.config?.storefrontServiceMode || 'hybrid';
+  const selectionMode = currentTenant?.config?.tableSelectionMode || 'both';
+
+  // Mesas só ficam disponíveis no cardápio se o plano permitir e o lojista não tiver deixado somente delivery
+  const isTableServiceAvailable = Boolean(
+    isDiningTablesPlanAllowed &&
+    currentTenant?.config?.enableTableService !== false &&
+    serviceMode !== 'delivery_only'
+  );
 
   // Atendimento em Mesas (Salão / Dine-in)
   const [tableNumber, setTableNumber] = useState<string | null>(() => {
@@ -73,7 +87,7 @@ export const StorefrontView: React.FC = () => {
   const [isTableOrdersModalOpen, setIsTableOrdersModalOpen] = useState(false);
   const [tempTableInput, setTempTableInput] = useState('');
 
-  const isTableActive = Boolean(currentTenant?.config?.enableTableService || tableNumber);
+  const isTableActive = Boolean(isTableServiceAvailable && (tableNumber || serviceMode === 'tables_only'));
 
   // Pedidos ativos da mesa atual
   const tableOrders = useMemo(() => {
@@ -278,7 +292,7 @@ export const StorefrontView: React.FC = () => {
                     className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md border"
                     style={{
                       backgroundColor: `${brandAccent}15`,
-                      color: isLight ? '#92400e' : brandAccent,
+                      color: brandAccent,
                       borderColor: `${brandAccent}35`,
                     }}
                   >
@@ -364,11 +378,19 @@ export const StorefrontView: React.FC = () => {
                   <div className="flex items-center gap-2.5 shrink-0">
                     <div
                       onClick={() => {
+                        if (selectionMode === 'qrcode_fixed' && tableNumber) {
+                          showAlert({
+                            title: 'Mesa Fixada pelo QR Code',
+                            message: `Você está na Mesa ${tableNumber.replace(/[^0-9]/g, '') || tableNumber}, vinculada pela plaquinha da sua mesa.`,
+                            variant: 'info'
+                          });
+                          return;
+                        }
                         setTempTableInput(tableNumber || '');
                         setIsTableSelectorOpen(true);
                       }}
                       className="cursor-pointer group flex items-center gap-2 transition-all hover:opacity-90"
-                      title="Toque para definir ou alterar o número da sua mesa"
+                      title={selectionMode === 'qrcode_fixed' && tableNumber ? 'Mesa vinculada pela plaquinha QR Code' : 'Toque para escolher ou alterar o número da sua mesa'}
                     >
                       <div 
                         className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0 transition-transform group-hover:scale-105"

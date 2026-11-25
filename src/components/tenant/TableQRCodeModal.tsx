@@ -34,6 +34,134 @@ export const TableQRCodeModal: React.FC<TableQRCodeModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const totalTables = tenant.config?.tableCount || 12;
+
+  const handlePrintAllTables = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Por favor, permita pop-ups para imprimir as plaquinhas de mesa.');
+      return;
+    }
+
+    const cardsHtml = Array.from({ length: totalTables }, (_, i) => {
+      const num = String(i + 1).padStart(2, '0');
+      const tableUrl = `${baseUrl}?mesa=${encodeURIComponent(num)}`;
+      const qrUrl = getQRCodeUrl(tableUrl, 400);
+
+      return `
+        <div class="plate-card">
+          <div class="logo-box">
+            ${tenant.branding?.logoUrl ? `<img src="${tenant.branding.logoUrl}" alt="${tenant.name}" />` : (tenant.name?.substring(0, 2).toUpperCase() || 'NU')}
+          </div>
+          <h1>${tenant.name}</h1>
+          <p class="slogan">${tenant.slogan || 'Cardápio Digital & Atendimento Inteligente'}</p>
+
+          <div class="badge-mesa">MESA ${num}</div>
+
+          <div class="qr-wrapper">
+            <img src="${qrUrl}" alt="QR Code Mesa ${num}" />
+          </div>
+
+          <p class="instruction">📱 Aponte a câmera do seu celular</p>
+          <p class="sub-instruction">Acesse o cardápio, veja fotos e faça seu pedido direto desta mesa!</p>
+
+          <div class="footer">
+            Nuvi SaaS • Tecnologia para Restaurantes, Bares e Adegas
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Plaquinhas de Todas as Mesas (1 a ${totalTables}) - ${tenant.name}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+            * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+            body {
+              background-color: #ffffff;
+              padding: 20px;
+            }
+            .grid-container {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 20px;
+            }
+            .plate-card {
+              width: 100%;
+              max-width: 360px;
+              margin: 0 auto 20px;
+              background: #ffffff;
+              border-radius: 20px;
+              padding: 24px 20px;
+              text-align: center;
+              border: 2px solid #cbd5e1;
+              page-break-inside: avoid;
+            }
+            .logo-box {
+              width: 52px;
+              height: 52px;
+              margin: 0 auto 8px;
+              border-radius: 14px;
+              background: #0ea5e9;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-weight: 800;
+              font-size: 20px;
+              overflow: hidden;
+            }
+            .logo-box img { width: 100%; height: 100%; object-fit: cover; }
+            h1 { font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
+            .slogan { font-size: 11px; color: #64748b; margin-bottom: 12px; }
+            .badge-mesa {
+              display: inline-block;
+              background: #0284c7;
+              color: white;
+              font-weight: 800;
+              font-size: 12px;
+              padding: 3px 14px;
+              border-radius: 16px;
+              margin-bottom: 12px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .qr-wrapper {
+              background: #ffffff;
+              padding: 8px;
+              border-radius: 16px;
+              border: 2.5px solid #0284c7;
+              display: inline-block;
+              margin-bottom: 12px;
+            }
+            .qr-wrapper img { width: 170px; height: 170px; display: block; }
+            .instruction { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+            .sub-instruction { font-size: 10px; color: #64748b; line-height: 1.3; }
+            .footer { margin-top: 14px; padding-top: 10px; border-top: 1px dashed #cbd5e1; font-size: 9px; color: #94a3b8; }
+            @media print {
+              body { padding: 0; }
+              .plate-card { border: 1.5px solid #94a3b8; box-shadow: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="grid-container">
+            ${cardsHtml}
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -284,13 +412,13 @@ export const TableQRCodeModal: React.FC<TableQRCodeModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className={`p-5 border-t flex flex-col sm:flex-row items-center gap-3 ${
+        <div className={`p-5 border-t flex flex-col sm:flex-row items-center gap-2.5 ${
           isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121920] border-[#1C2631]'
         }`}>
           <button
             type="button"
             onClick={onClose}
-            className={`w-full sm:w-auto px-5 py-3 rounded-xl font-bold text-xs transition-colors cursor-pointer border ${
+            className={`w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs transition-colors cursor-pointer border ${
               isLight 
                 ? 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700' 
                 : 'bg-transparent hover:bg-white/5 border-slate-700 text-slate-300'
@@ -302,10 +430,19 @@ export const TableQRCodeModal: React.FC<TableQRCodeModalProps> = ({
           <button
             type="button"
             onClick={handlePrint}
-            className="w-full sm:flex-1 py-3 px-6 rounded-xl font-black text-sm bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 active:scale-98 transition-all cursor-pointer"
+            className="w-full sm:flex-1 py-2.5 px-4 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center gap-1.5 shadow-md active:scale-98 transition-all cursor-pointer border border-slate-700"
           >
-            <Printer className="w-5 h-5" />
-            <span>Imprimir Plaquinha de Mesa (A4)</span>
+            <Printer className="w-4 h-4 text-sky-400" />
+            <span>Imprimir Esta Plaquinha</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePrintAllTables}
+            className="w-full sm:flex-1 py-2.5 px-4 rounded-xl font-black text-xs bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white flex items-center justify-center gap-1.5 shadow-lg shadow-sky-500/25 active:scale-98 transition-all cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-amber-300" />
+            <span>Imprimir Todas as Mesas (1 a {totalTables})</span>
           </button>
         </div>
       </div>
