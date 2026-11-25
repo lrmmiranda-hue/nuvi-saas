@@ -246,14 +246,16 @@ export const StorefrontView: React.FC = () => {
             }}
           >
             {/* 1. Malha de Desenhos Abstratos em Linhas Claras (Line-Art Temático por Comércio) */}
-            <div 
-              className="absolute inset-0 pointer-events-none" 
-              style={{ 
-                backgroundImage: `url("${abstractPatternUrl}")`, 
-                backgroundSize: '160px 70px',
-                backgroundRepeat: 'repeat',
-              }} 
-            />
+            {currentTenant.branding?.patternStyle !== 'none' && (
+              <div 
+                className="absolute inset-0 pointer-events-none transition-opacity duration-300" 
+                style={{ 
+                  backgroundImage: `url("${abstractPatternUrl}")`, 
+                  backgroundSize: '160px 70px',
+                  backgroundRepeat: 'repeat',
+                }} 
+              />
+            )}
 
             {/* 2. Feixe de Luz Shimmer Metálico Dinâmico na Diagonal */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">

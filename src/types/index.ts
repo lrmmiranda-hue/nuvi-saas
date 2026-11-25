@@ -132,6 +132,7 @@ export interface TenantBranding {
   colorMode?: 'dark' | 'light'; // Modo claro ou escuro preferido do lojista
   bannerLighting?: 'brand' | 'neutral' | 'dark_lights' | 'white_lights'; // Estilo de iluminação da vitrine
   catalogLayout?: 'grid' | 'list'; // 'grid' = Grade com cards e fotos grandes; 'list' = Lista compacta com miniatura estilo restaurante/delivery
+  patternStyle?: 'line_art' | 'none'; // 'line_art' = Fundo vetorial temático sutil do comércio; 'none' = Fundo liso minimalista
 }
 
 export interface TenantAddress {

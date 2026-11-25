@@ -250,14 +250,16 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                     }}
                   >
                     {/* 1. Malha de Desenhos Abstratos em Linhas Claras (Line-Art Temático por Comércio) */}
-                    <div 
-                      className="absolute inset-0 pointer-events-none" 
-                      style={{ 
-                        backgroundImage: `url("${abstractPatternUrl}")`, 
-                        backgroundSize: '160px 70px',
-                        backgroundRepeat: 'repeat',
-                      }} 
-                    />
+                    {(brandingEdits?.patternStyle !== 'none') && (
+                      <div 
+                        className="absolute inset-0 pointer-events-none transition-opacity duration-300" 
+                        style={{ 
+                          backgroundImage: `url("${abstractPatternUrl}")`, 
+                          backgroundSize: '160px 70px',
+                          backgroundRepeat: 'repeat',
+                        }} 
+                      />
+                    )}
 
                     {/* 2. Feixe de Luz Shimmer Metálico Dinâmico na Diagonal */}
                     <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
@@ -501,6 +503,262 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                       : 'bg-neutral-950 border-neutral-800 text-neutral-200 placeholder:text-neutral-500 focus:border-blue-500'
                   }`}
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* SEÇÃO 2: ESTILO DE FUNDO DA VITRINE (DESENHOS VETORIAIS LINE-ART DO COMÉRCIO) */}
+          <div className={`p-5 rounded-2xl border space-y-5 transition-colors ${
+            isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
+          }`}>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>Fundo Abstrato da Vitrine: Traços Lineares (Line-Art do Comércio)</span>
+                </h3>
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  ✨ Sem Imagens Pesadas • 100% Vetorial
+                </span>
+              </div>
+              <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                Desenhos de traços lineares finos (outlines sutis) que acompanham a identidade visual da sua loja, adaptando-se harmonicamente tanto ao modo escuro quanto ao modo claro da vitrine web.
+              </p>
+            </div>
+
+            {/* Alternância de Modo: Traços Line-Art vs Fundo Liso */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setBrandingEdits({
+                    ...(brandingEdits || currentTenant.branding),
+                    patternStyle: 'line_art',
+                  });
+                }}
+                className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                  brandingEdits?.patternStyle !== 'none'
+                    ? isLight
+                      ? 'border-blue-600 bg-blue-50/70 text-blue-950 shadow-sm ring-1 ring-blue-500/20'
+                      : 'border-blue-500 bg-blue-950/40 text-white shadow-sm ring-1 ring-blue-500/30'
+                    : isLight
+                    ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                    : 'border-neutral-800 bg-neutral-950/60 hover:bg-neutral-800 text-neutral-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">✨</span>
+                    <span className="text-xs font-black">
+                      Traços Vetoriais Line-Art (Recomendado)
+                    </span>
+                  </div>
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    brandingEdits?.patternStyle !== 'none'
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : isLight ? 'border-slate-300 bg-white' : 'border-neutral-700 bg-neutral-900'
+                  }`}>
+                    {brandingEdits?.patternStyle !== 'none' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                  </div>
+                </div>
+                <p className={`text-[11px] leading-relaxed ${
+                  brandingEdits?.patternStyle !== 'none'
+                    ? isLight ? 'text-blue-900 font-medium' : 'text-blue-200 font-medium'
+                    : isLight ? 'text-slate-500' : 'text-neutral-400'
+                }`}>
+                  Exibe ícones lineares do seu ramo ({getSegmentById(currentTenant.businessSegment).shortLabel}) no topo do cardápio com efeito de iluminação shimmer.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setBrandingEdits({
+                    ...(brandingEdits || currentTenant.branding),
+                    patternStyle: 'none',
+                  });
+                }}
+                className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                  brandingEdits?.patternStyle === 'none'
+                    ? isLight
+                      ? 'border-blue-600 bg-blue-50/70 text-blue-950 shadow-sm ring-1 ring-blue-500/20'
+                      : 'border-blue-500 bg-blue-950/40 text-white shadow-sm ring-1 ring-blue-500/30'
+                    : isLight
+                    ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                    : 'border-neutral-800 bg-neutral-950/60 hover:bg-neutral-800 text-neutral-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">▫️</span>
+                    <span className="text-xs font-black">
+                      Fundo Liso & Gradiente Puro
+                    </span>
+                  </div>
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                    brandingEdits?.patternStyle === 'none'
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : isLight ? 'border-slate-300 bg-white' : 'border-neutral-700 bg-neutral-900'
+                  }`}>
+                    {brandingEdits?.patternStyle === 'none' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                  </div>
+                </div>
+                <p className={`text-[11px] leading-relaxed ${
+                  brandingEdits?.patternStyle === 'none'
+                    ? isLight ? 'text-blue-900 font-medium' : 'text-blue-200 font-medium'
+                    : isLight ? 'text-slate-500' : 'text-neutral-400'
+                }`}>
+                  Mantém apenas o degradê de cores da marca e o reflexo metálico no topo, sem desenhos ilustrados ao fundo.
+                </p>
+              </button>
+            </div>
+
+            {/* Amostra Visual do Padrão Vetorial do Segmento da Loja */}
+            <div className={`p-4 rounded-xl border overflow-hidden relative ${
+              isLight ? 'bg-slate-100 border-slate-300' : 'bg-neutral-950 border-neutral-800'
+            }`}>
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <span className={`text-xs font-bold flex items-center gap-1.5 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <span>Amostra dos Traços Lineares do seu Ramo ({getSegmentById(currentTenant.businessSegment).emoji} {getSegmentById(currentTenant.businessSegment).name}):</span>
+                </span>
+                <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                  {brandingEdits?.patternStyle !== 'none' ? 'Ativo na Vitrine' : 'Desativado (Fundo Liso)'}
+                </span>
+              </div>
+
+              {/* Box com o padrão SVG ao vivo */}
+              <div 
+                className="h-20 rounded-lg border relative overflow-hidden flex items-center justify-center"
+                style={{
+                  backgroundColor: isLight ? '#ffffff' : '#0d1117',
+                  borderColor: `${activeAccent}40`,
+                }}
+              >
+                {brandingEdits?.patternStyle !== 'none' ? (
+                  <>
+                    <div 
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage: `url("${getSegmentAbstractPattern(currentTenant.businessSegment, activeAccent, isLight ? 0.35 : 0.40)}")`,
+                        backgroundSize: '160px 70px',
+                        backgroundRepeat: 'repeat',
+                      }}
+                    />
+                    <span className={`relative z-10 text-[11px] font-bold px-3 py-1 rounded-full border shadow-sm ${
+                      isLight ? 'bg-white/90 text-slate-800 border-slate-200' : 'bg-neutral-900/90 text-neutral-200 border-neutral-700'
+                    }`}>
+                      {getSegmentById(currentTenant.businessSegment).emoji} Traços finos e elegantes combinando com {getSegmentById(currentTenant.businessSegment).shortLabel}
+                    </span>
+                  </>
+                ) : (
+                  <span className={`text-[11px] font-medium ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
+                    Fundo liso ativado — sem desenhos ilustrativos no cabeçalho
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Guia Visual dos 9 Segmentos com Traços Vetoriais Lineares */}
+            <div className="space-y-2 pt-1">
+              <h4 className={`text-xs font-bold ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
+                Desenhos específicos incluídos para cada nicho de comércio:
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {[
+                  {
+                    id: 'sorveteria',
+                    emoji: '🍦',
+                    name: 'Sorveteria',
+                    desc: 'Casquinhas de sorvete, picolés no palito, taça de sundae com cereja e confeitos lineares.',
+                  },
+                  {
+                    id: 'adega',
+                    emoji: '🍷',
+                    name: 'Adega & Bebidas',
+                    desc: 'Garrafas de vinho, taças de brinde, cachos de uva e rolhas em traços finos.',
+                  },
+                  {
+                    id: 'pizzaria',
+                    emoji: '🍕',
+                    name: 'Pizzaria',
+                    desc: 'Fatias de pizza com queijo/calabresa, rolo de massa e tomatinho com folha.',
+                  },
+                  {
+                    id: 'hamburgueria',
+                    emoji: '🍔',
+                    name: 'Hamburgueria & Lanches',
+                    desc: 'Hambúrgueres em camadas, batatas fritas e copos com canudo.',
+                  },
+                  {
+                    id: 'acai',
+                    emoji: '🥣',
+                    name: 'Açaí & Frutas',
+                    desc: 'Tigelas de açaí com frutas, folhas tropicais e bagas.',
+                  },
+                  {
+                    id: 'cafeteria',
+                    emoji: '☕',
+                    name: 'Cafeteria & Padaria',
+                    desc: 'Xícaras com vapor, grãos de café e croissants.',
+                  },
+                  {
+                    id: 'japonesa',
+                    emoji: '🍣',
+                    name: 'Comida Japonesa',
+                    desc: 'Sushis niguiri, rolinhos, tigela de ramen e hashis.',
+                  },
+                  {
+                    id: 'confeitaria',
+                    emoji: '🧁',
+                    name: 'Confeitaria & Doces',
+                    desc: 'Cupcakes com cobertura, pirulitos espirais e fatias de bolo.',
+                  },
+                  {
+                    id: 'geral',
+                    emoji: '🍽️',
+                    name: 'Geral & Gastronomia',
+                    desc: 'Talheres, pratos, sacolas de presentes e estrelas de qualidade.',
+                  },
+                ].map((item) => {
+                  const isCurrent = 
+                    (item.id === 'geral' && !['sorveteria', 'adega', 'pizzaria', 'hamburgueria', 'acai', 'cafeteria', 'japonesa', 'confeitaria'].includes(currentTenant.businessSegment)) ||
+                    (item.id === 'adega' && (currentTenant.businessSegment === 'adega' || currentTenant.businessSegment === 'bebidas')) ||
+                    (item.id === 'hamburgueria' && (currentTenant.businessSegment === 'hamburgueria' || currentTenant.businessSegment === 'lanchonete')) ||
+                    currentTenant.businessSegment === item.id;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={`p-2.5 rounded-xl border text-xs transition-all ${
+                        isCurrent
+                          ? isLight
+                            ? 'bg-amber-50/80 border-amber-400 text-amber-950 shadow-2xs'
+                            : 'bg-amber-950/30 border-amber-500/50 text-white shadow-2xs'
+                          : isLight
+                          ? 'bg-white border-slate-200 text-slate-700'
+                          : 'bg-neutral-950 border-neutral-800 text-neutral-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold flex items-center gap-1.5 text-xs">
+                          <span>{item.emoji}</span>
+                          <span>{item.name}</span>
+                        </span>
+                        {isCurrent && (
+                          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded bg-amber-500 text-black">
+                            Sua Loja
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-[10px] leading-snug ${
+                        isCurrent ? (isLight ? 'text-amber-900 font-medium' : 'text-amber-200 font-medium') : (isLight ? 'text-slate-500' : 'text-neutral-400')
+                      }`}>
+                        {item.desc}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
