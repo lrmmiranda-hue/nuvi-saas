@@ -387,8 +387,8 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           ? 'bg-white border-slate-200 shadow-xs text-slate-900'
           : 'bg-[#11161B] border-[#1C2631] text-white shadow-md'
       }`}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="max-w-2xl">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] uppercase font-black px-2.5 py-1 rounded-full bg-blue-600/15 text-blue-600 dark:text-blue-400 border border-blue-500/30">
                 Super Admin Master
@@ -405,7 +405,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2.5 shrink-0 flex-nowrap self-start lg:self-center">
             {/* Botão Configurar Chave PIX */}
             <button
               type="button"
@@ -413,14 +413,14 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                 setTempPixKey(masterPixKey);
                 setIsPixKeyModalOpen(true);
               }}
-              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shadow-xs ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shadow-xs whitespace-nowrap shrink-0 ${
                 themeMode === 'light'
                   ? 'bg-slate-50 border-slate-300 text-slate-700 hover:bg-slate-100'
                   : 'bg-[#161D24] border-[#253342] text-slate-200 hover:text-white hover:bg-[#1E2732]'
               }`}
               title="Configurar a Chave PIX do Master usada nas mensagens de cobrança"
             >
-              <QrCode className="w-4 h-4 text-emerald-500" />
+              <QrCode className="w-4 h-4 text-emerald-500 shrink-0" />
               <span>Chave PIX Master</span>
             </button>
 
@@ -428,9 +428,9 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             <button
               type="button"
               onClick={onOpenNewTenantModal}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-bold text-xs shadow-md shadow-sky-600/20 hover:shadow-sky-500/35 transition-all active:scale-[0.98] cursor-pointer bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 border border-sky-400/30"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-bold text-xs shadow-md shadow-sky-600/20 hover:shadow-sky-500/35 transition-all active:scale-[0.98] cursor-pointer bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 border border-sky-400/30 whitespace-nowrap shrink-0"
             >
-              <Plus className="w-4 h-4 text-white stroke-[2.5]" />
+              <Plus className="w-4 h-4 text-white stroke-[2.5] shrink-0" />
               <span>Cadastrar Estabelecimento</span>
             </button>
           </div>
