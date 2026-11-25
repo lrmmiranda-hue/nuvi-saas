@@ -3,6 +3,7 @@ import { useStore } from '../../context/StoreContext';
 import { Tenant, BusinessSegmentType } from '../../types';
 import { BUSINESS_SEGMENTS, getSegmentById } from '../../data/businessSegments';
 import { NuviLogo } from '../common/NuviLogo';
+import { PlansComparisonTable } from '../common/PlansComparisonTable';
 import {
   Store,
   User,
@@ -52,6 +53,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   // Plano selecionado e modal de consulta
   const [selectedPlanId, setSelectedPlanId] = useState<string>('plan_nuvi_pro');
   const [isPlansInfoModalOpen, setIsPlansInfoModalOpen] = useState(false);
+  const [infoModalTab, setInfoModalTab] = useState<'table' | 'cards'>('table');
 
   // Estados do Filtro de Ramo no Celular (conforme Imagem 2)
   const [isBranchFilterOpen, setIsBranchFilterOpen] = useState(false);
@@ -825,8 +827,8 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
 
       {/* Modal de Informações e Consulta de Planos */}
       {isPlansInfoModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={`relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden ${
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className={`relative w-full max-w-6xl max-h-[92vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden ${
             isLight ? 'bg-white border-slate-200' : 'bg-[#0F1722] border-[#1C2631]'
           }`}>
             {/* Header do Modal */}
@@ -839,13 +841,13 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 </div>
                 <div>
                   <h3 className={`text-base font-black flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    Planos & Valores Nuvi SaaS
+                    Tabela Comparativa Oficial dos 5 Planos Nuvi SaaS
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 uppercase border border-emerald-500/30">
-                      Apenas Consulta
+                      Demonstrativo de Recursos
                     </span>
                   </h3>
                   <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                    Conheça os planos disponíveis para quando o seu período de teste gratuito for concluído.
+                    Veja em detalhes os recursos liberados em cada plano e selecione a melhor opção para o seu comércio.
                   </p>
                 </div>
               </div>
@@ -862,58 +864,126 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
               </button>
             </div>
 
-            {/* Conteúdo com os 4 Cards */}
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-4">
-              {/* Banner de Observação Importante */}
-              <div className={`p-3.5 rounded-2xl border text-xs flex items-start gap-3 ${
-                isLight ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950' : 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
-              }`}>
-                <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <span className="font-bold block text-sm">
-                    Você não precisa cadastrar nenhum cartão de crédito agora!
-                  </span>
-                  <p className={`text-xs ${isLight ? 'text-emerald-800' : 'text-emerald-300'}`}>
-                    Seu cadastro libera um período de teste gratuito para experimentar todas as ferramentas na prática. O pagamento só acontece após o término do teste, caso decida contratar, de forma direta e sem burocracia <strong>via PIX</strong>.
-                  </p>
-                </div>
-              </div>
+            {/* Abas do Modal: Tabela Comparativa vs Cards */}
+            <div className={`px-6 pt-2 border-b flex items-center gap-2 ${
+              isLight ? 'bg-white border-slate-200' : 'bg-[#0F1722] border-[#1C2631]'
+            }`}>
+              <button
+                type="button"
+                onClick={() => setInfoModalTab('table')}
+                className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+                  infoModalTab === 'table'
+                    ? 'border-sky-500 text-sky-600 dark:text-sky-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                📊 Tabela Comparativa de Recursos (Demonstrativo)
+              </button>
+              <button
+                type="button"
+                onClick={() => setInfoModalTab('cards')}
+                className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+                  infoModalTab === 'cards'
+                    ? 'border-sky-500 text-sky-600 dark:text-sky-400'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                💳 Miniaturas dos 5 Planos
+              </button>
+            </div>
 
-              {/* Grid com os 5 Planos */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                {officialNuviPlans.map((p) => (
-                  <div
-                    key={p.id}
-                    className={`p-4 rounded-2xl border flex flex-col justify-between transition-all ${
-                      isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#121B27] border-[#1C2631] text-white'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-1 mb-2">
-                        <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">
-                          {p.tag}
-                        </span>
-                        <span className="text-base">{p.icon}</span>
-                      </div>
-                      <h4 className="font-black text-xs leading-snug mb-1">
-                        {p.name}
-                      </h4>
-                      <p className={`text-[11px] leading-relaxed line-clamp-3 mb-3 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                        {p.description}
+            {/* Conteúdo com Scroll */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-4">
+              {infoModalTab === 'table' ? (
+                <PlansComparisonTable
+                  selectedPlanId={selectedPlanId}
+                  onSelectPlan={(id) => {
+                    setSelectedPlanId(id);
+                    setIsPlansInfoModalOpen(false);
+                    showAlert({
+                      title: 'Plano Selecionado!',
+                      message: 'Sua escolha foi atualizada. Ao concluir o cadastro, você testará este plano gratuitamente por 7 dias.',
+                      variant: 'success'
+                    });
+                  }}
+                  isLight={isLight}
+                />
+              ) : (
+                <>
+                  {/* Banner de Observação Importante */}
+                  <div className={`p-3.5 rounded-2xl border text-xs flex items-start gap-3 ${
+                    isLight ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950' : 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
+                  }`}>
+                    <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <span className="font-bold block text-sm">
+                        Você não precisa cadastrar nenhum cartão de crédito agora!
+                      </span>
+                      <p className={`text-xs ${isLight ? 'text-emerald-800' : 'text-emerald-300'}`}>
+                        Seu cadastro libera um período de teste gratuito para experimentar todas as ferramentas na prática. O pagamento só acontece após o término do teste, caso decida contratar, de forma direta e sem burocracia <strong>via PIX</strong>.
                       </p>
                     </div>
-
-                    <div className={`pt-3 border-t flex items-baseline gap-1 ${isLight ? 'border-slate-200' : 'border-[#1C2631]'}`}>
-                      <span className="text-xl font-black text-sky-500">
-                        R$ {p.price.toFixed(2).replace('.', ',')}
-                      </span>
-                      <span className={`text-[10px] font-semibold ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
-                        /mês
-                      </span>
-                    </div>
                   </div>
-                ))}
-              </div>
+
+                  {/* Grid com os 5 Planos */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    {officialNuviPlans.map((p) => {
+                      const isSelected = selectedPlanId === p.id;
+                      return (
+                        <div
+                          key={p.id}
+                          className={`p-4 rounded-2xl border flex flex-col justify-between transition-all ${
+                            isSelected
+                              ? 'border-sky-500 ring-2 ring-sky-500/25 bg-sky-500/5'
+                              : isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#121B27] border-[#1C2631] text-white'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-1 mb-2">
+                              <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">
+                                {p.tag}
+                              </span>
+                              <span className="text-base">{p.icon}</span>
+                            </div>
+                            <h4 className="font-black text-xs leading-snug mb-1">
+                              {p.name}
+                            </h4>
+                            <p className={`text-[11px] leading-relaxed line-clamp-3 mb-3 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                              {p.description}
+                            </p>
+                          </div>
+
+                          <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-[#1C2631]">
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-lg font-black text-sky-500">
+                                R$ {p.price.toFixed(2).replace('.', ',')}
+                              </span>
+                              <span className={`text-[10px] font-semibold ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
+                                /mês
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedPlanId(p.id);
+                                setIsPlansInfoModalOpen(false);
+                              }}
+                              className={`w-full py-1.5 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-sky-600 text-white'
+                                  : 'bg-sky-500/10 hover:bg-sky-600 text-sky-600 hover:text-white dark:text-sky-400'
+                              }`}
+                            >
+                              {isSelected ? 'Selecionado' : 'Escolher'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Footer do Modal */}
@@ -921,7 +991,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
               isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121B27] border-[#1C2631]'
             }`}>
               <span className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                A escolha definitiva do modelo de foco ocorre na tela seguinte de configuração.
+                Você poderá alterar ou fazer upgrade de plano a qualquer momento no painel.
               </span>
               <button
                 type="button"

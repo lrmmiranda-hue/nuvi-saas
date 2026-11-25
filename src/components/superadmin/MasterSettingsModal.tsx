@@ -3,6 +3,7 @@ import { useStore, DEFAULT_GLOBAL_CONFIG } from '../../context/StoreContext';
 import { BUSINESS_SEGMENTS } from '../../data/businessSegments';
 import { BusinessSegmentType, SaaSFeaturePermissions, SaaSSubscriptionPlan, SaaSPromoBannerTheme } from '../../types';
 import { PromoFlyerBanner, PROMO_BANNER_THEMES } from '../common/PromoFlyerBanner';
+import { PlansComparisonTable } from '../common/PlansComparisonTable';
 import { 
   Settings, 
   X, 
@@ -56,8 +57,9 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
   // Estado da aba de permissões
   const [selectedTarget, setSelectedTarget] = useState<'global' | BusinessSegmentType>('global');
 
-  // Estado local para os 4 planos
+  // Estado local para os 5 planos
   const [plansState, setPlansState] = useState<SaaSSubscriptionPlan[]>(globalConfig.plans);
+  const [showPlansComparisonTable, setShowPlansComparisonTable] = useState(false);
 
   // Estado local para o banner promocional
   const [promoState, setPromoState] = useState(globalConfig.promoBanner);
@@ -578,14 +580,42 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
           {activeTab === 'plans' && (
             <div className="space-y-4">
               
-              <div className="space-y-0.5">
-                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
-                  Tabela Oficial de Preços dos 5 Planos Nuvi SaaS
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Defina os valores mensais e ative ou configure os módulos e permissões que cada plano terá direito.
-                </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200 dark:border-[#1C2631]">
+                <div className="space-y-0.5">
+                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>Tabela Oficial de Preços dos 5 Planos Nuvi SaaS</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">
+                      Oficial
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Defina os valores mensais e ative ou configure os módulos e permissões que cada plano terá direito.
+                  </p>
+                </div>
+
+                {/* Botão de Alternância para o Demonstrativo Comparativo */}
+                <button
+                  type="button"
+                  onClick={() => setShowPlansComparisonTable(!showPlansComparisonTable)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border flex items-center gap-2 shrink-0 ${
+                    showPlansComparisonTable
+                      ? 'bg-sky-600 text-white border-sky-500 shadow-md shadow-sky-500/25'
+                      : isLight
+                      ? 'bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200'
+                      : 'bg-sky-950/40 hover:bg-sky-950/70 text-sky-300 border-sky-500/30'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4 text-sky-500" />
+                  <span>{showPlansComparisonTable ? 'Ocultar Demonstrativo' : '📊 Demonstrativo de Recursos dos 5 Planos'}</span>
+                </button>
               </div>
+
+              {/* Tabela Demonstrativa Comparativa (Quando ativada pelo Master) */}
+              {showPlansComparisonTable && (
+                <div className="p-4 rounded-3xl border border-sky-500/30 bg-sky-500/5 animate-in fade-in duration-200">
+                  <PlansComparisonTable isLight={isLight} />
+                </div>
+              )}
 
               {/* Grid dos 5 Planos Compactos */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5">
