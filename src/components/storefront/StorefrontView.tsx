@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Product, CategoryType, Order } from '../../types';
 import { getTenantActiveCategories, getCategoryDisplayName } from '../../data/businessSegments';
