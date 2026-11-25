@@ -81,11 +81,21 @@ export const StorefrontView: React.FC = () => {
   const [tableNumber, setTableNumber] = useState<string | null>(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      return params.get('mesa') || params.get('table') || null;
+      return params.get('mesa') || params.get('table') || sessionStorage.getItem('nuvi_store_table') || null;
     } catch {
       return null;
     }
   });
+
+  useEffect(() => {
+    try {
+      if (tableNumber) {
+        sessionStorage.setItem('nuvi_store_table', tableNumber);
+      } else {
+        sessionStorage.removeItem('nuvi_store_table');
+      }
+    } catch {}
+  }, [tableNumber]);
   const [isTableSelectorOpen, setIsTableSelectorOpen] = useState(false);
   const [isTableOrdersModalOpen, setIsTableOrdersModalOpen] = useState(false);
   const [tempTableInput, setTempTableInput] = useState('');
@@ -427,24 +437,30 @@ export const StorefrontView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 2. NOME DA LOJA COM BADGE E SETA > */}
+                {/* 2. NOME DA LOJA COM BADGE, SLOGAN E SETA > */}
                 <div
                   onClick={() => setIsStoreInfoModalOpen(true)}
                   className="flex items-center justify-between cursor-pointer group py-1"
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
-                      style={{ backgroundColor: brandAccent }}
-                    >
-                      <Sparkles className="w-3 h-3" />
-                    </span>
-                    <h1
-                      className="text-base sm:text-xl font-black tracking-tight truncate flex items-center gap-1.5"
-                      style={{ color: isLight ? '#0f172a' : '#ffffff' }}
-                    >
-                      {currentTenant.name}
-                    </h1>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
+                        style={{ backgroundColor: brandAccent }}
+                      >
+                        <Sparkles className="w-3 h-3" />
+                      </span>
+                      <h1
+                        className="text-base sm:text-xl font-black tracking-tight truncate flex items-center gap-1.5"
+                        style={{ color: isLight ? '#0f172a' : '#ffffff' }}
+                      >
+                        {currentTenant.name}
+                      </h1>
+                    </div>
+                    {/* Slogan abaixo do nome Donana */}
+                    <p className={`text-xs mt-0.5 font-medium line-clamp-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      {currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                    </p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white shrink-0 transition-transform group-hover:translate-x-0.5" />
                 </div>
@@ -462,7 +478,14 @@ export const StorefrontView: React.FC = () => {
                         <div className={`p-2.5 rounded-2xl border flex items-center justify-between gap-3 ${
                           isLight ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950' : 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
                         }`}>
-                          <div className="flex items-center gap-2.5">
+                          <div
+                            onClick={() => {
+                              setTempTableInput(tableNumber || '');
+                              setIsTableSelectorOpen(true);
+                            }}
+                            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
+                            title="Toque para alterar a mesa"
+                          >
                             <div
                               className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
                               style={{ backgroundColor: brandPrimary }}
@@ -475,7 +498,7 @@ export const StorefrontView: React.FC = () => {
                                 Consumo no Local
                               </span>
                               <span className="text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                                Mesa {tableNumber?.replace(/[^0-9]/g, '') || tableNumber} Selecionada
+                                Mesa {tableNumber?.replace(/[^0-9]/g, '') || tableNumber}
                               </span>
                             </div>
                           </div>
@@ -483,18 +506,8 @@ export const StorefrontView: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
-                              onClick={() => {
-                                setTempTableInput(tableNumber || '');
-                                setIsTableSelectorOpen(true);
-                              }}
-                              className="text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
-                            >
-                              Trocar Mesa ➔
-                            </button>
-                            <button
-                              type="button"
                               onClick={() => setIsTableOrdersModalOpen(true)}
-                              className="px-2.5 py-1.5 rounded-xl text-xs font-black text-white shadow-xs flex items-center gap-1 cursor-pointer shrink-0"
+                              className="px-3 py-1.5 rounded-xl text-xs font-black text-white shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
                               style={{ backgroundColor: brandPrimary }}
                             >
                               <ReceiptText className="w-3.5 h-3.5" />

@@ -376,18 +376,23 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                             </div>
                           </div>
 
-                          {/* Nome da Loja com Badge e Seta > */}
+                          {/* Nome da Loja com Badge, Slogan e Seta > */}
                           <div className="flex items-center justify-between py-1">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span
-                                className="w-4 h-4 rounded-full flex items-center justify-center text-white shrink-0"
-                                style={{ backgroundColor: brandAccent }}
-                              >
-                                <Sparkles className="w-2.5 h-2.5" />
-                              </span>
-                              <h1 className="text-sm font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                                {currentTenant.name}
-                              </h1>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span
+                                  className="w-4 h-4 rounded-full flex items-center justify-center text-white shrink-0"
+                                  style={{ backgroundColor: brandAccent }}
+                                >
+                                  <Sparkles className="w-2.5 h-2.5" />
+                                </span>
+                                <h1 className="text-sm font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                  {currentTenant.name}
+                                </h1>
+                              </div>
+                              <p className={`text-[10px] mt-0.5 font-medium line-clamp-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                                {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                              </p>
                             </div>
                             <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                           </div>
