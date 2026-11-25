@@ -224,16 +224,29 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                 </div>
               </div>
 
-              {/* Banner Hero Preview - Luxury Glassmorphism & Ambient Glow */}
+              {/* Banner Hero Preview - Luxury Glassmorphism com Borda Cinza Claro & Animação Flash */}
               {(() => {
                 const brandAccent = brandingEdits?.accentColor || currentTenant.branding.accentColor || '#F59E0B';
                 const brandPrimary = brandingEdits?.primaryColor || currentTenant.branding.primaryColor || '#881337';
+                const bannerStyle = brandingEdits?.bannerStyle || currentTenant.branding?.bannerStyle || 'silver_flash';
 
-                const luxuryBg = isLight
-                  ? `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}14 0%, transparent 60%), radial-gradient(ellipse 70% 70% at 10% 90%, ${brandPrimary}0D 0%, transparent 55%), linear-gradient(135deg, #ffffff 0%, #fbfbfc 50%, #f4f5f7 100%)`
-                  : `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}26 0%, transparent 65%), radial-gradient(ellipse 75% 70% at 10% 90%, ${brandPrimary}33 0%, transparent 60%), linear-gradient(140deg, #0d0f15 0%, #12151f 40%, #090a0f 100%)`;
+                let luxuryBg = '';
+                if (bannerStyle === 'platinum_minimal') {
+                  luxuryBg = isLight
+                    ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)'
+                    : 'linear-gradient(140deg, #090b0e 0%, #0e1217 50%, #06080a 100%)';
+                } else if (bannerStyle === 'brand_aurora_flash') {
+                  luxuryBg = isLight
+                    ? `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}18 0%, transparent 60%), radial-gradient(ellipse 70% 70% at 10% 90%, ${brandPrimary}12 0%, transparent 55%), linear-gradient(135deg, #ffffff 0%, #fbfbfc 50%, #f4f5f7 100%)`
+                    : `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}30 0%, transparent 65%), radial-gradient(ellipse 75% 70% at 10% 90%, ${brandPrimary}40 0%, transparent 60%), linear-gradient(140deg, #0d0f15 0%, #12151f 40%, #090a0f 100%)`;
+                } else {
+                  luxuryBg = isLight
+                    ? `radial-gradient(ellipse 80% 70% at 80% 20%, ${brandAccent}12 0%, transparent 60%), linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #f1f5f9 100%)`
+                    : `radial-gradient(ellipse 80% 70% at 80% 20%, ${brandAccent}22 0%, transparent 65%), linear-gradient(140deg, #0b0e14 0%, #111620 45%, #080a0f 100%)`;
+                }
 
-                const luxuryBorder = isLight ? `${brandAccent}35` : `${brandAccent}40`;
+                // Borda Cinza Claro Fina e Elegante solicitada pelo usuário
+                const luxuryBorder = isLight ? '#cbd5e1' : '#334155';
 
                 return (
                   <div
@@ -245,35 +258,41 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                       borderColor: luxuryBorder,
                     }}
                   >
-                    {/* 1. Iluminação Ambiente Suave de Fundo (Aura Glow Sofisticada) */}
-                    <div 
-                      className="pointer-events-none absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-35 mix-blend-screen"
-                      style={{
-                        background: `radial-gradient(circle, ${brandAccent}55 0%, transparent 70%)`
-                      }}
-                    />
-                    <div 
-                      className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-25 mix-blend-screen"
-                      style={{
-                        background: `radial-gradient(circle, ${brandPrimary}60 0%, transparent 70%)`
-                      }}
-                    />
+                    {/* 1. Iluminação Ambiente Suave de Fundo */}
+                    {bannerStyle !== 'platinum_minimal' && (
+                      <>
+                        <div 
+                          className="pointer-events-none absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-35 mix-blend-screen"
+                          style={{
+                            background: `radial-gradient(circle, ${brandAccent}55 0%, transparent 70%)`
+                          }}
+                        />
+                        <div 
+                          className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-20 mix-blend-screen"
+                          style={{
+                            background: `radial-gradient(circle, ${brandPrimary}60 0%, transparent 70%)`
+                          }}
+                        />
+                      </>
+                    )}
 
-                    {/* 2. Feixe de Luz Shimmer Metálico Dinâmico na Diagonal */}
+                    {/* 2. Feixe de Luz Flash Metálico de Alto Impacto (Flesh / Shimmer Metallic Flash) */}
                     <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
                       <div 
-                        className="w-1/2 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-40"
+                        className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
                         style={{
-                          background: `linear-gradient(90deg, transparent 0%, ${brandAccent}10 30%, rgba(255, 255, 255, 0.45) 50%, ${brandAccent}15 70%, transparent 100%)`
+                          background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
                         }}
                       />
                     </div>
 
-                    {/* 3. Linha Acetinada de Reflexo de Borda Superior */}
+                    {/* 3. Linha Acetinada Prateada com Reflexo Flash no Topo */}
                     <div 
-                      className="absolute top-0 inset-x-0 h-[1px] pointer-events-none opacity-40"
+                      className="absolute top-0 inset-x-0 h-[1.5px] pointer-events-none opacity-60"
                       style={{
-                        background: `linear-gradient(90deg, transparent 0%, ${brandAccent} 40%, rgba(255,255,255,0.8) 50%, ${brandAccent} 60%, transparent 100%)`
+                        background: isLight
+                          ? 'linear-gradient(90deg, transparent 0%, #94a3b8 20%, #ffffff 50%, #94a3b8 80%, transparent 100%)'
+                          : 'linear-gradient(90deg, transparent 0%, #475569 20%, #e2e8f0 50%, #475569 80%, transparent 100%)'
                       }}
                     />
 
@@ -505,7 +524,107 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
             </div>
           </div>
 
-          {/* SEÇÃO 2: CORES DA VITRINE DO CARDÁPIO ONLINE */}
+          {/* SEÇÃO 2: ESTILOS DE BANNER HERO (BORDA CINZA CLARO & ANIMAÇÃO FLASH) */}
+          <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
+            isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
+          }`}>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <Sparkles className="w-4 h-4 text-sky-500" />
+                  <span>Estilos de Banner da Vitrine (Borda Cinza Claro & Efeito Flash)</span>
+                </h3>
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-500 border border-sky-500/20">
+                  ⚡ Feixe de Luz Reluzente em Tempo Real
+                </span>
+              </div>
+              <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                Selecione o modelo de acabamento do cabeçalho da sua vitrine. Todos possuem borda cinza claro fina e animação com flash de luz metálico contínuo.
+              </p>
+            </div>
+
+            {/* Grid dos 3 Modelos de Banner com Borda Cinza Claro e Flash */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              {[
+                {
+                  id: 'silver_flash',
+                  name: 'Flash Silver Luxury',
+                  badge: 'Mais Recomendado',
+                  desc: 'Borda cinza claro nítida, fundo dark obsidian acetinado e feixe flash prateado cruzando o banner.',
+                  icon: '✨',
+                },
+                {
+                  id: 'brand_aurora_flash',
+                  name: 'Brand Aurora Flash',
+                  badge: 'Cores da Marca',
+                  desc: 'Borda cinza claro com aura suave das cores do seu comércio e flash metálico reluzente.',
+                  icon: '🌟',
+                },
+                {
+                  id: 'platinum_minimal',
+                  name: 'Platinum Minimal',
+                  badge: 'Ultra Clean',
+                  desc: 'Fundo preto carbono puro ou branco clean, borda cinza claro e flash sutil estilo Apple.',
+                  icon: '💎',
+                },
+              ].map((style) => {
+                const currentBannerStyle = brandingEdits?.bannerStyle || currentTenant.branding?.bannerStyle || 'silver_flash';
+                const isSelected = currentBannerStyle === style.id;
+
+                return (
+                  <button
+                    key={style.id}
+                    type="button"
+                    onClick={() => {
+                      setBrandingEdits({
+                        ...(brandingEdits || currentTenant.branding),
+                        bannerStyle: style.id as any,
+                      });
+                    }}
+                    className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 relative overflow-hidden ${
+                      isSelected
+                        ? isLight
+                          ? 'border-sky-500 bg-sky-50/70 text-slate-900 shadow-sm ring-1 ring-sky-500/30'
+                          : 'border-sky-500 bg-sky-950/40 text-white shadow-sm ring-1 ring-sky-500/30'
+                        : isLight
+                        ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                        : 'border-neutral-800 bg-neutral-950/60 hover:bg-neutral-800 text-neutral-300'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-base">{style.icon}</span>
+                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                          isSelected
+                            ? 'bg-sky-500 text-white'
+                            : isLight ? 'bg-slate-200 text-slate-700' : 'bg-neutral-800 text-slate-400'
+                        }`}>
+                          {style.badge}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-black">{style.name}</h4>
+                      <p className={`text-[11px] leading-relaxed mt-1 ${
+                        isSelected ? (isLight ? 'text-slate-800' : 'text-slate-200') : (isLight ? 'text-slate-500' : 'text-neutral-400')
+                      }`}>
+                        {style.desc}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-neutral-800/80">
+                      <span className="text-[10px] font-bold text-slate-400">
+                        Borda: Cinza Claro
+                      </span>
+                      <span className={`text-[10px] font-black ${isSelected ? 'text-sky-500' : 'text-slate-400'}`}>
+                        {isSelected ? '✓ Ativo no Banner' : 'Selecionar'}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SEÇÃO 3: CORES DA VITRINE DO CARDÁPIO ONLINE */}
           <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
             isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
           }`}>
@@ -867,7 +986,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
             </div>
           </div>
 
-          {/* SEÇÃO 3: TEXTOS E AVISOS DA VITRINE */}
+          {/* SEÇÃO 4: TEXTOS E AVISOS DA VITRINE */}
           <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
             isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
           }`}>

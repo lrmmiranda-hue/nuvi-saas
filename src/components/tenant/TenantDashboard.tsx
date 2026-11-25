@@ -677,6 +677,25 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               </button>
             )}
 
+            {/* Botão Rápido: Gestão Financeira & Métricas (Apenas se o plano tiver permissão) */}
+            {allowMetrics && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('metricas')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer border ${
+                  activeTab === 'metricas'
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-500/30'
+                    : isLight
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100'
+                    : 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300 hover:bg-emerald-900/50'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Métricas & Finanças</span>
+                <span className="sm:hidden">Finanças</span>
+              </button>
+            )}
+
             {/* Ícone sem Fundo: Loja Aberta / Fechada */}
             <button
               type="button"

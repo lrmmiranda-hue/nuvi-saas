@@ -211,7 +211,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
         enablePDVBalcao: false,
         enableStockControl: false,
         enableDeliveryRadius: false,
-        enableFinancialMetrics: false,
+        enableFinancialMetrics: true,
         enableBarcodeScanner: false,
         enableKitchenKDS: false
       }
@@ -239,7 +239,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
         enableStockControl: false,
         enableBarcodeScanner: true,
         enableDeliveryRadius: false,
-        enableFinancialMetrics: false,
+        enableFinancialMetrics: true,
         enableKitchenKDS: false
       }
     },
@@ -741,7 +741,18 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             // Garante que todos os planos padrão existam (incluindo o novo plano de balcão e estoque)
             const merged = DEFAULT_GLOBAL_CONFIG.plans.map(defPlan => {
               const existing = parsed.plans.find((p: any) => p.id === defPlan.id);
-              return existing ? { ...defPlan, ...existing } : defPlan;
+              if (!existing) return defPlan;
+              return {
+                ...defPlan,
+                ...existing,
+                permissions: {
+                  ...defPlan.permissions,
+                  ...(existing.permissions || {}),
+                  enableFinancialMetrics: existing.permissions?.enableFinancialMetrics !== undefined 
+                    ? existing.permissions.enableFinancialMetrics 
+                    : true,
+                }
+              };
             });
             return merged;
           })(),
@@ -846,6 +857,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const planObj = globalConfig.plans?.find(p => p.id === targetPlanId || p.id === targetTenant.plan || p.id === `plan_${targetTenant.plan}`);
     if (planObj?.permissions && planObj.permissions[feature] !== undefined) {
       return Boolean(planObj.permissions[feature]);
+    }
+
+    // Se for Métricas & Financeiro e não houver bloqueio explícito, permite por padrão oficial
+    if (feature === 'enableFinancialMetrics') {
+      return true;
     }
 
     // 2. Fallback nas permissões padrão do plano oficial

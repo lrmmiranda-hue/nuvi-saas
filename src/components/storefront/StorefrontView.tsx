@@ -135,8 +135,8 @@ export const StorefrontView: React.FC = () => {
 
   const activeCategories = useMemo(() => {
     return getTenantActiveCategories(
-      tenantProducts, 
-      currentTenant?.businessSegment, 
+      tenantProducts,
+      currentTenant?.businessSegment,
       currentTenant?.categories || currentTenant?.customCategories
     );
   }, [tenantProducts, currentTenant?.businessSegment, currentTenant?.categories, currentTenant?.customCategories]);
@@ -223,15 +223,29 @@ export const StorefrontView: React.FC = () => {
   return (
     <div className="space-y-6 pb-28" style={{ '--brand-accent': brandAccent, '--brand-primary': brandPrimary } as React.CSSProperties}>
 
-      {/* Brand Hero Banner - Luxury Glassmorphism & Ambient Glow */}
+      {/* Brand Hero Banner - Luxury Glassmorphism com Borda Cinza Claro & Animação Flash */}
       {(() => {
-        const luxuryBg = isLight
-          ? `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}14 0%, transparent 60%), radial-gradient(ellipse 70% 70% at 10% 90%, ${brandPrimary}0D 0%, transparent 55%), linear-gradient(135deg, #ffffff 0%, #fbfbfc 50%, #f4f5f7 100%)`
-          : `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}26 0%, transparent 65%), radial-gradient(ellipse 75% 70% at 10% 90%, ${brandPrimary}33 0%, transparent 60%), linear-gradient(140deg, #0d0f15 0%, #12151f 40%, #090a0f 100%)`;
+        const bannerStyle = currentTenant.branding?.bannerStyle || 'silver_flash';
 
-        const luxuryBorder = isLight 
-          ? `${brandAccent}35`
-          : `${brandAccent}40`;
+        // 1. Definição do Fundo Elegante conforme o estilo selecionado
+        let luxuryBg = '';
+        if (bannerStyle === 'platinum_minimal') {
+          luxuryBg = isLight
+            ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)'
+            : 'linear-gradient(140deg, #090b0e 0%, #0e1217 50%, #06080a 100%)';
+        } else if (bannerStyle === 'brand_aurora_flash') {
+          luxuryBg = isLight
+            ? `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}18 0%, transparent 60%), radial-gradient(ellipse 70% 70% at 10% 90%, ${brandPrimary}12 0%, transparent 55%), linear-gradient(135deg, #ffffff 0%, #fbfbfc 50%, #f4f5f7 100%)`
+            : `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}30 0%, transparent 65%), radial-gradient(ellipse 75% 70% at 10% 90%, ${brandPrimary}40 0%, transparent 60%), linear-gradient(140deg, #0d0f15 0%, #12151f 40%, #090a0f 100%)`;
+        } else {
+          // 'silver_flash' (Padrão Recomendado): Obsidian Profundo com Halo Prateado & Toque da Marca
+          luxuryBg = isLight
+            ? `radial-gradient(ellipse 80% 70% at 80% 20%, ${brandAccent}12 0%, transparent 60%), linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #f1f5f9 100%)`
+            : `radial-gradient(ellipse 80% 70% at 80% 20%, ${brandAccent}22 0%, transparent 65%), linear-gradient(140deg, #0b0e14 0%, #111620 45%, #080a0f 100%)`;
+        }
+
+        // Borda Cinza Claro Fina e Elegante solicitada pelo usuário
+        const luxuryBorder = isLight ? '#cbd5e1' : '#334155';
 
         return (
           <div
@@ -243,52 +257,57 @@ export const StorefrontView: React.FC = () => {
               borderColor: luxuryBorder,
             }}
           >
-            {/* 1. Iluminação Ambiente Suave de Fundo (Aura Glow Sofisticada) */}
-            <div 
-              className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl opacity-35 mix-blend-screen"
-              style={{
-                background: `radial-gradient(circle, ${brandAccent}55 0%, transparent 70%)`
-              }}
-            />
-            <div 
-              className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-25 mix-blend-screen"
-              style={{
-                background: `radial-gradient(circle, ${brandPrimary}60 0%, transparent 70%)`
-              }}
-            />
+            {/* 1. Iluminação Ambiente Suave nos Cantos */}
+            {bannerStyle !== 'platinum_minimal' && (
+              <>
+                <div
+                  className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl opacity-35 mix-blend-screen"
+                  style={{
+                    background: `radial-gradient(circle, ${brandAccent}55 0%, transparent 70%)`
+                  }}
+                />
+                <div
+                  className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-20 mix-blend-screen"
+                  style={{
+                    background: `radial-gradient(circle, ${brandPrimary}60 0%, transparent 70%)`
+                  }}
+                />
+              </>
+            )}
 
-            {/* 2. Feixe de Luz Shimmer Metálico Dinâmico na Diagonal */}
+            {/* 2. Feixe de Luz Flash Metálico de Alto Impacto (Flesh / Shimmer Metallic Flash) */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
-              <div 
-                className="w-1/2 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-40"
+              <div
+                className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
                 style={{
-                  background: `linear-gradient(90deg, transparent 0%, ${brandAccent}10 30%, rgba(255, 255, 255, 0.45) 50%, ${brandAccent}15 70%, transparent 100%)`
+                  background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
                 }}
               />
             </div>
 
-            {/* 3. Linha Acetinada de Reflexo de Borda Superior */}
-            <div 
-              className="absolute top-0 inset-x-0 h-[1px] pointer-events-none opacity-40"
+            {/* 3. Linha Acetinada Prateada com Reflexo Flash no Topo */}
+            <div
+              className="absolute top-0 inset-x-0 h-[1.5px] pointer-events-none opacity-60"
               style={{
-                background: `linear-gradient(90deg, transparent 0%, ${brandAccent} 40%, rgba(255,255,255,0.8) 50%, ${brandAccent} 60%, transparent 100%)`
+                background: isLight
+                  ? 'linear-gradient(90deg, transparent 0%, #94a3b8 20%, #ffffff 50%, #94a3b8 80%, transparent 100%)'
+                  : 'linear-gradient(90deg, transparent 0%, #475569 20%, #e2e8f0 50%, #475569 80%, transparent 100%)'
               }}
             />
 
             {/* Conteúdo Principal do Banner (Totalmente Adaptado para Celular & Desktop) */}
             <div className="relative z-20 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
-              
+
               {/* Lado Esquerdo: Identidade da Loja */}
               <div className="space-y-2 sm:space-y-3 max-w-2xl">
-                
+
                 {/* Status Aberto/Fechado + Selo Destaque */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span
-                    className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-2xs flex items-center gap-1.5 ${
-                      currentTenant.isOpen
+                    className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-2xs flex items-center gap-1.5 ${currentTenant.isOpen
                         ? isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                         : isLight ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
-                    }`}
+                      }`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${currentTenant.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
                     {currentTenant.isOpen ? 'Aberto Agora' : 'Fechado no momento'}
@@ -307,14 +326,14 @@ export const StorefrontView: React.FC = () => {
                 </div>
 
                 {/* Logo, Nome e Slogan (Toque para Ver Detalhes) */}
-                <div 
+                <div
                   onClick={() => setIsStoreInfoModalOpen(true)}
                   className="flex items-start sm:items-center gap-3 sm:gap-4 pt-1 cursor-pointer group select-none transition-all active:scale-[0.99]"
                   title="Toque para ver horários, cartões aceitos e endereço do estabelecimento"
                 >
                   {/* Logo Box Luxo - Sem Borda conforme solicitado */}
                   {currentTenant.branding.logoUrl ? (
-                    <div 
+                    <div
                       className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl p-1 shrink-0 shadow-lg transition-transform group-hover:scale-105"
                       style={{
                         backgroundColor: isLight ? '#ffffff' : 'rgba(10, 10, 10, 0.75)',
@@ -329,7 +348,7 @@ export const StorefrontView: React.FC = () => {
                   ) : (
                     <div
                       className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl flex items-center justify-center font-black text-2xl sm:text-3xl shadow-lg shrink-0 transition-transform group-hover:scale-105 text-white"
-                      style={{ 
+                      style={{
                         backgroundColor: brandPrimary,
                         boxShadow: `0 8px 20px -4px ${brandPrimary}50`
                       }}
@@ -340,7 +359,7 @@ export const StorefrontView: React.FC = () => {
 
                   {/* Textos da Loja */}
                   <div>
-                    <h1 
+                    <h1
                       className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight group-hover:underline flex items-center gap-1.5"
                       style={{ color: isLight ? '#0f172a' : '#ffffff' }}
                     >
@@ -348,7 +367,7 @@ export const StorefrontView: React.FC = () => {
                       <Info className="w-4 h-4 opacity-80 group-hover:opacity-100 shrink-0 transition-opacity" style={{ color: brandAccent }} />
                     </h1>
 
-                    <p 
+                    <p
                       className="text-xs sm:text-sm mt-0.5 font-medium line-clamp-2 max-w-lg"
                       style={{ color: isLight ? '#475569' : '#d4d4d8' }}
                     >
@@ -356,7 +375,7 @@ export const StorefrontView: React.FC = () => {
                     </p>
 
                     <div className="flex items-center gap-2 pt-1">
-                      <span 
+                      <span
                         className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-2xs group-hover:brightness-110 transition-all"
                         style={{
                           backgroundColor: `${brandAccent}15`,
@@ -375,7 +394,7 @@ export const StorefrontView: React.FC = () => {
 
               {/* Lado Direito: Card Dinâmico (Escolha Mesa no Salão vs Tempo Médio no Delivery) + Ações */}
               <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-2 sm:pt-0">
-                
+
                 {/* CARD DINÂMICO: MESA COM EXTRATO PARA VISUALIZAR (SEM FUNDO/BORDA CONFORME SOLICITADO) */}
                 {isTableActive ? (
                   /* Modo Estabelecimento / Salão -> Mesa com Extrato */
@@ -396,7 +415,7 @@ export const StorefrontView: React.FC = () => {
                       className="cursor-pointer group flex items-center gap-2 transition-all hover:opacity-90"
                       title={selectionMode === 'qrcode_fixed' && tableNumber ? 'Mesa vinculada pela plaquinha QR Code' : 'Toque para escolher ou alterar o número da sua mesa'}
                     >
-                      <div 
+                      <div
                         className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0 transition-transform group-hover:scale-105"
                         style={{ backgroundColor: brandPrimary }}
                       >
@@ -439,7 +458,7 @@ export const StorefrontView: React.FC = () => {
                     }}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div 
+                      <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
                         style={{ backgroundColor: brandPrimary }}
                       >
@@ -455,7 +474,7 @@ export const StorefrontView: React.FC = () => {
                       </div>
                     </div>
 
-                    <span 
+                    <span
                       className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0"
                       style={{
                         backgroundColor: `${brandAccent}15`,
@@ -511,13 +530,12 @@ export const StorefrontView: React.FC = () => {
           {isAdega && (
             <button
               onClick={() => setFilterOnlyChilled(!filterOnlyChilled)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap cursor-pointer ${
-                filterOnlyChilled
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap cursor-pointer ${filterOnlyChilled
                   ? 'bg-sky-500/15 border-sky-500/50 text-sky-600 dark:text-sky-400'
                   : isLight
-                  ? 'bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
-                  : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
-              }`}
+                    ? 'bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
+                    : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
+                }`}
             >
               <Snowflake className="w-3.5 h-3.5" />
               <span>Apenas Geladas</span>
@@ -526,13 +544,12 @@ export const StorefrontView: React.FC = () => {
 
           <button
             onClick={() => setFilterOnlyPromo(!filterOnlyPromo)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap cursor-pointer ${
-              filterOnlyPromo
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap cursor-pointer ${filterOnlyPromo
                 ? 'bg-red-500/15 border-red-500/50 text-red-600 dark:text-red-400'
                 : isLight
-                ? 'bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
-                : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
-            }`}
+                  ? 'bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
+                  : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
+              }`}
           >
             <Flame className="w-3.5 h-3.5" />
             <span>Em Promoção</span>
@@ -543,13 +560,12 @@ export const StorefrontView: React.FC = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs scrollbar-none">
           <button
             onClick={() => setSelectedCategory('todas')}
-            className={`px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${
-              selectedCategory === 'todas'
+            className={`px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${selectedCategory === 'todas'
                 ? 'shadow-sm font-extrabold text-white'
                 : isLight
-                ? 'bg-white border border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
-                : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
-            }`}
+                  ? 'bg-white border border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
+                  : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
+              }`}
             style={selectedCategory === 'todas' ? {
               backgroundColor: brandAccent,
               color: '#ffffff',
@@ -565,13 +581,12 @@ export const StorefrontView: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  isSelected
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${isSelected
                     ? 'shadow-sm font-extrabold text-white'
                     : isLight
-                    ? 'bg-white border border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
-                    : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
-                }`}
+                      ? 'bg-white border border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
+                      : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
+                  }`}
                 style={isSelected ? {
                   backgroundColor: brandAccent,
                   color: '#ffffff',
@@ -579,13 +594,12 @@ export const StorefrontView: React.FC = () => {
               >
                 {categoryIcons[cat.id] || <Sparkles className="w-3.5 h-3.5" />}
                 <span>{cat.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                  isSelected
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isSelected
                     ? 'bg-white/20 text-white'
                     : isLight
-                    ? 'bg-slate-100 text-slate-600'
-                    : 'bg-neutral-800 text-neutral-400'
-                }`}>
+                      ? 'bg-slate-100 text-slate-600'
+                      : 'bg-neutral-800 text-neutral-400'
+                  }`}>
                   {cat.count}
                 </span>
               </button>
@@ -605,11 +619,10 @@ export const StorefrontView: React.FC = () => {
                   setSelectedCategory('todas');
                   setSearchQuery('');
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                  isLight
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${isLight
                     ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
                     : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
-                }`}
+                  }`}
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Ver Todos os Itens</span>
@@ -629,20 +642,18 @@ export const StorefrontView: React.FC = () => {
             </span>
 
             {/* Alternador Rápido de Layout na Vitrine (Grade vs Lista com Miniatura) */}
-            <div className={`flex items-center p-0.5 rounded-lg border ${
-              isLight ? 'bg-slate-100 border-slate-300' : 'bg-neutral-800 border-neutral-700'
-            }`}>
+            <div className={`flex items-center p-0.5 rounded-lg border ${isLight ? 'bg-slate-100 border-slate-300' : 'bg-neutral-800 border-neutral-700'
+              }`}>
               <button
                 type="button"
                 onClick={() => setViewModeOverride('grid')}
                 title="Exibir em Grade com Fotos em Destaque (4 Colunas)"
-                className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                  !isListLayout
+                className={`p-1.5 rounded-md transition-all cursor-pointer ${!isListLayout
                     ? isLight
                       ? 'bg-sky-500/15 text-sky-800 border border-sky-400/50 font-bold shadow-none'
                       : 'bg-neutral-800 text-white shadow-none'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                  }`}
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
               </button>
@@ -650,13 +661,12 @@ export const StorefrontView: React.FC = () => {
                 type="button"
                 onClick={() => setViewModeOverride('list')}
                 title="Exibir em Lista Compacta com Miniatura Lateral"
-                className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                  isListLayout
+                className={`p-1.5 rounded-md transition-all cursor-pointer ${isListLayout
                     ? isLight
                       ? 'bg-sky-500/15 text-sky-800 border border-sky-400/50 font-bold shadow-none'
                       : 'bg-neutral-800 text-white shadow-none'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                  }`}
               >
                 <List className="w-3.5 h-3.5" />
               </button>
@@ -675,9 +685,8 @@ export const StorefrontView: React.FC = () => {
 
                 return (
                   <div key={cat.id} className="space-y-2">
-                    <h3 className={`text-lg sm:text-xl font-black border-b pb-2 flex items-center justify-between ${
-                      isLight ? 'text-slate-900 border-slate-200' : 'text-white border-neutral-800'
-                    }`}>
+                    <h3 className={`text-lg sm:text-xl font-black border-b pb-2 flex items-center justify-between ${isLight ? 'text-slate-900 border-slate-200' : 'text-white border-neutral-800'
+                      }`}>
                       <span>{cat.label}</span>
                       <span className={`text-xs font-semibold font-mono ${isLight ? 'text-slate-400' : 'text-neutral-500'}`}>
                         {prodsInCat.length} {prodsInCat.length === 1 ? 'item' : 'itens'}
@@ -692,22 +701,19 @@ export const StorefrontView: React.FC = () => {
                           <div
                             key={product.id}
                             onClick={() => handleOpenProduct(product)}
-                            className={`py-4 flex items-start justify-between gap-4 cursor-pointer transition-colors group ${
-                              isLight ? 'hover:bg-slate-50/80' : 'hover:bg-neutral-850/40'
-                            }`}
+                            className={`py-4 flex items-start justify-between gap-4 cursor-pointer transition-colors group ${isLight ? 'hover:bg-slate-50/80' : 'hover:bg-neutral-850/40'
+                              }`}
                           >
                             <div className="flex-1 min-w-0 pr-1">
-                              <h4 className={`text-base sm:text-lg font-bold group-hover:text-[var(--brand-accent)] transition-colors leading-snug ${
-                                isLight ? 'text-slate-900' : 'text-white'
-                              }`}>
+                              <h4 className={`text-base sm:text-lg font-bold group-hover:text-[var(--brand-accent)] transition-colors leading-snug ${isLight ? 'text-slate-900' : 'text-white'
+                                }`}>
                                 {product.name}
                               </h4>
 
                               {(product.ingredients || product.description) && (
                                 <div className="mt-1">
-                                  <p className={`text-xs sm:text-sm line-clamp-2 leading-relaxed ${
-                                    isLight ? 'text-slate-600' : 'text-neutral-300'
-                                  }`}>
+                                  <p className={`text-xs sm:text-sm line-clamp-2 leading-relaxed ${isLight ? 'text-slate-600' : 'text-neutral-300'
+                                    }`}>
                                     {product.ingredients ? `Sabores: ${product.ingredients}` : product.description}
                                   </p>
                                   <span
@@ -749,9 +755,8 @@ export const StorefrontView: React.FC = () => {
                             </div>
 
                             {product.imageUrl && (
-                              <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shrink-0 border shadow-2xs ${
-                                isLight ? 'border-slate-200 bg-slate-100' : 'border-neutral-800 bg-neutral-900'
-                              }`}>
+                              <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shrink-0 border shadow-2xs ${isLight ? 'border-slate-200 bg-slate-100' : 'border-neutral-800 bg-neutral-900'
+                                }`}>
                                 <img
                                   src={product.imageUrl}
                                   alt={product.name}
@@ -770,9 +775,8 @@ export const StorefrontView: React.FC = () => {
             ) : (
               // Categoria selecionada ou termo pesquisado
               <div className="space-y-2">
-                <h3 className={`text-lg sm:text-xl font-black border-b pb-2 flex items-center justify-between ${
-                  isLight ? 'text-slate-900 border-slate-200' : 'text-white border-neutral-800'
-                }`}>
+                <h3 className={`text-lg sm:text-xl font-black border-b pb-2 flex items-center justify-between ${isLight ? 'text-slate-900 border-slate-200' : 'text-white border-neutral-800'
+                  }`}>
                   <span>
                     {selectedCategory !== 'todas'
                       ? activeCategories.find((c) => c.id === selectedCategory)?.label || 'Produtos Selecionados'
@@ -791,22 +795,19 @@ export const StorefrontView: React.FC = () => {
                       <div
                         key={product.id}
                         onClick={() => handleOpenProduct(product)}
-                        className={`py-4 flex items-start justify-between gap-4 cursor-pointer transition-colors group ${
-                          isLight ? 'hover:bg-slate-50/80' : 'hover:bg-neutral-850/40'
-                        }`}
+                        className={`py-4 flex items-start justify-between gap-4 cursor-pointer transition-colors group ${isLight ? 'hover:bg-slate-50/80' : 'hover:bg-neutral-850/40'
+                          }`}
                       >
                         <div className="flex-1 min-w-0 pr-1">
-                          <h4 className={`text-base sm:text-lg font-bold group-hover:text-[var(--brand-accent)] transition-colors leading-snug ${
-                            isLight ? 'text-slate-900' : 'text-white'
-                          }`}>
+                          <h4 className={`text-base sm:text-lg font-bold group-hover:text-[var(--brand-accent)] transition-colors leading-snug ${isLight ? 'text-slate-900' : 'text-white'
+                            }`}>
                             {product.name}
                           </h4>
 
                           {(product.ingredients || product.description) && (
                             <div className="mt-1">
-                              <p className={`text-xs sm:text-sm line-clamp-2 leading-relaxed ${
-                                isLight ? 'text-slate-600' : 'text-neutral-300'
-                              }`}>
+                              <p className={`text-xs sm:text-sm line-clamp-2 leading-relaxed ${isLight ? 'text-slate-600' : 'text-neutral-300'
+                                }`}>
                                 {product.ingredients ? `Sabores: ${product.ingredients}` : product.description}
                               </p>
                               <span
@@ -848,9 +849,8 @@ export const StorefrontView: React.FC = () => {
                         </div>
 
                         {product.imageUrl && (
-                          <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shrink-0 border shadow-2xs ${
-                            isLight ? 'border-slate-200 bg-slate-100' : 'border-neutral-800 bg-neutral-900'
-                          }`}>
+                          <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shrink-0 border shadow-2xs ${isLight ? 'border-slate-200 bg-slate-100' : 'border-neutral-800 bg-neutral-900'
+                            }`}>
                             <img
                               src={product.imageUrl}
                               alt={product.name}
@@ -876,11 +876,10 @@ export const StorefrontView: React.FC = () => {
                 <div
                   key={product.id}
                   onClick={() => handleOpenProduct(product)}
-                  className={`group rounded-xl sm:rounded-2xl transition-all cursor-pointer flex flex-col justify-between overflow-hidden shadow-2xs hover:shadow-md border ${
-                    isLight
+                  className={`group rounded-xl sm:rounded-2xl transition-all cursor-pointer flex flex-col justify-between overflow-hidden shadow-2xs hover:shadow-md border ${isLight
                       ? 'bg-white border-slate-200 hover:border-slate-300 text-slate-900'
                       : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700 text-white'
-                  }`}
+                    }`}
                 >
                   {/* Product Image Slot (compacto no mobile h-28 a h-32, h-48 no desktop) */}
                   <div className="relative w-full h-28 sm:h-40 md:h-48 bg-neutral-950 overflow-hidden">
@@ -922,9 +921,8 @@ export const StorefrontView: React.FC = () => {
                   <div className="p-2 sm:p-3.5 space-y-1.5 flex-1 flex flex-col justify-between">
                     <div>
                       {/* Clean unboxed metadata with dot separator */}
-                      <div className={`flex items-center gap-1 text-[9px] sm:text-[11px] uppercase tracking-wider font-semibold truncate ${
-                        isLight ? 'text-slate-500' : 'text-neutral-400'
-                      }`}>
+                      <div className={`flex items-center gap-1 text-[9px] sm:text-[11px] uppercase tracking-wider font-semibold truncate ${isLight ? 'text-slate-500' : 'text-neutral-400'
+                        }`}>
                         <span className="truncate">{getCategoryDisplayName(product.category, currentTenant?.businessSegment, currentTenant?.categories || currentTenant?.customCategories)}</span>
                         {product.volume && (
                           <>
@@ -934,9 +932,8 @@ export const StorefrontView: React.FC = () => {
                         )}
                       </div>
 
-                      <h3 className={`text-xs sm:text-sm font-bold mt-0.5 transition-colors line-clamp-2 leading-tight ${
-                        isLight ? 'text-slate-900 group-hover:text-[var(--brand-accent)]' : 'text-white group-hover:text-[var(--brand-accent)]'
-                      }`}>
+                      <h3 className={`text-xs sm:text-sm font-bold mt-0.5 transition-colors line-clamp-2 leading-tight ${isLight ? 'text-slate-900 group-hover:text-[var(--brand-accent)]' : 'text-white group-hover:text-[var(--brand-accent)]'
+                        }`}>
                         {product.name}
                       </h3>
 
@@ -953,9 +950,8 @@ export const StorefrontView: React.FC = () => {
                     </div>
 
                     {/* Price & Add Button */}
-                    <div className={`pt-2 border-t flex items-center justify-between gap-1 ${
-                      isLight ? 'border-slate-100' : 'border-neutral-800/80'
-                    }`}>
+                    <div className={`pt-2 border-t flex items-center justify-between gap-1 ${isLight ? 'border-slate-100' : 'border-neutral-800/80'
+                      }`}>
                       <div>
                         <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-1.5">
                           <span
@@ -995,9 +991,8 @@ export const StorefrontView: React.FC = () => {
         )}
 
         {filteredProducts.length === 0 && (
-          <div className={`p-12 text-center rounded-2xl border space-y-2 ${
-            isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-neutral-900 border-neutral-800 text-neutral-400'
-          }`}>
+          <div className={`p-12 text-center rounded-2xl border space-y-2 ${isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-neutral-900 border-neutral-800 text-neutral-400'
+            }`}>
             <Beer className="w-8 h-8 text-neutral-500 mx-auto" />
             <h4 className={`text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Nenhum produto encontrado</h4>
             <p className="text-xs">
@@ -1009,11 +1004,10 @@ export const StorefrontView: React.FC = () => {
 
       {/* Storefront Footer with Store Details & Discreet Merchant Login */}
       {!isGastronomy && !isMenuOnly && (
-        <footer className={`mt-16 pt-8 pb-12 border-t transition-colors text-xs ${
-          isLight 
-            ? 'border-slate-200 bg-white/70 text-slate-700' 
+        <footer className={`mt-16 pt-8 pb-12 border-t transition-colors text-xs ${isLight
+            ? 'border-slate-200 bg-white/70 text-slate-700'
             : 'border-neutral-800/80 bg-transparent text-neutral-300'
-        }`}>
+          }`}>
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <div
@@ -1036,11 +1030,10 @@ export const StorefrontView: React.FC = () => {
             <div className="flex items-center gap-2.5 flex-wrap">
               <button
                 onClick={() => setViewRole('tenant_admin')}
-                className={`px-3.5 py-2 rounded-xl border font-semibold text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                  isLight
+                className={`px-3.5 py-2 rounded-xl border font-semibold text-xs flex items-center gap-2 transition-all cursor-pointer ${isLight
                     ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800 shadow-xs'
                     : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-200'
-                }`}
+                  }`}
               >
                 <Lock className={`w-3.5 h-3.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`} />
                 <span>Área do Lojista (Painel & PDV)</span>
@@ -1048,11 +1041,10 @@ export const StorefrontView: React.FC = () => {
 
               <button
                 onClick={() => setViewRole('register_tenant')}
-                className={`px-3.5 py-2 rounded-xl border font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                  isLight
+                className={`px-3.5 py-2 rounded-xl border font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${isLight
                     ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 shadow-xs'
                     : 'bg-neutral-900/80 hover:bg-neutral-800 border-neutral-800 text-neutral-300'
-                }`}
+                  }`}
               >
                 <Sparkles className={`w-3.5 h-3.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`} />
                 <span>Criar Minha Loja</span>
@@ -1097,9 +1089,8 @@ export const StorefrontView: React.FC = () => {
 
       {/* BARRA INFERIOR FIXA NO CELULAR: 3 ABAS NO MODO CARDÁPIO (Cardápio, Busca, Entrar) OU 4 ABAS NO MODO LOJA */}
       {isMenuOnly ? (
-        <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-50 h-[58px] grid grid-cols-3 items-center justify-items-center shadow-lg safe-area-pb transition-colors ${
-          isLight ? 'bg-white border-t border-[#e2e8f0] text-[#0F1111]' : 'bg-[#0E1318]/95 backdrop-blur-md border-t border-[#1C2631] text-white shadow-2xl'
-        }`}>
+        <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-50 h-[58px] grid grid-cols-3 items-center justify-items-center shadow-lg safe-area-pb transition-colors ${isLight ? 'bg-white border-t border-[#e2e8f0] text-[#0F1111]' : 'bg-[#0E1318]/95 backdrop-blur-md border-t border-[#1C2631] text-white shadow-2xl'
+          }`}>
           {/* 1. Cardápio */}
           <button
             type="button"
@@ -1111,19 +1102,16 @@ export const StorefrontView: React.FC = () => {
               setSearchQuery('');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-            }`}
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+              }`}
           >
             {!isMobileSearchModalOpen && !isMobileAccountModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
-                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-              }`} />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+                }`} />
             )}
             <BookOpen className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
-              !isMobileSearchModalOpen && !isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
-            }`}>
+            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${!isMobileSearchModalOpen && !isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
+              }`}>
               Cardápio
             </span>
           </button>
@@ -1136,19 +1124,16 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsMobileSearchModalOpen(true);
             }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-            }`}
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+              }`}
           >
             {isMobileSearchModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
-                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-              }`} />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+                }`} />
             )}
             <Search className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
-              isMobileSearchModalOpen ? 'font-bold' : 'font-normal'
-            }`}>
+            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isMobileSearchModalOpen ? 'font-bold' : 'font-normal'
+              }`}>
               Busca
             </span>
           </button>
@@ -1161,27 +1146,23 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsMobileAccountModalOpen(true);
             }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-            }`}
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+              }`}
           >
             {isMobileAccountModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
-                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-              }`} />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+                }`} />
             )}
             <LogIn className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
-              isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
-            }`}>
+            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
+              }`}>
               Entrar
             </span>
           </button>
         </div>
       ) : (
-        <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-50 h-[58px] grid grid-cols-4 items-center justify-items-center shadow-lg safe-area-pb transition-colors ${
-          isLight ? 'bg-white border-t border-[#e2e8f0] text-[#0F1111]' : 'bg-[#0E1318]/95 backdrop-blur-md border-t border-[#1C2631] text-white shadow-2xl'
-        }`}>
+        <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-50 h-[58px] grid grid-cols-4 items-center justify-items-center shadow-lg safe-area-pb transition-colors ${isLight ? 'bg-white border-t border-[#e2e8f0] text-[#0F1111]' : 'bg-[#0E1318]/95 backdrop-blur-md border-t border-[#1C2631] text-white shadow-2xl'
+          }`}>
           {/* 1. Início */}
           <button
             type="button"
@@ -1194,19 +1175,16 @@ export const StorefrontView: React.FC = () => {
               setSearchQuery('');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-            }`}
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+              }`}
           >
             {!isCartOpen && !isMobileSearchModalOpen && !isMobileAccountModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
-                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-              }`} />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+                }`} />
             )}
             <Home className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
-              !isCartOpen && !isMobileSearchModalOpen && !isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
-            }`}>
+            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${!isCartOpen && !isMobileSearchModalOpen && !isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
+              }`}>
               Início
             </span>
           </button>
@@ -1220,19 +1198,16 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsMobileAccountModalOpen(true);
             }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-            }`}
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+              }`}
           >
             {isMobileAccountModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
-                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-              }`} />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+                }`} />
             )}
             <User className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
-              isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
-            }`}>
+            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
+              }`}>
               Conta
             </span>
           </button>
@@ -1246,26 +1221,22 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsCartOpen(prev => !prev);
             }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-            }`}
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+              }`}
           >
             {isCartOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
-                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-              }`} />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+                }`} />
             )}
             <div className="relative">
               <ShoppingCart className="w-[22px] h-[22px] stroke-[1.75]" />
-              <span className={`absolute -top-1.5 left-1/2 -translate-x-1/2 text-[10px] font-bold leading-none ${
-                isLight ? 'text-[#0F1111]' : 'text-sky-300'
-              }`}>
+              <span className={`absolute -top-1.5 left-1/2 -translate-x-1/2 text-[10px] font-bold leading-none ${isLight ? 'text-[#0F1111]' : 'text-sky-300'
+                }`}>
                 {totalCartItems}
               </span>
             </div>
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
-              isCartOpen ? 'font-bold' : 'font-normal'
-            }`}>
+            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isCartOpen ? 'font-bold' : 'font-normal'
+              }`}>
               Carrinho
             </span>
           </button>
@@ -1279,19 +1250,16 @@ export const StorefrontView: React.FC = () => {
               setIsMobileMenuDrawerOpen(false);
               setIsMobileSearchModalOpen(true);
             }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-              isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-            }`}
+            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
+              }`}
           >
             {isMobileSearchModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${
-                isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-              }`} />
+              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
+                }`} />
             )}
             <Search className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${
-              isMobileSearchModalOpen ? 'font-bold' : 'font-normal'
-            }`}>
+            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isMobileSearchModalOpen ? 'font-bold' : 'font-normal'
+              }`}>
               Pesquisar
             </span>
           </button>
@@ -1302,9 +1270,8 @@ export const StorefrontView: React.FC = () => {
       {isMobileMenuDrawerOpen && (
         <div className="sm:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex flex-col justify-end">
           <div className="absolute inset-0" onClick={() => setIsMobileMenuDrawerOpen(false)} />
-          <div className={`relative rounded-t-3xl border-t p-5 max-h-[82vh] overflow-y-auto space-y-4 shadow-2xl ${
-            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
-          }`}>
+          <div className={`relative rounded-t-3xl border-t p-5 max-h-[82vh] overflow-y-auto space-y-4 shadow-2xl ${isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
+            }`}>
             <div className="flex items-center justify-between pb-3 border-b border-slate-150 dark:border-neutral-800">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5" style={{ color: brandAccent }} />
@@ -1326,13 +1293,12 @@ export const StorefrontView: React.FC = () => {
                 setSelectedCategory('todas');
                 setIsMobileMenuDrawerOpen(false);
               }}
-              className={`w-full p-3 rounded-xl border flex items-center justify-between font-bold text-xs transition-all cursor-pointer ${
-                selectedCategory === 'todas'
+              className={`w-full p-3 rounded-xl border flex items-center justify-between font-bold text-xs transition-all cursor-pointer ${selectedCategory === 'todas'
                   ? 'shadow-xs font-black'
                   : isLight
-                  ? 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-800'
-                  : 'bg-neutral-950 border-neutral-800 hover:bg-neutral-800 text-neutral-200'
-              }`}
+                    ? 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-800'
+                    : 'bg-neutral-950 border-neutral-800 hover:bg-neutral-800 text-neutral-200'
+                }`}
               style={selectedCategory === 'todas' ? {
                 borderColor: brandAccent,
                 backgroundColor: `${brandAccent}15`,
@@ -1364,13 +1330,12 @@ export const StorefrontView: React.FC = () => {
                         setSelectedCategory(cat.id);
                         setIsMobileMenuDrawerOpen(false);
                       }}
-                      className={`w-full p-3 rounded-xl border flex items-center justify-between text-xs transition-all cursor-pointer ${
-                        isSelected
+                      className={`w-full p-3 rounded-xl border flex items-center justify-between text-xs transition-all cursor-pointer ${isSelected
                           ? 'shadow-xs font-black'
                           : isLight
-                          ? 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-800'
-                          : 'bg-neutral-950 border-neutral-800 hover:bg-neutral-800 text-neutral-200'
-                      }`}
+                            ? 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-800'
+                            : 'bg-neutral-950 border-neutral-800 hover:bg-neutral-800 text-neutral-200'
+                        }`}
                       style={isSelected ? {
                         borderColor: brandAccent,
                         backgroundColor: `${brandAccent}15`,
@@ -1397,15 +1362,13 @@ export const StorefrontView: React.FC = () => {
 
       {/* TELA INTEIRA DE PESQUISA & MENU DE CATEGORIAS (MOBILE & DESKTOP) */}
       {isMobileSearchModalOpen && (
-        <div className={`fixed inset-x-0 top-0 bottom-[58px] sm:bottom-0 sm:inset-0 z-40 sm:z-50 p-4 sm:p-8 flex flex-col overflow-y-auto transition-colors ${
-          isLight ? 'bg-white text-slate-900' : 'bg-[#0B0F12] text-white'
-        }`}>
+        <div className={`fixed inset-x-0 top-0 bottom-[58px] sm:bottom-0 sm:inset-0 z-40 sm:z-50 p-4 sm:p-8 flex flex-col overflow-y-auto transition-colors ${isLight ? 'bg-white text-slate-900' : 'bg-[#0B0F12] text-white'
+          }`}>
           <div className="max-w-4xl w-full mx-auto space-y-6">
             {/* Header da Busca - idêntico à imagem de referência */}
             <div className="flex items-center gap-3">
-              <div className={`relative flex-1 rounded-2xl border flex items-center px-4 py-2.5 shadow-2xs ${
-                isLight ? 'bg-white border-slate-300' : 'bg-neutral-900 border-neutral-700'
-              }`}>
+              <div className={`relative flex-1 rounded-2xl border flex items-center px-4 py-2.5 shadow-2xs ${isLight ? 'bg-white border-slate-300' : 'bg-neutral-900 border-neutral-700'
+                }`}>
                 <Search className="w-5 h-5 text-slate-400 dark:text-neutral-500 shrink-0 mr-3" />
                 <input
                   type="text"
@@ -1413,9 +1376,8 @@ export const StorefrontView: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Buscar produtos"
-                  className={`w-full text-sm sm:text-base font-medium focus:outline-none bg-transparent ${
-                    isLight ? 'text-slate-900 placeholder:text-slate-400' : 'text-white placeholder:text-neutral-500'
-                  }`}
+                  className={`w-full text-sm sm:text-base font-medium focus:outline-none bg-transparent ${isLight ? 'text-slate-900 placeholder:text-slate-400' : 'text-white placeholder:text-neutral-500'
+                    }`}
                 />
                 {searchQuery && (
                   <button
@@ -1441,7 +1403,7 @@ export const StorefrontView: React.FC = () => {
               <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-neutral-100 mb-3">
                 Categorias
               </h3>
-              
+
               <div className="flex flex-wrap gap-2.5">
                 {activeCategories.map((cat) => {
                   const isSelected = selectedCategory === cat.id;
@@ -1452,13 +1414,12 @@ export const StorefrontView: React.FC = () => {
                       onClick={() => {
                         setSelectedCategory(cat.id);
                       }}
-                      className={`rounded-full px-4 py-2 text-xs sm:text-sm font-medium transition-all active:scale-95 cursor-pointer border shadow-2xs ${
-                        isSelected
+                      className={`rounded-full px-4 py-2 text-xs sm:text-sm font-medium transition-all active:scale-95 cursor-pointer border shadow-2xs ${isSelected
                           ? 'border-transparent shadow-xs font-bold'
                           : isLight
-                          ? 'bg-white border-slate-300 text-slate-800 hover:border-slate-400 hover:bg-slate-50'
-                          : 'bg-neutral-900 border-neutral-700 text-neutral-200 hover:border-neutral-500'
-                      }`}
+                            ? 'bg-white border-slate-300 text-slate-800 hover:border-slate-400 hover:bg-slate-50'
+                            : 'bg-neutral-900 border-neutral-700 text-neutral-200 hover:border-neutral-500'
+                        }`}
                       style={isSelected ? {
                         backgroundColor: brandAccent,
                         color: '#09090b',
@@ -1479,7 +1440,7 @@ export const StorefrontView: React.FC = () => {
                   {selectedCategory !== 'todas' && ` na categoria "${activeCategories.find(c => c.id === selectedCategory)?.label}"`}
                   {searchQuery && ` para "${searchQuery}"`}
                 </span>
-                
+
                 <button
                   type="button"
                   onClick={() => setIsMobileSearchModalOpen(false)}
@@ -1500,9 +1461,8 @@ export const StorefrontView: React.FC = () => {
                         setIsMobileSearchModalOpen(false);
                         handleOpenProduct(product);
                       }}
-                      className={`p-2.5 rounded-2xl border flex flex-col justify-between transition-all cursor-pointer shadow-2xs hover:shadow-md ${
-                        isLight ? 'bg-white border-slate-200 hover:border-slate-300' : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700'
-                      }`}
+                      className={`p-2.5 rounded-2xl border flex flex-col justify-between transition-all cursor-pointer shadow-2xs hover:shadow-md ${isLight ? 'bg-white border-slate-200 hover:border-slate-300' : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700'
+                        }`}
                     >
                       <div className="w-full h-24 sm:h-32 rounded-xl bg-neutral-950/10 dark:bg-neutral-950 overflow-hidden mb-2">
                         {product.imageUrl ? (
@@ -1529,13 +1489,11 @@ export const StorefrontView: React.FC = () => {
 
       {/* TELA INTEIRA DE CONTA NO CELULAR */}
       {isMobileAccountModalOpen && (
-        <div className={`sm:hidden fixed inset-x-0 top-0 bottom-[58px] z-40 overflow-y-auto p-4 sm:p-6 space-y-5 transition-colors ${
-          isLight ? 'bg-white text-slate-900' : 'bg-[#0B0F12] text-white'
-        }`}>
-          {/* Header da Tela de Conta */}
-          <div className={`flex items-center justify-between pb-3 border-b ${
-            isLight ? 'border-slate-200' : 'border-[#1C2631]'
+        <div className={`sm:hidden fixed inset-x-0 top-0 bottom-[58px] z-40 overflow-y-auto p-4 sm:p-6 space-y-5 transition-colors ${isLight ? 'bg-white text-slate-900' : 'bg-[#0B0F12] text-white'
           }`}>
+          {/* Header da Tela de Conta */}
+          <div className={`flex items-center justify-between pb-3 border-b ${isLight ? 'border-slate-200' : 'border-[#1C2631]'
+            }`}>
             <div>
               <h2 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Sua Conta</h2>
               <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{currentTenant.name}</p>
@@ -1543,18 +1501,16 @@ export const StorefrontView: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsMobileAccountModalOpen(false)}
-              className={`p-1.5 rounded-full cursor-pointer ${
-                isLight ? 'hover:bg-slate-100 text-slate-500 hover:text-slate-900' : 'hover:bg-[#1C2631] text-slate-400 hover:text-white'
-              }`}
+              className={`p-1.5 rounded-full cursor-pointer ${isLight ? 'hover:bg-slate-100 text-slate-500 hover:text-slate-900' : 'hover:bg-[#1C2631] text-slate-400 hover:text-white'
+                }`}
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Card de Perfil / Boas-vindas */}
-          <div className={`p-4 rounded-2xl flex items-center gap-3.5 border ${
-            isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
-          }`}>
+          <div className={`p-4 rounded-2xl flex items-center gap-3.5 border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+            }`}>
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-base shadow-xs shrink-0"
               style={{ backgroundColor: `${brandAccent}20`, color: brandAccent }}
@@ -1580,11 +1536,10 @@ export const StorefrontView: React.FC = () => {
                 setIsMobileAccountModalOpen(false);
                 setViewRole('login_tenant');
               }}
-              className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs ${
-                isLight 
-                  ? 'border-slate-200 bg-white hover:bg-slate-50 text-slate-900' 
+              className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs ${isLight
+                  ? 'border-slate-200 bg-white hover:bg-slate-50 text-slate-900'
                   : 'border-[#1C2631] bg-[#11161B] hover:bg-[#161F28] text-white'
-              }`}
+                }`}
             >
               <div className={`p-2.5 rounded-xl ${isLight ? 'bg-slate-100 text-slate-700' : 'bg-[#1C2631] text-sky-400'}`}>
                 <Lock className="w-5 h-5" />
@@ -1603,11 +1558,10 @@ export const StorefrontView: React.FC = () => {
                 setIsMobileAccountModalOpen(false);
                 setViewRole('register_tenant');
               }}
-              className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs ${
-                isLight 
-                  ? 'border-blue-200 bg-blue-50/50 hover:bg-blue-50 text-blue-900' 
+              className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs ${isLight
+                  ? 'border-blue-200 bg-blue-50/50 hover:bg-blue-50 text-blue-900'
                   : 'border-[#1C2631] bg-[#11161B] hover:bg-[#161F28] text-white'
-              }`}
+                }`}
             >
               <div className={`p-2.5 rounded-xl ${isLight ? 'bg-blue-100 text-blue-700' : 'bg-sky-500/20 text-sky-400'}`}>
                 <Sparkles className="w-5 h-5" />
@@ -1685,9 +1639,8 @@ export const StorefrontView: React.FC = () => {
       {isTableSelectorOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="absolute inset-0" onClick={() => setIsTableSelectorOpen(false)} />
-          <div className={`relative max-w-sm w-full rounded-3xl border p-5 sm:p-6 shadow-2xl space-y-4 ${
-            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
-          }`}>
+          <div className={`relative max-w-sm w-full rounded-3xl border p-5 sm:p-6 shadow-2xl space-y-4 ${isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
+            }`}>
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-blue-600 text-white">
@@ -1717,11 +1670,10 @@ export const StorefrontView: React.FC = () => {
                 value={tempTableInput}
                 onChange={(e) => setTempTableInput(e.target.value)}
                 placeholder="Ex: Mesa 04 ou 4"
-                className={`w-full px-3.5 py-2.5 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-500 ${
-                  isLight
+                className={`w-full px-3.5 py-2.5 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-500 ${isLight
                     ? 'bg-slate-50 border border-slate-300 text-slate-900'
                     : 'bg-neutral-950 border border-neutral-700 text-white'
-                }`}
+                  }`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     if (tempTableInput.trim()) {
@@ -1752,13 +1704,12 @@ export const StorefrontView: React.FC = () => {
                         setIsTableSelectorOpen(false);
                       }}
                       style={isSelected ? { backgroundColor: brandPrimary, borderColor: brandPrimary } : {}}
-                      className={`p-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${
-                        isSelected
+                      className={`p-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${isSelected
                           ? 'text-white shadow-sm'
                           : isLight
-                          ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                          : 'bg-neutral-950 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
-                      }`}
+                            ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                            : 'bg-neutral-950 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
+                        }`}
                     >
                       {num}
                     </button>
@@ -1802,12 +1753,11 @@ export const StorefrontView: React.FC = () => {
       {isTableOrdersModalOpen && tableNumber && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="absolute inset-0" onClick={() => setIsTableOrdersModalOpen(false)} />
-          <div className={`relative max-w-md w-full rounded-3xl border p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col ${
-            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
-          }`}>
+          <div className={`relative max-w-md w-full rounded-3xl border p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col ${isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
+            }`}>
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800 shrink-0">
               <div className="flex items-center gap-2">
-                <div 
+                <div
                   className="p-2 rounded-xl text-white shadow-sm"
                   style={{ backgroundColor: brandPrimary }}
                 >
@@ -1836,23 +1786,21 @@ export const StorefrontView: React.FC = () => {
               {tableOrders.map((ord, idx) => (
                 <div
                   key={ord.id}
-                  className={`p-3 rounded-2xl border space-y-2 ${
-                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-neutral-950 border-neutral-800'
-                  }`}
+                  className={`p-3 rounded-2xl border space-y-2 ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-neutral-950 border-neutral-800'
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold" style={{ color: brandPrimary }}>
                       Rodada #{idx + 1} • {ord.id}
                     </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                      ord.status === 'novo'
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${ord.status === 'novo'
                         ? 'bg-amber-500/15 text-amber-500'
                         : ord.status === 'preparando'
-                        ? 'bg-blue-500/15 text-blue-500'
-                        : ord.status === 'pronto'
-                        ? 'bg-emerald-500/15 text-emerald-500 font-black'
-                        : 'bg-slate-500/15 text-slate-500'
-                    }`}>
+                          ? 'bg-blue-500/15 text-blue-500'
+                          : ord.status === 'pronto'
+                            ? 'bg-emerald-500/15 text-emerald-500 font-black'
+                            : 'bg-slate-500/15 text-slate-500'
+                      }`}>
                       {ord.status === 'novo' ? 'Na Cozinha' : ord.status === 'preparando' ? 'Em Preparo' : ord.status === 'pronto' ? 'Pronto para Servir' : 'Entregue'}
                     </span>
                   </div>
@@ -1877,10 +1825,9 @@ export const StorefrontView: React.FC = () => {
             </div>
 
             {/* Total Acumulado */}
-            <div 
-              className={`p-3.5 rounded-2xl border shrink-0 space-y-1.5 ${
-                isLight ? 'bg-slate-50 text-slate-900' : 'bg-neutral-950/80 text-white'
-              }`}
+            <div
+              className={`p-3.5 rounded-2xl border shrink-0 space-y-1.5 ${isLight ? 'bg-slate-50 text-slate-900' : 'bg-neutral-950/80 text-white'
+                }`}
               style={{ borderColor: `${brandPrimary}40` }}
             >
               <div className="flex justify-between items-baseline font-black">
@@ -1920,10 +1867,9 @@ export const StorefrontView: React.FC = () => {
       {isStoreInfoModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="absolute inset-0" onClick={() => setIsStoreInfoModalOpen(false)} />
-          
-          <div className={`relative max-w-lg w-full rounded-3xl border p-5 sm:p-6 shadow-2xl space-y-5 my-8 transition-all ${
-            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
-          }`}>
+
+          <div className={`relative max-w-lg w-full rounded-3xl border p-5 sm:p-6 shadow-2xl space-y-5 my-8 transition-all ${isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-white'
+            }`}>
             {/* Header com Logo, Nome e Botão Fechar */}
             <div className="flex items-start justify-between pb-3 border-b border-slate-150 dark:border-neutral-800">
               <div className="flex items-center gap-3">
@@ -1943,11 +1889,10 @@ export const StorefrontView: React.FC = () => {
                   <h3 className="font-extrabold text-base sm:text-lg leading-tight">{currentTenant.name}</h3>
                   <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">{currentTenant.slogan || 'Cardápio Digital & Atendimento Oficial'}</p>
                   <span
-                    className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 ${
-                      currentTenant.isOpen
+                    className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 ${currentTenant.isOpen
                         ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300'
                         : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-300'
-                    }`}
+                      }`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${currentTenant.isOpen ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                     {currentTenant.isOpen ? 'Aberto Agora' : 'Fechado no momento'}
@@ -2032,7 +1977,7 @@ export const StorefrontView: React.FC = () => {
                   <p className="text-xs text-slate-500 dark:text-neutral-400">
                     Bairro {currentTenant.address.neighborhood} - {currentTenant.address.city}
                   </p>
-                  
+
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                       `${currentTenant.name}, ${currentTenant.address.street}, ${currentTenant.address.number}, ${currentTenant.address.neighborhood}, ${currentTenant.address.city}`
