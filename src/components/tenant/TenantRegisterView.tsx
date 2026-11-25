@@ -379,56 +379,14 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
             <form onSubmit={handleSubmit} className="space-y-4">
 
               {/* ======================================================== */}
-              {/* 1. SELETOR DE RAMO NO COMPUTADOR: Grid 3x3 como estava antes */}
+              {/* 1. SELETOR DE RAMO UNIFICADO (COMPUTADOR & CELULAR) */}
               {/* ======================================================== */}
-              <div className="hidden md:block space-y-2">
-                <label className={`block text-xs font-bold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                  1. Qual é o ramo da sua loja? *
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {BUSINESS_SEGMENTS.map((seg) => {
-                    const isSelected = selectedSegment === seg.id;
-                    return (
-                      <button
-                        key={seg.id}
-                        type="button"
-                        onClick={() => setSelectedSegment(seg.id)}
-                        className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 outline-none ${
-                          isSelected
-                            ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white shadow-md shadow-[#0C2340]/40 border-0'
-                            : isLight
-                            ? 'bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 text-slate-700'
-                            : 'bg-[#121820] hover:bg-[#182230] border border-[#1C2631] hover:border-sky-800 text-slate-300'
-                        }`}
-                        >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xl leading-none">{seg.emoji}</span>
-                          {isSelected && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-                          )}
-                        </div>
-                        <span className={`text-[11px] leading-tight line-clamp-1 ${
-                          isSelected
-                            ? 'text-white font-bold'
-                            : ''
-                        }`}>
-                          {seg.shortLabel}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* ======================================================== */}
-              {/* 1. SELETOR DE RAMO NO CELULAR: Filtro Dropdown conforme Imagem 2 */}
-              {/* ======================================================== */}
-              <div className="md:hidden space-y-2">
+              <div className="space-y-2">
                 <label className={`block text-xs font-bold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
                   1. Escolha o ramo da sua loja: *
                 </label>
 
-                {/* Botão Gatilho do Dropdown */}
+                {/* Botão Gatilho do Seletor (Sem borda azul pesada) */}
                 <button
                   type="button"
                   onClick={() => setIsBranchFilterOpen(!isBranchFilterOpen)}
@@ -436,10 +394,10 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                     isBranchFilterOpen
                       ? isLight
                         ? 'bg-slate-100/90 border-slate-300 text-slate-800'
-                        : 'bg-[#151F2C] border-[#223142] text-white'
+                        : 'bg-[#151F2C] border-[#253342] text-white'
                       : isLight
-                      ? 'bg-slate-50 border-slate-200 text-slate-800'
-                      : 'bg-[#0E1520] border-[#1C2631] text-white'
+                      ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
+                      : 'bg-[#0E1520] hover:bg-[#131b26] border-[#1C2631] text-white'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -449,19 +407,19 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                         {currentSegmentConfig.title}
                       </span>
                       <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                        Toque para filtrar outro ramo
+                        Clique para alterar o ramo
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-500 border border-blue-500/30">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-neutral-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-neutral-700">
                       Selecionado
                     </span>
-                    <ChevronDown className={`w-4 h-4 text-blue-400 transition-transform ${isBranchFilterOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isBranchFilterOpen ? 'rotate-180' : ''}`} />
                   </div>
                 </button>
 
-                {/* Painel do Filtro conforme Imagem 2 (Sem bordas azuis pesadas no celular) */}
+                {/* Painel do Filtro com Busca (Sem bordas azuis pesadas) */}
                 {isBranchFilterOpen && (
                   <div className={`p-3 rounded-2xl border shadow-xl space-y-2.5 transition-all ${
                     isLight ? 'bg-white border-slate-200 shadow-slate-200/50' : 'bg-[#0E1520] border-[#1C2631] shadow-black/80'
@@ -492,12 +450,12 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                       )}
                     </div>
 
-                    {/* Cabeçalho da Lista: Marcar exibidos (conforme imagem 2) */}
+                    {/* Cabeçalho da Lista */}
                     <div className="flex items-center justify-between px-1 text-[11px] font-bold text-slate-600 dark:text-slate-300">
                       <span>Marcar ramo exibido ({filteredBranches.length})</span>
                     </div>
 
-                    {/* Lista vertical rolável com barra de scroll e checkboxes brancos */}
+                    {/* Lista vertical rolável com barra de scroll e checkboxes */}
                     <div className="max-h-56 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
                       {filteredBranches.map((seg) => {
                         const isSelected = selectedSegment === seg.id;
@@ -513,23 +471,23 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                             className={`w-full p-2.5 rounded-lg flex items-center gap-3 text-left transition-colors cursor-pointer ${
                               isSelected
                                 ? isLight
-                                  ? 'bg-blue-50 text-blue-900 font-bold'
-                                  : 'bg-blue-600/20 text-white font-bold'
+                                  ? 'bg-slate-100 text-slate-900 font-bold'
+                                  : 'bg-slate-800 text-white font-bold'
                                 : isLight
                                 ? 'hover:bg-slate-100 text-slate-700'
                                 : 'hover:bg-[#121B27] text-slate-300'
                             }`}
                           >
-                            {/* Checkbox branco conforme Imagem 2 */}
+                            {/* Checkbox */}
                             <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
                               isSelected
-                                ? 'bg-white border-white text-slate-900'
+                                ? 'bg-sky-500 border-sky-500 text-white'
                                 : isLight
                                 ? 'border-slate-300 bg-white'
                                 : 'border-slate-600 bg-transparent'
                             }`}>
                               {isSelected && (
-                                <Check className="w-3 h-3 text-slate-900 stroke-[3]" />
+                                <Check className="w-3 h-3 text-white stroke-[3]" />
                               )}
                             </div>
 

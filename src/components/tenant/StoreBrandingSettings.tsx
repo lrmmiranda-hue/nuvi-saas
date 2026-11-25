@@ -32,7 +32,13 @@ import {
   Palette,
   X,
   Plus,
-  UtensilsCrossed
+  UtensilsCrossed,
+  Smartphone,
+  Monitor,
+  Heart,
+  ArrowLeft,
+  ChevronRight,
+  Star
 } from 'lucide-react';
 
 interface StoreBrandingSettingsProps {
@@ -44,6 +50,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
 
   const [brandingEdits, setBrandingEdits] = useState(currentTenant?.branding);
   const [sloganEdit, setSloganEdit] = useState(currentTenant?.slogan || '');
+  const [previewDevice, setPreviewDevice] = useState<'mobile' | 'desktop'>('mobile');
 
   // Sincroniza quando currentTenant mudar
   useEffect(() => {
@@ -165,6 +172,19 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
     }
   };
 
+  const handleRemoveBanner = () => {
+    if (brandingEdits && currentTenant) {
+      const updatedBranding = { ...brandingEdits, bannerUrl: '' };
+      setBrandingEdits(updatedBranding);
+      updateTenant(currentTenant.id, { branding: updatedBranding });
+      showAlert({
+        title: 'Capa Removida',
+        message: 'A vitrine usará o fundo com iluminação e degradê acetinado.',
+        variant: 'info',
+      });
+    }
+  };
+
   const handleSaveBranding = () => {
     if (brandingEdits && currentTenant) {
       updateTenant(currentTenant.id, {
@@ -199,7 +219,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
             <div className={`rounded-2xl border overflow-hidden shadow-lg transition-colors ${
               isLight ? 'bg-white border-neutral-300' : 'bg-neutral-950 border-neutral-800'
             }`}>
-              <div className={`p-3 border-b flex items-center justify-between text-xs ${
+              <div className={`p-3 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs ${
                 isLight ? 'bg-neutral-100 border-neutral-200' : 'bg-neutral-900 border-neutral-800'
               }`}>
                 <div className="flex items-center gap-2">
@@ -209,16 +229,41 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <span className={`text-[11px] ${isLight ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                    Como seus clientes verão na web
-                  </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Seletor de Dispositivo: Celular vs Computador */}
+                  <div className="flex items-center rounded-lg border overflow-hidden p-0.5 bg-black/10 dark:bg-black/30 border-slate-300 dark:border-neutral-700">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDevice('mobile')}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                        previewDevice === 'mobile'
+                          ? 'bg-sky-600 text-white shadow-xs'
+                          : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Smartphone className="w-3.5 h-3.5" />
+                      <span>📱 Celular (Foto no Fundo)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDevice('desktop')}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                        previewDevice === 'desktop'
+                          ? 'bg-sky-600 text-white shadow-xs'
+                          : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Monitor className="w-3.5 h-3.5" />
+                      <span>💻 Computador</span>
+                    </button>
+                  </div>
+
                   <button
                     type="button"
                     onClick={() => setViewRole('storefront')}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-500 font-bold text-[11px] transition-colors cursor-pointer"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-500 font-bold text-[11px] transition-colors cursor-pointer"
                   >
-                    <span>Abrir Vitrine</span>
+                    <span>Abrir Vitrine Real</span>
                     <ExternalLink className="w-3 h-3" />
                   </button>
                 </div>
@@ -229,6 +274,8 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                 const brandAccent = brandingEdits?.accentColor || currentTenant.branding.accentColor || '#F59E0B';
                 const brandPrimary = brandingEdits?.primaryColor || currentTenant.branding.primaryColor || '#881337';
                 const bannerStyle = brandingEdits?.bannerStyle || currentTenant.branding?.bannerStyle || 'silver_flash';
+                const bannerLayout = brandingEdits?.bannerLayout || currentTenant.branding?.bannerLayout || 'ifood_cover';
+                const bannerImage = brandingEdits?.bannerUrl || (segmentWallpapers.length > 0 ? segmentWallpapers[0].url : '');
 
                 let luxuryBg = '';
                 if (bannerStyle === 'platinum_minimal') {
@@ -248,6 +295,158 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                 // Borda Cinza Claro Fina e Elegante solicitada pelo usuário
                 const luxuryBorder = isLight ? '#cbd5e1' : '#334155';
 
+                // =========================================================================
+                // 1. MODO PRÉVIA CELULAR: Idêntico à Foto Enviada pelo Usuário
+                // =========================================================================
+                if (previewDevice === 'mobile') {
+                  return (
+                    <div className="p-4 sm:p-6 flex justify-center bg-slate-900/40">
+                      <div
+                        className={`w-full max-w-sm rounded-3xl border shadow-2xl overflow-hidden transition-all duration-300 relative ${
+                          isLight ? 'bg-white text-slate-900' : 'bg-neutral-950 text-white'
+                        }`}
+                        style={{ borderColor: luxuryBorder }}
+                      >
+                        {/* Capa de Fundo no Celular */}
+                        <div className="relative h-44 w-full overflow-hidden bg-slate-900">
+                          {bannerImage ? (
+                            <img
+                              src={bannerImage}
+                              alt="Capa de Fundo"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full" style={{ background: luxuryBg }} />
+                          )}
+
+                          {/* Vinheta Escura */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/40 pointer-events-none" />
+
+                          {/* Feixe Flash */}
+                          <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
+                            <div
+                              className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
+                              style={{
+                                background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
+                              }}
+                            />
+                          </div>
+
+                          {/* Botões Flutuantes sobre a Imagem no Topo */}
+                          <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between">
+                            <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-md border border-white/20">
+                              <ArrowLeft className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-md border border-white/20">
+                                <Heart className="w-3.5 h-3.5" />
+                              </div>
+                              <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-md border border-white/20">
+                                <Search className="w-3.5 h-3.5" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card Sobreposto com Logo Circular Centralizada */}
+                        <div className={`px-4 pb-4 relative z-20 -mt-6 rounded-t-3xl pt-0 transition-colors ${
+                          isLight ? 'bg-white' : 'bg-neutral-950'
+                        }`}>
+                          {/* Logo Circular Centralizada Sobreposta */}
+                          <div className="flex justify-center -mt-10 mb-2">
+                            <div
+                              className={`w-20 h-20 rounded-full p-1 shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
+                                isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
+                              }`}
+                            >
+                              {brandingEdits?.logoUrl ? (
+                                <img
+                                  src={brandingEdits.logoUrl}
+                                  alt="Logo da Loja"
+                                  className="w-full h-full object-cover rounded-full"
+                                />
+                              ) : (
+                                <div
+                                  className="w-full h-full rounded-full flex items-center justify-center font-black text-2xl text-white shadow-inner"
+                                  style={{ backgroundColor: brandPrimary }}
+                                >
+                                  {currentTenant.name.charAt(0)}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Nome da Loja com Badge e Seta > */}
+                          <div className="flex items-center justify-between py-1">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span
+                                className="w-4 h-4 rounded-full flex items-center justify-center text-white shrink-0"
+                                style={{ backgroundColor: brandAccent }}
+                              >
+                                <Sparkles className="w-2.5 h-2.5" />
+                              </span>
+                              <h1 className="text-sm font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                {currentTenant.name}
+                              </h1>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                          </div>
+
+                          {/* Linha 1: Entrega rastreável • 2.0 km • Min R$ ... */}
+                          <div className={`text-[11px] flex items-center gap-1.5 font-medium pb-2 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                            <span>Entrega rastreável</span>
+                            <span>•</span>
+                            <span>{currentTenant.city || '2.0 km'}</span>
+                            <span>•</span>
+                            <span>Min R$ {(currentTenant.config?.minimumOrderValue || 10).toFixed(2).replace('.', ',')}</span>
+                          </div>
+
+                          {/* Divisória 1 */}
+                          <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
+
+                          {/* Linha 2: ★ 4,9 (245 avaliações) • [✪ Super] > */}
+                          <div className="flex items-center justify-between text-[11px] py-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-black text-amber-500">★ 4,9</span>
+                              <span className={isLight ? 'text-slate-500' : 'text-slate-400'}>(245 avaliações)</span>
+                              <span>•</span>
+                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30">
+                                ✪ Super
+                              </span>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                          </div>
+
+                          {/* Divisória 2 */}
+                          <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
+
+                          {/* Linha 3: Padrão • 10-25 min • R$ 7,99 / Mais opções disponíveis na sacola */}
+                          <div className="py-1 text-[11px] space-y-0.5">
+                            <div className="flex items-center gap-1.5 font-medium">
+                              <span className="font-extrabold" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Padrão</span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
+                                <Clock className="w-3 h-3 text-slate-400" />
+                                {currentTenant.config?.estimatedDeliveryTime || '10-25'} min
+                              </span>
+                              <span>•</span>
+                              <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
+                                {currentTenant.config?.deliveryFee ? `R$ ${currentTenant.config.deliveryFee.toFixed(2).replace('.', ',')}` : 'R$ 7,99'}
+                              </span>
+                            </div>
+                            <p className={`text-[10px] ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
+                              Mais opções disponíveis na sacola
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // =========================================================================
+                // 2. MODO PRÉVIA COMPUTADOR (WIDESCREEN)
+                // =========================================================================
                 return (
                   <div
                     className={`rounded-3xl border shadow-2xl relative overflow-hidden transition-all duration-300 p-4 sm:p-6 backdrop-blur-xl ${
@@ -276,7 +475,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                       </>
                     )}
 
-                    {/* 2. Feixe de Luz Flash Metálico de Alto Impacto (Flesh / Shimmer Metallic Flash) */}
+                    {/* 2. Feixe de Luz Flash Metálico de Alto Impacto */}
                     <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
                       <div 
                         className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
@@ -296,11 +495,9 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                       }}
                     />
 
-                    {/* Conteúdo da Prévia (Idêntico à Vitrine Real) */}
+                    {/* Conteúdo da Prévia Computador */}
                     <div className="relative z-20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      
                       <div className="space-y-2 max-w-xl">
-                        {/* Status + Segmento */}
                         <div className="flex items-center gap-2 flex-wrap">
                           <span
                             className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border flex items-center gap-1.5 ${
@@ -323,7 +520,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           </span>
                         </div>
 
-                        {/* Logo, Nome e Slogan */}
                         <div className="flex items-center gap-3 pt-0.5">
                           {brandingEdits?.logoUrl ? (
                             <div 
@@ -379,7 +575,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         </div>
                       </div>
 
-                      {/* Lado Direito: Mesa com Extrato (sem fundo/borda, sem WhatsApp) */}
                       <div className="flex items-center gap-2.5 shrink-0">
                         <div className="flex items-center gap-2">
                           <div 
@@ -398,7 +593,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           </div>
                         </div>
 
-                        {/* Botão de Extrato na Prévia */}
                         <div 
                           className="px-2.5 py-1 rounded-xl text-[11px] font-black text-white shadow-xs flex items-center gap-1 shrink-0"
                           style={{ backgroundColor: brandPrimary }}
@@ -406,7 +600,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           <span>🧾 R$ 149,70</span>
                         </div>
 
-                        {/* Sacola (WhatsApp removido conforme solicitado) */}
                         <div 
                           className="p-2 rounded-xl border text-white shadow-sm shrink-0"
                           style={{
@@ -418,7 +611,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           <ShoppingCart className="w-4 h-4" />
                         </div>
                       </div>
-
                     </div>
                   </div>
                 );
@@ -524,7 +716,234 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
             </div>
           </div>
 
-          {/* SEÇÃO 2: ESTILOS DE BANNER HERO (BORDA CINZA CLARO & ANIMAÇÃO FLASH) */}
+          {/* SEÇÃO 2: 3 OPÇÕES DE LAYOUT DO BANNER (ESTILO IFOOD / 99FOOD) */}
+          <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
+            isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
+          }`}>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <Store className="w-4 h-4 text-sky-500" />
+                  <span>3 Opções de Layout do Banner (Estilo iFood / 99Food)</span>
+                </h3>
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                  ✓ Escolha o formato desejado
+                </span>
+              </div>
+              <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                Escolha como a vitrine e a foto da sua loja serão exibidas para seus clientes no celular e no computador.
+              </p>
+            </div>
+
+            {/* Grid dos 3 Modelos de Layout Solicitados pelo Usuário */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              {[
+                {
+                  id: 'ifood_cover',
+                  name: 'Capa Panorâmica iFood',
+                  badge: 'Idêntico ao iFood',
+                  desc: 'Foto panorâmica no topo, logo circular centralizada sobreposta e detalhes de entrega/avaliação idênticos à foto do app.',
+                  icon: '🍕',
+                  highlight: true
+                },
+                {
+                  id: 'card_99food',
+                  name: 'Card Integrado 99Food',
+                  badge: 'Moderno 99Food',
+                  desc: 'Card compacto e moderno com visual acetinado, foto integrada e visualização ágil das informações da loja.',
+                  icon: '⚡',
+                  highlight: false
+                },
+                {
+                  id: 'carousel_promos',
+                  name: 'Carrossel Promocional',
+                  badge: 'Ofertas em Slides',
+                  desc: 'Banners promocionais rotativos em carrossel no topo, ideal para destacar ofertas, combos e novidades.',
+                  icon: '📢',
+                  highlight: false
+                }
+              ].map((layout) => {
+                const currentLayout = brandingEdits?.bannerLayout || currentTenant.branding?.bannerLayout || 'ifood_cover';
+                const isSelected = currentLayout === layout.id;
+
+                return (
+                  <button
+                    key={layout.id}
+                    type="button"
+                    onClick={() => {
+                      const updated = {
+                        ...(brandingEdits || currentTenant.branding),
+                        bannerLayout: layout.id as any
+                      };
+                      setBrandingEdits(updated);
+                      updateTenant(currentTenant.id, { branding: updated });
+                    }}
+                    className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 relative overflow-hidden ${
+                      isSelected
+                        ? isLight
+                          ? 'border-sky-500 bg-sky-50/70 text-slate-900 shadow-sm ring-1 ring-sky-500/30'
+                          : 'border-sky-500 bg-sky-950/40 text-white shadow-sm ring-1 ring-sky-500/30'
+                        : isLight
+                        ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                        : 'border-neutral-800 bg-neutral-950/60 hover:bg-neutral-800 text-neutral-300'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xl">{layout.icon}</span>
+                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                          isSelected
+                            ? 'bg-sky-500 text-white'
+                            : isLight ? 'bg-slate-200 text-slate-700' : 'bg-neutral-800 text-slate-400'
+                        }`}>
+                          {layout.badge}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-black">{layout.name}</h4>
+                      <p className={`text-[11px] leading-relaxed mt-1 ${
+                        isSelected ? (isLight ? 'text-slate-800' : 'text-slate-200') : (isLight ? 'text-slate-500' : 'text-neutral-400')
+                      }`}>
+                        {layout.desc}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-neutral-800/80">
+                      <span className="text-[10px] font-bold text-slate-400">
+                        {isSelected ? '✓ Selecionado' : 'Toque para ativar'}
+                      </span>
+                      <span className={`text-[10px] font-black ${isSelected ? 'text-sky-500' : 'text-slate-400'}`}>
+                        {isSelected ? 'Ativo na Vitrine' : 'Usar'}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SEÇÃO 3: FOTO DE FUNDO / CAPA DA VITRINE */}
+          <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
+            isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
+          }`}>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <ImageIcon className="w-4 h-4 text-sky-500" />
+                  <span>Foto de Fundo / Capa da Vitrine ({currentSegmentConfig.emoji} {currentSegmentConfig.shortLabel})</span>
+                </h3>
+                {brandingEdits?.bannerUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveBanner}
+                    className="text-[11px] font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Remover Capa</span>
+                  </button>
+                )}
+              </div>
+              <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                Envie sua própria foto de capa, cole uma URL ou selecione abaixo uma das fotos profissionais em alta resolução preparadas para o seu ramo ({currentSegmentConfig.shortLabel}).
+              </p>
+            </div>
+
+            {/* Upload e Controles da Capa */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border cursor-pointer transition-all text-xs font-bold shadow-2xs ${
+                isLight
+                  ? 'bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300'
+                  : 'bg-neutral-800 hover:bg-neutral-750 text-neutral-100 border-neutral-700'
+              }`}>
+                <Upload className="w-4 h-4 text-sky-500" />
+                <span>Anexar Foto de Capa (PNG, JPG, WebP)</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBannerUpload}
+                  className="hidden"
+                />
+              </label>
+
+              <input
+                type="text"
+                value={brandingEdits?.bannerUrl || ''}
+                onChange={(e) => {
+                  const updated = {
+                    ...(brandingEdits || currentTenant.branding),
+                    bannerUrl: e.target.value
+                  };
+                  setBrandingEdits(updated);
+                  updateTenant(currentTenant.id, { branding: updated });
+                }}
+                placeholder="Ou cole a URL direta de uma foto de capa"
+                className={`w-full px-3 py-2.5 rounded-xl text-xs font-mono border focus:outline-none transition-colors ${
+                  isLight
+                    ? 'bg-neutral-50 border-neutral-300 text-neutral-900 placeholder:text-neutral-400 focus:border-blue-500'
+                    : 'bg-neutral-950 border-neutral-800 text-neutral-200 placeholder:text-neutral-500 focus:border-blue-500'
+                }`}
+              />
+            </div>
+
+            {/* Galeria de Fotos Prontas em Alta Resolução do Segmento */}
+            {segmentWallpapers.length > 0 && (
+              <div className="space-y-2 pt-2">
+                <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                  Fotos em Alta Resolução Prontas para {currentSegmentConfig.title} (Toque para usar):
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                  {segmentWallpapers.map((wp) => {
+                    const isSelected = brandingEdits?.bannerUrl === wp.url;
+                    return (
+                      <div
+                        key={wp.id}
+                        onClick={() => {
+                          const updated = {
+                            ...(brandingEdits || currentTenant.branding),
+                            bannerUrl: wp.url
+                          };
+                          setBrandingEdits(updated);
+                          updateTenant(currentTenant.id, { branding: updated });
+                          showAlert({
+                            title: 'Capa Definida!',
+                            message: `A imagem "${wp.title}" foi aplicada como capa da vitrine.`,
+                            variant: 'success'
+                          });
+                        }}
+                        className={`group relative rounded-xl overflow-hidden border-2 cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
+                          isSelected
+                            ? 'border-sky-500 ring-2 ring-sky-500/30'
+                            : 'border-slate-200 dark:border-neutral-800 hover:border-sky-400'
+                        }`}
+                      >
+                        <div className="h-24 w-full overflow-hidden bg-slate-900">
+                          <img
+                            src={wp.url}
+                            alt={wp.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2 pointer-events-none">
+                          <span className="text-[10px] font-bold text-white truncate drop-shadow-sm">
+                            {wp.title}
+                          </span>
+                          <span className="text-[8.5px] text-sky-300 font-semibold truncate">
+                            {wp.tag}
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-md">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* SEÇÃO 4: ESTILOS DE BANNER HERO (BORDA CINZA CLARO & ANIMAÇÃO FLASH) */}
           <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
             isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
           }`}>

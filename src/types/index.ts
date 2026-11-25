@@ -134,6 +134,8 @@ export interface TenantBranding {
   catalogLayout?: 'grid' | 'list'; // 'grid' = Grade com cards e fotos grandes; 'list' = Lista compacta com miniatura estilo restaurante/delivery
   patternStyle?: 'line_art' | 'none'; // 'line_art' = Fundo vetorial temático sutil do comércio; 'none' = Fundo liso minimalista
   bannerStyle?: 'silver_flash' | 'brand_aurora_flash' | 'platinum_minimal'; // Estilo do banner com borda cinza claro e flash
+  bannerLayout?: 'ifood_cover' | 'card_99food' | 'carousel_promos'; // 3 Opções de layout estilo iFood / 99Food
+  promoBanners?: string[]; // Até 3 banners promocionais para o carrossel estilo iFood / 99Food
 }
 
 export interface TenantAddress {
