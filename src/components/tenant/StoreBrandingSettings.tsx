@@ -3,7 +3,6 @@ import { useStore } from '../../context/StoreContext';
 import { STORE_WALLPAPERS, WALLPAPER_CATEGORIES, getSegmentWallpapers } from '../../data/wallpapers';
 import { PRESET_THEMES, PRESET_BANNERS, getSegmentThemes } from './OnboardingWizardModal';
 import { getSegmentById } from '../../data/businessSegments';
-import { getSegmentAbstractPattern } from '../../utils/abstractPatterns';
 import {
   Check,
   ExternalLink,
@@ -45,16 +44,12 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
 
   const [brandingEdits, setBrandingEdits] = useState(currentTenant?.branding);
   const [sloganEdit, setSloganEdit] = useState(currentTenant?.slogan || '');
-  const [previewSegment, setPreviewSegment] = useState<string>(currentTenant?.businessSegment || 'pizzaria');
 
   // Sincroniza quando currentTenant mudar
   useEffect(() => {
     if (currentTenant) {
       setBrandingEdits(currentTenant.branding);
       setSloganEdit(currentTenant.slogan);
-      if (currentTenant.businessSegment) {
-        setPreviewSegment(currentTenant.businessSegment);
-      }
     }
   }, [currentTenant]);
 
@@ -229,57 +224,56 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                 </div>
               </div>
 
-              {/* Banner Hero Preview - Gold Luxury Geometric Sem Imagem com Animação Shimmer */}
+              {/* Banner Hero Preview - Luxury Glassmorphism & Ambient Glow */}
               {(() => {
                 const brandAccent = brandingEdits?.accentColor || currentTenant.branding.accentColor || '#F59E0B';
                 const brandPrimary = brandingEdits?.primaryColor || currentTenant.branding.primaryColor || '#881337';
 
                 const luxuryBg = isLight
-                  ? `linear-gradient(135deg, #ffffff 0%, ${brandPrimary}0A 35%, #ffffff 70%, ${brandAccent}15 100%)`
-                  : `linear-gradient(135deg, #09090b 0%, #141316 45%, ${brandPrimary}22 75%, #050507 100%)`;
+                  ? `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}14 0%, transparent 60%), radial-gradient(ellipse 70% 70% at 10% 90%, ${brandPrimary}0D 0%, transparent 55%), linear-gradient(135deg, #ffffff 0%, #fbfbfc 50%, #f4f5f7 100%)`
+                  : `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}26 0%, transparent 65%), radial-gradient(ellipse 75% 70% at 10% 90%, ${brandPrimary}33 0%, transparent 60%), linear-gradient(140deg, #0d0f15 0%, #12151f 40%, #090a0f 100%)`;
 
-                const luxuryBorder = `${brandAccent}${isLight ? '40' : '30'}`;
-                const patternStrokeColor = isLight ? brandPrimary : brandAccent;
-                const patternOpacity = isLight ? 0.22 : 0.28;
-                const abstractPatternUrl = getSegmentAbstractPattern(currentTenant.businessSegment, patternStrokeColor, patternOpacity);
+                const luxuryBorder = isLight ? `${brandAccent}35` : `${brandAccent}40`;
 
                 return (
                   <div
-                    className={`rounded-3xl border shadow-xl relative overflow-hidden transition-all duration-300 p-4 sm:p-6 ${
-                      isLight ? 'bg-white text-slate-900' : 'bg-neutral-950 text-white'
+                    className={`rounded-3xl border shadow-2xl relative overflow-hidden transition-all duration-300 p-4 sm:p-6 backdrop-blur-xl ${
+                      isLight ? 'bg-white/95 text-slate-900 shadow-slate-200/50' : 'bg-neutral-950/90 text-white shadow-black/60'
                     }`}
                     style={{
                       background: luxuryBg,
                       borderColor: luxuryBorder,
                     }}
                   >
-                    {/* 1. Malha de Desenhos Abstratos em Linhas Claras (Line-Art Temático por Comércio) */}
-                    {(brandingEdits?.patternStyle !== 'none') && (
-                      <div 
-                        className="absolute inset-0 pointer-events-none transition-opacity duration-300" 
-                        style={{ 
-                          backgroundImage: `url("${abstractPatternUrl}")`, 
-                          backgroundSize: '160px 70px',
-                          backgroundRepeat: 'repeat',
-                        }} 
-                      />
-                    )}
+                    {/* 1. Iluminação Ambiente Suave de Fundo (Aura Glow Sofisticada) */}
+                    <div 
+                      className="pointer-events-none absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-35 mix-blend-screen"
+                      style={{
+                        background: `radial-gradient(circle, ${brandAccent}55 0%, transparent 70%)`
+                      }}
+                    />
+                    <div 
+                      className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-25 mix-blend-screen"
+                      style={{
+                        background: `radial-gradient(circle, ${brandPrimary}60 0%, transparent 70%)`
+                      }}
+                    />
 
                     {/* 2. Feixe de Luz Shimmer Metálico Dinâmico na Diagonal */}
                     <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
                       <div 
-                        className="w-1/2 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-55"
+                        className="w-1/2 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-40"
                         style={{
-                          background: `linear-gradient(90deg, transparent 0%, ${brandAccent}15 30%, rgba(255, 255, 255, 0.70) 50%, ${brandAccent}20 70%, transparent 100%)`
+                          background: `linear-gradient(90deg, transparent 0%, ${brandAccent}10 30%, rgba(255, 255, 255, 0.45) 50%, ${brandAccent}15 70%, transparent 100%)`
                         }}
                       />
                     </div>
 
-                    {/* 3. Spotlight de Iluminação Ambiente */}
+                    {/* 3. Linha Acetinada de Reflexo de Borda Superior */}
                     <div 
-                      className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 rounded-full blur-3xl opacity-35 mix-blend-screen z-10"
+                      className="absolute top-0 inset-x-0 h-[1px] pointer-events-none opacity-40"
                       style={{
-                        background: `radial-gradient(circle, ${brandAccent}40 0%, ${brandPrimary}25 50%, transparent 75%)`
+                        background: `linear-gradient(90deg, transparent 0%, ${brandAccent} 40%, rgba(255,255,255,0.8) 50%, ${brandAccent} 60%, transparent 100%)`
                       }}
                     />
 
@@ -511,292 +505,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
             </div>
           </div>
 
-          {/* SEÇÃO 2: ESTILO DE FUNDO DA VITRINE (DESENHOS VETORIAIS LINE-ART DO COMÉRCIO) */}
-          <div className={`p-5 rounded-2xl border space-y-5 transition-colors ${
-            isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
-          }`}>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span>Fundo Abstrato da Vitrine: Traços Lineares (Line-Art do Comércio)</span>
-                </h3>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                  ✨ Sem Imagens Pesadas • 100% Vetorial
-                </span>
-              </div>
-              <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
-                Desenhos de traços lineares finos (outlines sutis) que acompanham a identidade visual da sua loja, adaptando-se harmonicamente tanto ao modo escuro quanto ao modo claro da vitrine web.
-              </p>
-            </div>
-
-            {/* Alternância de Modo: Traços Line-Art vs Fundo Liso */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setBrandingEdits({
-                    ...(brandingEdits || currentTenant.branding),
-                    patternStyle: 'line_art',
-                  });
-                }}
-                className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
-                  brandingEdits?.patternStyle !== 'none'
-                    ? isLight
-                      ? 'border-blue-600 bg-blue-50/70 text-blue-950 shadow-sm ring-1 ring-blue-500/20'
-                      : 'border-blue-500 bg-blue-950/40 text-white shadow-sm ring-1 ring-blue-500/30'
-                    : isLight
-                    ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
-                    : 'border-neutral-800 bg-neutral-950/60 hover:bg-neutral-800 text-neutral-300'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">✨</span>
-                    <span className="text-xs font-black">
-                      Traços Vetoriais Line-Art (Recomendado)
-                    </span>
-                  </div>
-                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                    brandingEdits?.patternStyle !== 'none'
-                      ? 'bg-blue-600 border-blue-600 text-white'
-                      : isLight ? 'border-slate-300 bg-white' : 'border-neutral-700 bg-neutral-900'
-                  }`}>
-                    {brandingEdits?.patternStyle !== 'none' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                  </div>
-                </div>
-                <p className={`text-[11px] leading-relaxed ${
-                  brandingEdits?.patternStyle !== 'none'
-                    ? isLight ? 'text-blue-900 font-medium' : 'text-blue-200 font-medium'
-                    : isLight ? 'text-slate-500' : 'text-neutral-400'
-                }`}>
-                  Exibe ícones lineares do seu ramo ({getSegmentById(currentTenant.businessSegment).shortLabel}) no topo do cardápio com efeito de iluminação shimmer.
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setBrandingEdits({
-                    ...(brandingEdits || currentTenant.branding),
-                    patternStyle: 'none',
-                  });
-                }}
-                className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
-                  brandingEdits?.patternStyle === 'none'
-                    ? isLight
-                      ? 'border-blue-600 bg-blue-50/70 text-blue-950 shadow-sm ring-1 ring-blue-500/20'
-                      : 'border-blue-500 bg-blue-950/40 text-white shadow-sm ring-1 ring-blue-500/30'
-                    : isLight
-                    ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
-                    : 'border-neutral-800 bg-neutral-950/60 hover:bg-neutral-800 text-neutral-300'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">▫️</span>
-                    <span className="text-xs font-black">
-                      Fundo Liso & Gradiente Puro
-                    </span>
-                  </div>
-                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                    brandingEdits?.patternStyle === 'none'
-                      ? 'bg-blue-600 border-blue-600 text-white'
-                      : isLight ? 'border-slate-300 bg-white' : 'border-neutral-700 bg-neutral-900'
-                  }`}>
-                    {brandingEdits?.patternStyle === 'none' && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                  </div>
-                </div>
-                <p className={`text-[11px] leading-relaxed ${
-                  brandingEdits?.patternStyle === 'none'
-                    ? isLight ? 'text-blue-900 font-medium' : 'text-blue-200 font-medium'
-                    : isLight ? 'text-slate-500' : 'text-neutral-400'
-                }`}>
-                  Mantém apenas o degradê de cores da marca e o reflexo metálico no topo, sem desenhos ilustrados ao fundo.
-                </p>
-              </button>
-            </div>
-
-            {/* Amostra Visual do Padrão Vetorial do Segmento da Loja */}
-            <div className={`p-4 rounded-xl border overflow-hidden relative ${
-              isLight ? 'bg-slate-50 border-slate-300' : 'bg-neutral-950 border-neutral-800'
-            }`}>
-              <div className="flex items-center justify-between mb-2 relative z-10 flex-wrap gap-2">
-                <span className={`text-xs font-bold flex items-center gap-1.5 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  <span>Amostra dos Traços Lineares ({getSegmentById(previewSegment).emoji} {getSegmentById(previewSegment).name}):</span>
-                </span>
-                <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
-                  {brandingEdits?.patternStyle !== 'none' ? 'Ativo na Vitrine' : 'Desativado (Fundo Liso)'}
-                </span>
-              </div>
-
-              {/* Box com o padrão SVG ao vivo ampliado */}
-              <div 
-                className="h-32 sm:h-36 rounded-xl border-2 relative overflow-hidden flex flex-col justify-between p-3 transition-all shadow-inner"
-                style={{
-                  backgroundColor: isLight ? '#f8fafc' : '#090d16',
-                  borderColor: `${activeAccent}60`,
-                }}
-              >
-                {brandingEdits?.patternStyle !== 'none' ? (
-                  <>
-                    <div 
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        backgroundImage: `url("${getSegmentAbstractPattern(previewSegment, activeAccent || '#d97706', isLight ? 0.70 : 0.75)}")`,
-                        backgroundSize: '160px 70px',
-                        backgroundRepeat: 'repeat',
-                      }}
-                    />
-                    <div className="relative z-10 flex items-center justify-between">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border backdrop-blur-md shadow-2xs ${
-                        isLight ? 'bg-white/90 text-slate-900 border-slate-300' : 'bg-neutral-900/90 text-white border-neutral-700'
-                      }`}>
-                        {getSegmentById(previewSegment).emoji} Traços de {getSegmentById(previewSegment).shortLabel}
-                      </span>
-                      <span className="text-[9px] font-mono opacity-70 px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10">
-                        160x70px seamless
-                      </span>
-                    </div>
-
-                    <div className="relative z-10 self-center">
-                      <span className={`text-[11px] font-black px-3.5 py-1 rounded-full border shadow-sm backdrop-blur-md ${
-                        isLight ? 'bg-white/95 text-slate-900 border-slate-300' : 'bg-neutral-900/95 text-amber-400 border-amber-500/40'
-                      }`}>
-                        ✨ Padrão Vetorial do seu Comércio
-                      </span>
-                    </div>
-
-                    <div className="relative z-10 text-[9px] font-medium opacity-60 text-right">
-                      Adaptável ao modo escuro e claro
-                    </div>
-                  </>
-                ) : (
-                  <div className="h-full flex items-center justify-center">
-                    <span className={`text-xs font-medium ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
-                      Fundo liso ativado — sem desenhos ilustrativos no cabeçalho
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Guia Visual dos 9 Segmentos com Traços Vetoriais Lineares */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between">
-                <h4 className={`text-xs font-bold ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
-                  Desenhos específicos por nicho (toque em qualquer um para ver a amostra acima):
-                </h4>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                {[
-                  {
-                    id: 'sorveteria',
-                    emoji: '🍦',
-                    name: 'Sorveteria',
-                    desc: 'Casquinhas de sorvete, picolés no palito, taça de sundae com cereja e confeitos lineares.',
-                  },
-                  {
-                    id: 'adega',
-                    emoji: '🍷',
-                    name: 'Adega & Bebidas',
-                    desc: 'Garrafas de vinho, taças de brinde, cachos de uva e rolhas em traços finos.',
-                  },
-                  {
-                    id: 'pizzaria',
-                    emoji: '🍕',
-                    name: 'Pizzaria',
-                    desc: 'Fatias de pizza com queijo/calabresa, rolo de massa e tomatinho com folha.',
-                  },
-                  {
-                    id: 'hamburgueria',
-                    emoji: '🍔',
-                    name: 'Hamburgueria & Lanches',
-                    desc: 'Hambúrgueres em camadas, batatas fritas e copos com canudo.',
-                  },
-                  {
-                    id: 'acai',
-                    emoji: '🥣',
-                    name: 'Açaí & Frutas',
-                    desc: 'Tigelas de açaí com frutas, folhas tropicais e bagas.',
-                  },
-                  {
-                    id: 'cafeteria',
-                    emoji: '☕',
-                    name: 'Cafeteria & Padaria',
-                    desc: 'Xícaras com vapor, grãos de café e croissants.',
-                  },
-                  {
-                    id: 'japonesa',
-                    emoji: '🍣',
-                    name: 'Comida Japonesa',
-                    desc: 'Sushis niguiri, rolinhos, tigela de ramen e hashis.',
-                  },
-                  {
-                    id: 'confeitaria',
-                    emoji: '🧁',
-                    name: 'Confeitaria & Doces',
-                    desc: 'Cupcakes com cobertura, pirulitos espirais e fatias de bolo.',
-                  },
-                  {
-                    id: 'geral',
-                    emoji: '🍽️',
-                    name: 'Geral & Gastronomia',
-                    desc: 'Talheres, pratos, sacolas de presentes e estrelas de qualidade.',
-                  },
-                ].map((item) => {
-                  const isCurrent = 
-                    (item.id === 'geral' && !['sorveteria', 'adega', 'pizzaria', 'hamburgueria', 'acai', 'cafeteria', 'japonesa', 'confeitaria'].includes(currentTenant.businessSegment)) ||
-                    (item.id === 'adega' && (currentTenant.businessSegment === 'adega' || currentTenant.businessSegment === 'bebidas')) ||
-                    (item.id === 'hamburgueria' && (currentTenant.businessSegment === 'hamburgueria' || currentTenant.businessSegment === 'lanchonete')) ||
-                    currentTenant.businessSegment === item.id;
-
-                  const isViewing = previewSegment === item.id;
-
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setPreviewSegment(item.id)}
-                      className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer ${
-                        isViewing
-                          ? isLight
-                            ? 'bg-amber-100/70 border-amber-500 text-amber-950 shadow-sm ring-2 ring-amber-400/30'
-                            : 'bg-amber-950/40 border-amber-400 text-white shadow-sm ring-2 ring-amber-400/30'
-                          : isCurrent
-                          ? isLight
-                            ? 'bg-amber-50/80 border-amber-300 text-amber-950'
-                            : 'bg-amber-950/20 border-amber-600/50 text-white'
-                          : isLight
-                          ? 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
-                          : 'bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-300'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold flex items-center gap-1.5 text-xs">
-                          <span>{item.emoji}</span>
-                          <span>{item.name}</span>
-                        </span>
-                        {isCurrent && (
-                          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded bg-amber-500 text-black">
-                            Sua Loja
-                          </span>
-                        )}
-                      </div>
-                      <p className={`text-[10px] leading-snug ${
-                        isViewing || isCurrent ? (isLight ? 'text-amber-900 font-medium' : 'text-amber-200 font-medium') : (isLight ? 'text-slate-500' : 'text-neutral-400')
-                      }`}>
-                        {item.desc}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* SEÇÃO 3: CORES DA VITRINE DO CARDÁPIO ONLINE */}
+          {/* SEÇÃO 2: CORES DA VITRINE DO CARDÁPIO ONLINE */}
           <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
             isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-neutral-900 border-neutral-800'
           }`}>
@@ -1158,7 +867,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
             </div>
           </div>
 
-          {/* SEÇÃO 4: TEXTOS E AVISOS DA VITRINE */}
+          {/* SEÇÃO 3: TEXTOS E AVISOS DA VITRINE */}
           <div className={`p-5 rounded-2xl border space-y-4 transition-colors ${
             isLight ? 'bg-white border-neutral-200' : 'bg-neutral-900 border-neutral-800'
           }`}>
