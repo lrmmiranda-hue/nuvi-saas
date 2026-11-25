@@ -3,6 +3,7 @@ import { useStore } from '../../context/StoreContext';
 import { STORE_WALLPAPERS, WALLPAPER_CATEGORIES, getSegmentWallpapers } from '../../data/wallpapers';
 import { PRESET_THEMES, PRESET_BANNERS, getSegmentThemes } from './OnboardingWizardModal';
 import { getSegmentById } from '../../data/businessSegments';
+import { getSegmentAbstractPattern } from '../../utils/abstractPatterns';
 import {
   Check,
   ExternalLink,
@@ -234,6 +235,9 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                   : `linear-gradient(135deg, #09090b 0%, #141316 45%, ${brandPrimary}22 75%, #050507 100%)`;
 
                 const luxuryBorder = `${brandAccent}${isLight ? '40' : '30'}`;
+                const patternStrokeColor = isLight ? brandPrimary : brandAccent;
+                const patternOpacity = isLight ? 0.22 : 0.28;
+                const abstractPatternUrl = getSegmentAbstractPattern(currentTenant.businessSegment, patternStrokeColor, patternOpacity);
 
                 return (
                   <div
@@ -245,13 +249,13 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                       borderColor: luxuryBorder,
                     }}
                   >
-                    {/* 1. Malha Geométrica Pontilhada de Luxo */}
+                    {/* 1. Malha de Desenhos Abstratos em Linhas Claras (Line-Art Temático por Comércio) */}
                     <div 
                       className="absolute inset-0 pointer-events-none" 
                       style={{ 
-                        backgroundImage: `radial-gradient(circle, ${brandAccent} 1px, transparent 1px)`, 
-                        backgroundSize: '20px 20px',
-                        opacity: isLight ? 0.12 : 0.18
+                        backgroundImage: `url("${abstractPatternUrl}")`, 
+                        backgroundSize: '160px 70px',
+                        backgroundRepeat: 'repeat',
                       }} 
                     />
 
@@ -304,24 +308,22 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         <div className="flex items-center gap-3 pt-0.5">
                           {brandingEdits?.logoUrl ? (
                             <div 
-                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl p-1 border shrink-0 shadow-md"
+                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl p-1 shrink-0 shadow-md"
                               style={{
                                 backgroundColor: isLight ? '#ffffff' : 'rgba(10, 10, 10, 0.75)',
-                                borderColor: `${brandAccent}40`,
                               }}
                             >
                               <img
                                 src={brandingEdits.logoUrl}
                                 alt="Logo Preview"
-                                className="w-full h-full object-contain"
+                                className="w-full h-full object-contain rounded-xl"
                               />
                             </div>
                           ) : (
                             <div 
-                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-md shrink-0 border-2 text-white"
+                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-md shrink-0 text-white"
                               style={{ 
                                 backgroundColor: brandPrimary,
-                                borderColor: brandAccent,
                                 boxShadow: `0 6px 14px -3px ${brandPrimary}50`
                               }}
                             >

@@ -5,6 +5,7 @@ import { getTenantActiveCategories, getCategoryDisplayName } from '../../data/bu
 import { ProductDetailModal } from './ProductDetailModal';
 import { CartDrawer } from './CartDrawer';
 import { OrderConfirmationModal } from './OrderConfirmationModal';
+import { getSegmentAbstractPattern } from '../../utils/abstractPatterns';
 import {
   ShoppingBag,
   ShoppingCart,
@@ -230,6 +231,9 @@ export const StorefrontView: React.FC = () => {
           : `linear-gradient(135deg, #09090b 0%, #141316 45%, ${brandPrimary}22 75%, #050507 100%)`;
 
         const luxuryBorder = `${brandAccent}${isLight ? '40' : '30'}`;
+        const patternStrokeColor = isLight ? brandPrimary : brandAccent;
+        const patternOpacity = isLight ? 0.22 : 0.28;
+        const abstractPatternUrl = getSegmentAbstractPattern(currentTenant.businessSegment, patternStrokeColor, patternOpacity);
 
         return (
           <div
@@ -241,13 +245,13 @@ export const StorefrontView: React.FC = () => {
               borderColor: luxuryBorder,
             }}
           >
-            {/* 1. Malha Geométrica Pontilhada de Luxo */}
+            {/* 1. Malha de Desenhos Abstratos em Linhas Claras (Line-Art Temático por Comércio) */}
             <div 
               className="absolute inset-0 pointer-events-none" 
               style={{ 
-                backgroundImage: `radial-gradient(circle, ${brandAccent} 1px, transparent 1px)`, 
-                backgroundSize: '20px 20px',
-                opacity: isLight ? 0.12 : 0.18
+                backgroundImage: `url("${abstractPatternUrl}")`, 
+                backgroundSize: '160px 70px',
+                backgroundRepeat: 'repeat',
               }} 
             />
 
@@ -306,27 +310,25 @@ export const StorefrontView: React.FC = () => {
                   className="flex items-start sm:items-center gap-3 sm:gap-4 pt-1 cursor-pointer group select-none transition-all active:scale-[0.99]"
                   title="Toque para ver horários, cartões aceitos e endereço do estabelecimento"
                 >
-                  {/* Logo Box Luxo */}
+                  {/* Logo Box Luxo - Sem Borda conforme solicitado */}
                   {currentTenant.branding.logoUrl ? (
                     <div 
-                      className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl p-1.5 border shrink-0 shadow-lg transition-transform group-hover:scale-105"
+                      className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl p-1 shrink-0 shadow-lg transition-transform group-hover:scale-105"
                       style={{
                         backgroundColor: isLight ? '#ffffff' : 'rgba(10, 10, 10, 0.75)',
-                        borderColor: `${brandAccent}40`,
                       }}
                     >
                       <img
                         src={currentTenant.branding.logoUrl}
                         alt={currentTenant.name}
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain rounded-xl"
                       />
                     </div>
                   ) : (
                     <div
-                      className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl flex items-center justify-center font-black text-2xl sm:text-3xl shadow-lg shrink-0 border-2 transition-transform group-hover:scale-105 text-white"
+                      className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl flex items-center justify-center font-black text-2xl sm:text-3xl shadow-lg shrink-0 transition-transform group-hover:scale-105 text-white"
                       style={{ 
                         backgroundColor: brandPrimary,
-                        borderColor: brandAccent,
                         boxShadow: `0 8px 20px -4px ${brandPrimary}50`
                       }}
                     >
