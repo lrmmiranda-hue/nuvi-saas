@@ -45,12 +45,16 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
 
   const [brandingEdits, setBrandingEdits] = useState(currentTenant?.branding);
   const [sloganEdit, setSloganEdit] = useState(currentTenant?.slogan || '');
+  const [previewSegment, setPreviewSegment] = useState<string>(currentTenant?.businessSegment || 'pizzaria');
 
   // Sincroniza quando currentTenant mudar
   useEffect(() => {
     if (currentTenant) {
       setBrandingEdits(currentTenant.branding);
       setSloganEdit(currentTenant.slogan);
+      if (currentTenant.businessSegment) {
+        setPreviewSegment(currentTenant.businessSegment);
+      }
     }
   }, [currentTenant]);
 
@@ -615,54 +619,75 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
 
             {/* Amostra Visual do Padrão Vetorial do Segmento da Loja */}
             <div className={`p-4 rounded-xl border overflow-hidden relative ${
-              isLight ? 'bg-slate-100 border-slate-300' : 'bg-neutral-950 border-neutral-800'
+              isLight ? 'bg-slate-50 border-slate-300' : 'bg-neutral-950 border-neutral-800'
             }`}>
-              <div className="flex items-center justify-between mb-2 relative z-10">
+              <div className="flex items-center justify-between mb-2 relative z-10 flex-wrap gap-2">
                 <span className={`text-xs font-bold flex items-center gap-1.5 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  <span>Amostra dos Traços Lineares do seu Ramo ({getSegmentById(currentTenant.businessSegment).emoji} {getSegmentById(currentTenant.businessSegment).name}):</span>
+                  <span>Amostra dos Traços Lineares ({getSegmentById(previewSegment).emoji} {getSegmentById(previewSegment).name}):</span>
                 </span>
                 <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
                   {brandingEdits?.patternStyle !== 'none' ? 'Ativo na Vitrine' : 'Desativado (Fundo Liso)'}
                 </span>
               </div>
 
-              {/* Box com o padrão SVG ao vivo */}
+              {/* Box com o padrão SVG ao vivo ampliado */}
               <div 
-                className="h-20 rounded-lg border relative overflow-hidden flex items-center justify-center"
+                className="h-32 sm:h-36 rounded-xl border-2 relative overflow-hidden flex flex-col justify-between p-3 transition-all shadow-inner"
                 style={{
-                  backgroundColor: isLight ? '#ffffff' : '#0d1117',
-                  borderColor: `${activeAccent}40`,
+                  backgroundColor: isLight ? '#f8fafc' : '#090d16',
+                  borderColor: `${activeAccent}60`,
                 }}
               >
                 {brandingEdits?.patternStyle !== 'none' ? (
                   <>
                     <div 
-                      className="absolute inset-0"
+                      className="absolute inset-0 pointer-events-none"
                       style={{
-                        backgroundImage: `url("${getSegmentAbstractPattern(currentTenant.businessSegment, activeAccent, isLight ? 0.35 : 0.40)}")`,
+                        backgroundImage: `url("${getSegmentAbstractPattern(previewSegment, activeAccent || '#d97706', isLight ? 0.70 : 0.75)}")`,
                         backgroundSize: '160px 70px',
                         backgroundRepeat: 'repeat',
                       }}
                     />
-                    <span className={`relative z-10 text-[11px] font-bold px-3 py-1 rounded-full border shadow-sm ${
-                      isLight ? 'bg-white/90 text-slate-800 border-slate-200' : 'bg-neutral-900/90 text-neutral-200 border-neutral-700'
-                    }`}>
-                      {getSegmentById(currentTenant.businessSegment).emoji} Traços finos e elegantes combinando com {getSegmentById(currentTenant.businessSegment).shortLabel}
-                    </span>
+                    <div className="relative z-10 flex items-center justify-between">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border backdrop-blur-md shadow-2xs ${
+                        isLight ? 'bg-white/90 text-slate-900 border-slate-300' : 'bg-neutral-900/90 text-white border-neutral-700'
+                      }`}>
+                        {getSegmentById(previewSegment).emoji} Traços de {getSegmentById(previewSegment).shortLabel}
+                      </span>
+                      <span className="text-[9px] font-mono opacity-70 px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10">
+                        160x70px seamless
+                      </span>
+                    </div>
+
+                    <div className="relative z-10 self-center">
+                      <span className={`text-[11px] font-black px-3.5 py-1 rounded-full border shadow-sm backdrop-blur-md ${
+                        isLight ? 'bg-white/95 text-slate-900 border-slate-300' : 'bg-neutral-900/95 text-amber-400 border-amber-500/40'
+                      }`}>
+                        ✨ Padrão Vetorial do seu Comércio
+                      </span>
+                    </div>
+
+                    <div className="relative z-10 text-[9px] font-medium opacity-60 text-right">
+                      Adaptável ao modo escuro e claro
+                    </div>
                   </>
                 ) : (
-                  <span className={`text-[11px] font-medium ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
-                    Fundo liso ativado — sem desenhos ilustrativos no cabeçalho
-                  </span>
+                  <div className="h-full flex items-center justify-center">
+                    <span className={`text-xs font-medium ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
+                      Fundo liso ativado — sem desenhos ilustrativos no cabeçalho
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
 
             {/* Guia Visual dos 9 Segmentos com Traços Vetoriais Lineares */}
             <div className="space-y-2 pt-1">
-              <h4 className={`text-xs font-bold ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
-                Desenhos específicos incluídos para cada nicho de comércio:
-              </h4>
+              <div className="flex items-center justify-between">
+                <h4 className={`text-xs font-bold ${isLight ? 'text-slate-800' : 'text-neutral-300'}`}>
+                  Desenhos específicos por nicho (toque em qualquer um para ver a amostra acima):
+                </h4>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {[
@@ -727,17 +752,25 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                     (item.id === 'hamburgueria' && (currentTenant.businessSegment === 'hamburgueria' || currentTenant.businessSegment === 'lanchonete')) ||
                     currentTenant.businessSegment === item.id;
 
+                  const isViewing = previewSegment === item.id;
+
                   return (
-                    <div
+                    <button
                       key={item.id}
-                      className={`p-2.5 rounded-xl border text-xs transition-all ${
-                        isCurrent
+                      type="button"
+                      onClick={() => setPreviewSegment(item.id)}
+                      className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer ${
+                        isViewing
                           ? isLight
-                            ? 'bg-amber-50/80 border-amber-400 text-amber-950 shadow-2xs'
-                            : 'bg-amber-950/30 border-amber-500/50 text-white shadow-2xs'
+                            ? 'bg-amber-100/70 border-amber-500 text-amber-950 shadow-sm ring-2 ring-amber-400/30'
+                            : 'bg-amber-950/40 border-amber-400 text-white shadow-sm ring-2 ring-amber-400/30'
+                          : isCurrent
+                          ? isLight
+                            ? 'bg-amber-50/80 border-amber-300 text-amber-950'
+                            : 'bg-amber-950/20 border-amber-600/50 text-white'
                           : isLight
-                          ? 'bg-white border-slate-200 text-slate-700'
-                          : 'bg-neutral-950 border-neutral-800 text-neutral-300'
+                          ? 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+                          : 'bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-300'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
@@ -752,11 +785,11 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         )}
                       </div>
                       <p className={`text-[10px] leading-snug ${
-                        isCurrent ? (isLight ? 'text-amber-900 font-medium' : 'text-amber-200 font-medium') : (isLight ? 'text-slate-500' : 'text-neutral-400')
+                        isViewing || isCurrent ? (isLight ? 'text-amber-900 font-medium' : 'text-amber-200 font-medium') : (isLight ? 'text-slate-500' : 'text-neutral-400')
                       }`}>
                         {item.desc}
                       </p>
-                    </div>
+                    </button>
                   );
                 })}
               </div>

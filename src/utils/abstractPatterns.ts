@@ -1,9 +1,22 @@
 // Gerador de Padrões Abstratos Line-Art Vetoriais por Segmento de Comércio
 // Cria SVGs seamless com traços finos (outlines), elegantes e transparentes, ideais para fundos claro e escuro.
 
-export function getSegmentAbstractPattern(segment: string | undefined, strokeColor: string, opacity: number = 0.25): string {
-  const encStroke = encodeURIComponent(strokeColor);
-  const strokeAttr = `stroke="${encStroke}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="${opacity}"`;
+function toSvgBase64(svg: string): string {
+  if (typeof window !== 'undefined' && window.btoa) {
+    return `data:image/svg+xml;base64,${window.btoa(unescape(encodeURIComponent(svg)))}`;
+  }
+  // Fallback seguro em ambientes sem window
+  try {
+    return `data:image/svg+xml;base64,${Buffer.from(svg, 'utf-8').toString('base64')}`;
+  } catch {
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  }
+}
+
+export function getSegmentAbstractPattern(segment: string | undefined, strokeColor: string, opacity: number = 0.35): string {
+  // Garante cor válida sem double-encoding
+  const color = strokeColor || '#F59E0B';
+  const strokeAttr = `stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="${opacity}"`;
 
   let innerSvg = '';
 
@@ -275,7 +288,7 @@ export function getSegmentAbstractPattern(segment: string | undefined, strokeCol
       break;
   }
 
-  // Gera SVG como Data URL codificada
+  // Gera SVG como Data URL codificada em Base64
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="70" viewBox="0 0 160 70">${innerSvg}</svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  return toSvgBase64(svg);
 }
