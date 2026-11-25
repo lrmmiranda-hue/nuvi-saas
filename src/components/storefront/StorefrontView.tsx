@@ -118,7 +118,22 @@ export const StorefrontView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOnlyChilled, setFilterOnlyChilled] = useState(false);
   const [filterOnlyPromo, setFilterOnlyPromo] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [isFavorited, setIsFavorited] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(`nuvi_fav_${currentTenant?.id}`) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (currentTenant?.id) {
+        const saved = localStorage.getItem(`nuvi_fav_${currentTenant.id}`) === 'true';
+        setIsFavorited(saved);
+      }
+    } catch {}
+  }, [currentTenant?.id]);
 
   // Modals & Drawers
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -328,22 +343,34 @@ export const StorefrontView: React.FC = () => {
                   </button>
 
                   {/* Controles do Canto Direito: Favoritar, Buscar e Status */}
-                  <div className="flex items-center gap-2">
-                    {/* Botão Favoritar / Curtir */}
+                  <div className="flex items-center gap-2 relative z-30">
+                    {/* Botão Favoritar / Curtir com Persistência em LocalStorage */}
                     <button
                       type="button"
-                      onClick={() => {
-                        setIsFavorited(!isFavorited);
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const nextFav = !isFavorited;
+                        setIsFavorited(nextFav);
+                        try {
+                          localStorage.setItem(`nuvi_fav_${currentTenant.id}`, String(nextFav));
+                        } catch {}
                         showAlert({
-                          title: !isFavorited ? 'Adicionado aos Favoritos!' : 'Removido dos Favoritos',
-                          message: !isFavorited ? `Você marcou ${currentTenant.name} como favorito.` : '',
+                          title: nextFav ? '❤️ Estabelecimento Favoritado!' : 'Removido dos Favoritos',
+                          message: nextFav
+                            ? `${currentTenant.name} agora está nos seus favoritos.`
+                            : `${currentTenant.name} foi removido dos favoritos.`,
                           variant: 'info'
                         });
                       }}
-                      className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white flex items-center justify-center shadow-lg transition-all border border-white/20 cursor-pointer active:scale-95"
-                      title="Favoritar Loja"
+                      className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white flex items-center justify-center shadow-lg transition-all border border-white/20 cursor-pointer active:scale-90"
+                      title={isFavorited ? 'Remover dos favoritos' : 'Favoritar Loja'}
                     >
-                      <Heart className={`w-4 h-4 transition-transform active:scale-125 ${isFavorited ? 'fill-rose-500 text-rose-500' : 'text-white'}`} />
+                      <Heart
+                        className={`w-4 h-4 transition-transform ${
+                          isFavorited ? 'fill-rose-500 text-rose-500 scale-110' : 'text-white'
+                        }`}
+                      />
                     </button>
 
                     {/* Botão Buscar */}
@@ -375,8 +402,8 @@ export const StorefrontView: React.FC = () => {
               <div className={`px-4 sm:px-6 pb-4 sm:pb-6 relative z-20 -mt-6 sm:-mt-8 rounded-t-[28px] sm:rounded-t-3xl pt-0 transition-colors ${
                 isLight ? 'bg-white' : 'bg-neutral-950'
               }`}>
-                {/* 1. LOGO CIRCULAR CENTRALIZADA FLUTUANTE (IDÊNTICO À FOTO DO USUÁRIO) */}
-                <div className="flex justify-center -mt-10 sm:-mt-12 mb-2">
+                {/* 1. LOGO NO CANTO ARREDONDADO ESQUERDO (CONFORME SOLICITADO PELO USUÁRIO) */}
+                <div className="flex justify-start pl-2 sm:pl-4 -mt-10 sm:-mt-12 mb-2">
                   <div
                     onClick={() => setIsStoreInfoModalOpen(true)}
                     className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full p-1 shadow-2xl border-4 cursor-pointer shrink-0 transition-transform hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 ${
@@ -400,7 +427,7 @@ export const StorefrontView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 2. NOME DA LOJA COM BADGE E SETA > (IDÊNTICO À FOTO) */}
+                {/* 2. NOME DA LOJA COM BADGE E SETA > */}
                 <div
                   onClick={() => setIsStoreInfoModalOpen(true)}
                   className="flex items-center justify-between cursor-pointer group py-1"
@@ -422,120 +449,167 @@ export const StorefrontView: React.FC = () => {
                   <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white shrink-0 transition-transform group-hover:translate-x-0.5" />
                 </div>
 
-                {/* 3. LINHA 1: Entrega rastreável • 2.0 km • Min R$ ... (IDÊNTICO À FOTO) */}
-                <div className={`text-xs flex items-center gap-1.5 flex-wrap font-medium pb-2 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                  <span>Entrega rastreável</span>
-                  <span>•</span>
-                  <span>{currentTenant.city || '2.0 km'}</span>
-                  <span>•</span>
-                  <span>Min R$ {(currentTenant.config?.minimumOrderValue || 10).toFixed(2).replace('.', ',')}</span>
-                </div>
+                {/* 3. CONTEÚDO DINÂMICO: MESA SELECIONADA vs RETIRADA/DELIVERY */}
+                {(() => {
+                  const deliveryRadius = currentTenant.address?.deliveryRadiusKm || (currentTenant.config as any)?.deliveryRadiusKm || 5;
+                  const minimumOrder = currentTenant.address?.minimumOrder || currentTenant.config?.minimumOrderValue || 0;
+                  const deliveryFee = currentTenant.address?.standardDeliveryFee || (currentTenant.config as any)?.deliveryFee || 0;
 
-                {/* DIVISÓRIA FINA 1 */}
-                <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
+                  // SE A MESA ESTIVER SELECIONADA: NÃO MOSTRAR NADA SOBRE RETIRADA OU ENTREGA!
+                  if (Boolean(tableNumber)) {
+                    return (
+                      <div className="pt-2 pb-1 space-y-2">
+                        <div className={`p-2.5 rounded-2xl border flex items-center justify-between gap-3 ${
+                          isLight ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950' : 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
+                        }`}>
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
+                              style={{ backgroundColor: brandPrimary }}
+                            >
+                              <UtensilsCrossed className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <span className="text-[10px] font-black uppercase tracking-wider block opacity-85 flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                Consumo no Local
+                              </span>
+                              <span className="text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                Mesa {tableNumber?.replace(/[^0-9]/g, '') || tableNumber} Selecionada
+                              </span>
+                            </div>
+                          </div>
 
-                {/* 4. LINHA 2: ★ 4,9 (245 avaliações) • [✪ Super] > (IDÊNTICO À FOTO) */}
-                <div
-                  onClick={() => setIsStoreInfoModalOpen(true)}
-                  className="flex items-center justify-between text-xs py-1.5 cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-black text-amber-500 flex items-center gap-1">
-                      ★ 4,9
-                    </span>
-                    <span className={isLight ? 'text-slate-500' : 'text-slate-400'}>
-                      (245 avaliações)
-                    </span>
-                    <span>•</span>
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30 flex items-center gap-1">
-                      <span>✪</span> Super Loja
-                    </span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white shrink-0 transition-transform group-hover:translate-x-0.5" />
-                </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTempTableInput(tableNumber || '');
+                                setIsTableSelectorOpen(true);
+                              }}
+                              className="text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
+                            >
+                              Trocar Mesa ➔
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIsTableOrdersModalOpen(true)}
+                              className="px-2.5 py-1.5 rounded-xl text-xs font-black text-white shadow-xs flex items-center gap-1 cursor-pointer shrink-0"
+                              style={{ backgroundColor: brandPrimary }}
+                            >
+                              <ReceiptText className="w-3.5 h-3.5" />
+                              <span>Extrato (R$ {tableOrdersTotal.toFixed(2)})</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
 
-                {/* DIVISÓRIA FINA 2 */}
-                <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
-
-                {/* 5. LINHA 3: Padrão • 10-25 min • R$ 7,99 / Mais opções disponíveis na sacola (IDÊNTICO À FOTO) */}
-                {isTableActive ? (
-                  <div className="flex items-center justify-between py-1.5 text-xs">
-                    <div className="flex items-center gap-2">
+                  // SE NÃO HÁ MESA SELECIONADA: MOSTRA BOTÃO DE ESCOLHER MESA + RAIO E MÍNIMO CONFIGURADOS + TEMPO E SACOLA
+                  return (
+                    <div className="space-y-1.5 pt-1">
+                      {/* BOTÃO PARA SELECIONAR A MESA (onde estava avaliações e super loja) */}
                       <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white shadow-xs shrink-0"
-                        style={{ backgroundColor: brandPrimary }}
+                        onClick={() => {
+                          setTempTableInput(tableNumber || '');
+                          setIsTableSelectorOpen(true);
+                        }}
+                        className={`flex items-center justify-between text-xs py-2 px-3 rounded-xl border cursor-pointer group transition-all my-1 ${
+                          isLight
+                            ? 'bg-sky-50/70 hover:bg-sky-100/80 border-sky-200 text-sky-950'
+                            : 'bg-sky-950/25 hover:bg-sky-900/35 border-sky-500/30 text-sky-200'
+                        }`}
                       >
-                        <UtensilsCrossed className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="font-bold text-xs" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                        {tableNumber ? `Consumo no Local: Mesa ${tableNumber.replace(/[^0-9]/g, '') || tableNumber}` : 'Consumo no Salão / Mesas'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsTableSelectorOpen(true)}
-                        className="text-xs font-bold text-sky-500 hover:underline cursor-pointer"
-                      >
-                        Alterar Mesa ➔
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsTableOrdersModalOpen(true)}
-                        className="px-2 py-1 rounded-lg text-xs font-black text-white shadow-xs flex items-center gap-1 cursor-pointer shrink-0"
-                        style={{ backgroundColor: brandPrimary }}
-                      >
-                        <ReceiptText className="w-3 h-3" />
-                        <span>R$ {tableOrdersTotal.toFixed(2)}</span>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="py-1 text-xs space-y-0.5">
-                    <div className="flex items-center justify-between font-medium">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                          Padrão
-                        </span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-semibold">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          {currentTenant.config?.estimatedDeliveryTime || '10-25'} min
-                        </span>
-                        <span>•</span>
-                        <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
-                          {currentTenant.config?.deliveryFee ? `R$ ${currentTenant.config.deliveryFee.toFixed(2).replace('.', ',')}` : 'R$ 7,99'}
-                        </span>
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white shadow-xs shrink-0"
+                            style={{ backgroundColor: brandPrimary }}
+                          >
+                            <UtensilsCrossed className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <span className="font-extrabold text-xs block">
+                              🍽️ Consumo no Salão / Mesas
+                            </span>
+                            <span className={`text-[10px] ${isLight ? 'text-sky-700' : 'text-sky-300'}`}>
+                              Está no estabelecimento? Toque aqui para selecionar sua Mesa
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-sky-600 dark:text-sky-400 font-bold text-xs">
+                          <span>Selecionar</span>
+                          <ChevronRight className="w-4 h-4 text-sky-500 group-hover:translate-x-0.5 transition-transform shrink-0" />
+                        </div>
                       </div>
 
-                      {/* Botão Sacola Rápida */}
-                      <button
-                        type="button"
-                        onClick={() => setIsCartOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer"
-                        style={{
-                          backgroundColor: `${brandAccent}15`,
-                          borderColor: `${brandAccent}40`,
-                          color: isLight ? '#0f172a' : brandAccent
-                        }}
-                      >
-                        <ShoppingCart className="w-3.5 h-3.5" style={{ color: brandAccent }} />
-                        <span>Sacola</span>
-                        {cart.length > 0 && (
-                          <span
-                            className="w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-white shrink-0 ml-0.5"
-                            style={{ backgroundColor: brandAccent }}
-                          >
-                            {cart.reduce((sum, item) => sum + item.quantity, 0)}
-                          </span>
+                      {/* DIVISÓRIA FINA */}
+                      <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
+
+                      {/* RAIO DE ENTREGA E PEDIDO MÍNIMO CONFIGURADOS PELO ESTABELECIMENTO */}
+                      <div className={`text-xs flex items-center gap-1.5 flex-wrap font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        <span>Raio de entrega: até {deliveryRadius} km</span>
+                        <span>•</span>
+                        <span>Mínimo para entrega: R$ {minimumOrder.toFixed(2).replace('.', ',')}</span>
+                        {deliveryFee > 0 && (
+                          <>
+                            <span>•</span>
+                            <span>Frete: R$ {deliveryFee.toFixed(2).replace('.', ',')}</span>
+                          </>
                         )}
-                      </button>
+                      </div>
+
+                      {/* DIVISÓRIA FINA */}
+                      <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
+
+                      {/* TEMPO DE ENTREGA E SACOLA RÁPIDA */}
+                      <div className="py-1 text-xs space-y-0.5">
+                        <div className="flex items-center justify-between font-medium">
+                          <div className="flex items-center gap-2">
+                            <span className="font-extrabold" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                              Padrão
+                            </span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-semibold">
+                              <Clock className="w-3.5 h-3.5 text-slate-400" />
+                              {currentTenant.config?.estimatedDeliveryTime || '10-25'} min
+                            </span>
+                            <span>•</span>
+                            <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
+                              {deliveryFee > 0 ? `R$ ${deliveryFee.toFixed(2).replace('.', ',')}` : 'Frete Grátis'}
+                            </span>
+                          </div>
+
+                          {/* Botão Sacola Rápida */}
+                          <button
+                            type="button"
+                            onClick={() => setIsCartOpen(true)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer"
+                            style={{
+                              backgroundColor: `${brandAccent}15`,
+                              borderColor: `${brandAccent}40`,
+                              color: isLight ? '#0f172a' : brandAccent
+                            }}
+                          >
+                            <ShoppingCart className="w-3.5 h-3.5" style={{ color: brandAccent }} />
+                            <span>Sacola</span>
+                            {cart.length > 0 && (
+                              <span
+                                className="w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-white shrink-0 ml-0.5"
+                                style={{ backgroundColor: brandAccent }}
+                              >
+                                {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                              </span>
+                            )}
+                          </button>
+                        </div>
+                        <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                          Mais opções disponíveis na sacola
+                        </p>
+                      </div>
                     </div>
-                    <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      Mais opções disponíveis na sacola
-                    </p>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             </div>
           );

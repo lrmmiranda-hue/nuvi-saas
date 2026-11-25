@@ -348,12 +348,12 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           </div>
                         </div>
 
-                        {/* Card Sobreposto com Logo Circular Centralizada */}
+                        {/* Card Sobreposto com Logo Circular no Canto Esquerdo */}
                         <div className={`px-4 pb-4 relative z-20 -mt-6 rounded-t-3xl pt-0 transition-colors ${
                           isLight ? 'bg-white' : 'bg-neutral-950'
                         }`}>
-                          {/* Logo Circular Centralizada Sobreposta */}
-                          <div className="flex justify-center -mt-10 mb-2">
+                          {/* Logo Circular no Canto Arredondado Esquerdo */}
+                          <div className="flex justify-start pl-2 -mt-10 mb-2">
                             <div
                               className={`w-20 h-20 rounded-full p-1 shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
                                 isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
@@ -392,35 +392,31 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                             <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                           </div>
 
-                          {/* Linha 1: Entrega rastreável • 2.0 km • Min R$ ... */}
-                          <div className={`text-[11px] flex items-center gap-1.5 font-medium pb-2 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                            <span>Entrega rastreável</span>
-                            <span>•</span>
-                            <span>{currentTenant.city || '2.0 km'}</span>
-                            <span>•</span>
-                            <span>Min R$ {(currentTenant.config?.minimumOrderValue || 10).toFixed(2).replace('.', ',')}</span>
+                          {/* Seletor de Mesa / Consumo no Salão */}
+                          <div className={`p-2 rounded-xl border flex items-center justify-between gap-2 my-1 text-[11px] ${
+                            isLight ? 'bg-sky-50/70 border-sky-200 text-sky-950' : 'bg-sky-950/25 border-sky-500/30 text-sky-200'
+                          }`}>
+                            <div className="flex items-center gap-2">
+                              <UtensilsCrossed className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                              <span className="font-bold">🍽️ Consumo no Salão: Selecionar Mesa</span>
+                            </div>
+                            <span className="font-bold text-sky-500 text-[10px]">➔</span>
                           </div>
 
                           {/* Divisória 1 */}
                           <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
 
-                          {/* Linha 2: ★ 4,9 (245 avaliações) • [✪ Super] > */}
-                          <div className="flex items-center justify-between text-[11px] py-1">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-black text-amber-500">★ 4,9</span>
-                              <span className={isLight ? 'text-slate-500' : 'text-slate-400'}>(245 avaliações)</span>
-                              <span>•</span>
-                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30">
-                                ✪ Super
-                              </span>
-                            </div>
-                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                          {/* Raio e Mínimo configurados por cada estabelecimento */}
+                          <div className={`text-[11px] flex items-center gap-1.5 font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                            <span>Raio de entrega: até {currentTenant.address?.deliveryRadiusKm || 5} km</span>
+                            <span>•</span>
+                            <span>Mínimo: R$ {(currentTenant.address?.minimumOrder || currentTenant.config?.minimumOrderValue || 0).toFixed(2).replace('.', ',')}</span>
                           </div>
 
                           {/* Divisória 2 */}
                           <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
 
-                          {/* Linha 3: Padrão • 10-25 min • R$ 7,99 / Mais opções disponíveis na sacola */}
+                          {/* Linha 3: Padrão • 10-25 min • R$ ... */}
                           <div className="py-1 text-[11px] space-y-0.5">
                             <div className="flex items-center gap-1.5 font-medium">
                               <span className="font-extrabold" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Padrão</span>
@@ -431,7 +427,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                               </span>
                               <span>•</span>
                               <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
-                                {currentTenant.config?.deliveryFee ? `R$ ${currentTenant.config.deliveryFee.toFixed(2).replace('.', ',')}` : 'R$ 7,99'}
+                                {currentTenant.config?.deliveryFee ? `R$ ${currentTenant.config.deliveryFee.toFixed(2).replace('.', ',')}` : 'Frete Grátis'}
                               </span>
                             </div>
                             <p className={`text-[10px] ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
