@@ -217,33 +217,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
       }
     },
     {
-      id: 'plan_balcao_estoque',
-      name: 'Balcão, Venda & Estoque (Sem Vitrine)',
-      tagline: 'Foco em loja física e controle de estoque',
-      price: 69.90,
-      period: '/mês',
-      description: 'Frente de Caixa (PDV), vendas no balcão e controle de estoque físico, sem vitrine online.',
-      badge: 'Balcão & Estoque',
-      features: [
-        'Frente de Caixa Balcão (PDV Ágil)',
-        'Controle de Estoque e baixa automática',
-        'Bipe com leitor USB / Bluetooth',
-        'Fechamento de caixa diário',
-        'Sem vitrine ou cardápio público na web'
-      ],
-      active: true,
-      permissions: {
-        enableStorefront: false,
-        enableDiningTables: false,
-        enablePDVBalcao: true,
-        enableStockControl: true,
-        enableBarcodeScanner: true,
-        enableDeliveryRadius: false,
-        enableFinancialMetrics: false,
-        enableKitchenKDS: false
-      }
-    },
-    {
       id: 'plan_balcao_pdv',
       name: 'Balcão & PDV Caixa Rápido',
       tagline: 'Para quem vende no balcão físico e online',
@@ -851,14 +824,14 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const targetTenant = tenant || currentTenant;
     if (!targetTenant) return Boolean(globalConfig.defaultPermissions[feature]);
 
-    // Mapeamento explícito entre os tipos de planos do lojista e os IDs dos 5 planos oficiais
+    // Mapeamento explícito entre os tipos de planos do lojista e os IDs dos 4 planos oficiais
     const PLAN_ID_MAP: Record<string, string> = {
       vitrine: 'plan_cardapio',
       plan_cardapio: 'plan_cardapio',
-      balcao_estoque: 'plan_balcao_estoque',
-      plan_balcao_estoque: 'plan_balcao_estoque',
       balcao: 'plan_balcao_pdv',
       plan_balcao_pdv: 'plan_balcao_pdv',
+      balcao_estoque: 'plan_balcao_pdv',
+      plan_balcao_estoque: 'plan_balcao_pdv',
       starter: 'plan_delivery_estoque',
       hibrido: 'plan_delivery_estoque',
       plan_delivery_estoque: 'plan_delivery_estoque',

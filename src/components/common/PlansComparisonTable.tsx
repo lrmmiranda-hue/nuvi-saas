@@ -15,7 +15,7 @@ export const PlansComparisonTable: React.FC<PlansComparisonTableProps> = ({
 }) => {
   const { globalConfig } = useStore();
 
-  // Dados consolidados dos 5 Planos Oficiais do Nuvi SaaS com preços em tempo real
+  // Dados consolidados dos 4 Planos Oficiais do Nuvi SaaS com preços em tempo real
   const plansData = [
     {
       id: 'plan_cardapio',
@@ -38,28 +38,6 @@ export const PlansComparisonTable: React.FC<PlansComparisonTableProps> = ({
       metricsText: 'Não incluso',
       highlight: false,
       target: 'Bares e restaurantes que querem cardápio digital de mesa via QR Code'
-    },
-    {
-      id: 'plan_balcao_estoque',
-      name: 'Balcão & Estoque [Sem Vitrine]',
-      badge: 'Loja Física',
-      tag: 'Sem Vitrine',
-      icon: '📦',
-      price: globalConfig?.plans?.find(p => p.id === 'plan_balcao_estoque')?.price ?? 69.90,
-      tables: false,
-      tablesText: 'Sem mesas',
-      kds: false,
-      kdsText: 'Não incluso',
-      delivery: false,
-      deliveryText: 'Sem vitrine web',
-      pdv: true,
-      pdvText: 'PDV Balcão Ágil',
-      stock: true,
-      stockText: 'Estoque + Leitor USB/BT',
-      metrics: false,
-      metricsText: 'Não incluso',
-      highlight: false,
-      target: 'Adegas, tabacarias e mercadinhos focados em caixa e controle de mercadorias'
     },
     {
       id: 'plan_balcao_pdv',
@@ -127,7 +105,10 @@ export const PlansComparisonTable: React.FC<PlansComparisonTableProps> = ({
       highlight: true,
       target: 'Operação completa e integrada: Salão + Cozinha + Delivery + Balcão'
     }
-  ];
+  ].filter(p => {
+    const configPlan = globalConfig?.plans?.find(cp => cp.id === p.id);
+    return configPlan ? configPlan.active !== false : true;
+  });
 
   return (
     <div className="w-full space-y-4">

@@ -114,23 +114,23 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     return () => window.removeEventListener('click', handleOutsideClick);
   }, []);
 
-  // Preços oficiais de referência dos planos
+  // Preços oficiais de referência dos 4 planos
   const PLAN_PRICES: Record<string, number> = {
     vitrine: 49.90,
-    balcao_estoque: 69.90,
     balcao: 89.90,
     starter: 139.90,
     hibrido: 139.90,
+    balcao_estoque: 89.90,
     pro: 199.90,
     enterprise: 199.90
   };
 
   const PLAN_TITLES: Record<string, string> = {
     vitrine: 'Cardápio Digital & QR Mesas (R$ 49,90)',
-    balcao_estoque: 'Balcão & Estoque (Sem Vitrine) (R$ 69,90)',
     balcao: 'Balcão & PDV Caixa Rápido (R$ 89,90)',
-    starter: 'Delivery & Estoque (R$ 139,90)',
-    hibrido: 'Delivery & Estoque (R$ 139,90)',
+    balcao_estoque: 'Balcão & PDV Caixa Rápido (R$ 89,90)',
+    starter: 'Delivery & Estoque Pro (R$ 139,90)',
+    hibrido: 'Delivery & Estoque Pro (R$ 139,90)',
     pro: 'Nuvi Pro Total (R$ 199,90)',
     enterprise: 'Nuvi Pro Total (R$ 199,90)'
   };
@@ -744,10 +744,10 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                         </div>
                       </td>
 
-                      {/* 3. Plano Contratado (5 Opções Oficiais Sem Duplicidade) */}
+                      {/* 3. Plano Contratado (4 Opções Oficiais Sem Duplicidade) */}
                       <td className="py-3 px-3.5">
                         <select
-                          value={tenant.plan === 'hibrido' ? 'starter' : tenant.plan === 'enterprise' ? 'pro' : tenant.plan}
+                          value={tenant.plan === 'hibrido' ? 'starter' : tenant.plan === 'enterprise' ? 'pro' : tenant.plan === 'balcao_estoque' ? 'balcao' : tenant.plan}
                           onChange={(e) => handleChangeTenantPlan(tenant.id, e.target.value as any)}
                           className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             themeMode === 'light'
@@ -755,10 +755,9 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                               : 'bg-[#151D24] border-[#253342] text-white focus:bg-[#1E2732]'
                           }`}
                         >
-                          <option value="vitrine">🛍️ Cardápio QR Mesas (R$ 49,90)</option>
-                          <option value="balcao_estoque">📦 Balcão & Estoque [Sem Vitrine] (R$ 69,90)</option>
+                          <option value="vitrine">📱 Cardápio QR Mesas (R$ 49,90)</option>
                           <option value="balcao">⚡ Balcão & PDV (R$ 89,90)</option>
-                          <option value="starter">🚚 Delivery & Estoque (R$ 139,90)</option>
+                          <option value="starter">🚚 Delivery & Estoque Pro (R$ 139,90)</option>
                           <option value="pro">👑 Nuvi Pro Total (R$ 199,90)</option>
                         </select>
                       </td>

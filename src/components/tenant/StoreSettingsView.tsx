@@ -573,10 +573,10 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
                 const PLAN_NAME_MAP: Record<string, string> = {
                   vitrine: 'Cardápio Digital & QR Mesas',
                   plan_cardapio: 'Cardápio Digital & QR Mesas',
-                  balcao_estoque: 'Balcão & Estoque (Sem Vitrine)',
-                  plan_balcao_estoque: 'Balcão & Estoque (Sem Vitrine)',
                   balcao: 'Balcão & PDV Caixa Rápido',
                   plan_balcao_pdv: 'Balcão & PDV Caixa Rápido',
+                  balcao_estoque: 'Balcão & PDV Caixa Rápido',
+                  plan_balcao_estoque: 'Balcão & PDV Caixa Rápido',
                   starter: 'Delivery & Estoque Profissional',
                   hibrido: 'Delivery & Estoque Profissional',
                   plan_delivery_estoque: 'Delivery & Estoque Profissional',

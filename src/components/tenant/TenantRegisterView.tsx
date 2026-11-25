@@ -70,7 +70,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Os 5 Planos Oficiais do Nuvi SaaS com preços integrados às configurações globais (filtrados pelos que estão ativos no Master)
+  // Os 4 Planos Oficiais do Nuvi SaaS com preços integrados às configurações globais (filtrados pelos que estão ativos no Master)
   const officialNuviPlans = [
     {
       id: 'plan_cardapio',
@@ -81,16 +81,6 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
       price: globalConfig?.plans?.find(p => p.id === 'plan_cardapio')?.price ?? 49.90,
       description: 'Acesso exclusivo a cardápio digital de mesa para clientes visualizarem via QR Code, sem PDV balcão.',
       icon: '📱'
-    },
-    {
-      id: 'plan_balcao_estoque',
-      tenantPlan: 'balcao_estoque' as const,
-      name: 'Balcão, Venda & Estoque (Sem Vitrine)',
-      badge: 'Balcão & Estoque',
-      tag: 'Sem Vitrine',
-      price: globalConfig?.plans?.find(p => p.id === 'plan_balcao_estoque')?.price ?? 69.90,
-      description: 'Frente de Caixa (PDV), vendas no balcão e controle de estoque físico com leitor, sem vitrine pública online.',
-      icon: '🏪'
     },
     {
       id: 'plan_balcao_pdv',
@@ -114,7 +104,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
     },
     {
       id: 'plan_nuvi_pro',
-      tenantPlan: 'hibrido' as const,
+      tenantPlan: 'pro' as const,
       name: 'Nuvi Pro Total (Completo)',
       badge: 'Mais Recomendado',
       tag: 'Tudo Incluso',
@@ -129,7 +119,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
 
   const currentSelectedPlan = officialNuviPlans.find(p => p.id === selectedPlanId) || officialNuviPlans[0] || {
     id: 'plan_nuvi_pro',
-    tenantPlan: 'hibrido' as const,
+    tenantPlan: 'pro' as const,
     name: 'Nuvi Pro Total (Completo)',
     badge: 'Mais Recomendado',
     tag: 'Tudo Incluso',
@@ -444,9 +434,11 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                   onClick={() => setIsBranchFilterOpen(!isBranchFilterOpen)}
                   className={`w-full p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
                     isBranchFilterOpen
-                      ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/30'
+                      ? isLight
+                        ? 'bg-slate-100/90 border-slate-300 text-slate-800'
+                        : 'bg-[#151F2C] border-[#223142] text-white'
                       : isLight
-                      ? 'bg-slate-50 border-slate-300 text-slate-800'
+                      ? 'bg-slate-50 border-slate-200 text-slate-800'
                       : 'bg-[#0E1520] border-[#1C2631] text-white'
                   }`}
                 >
@@ -469,23 +461,23 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                   </div>
                 </button>
 
-                {/* Painel do Filtro conforme Imagem 2 */}
+                {/* Painel do Filtro conforme Imagem 2 (Sem bordas azuis pesadas no celular) */}
                 {isBranchFilterOpen && (
-                  <div className={`p-3 rounded-2xl border-2 border-blue-500 shadow-2xl space-y-2.5 transition-all ${
-                    isLight ? 'bg-white shadow-blue-500/10' : 'bg-[#0B131E] shadow-black/80'
+                  <div className={`p-3 rounded-2xl border shadow-xl space-y-2.5 transition-all ${
+                    isLight ? 'bg-white border-slate-200 shadow-slate-200/50' : 'bg-[#0E1520] border-[#1C2631] shadow-black/80'
                   }`}>
-                    {/* Input de Busca com borda azul e ícone de lupa */}
+                    {/* Input de Busca com borda suave e ícone de lupa */}
                     <div className="relative">
-                      <Search className="w-4 h-4 text-blue-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                       <input
                         type="text"
                         value={branchSearchQuery}
                         onChange={(e) => setBranchSearchQuery(e.target.value)}
                         placeholder="Digite para buscar ramo (ex: Adega, Pizzaria)..."
-                        className={`w-full pl-9 pr-3 py-2 rounded-lg text-xs font-medium outline-none border-2 border-blue-500/80 focus:border-blue-500 transition-colors ${
+                        className={`w-full pl-9 pr-3 py-2 rounded-lg text-xs font-medium outline-none border focus:border-sky-500 transition-colors ${
                           isLight
-                            ? 'bg-slate-50 text-slate-900 placeholder-slate-400 focus:bg-white'
-                            : 'bg-[#080E17] text-white placeholder-slate-500'
+                            ? 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white'
+                            : 'bg-[#080E17] border-[#1C2631] text-white placeholder-slate-500'
                         }`}
                         autoFocus
                       />
@@ -748,7 +740,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                <div className={`grid grid-cols-1 sm:grid-cols-2 ${officialNuviPlans.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-2`}>
                   {officialNuviPlans.map((plan) => {
                     const isSelected = selectedPlanId === plan.id;
                     return (
@@ -841,7 +833,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                 </div>
                 <div>
                   <h3 className={`text-base font-black flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    Tabela Comparativa Oficial dos 5 Planos Nuvi SaaS
+                    Tabela Comparativa Oficial dos 4 Planos Nuvi SaaS
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 uppercase border border-emerald-500/30">
                       Demonstrativo de Recursos
                     </span>
@@ -888,7 +880,7 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                     : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
-                💳 Miniaturas dos 5 Planos
+                💳 Miniaturas dos Planos ({officialNuviPlans.length})
               </button>
             </div>
 
@@ -925,8 +917,8 @@ export const TenantRegisterView: React.FC<TenantRegisterViewProps> = ({ onSucces
                     </div>
                   </div>
 
-                  {/* Grid com os 5 Planos */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                  {/* Grid Dinâmico com os Planos Ativos */}
+                  <div className={`grid grid-cols-1 sm:grid-cols-2 ${officialNuviPlans.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-3`}>
                     {officialNuviPlans.map((p) => {
                       const isSelected = selectedPlanId === p.id;
                       return (

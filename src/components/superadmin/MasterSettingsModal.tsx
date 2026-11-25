@@ -232,7 +232,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Gerencie permissões de módulos, preços dos 5 planos de venda e banners promocionais.
+                Gerencie permissões de módulos, preços dos 4 planos de venda e banners promocionais.
               </p>
             </div>
           </div>
@@ -274,7 +274,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
             }`}
           >
             <DollarSign className="w-4 h-4" />
-            <span>Preços dos 5 Planos de Venda</span>
+            <span>Preços dos 4 Planos de Venda</span>
           </button>
 
           <button
@@ -583,7 +583,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200 dark:border-[#1C2631]">
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                    <span>Tabela Oficial de Preços dos 5 Planos Nuvi SaaS</span>
+                    <span>Tabela Oficial de Preços dos 4 Planos Nuvi SaaS</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">
                       Oficial
                     </span>
@@ -606,7 +606,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                   }`}
                 >
                   <BarChart3 className="w-4 h-4 text-sky-500" />
-                  <span>{showPlansComparisonTable ? 'Ocultar Demonstrativo' : '📊 Demonstrativo de Recursos dos 5 Planos'}</span>
+                  <span>{showPlansComparisonTable ? 'Ocultar Demonstrativo' : '📊 Demonstrativo de Recursos dos 4 Planos'}</span>
                 </button>
               </div>
 
@@ -617,8 +617,8 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                 </div>
               )}
 
-              {/* Grid dos 5 Planos Compactos */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5">
+              {/* Grid dos 4 Planos Compactos */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {plansState.map((plan, index) => (
                   <div
                     key={plan.id}
