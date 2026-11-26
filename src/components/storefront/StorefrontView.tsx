@@ -413,10 +413,10 @@ export const StorefrontView: React.FC = () => {
                 isLight ? 'bg-white' : 'bg-neutral-950'
               }`}>
                 {/* 1. LOGO QUADRADINHO NO CANTO SUPERIOR ESQUERDO SOBRE O RAIO DA BORDA */}
-                <div className="flex justify-start -mt-12 sm:-mt-14 mb-2.5">
+                <div className="flex justify-start -mt-14 sm:-mt-16 mb-2.5">
                   <div
                     onClick={() => setIsStoreInfoModalOpen(true)}
-                    className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl p-1 shadow-2xl border-4 cursor-pointer shrink-0 transition-transform hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 ${
+                    className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-2xl border-4 cursor-pointer shrink-0 transition-transform hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 ${
                       isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
                     }`}
                     style={{

@@ -295,8 +295,14 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                 // Borda Cinza Claro Fina e Elegante solicitada pelo usuário
                 const luxuryBorder = isLight ? '#cbd5e1' : '#334155';
 
+                const promoSlides = (brandingEdits?.promoBanners && brandingEdits.promoBanners.length > 0)
+                  ? brandingEdits.promoBanners
+                  : segmentWallpapers.length > 0
+                  ? segmentWallpapers.slice(0, 3).map(w => w.url)
+                  : [bannerImage].filter(Boolean);
+
                 // =========================================================================
-                // 1. MODO PRÉVIA CELULAR: Idêntico à Foto Enviada pelo Usuário
+                // 1. MODO PRÉVIA CELULAR: DINÂMICO PARA OS 3 LAYOUTS
                 // =========================================================================
                 if (previewDevice === 'mobile') {
                   return (
@@ -307,147 +313,477 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         }`}
                         style={{ borderColor: luxuryBorder }}
                       >
-                        {/* Capa de Fundo no Celular */}
-                        <div className="relative h-44 w-full overflow-hidden bg-slate-900">
-                          {bannerImage ? (
-                            <img
-                              src={bannerImage}
-                              alt="Capa de Fundo"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full" style={{ background: luxuryBg }} />
-                          )}
-
-                          {/* Vinheta Escura */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/40 pointer-events-none" />
-
-                          {/* Feixe Flash */}
-                          <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
-                            <div
-                              className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
-                              style={{
-                                background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
-                              }}
-                            />
-                          </div>
-
-                          {/* Botões Flutuantes sobre a Imagem no Topo */}
-                          <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between">
-                            <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-md border border-white/20">
-                              <ArrowLeft className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-md border border-white/20">
-                                <Heart className="w-3.5 h-3.5" />
-                              </div>
-                              <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-md border border-white/20">
-                                <Search className="w-3.5 h-3.5" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card Sobreposto com Logo Circular no Canto Esquerdo */}
-                        <div className={`px-4 pb-4 relative z-20 -mt-6 rounded-t-3xl pt-0 transition-colors ${
-                          isLight ? 'bg-white' : 'bg-neutral-950'
-                        }`}>
-                          {/* Logo Circular no Canto Arredondado Esquerdo */}
-                          <div className="flex justify-start pl-2 -mt-10 mb-2">
-                            <div
-                              className={`w-20 h-20 rounded-full p-1 shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
-                                isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
-                              }`}
-                            >
-                              {brandingEdits?.logoUrl ? (
+                        {/* OPÇÃO 1 CELULAR: CAPA PANORÂMICA IFOOD */}
+                        {bannerLayout === 'ifood_cover' && (
+                          <>
+                            {/* Capa de Fundo no Celular */}
+                            <div className="relative h-44 w-full overflow-hidden bg-slate-900">
+                              {bannerImage ? (
                                 <img
-                                  src={brandingEdits.logoUrl}
-                                  alt="Logo da Loja"
-                                  className="w-full h-full object-cover rounded-full"
+                                  src={bannerImage}
+                                  alt="Capa de Fundo"
+                                  className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <div
-                                  className="w-full h-full rounded-full flex items-center justify-center font-black text-2xl text-white shadow-inner"
-                                  style={{ backgroundColor: brandPrimary }}
-                                >
-                                  {currentTenant.name.charAt(0)}
-                                </div>
+                                <div className="w-full h-full" style={{ background: luxuryBg }} />
                               )}
-                            </div>
-                          </div>
 
-                          {/* Nome da Loja com Badge, Slogan e Seta > */}
-                          <div className="flex items-center justify-between py-1">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span
-                                  className="w-4 h-4 rounded-full flex items-center justify-center text-white shrink-0"
-                                  style={{ backgroundColor: brandAccent }}
+                              {/* Vinheta Escura */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/40 pointer-events-none" />
+
+                              {/* Feixe Flash */}
+                              <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
+                                <div
+                                  className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
+                                  style={{
+                                    background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
+                                  }}
+                                />
+                              </div>
+
+                              {/* Botões Flutuantes sobre a Imagem no Topo */}
+                              <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between">
+                                <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-md border border-white/20">
+                                  <ArrowLeft className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-md border border-white/20">
+                                    <Heart className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-md border border-white/20">
+                                    <Search className="w-3.5 h-3.5" />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Card Sobreposto com Logo Quadradinha no Canto Esquerdo */}
+                            <div className={`px-4 pb-4 relative z-20 -mt-6 rounded-t-3xl pt-0 transition-colors ${
+                              isLight ? 'bg-white' : 'bg-neutral-950'
+                            }`}>
+                              {/* Logo Quadradinha subindo mais e preenchendo completamente o quadradinho */}
+                              <div className="flex justify-start pl-1 -mt-14 mb-2">
+                                <div
+                                  className={`w-20 h-20 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
+                                    isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
+                                  }`}
+                                  style={{
+                                    boxShadow: '0 10px 25px -3px rgba(0, 0, 0, 0.35)'
+                                  }}
                                 >
-                                  <Sparkles className="w-2.5 h-2.5" />
-                                </span>
-                                <h1 className="text-sm font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                  {brandingEdits?.logoUrl ? (
+                                    <img
+                                      src={brandingEdits.logoUrl}
+                                      alt="Logo da Loja"
+                                      className="w-full h-full object-cover rounded-xl"
+                                    />
+                                  ) : (
+                                    <div
+                                      className="w-full h-full rounded-xl flex items-center justify-center font-black text-2xl text-white shadow-inner"
+                                      style={{ backgroundColor: brandPrimary }}
+                                    >
+                                      {currentTenant.name.charAt(0)}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Nome da Loja com Badge, Slogan e Seta > */}
+                              <div className="flex items-center justify-between py-1">
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <span
+                                      className="w-4 h-4 rounded-full flex items-center justify-center text-white shrink-0"
+                                      style={{ backgroundColor: brandAccent }}
+                                    >
+                                      <Sparkles className="w-2.5 h-2.5" />
+                                    </span>
+                                    <h1 className="text-sm font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                      {currentTenant.name}
+                                    </h1>
+                                  </div>
+                                  <p className={`text-[10px] mt-0.5 font-medium line-clamp-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                                    {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                                  </p>
+                                </div>
+                                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                              </div>
+
+                              {/* Seletor de Mesa / Consumo no Salão */}
+                              <div className={`p-2 rounded-xl border flex items-center justify-between gap-2 my-1 text-[11px] ${
+                                isLight ? 'bg-sky-50/70 border-sky-200 text-sky-950' : 'bg-sky-950/25 border-sky-500/30 text-sky-200'
+                              }`}>
+                                <div className="flex items-center gap-2">
+                                  <UtensilsCrossed className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                                  <span className="font-bold">🍽️ Consumo no Salão / Mesas</span>
+                                </div>
+                                <span className="font-bold text-sky-500 text-[10px]">➔</span>
+                              </div>
+
+                              {/* Divisória 1 */}
+                              <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
+
+                              {/* Raio e Mínimo configurados */}
+                              <div className={`text-[11px] flex items-center gap-1.5 font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                                <span>Raio: até {currentTenant.address?.deliveryRadiusKm || 5} km</span>
+                                <span>•</span>
+                                <span>Mínimo: R$ {(currentTenant.address?.minimumOrder || currentTenant.config?.minimumOrderValue || 0).toFixed(2).replace('.', ',')}</span>
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {/* OPÇÃO 2 CELULAR: CARD INTEGRADO 99FOOD */}
+                        {bannerLayout === 'card_99food' && (
+                          <div
+                            className="p-4 space-y-3 relative overflow-hidden"
+                            style={{ background: luxuryBg }}
+                          >
+                            {/* Imagem de Fundo Suave Acetinada */}
+                            {bannerImage && (
+                              <div
+                                className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay"
+                                style={{
+                                  backgroundImage: `url("${bannerImage}")`,
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: 'center',
+                                }}
+                              />
+                            )}
+
+                            {/* Feixe Flash */}
+                            <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
+                              <div
+                                className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
+                                style={{
+                                  background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
+                                }}
+                              />
+                            </div>
+
+                            {/* Status e Selo */}
+                            <div className="relative z-20 flex items-center gap-2">
+                              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                Aberto Agora
+                              </span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white/10 text-slate-300 border border-white/15">
+                                Moderno 99Food
+                              </span>
+                            </div>
+
+                            {/* Logo Integrada ao Lado do Nome */}
+                            <div className="relative z-20 flex items-center gap-3">
+                              <div
+                                className={`w-14 h-14 rounded-2xl shadow-lg border-2 shrink-0 overflow-hidden flex items-center justify-center ${
+                                  isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-800'
+                                }`}
+                              >
+                                {brandingEdits?.logoUrl ? (
+                                  <img
+                                    src={brandingEdits.logoUrl}
+                                    alt="Logo da Loja"
+                                    className="w-full h-full object-cover rounded-xl"
+                                  />
+                                ) : (
+                                  <div
+                                    className="w-full h-full rounded-xl flex items-center justify-center font-black text-xl text-white"
+                                    style={{ backgroundColor: brandPrimary }}
+                                  >
+                                    {currentTenant.name.charAt(0)}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <h1 className="text-base font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
                                   {currentTenant.name}
                                 </h1>
+                                <p className={`text-xs font-medium line-clamp-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                                  {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                                </p>
                               </div>
-                              <p className={`text-[10px] mt-0.5 font-medium line-clamp-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                                {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
-                              </p>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-                          </div>
 
-                          {/* Seletor de Mesa / Consumo no Salão */}
-                          <div className={`p-2 rounded-xl border flex items-center justify-between gap-2 my-1 text-[11px] ${
-                            isLight ? 'bg-sky-50/70 border-sky-200 text-sky-950' : 'bg-sky-950/25 border-sky-500/30 text-sky-200'
-                          }`}>
-                            <div className="flex items-center gap-2">
-                              <UtensilsCrossed className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                              <span className="font-bold">🍽️ Consumo no Salão: Selecionar Mesa</span>
-                            </div>
-                            <span className="font-bold text-sky-500 text-[10px]">➔</span>
-                          </div>
-
-                          {/* Divisória 1 */}
-                          <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
-
-                          {/* Raio e Mínimo configurados por cada estabelecimento */}
-                          <div className={`text-[11px] flex items-center gap-1.5 font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                            <span>Raio de entrega: até {currentTenant.address?.deliveryRadiusKm || 5} km</span>
-                            <span>•</span>
-                            <span>Mínimo: R$ {(currentTenant.address?.minimumOrder || currentTenant.config?.minimumOrderValue || 0).toFixed(2).replace('.', ',')}</span>
-                          </div>
-
-                          {/* Divisória 2 */}
-                          <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
-
-                          {/* Linha 3: Padrão • 10-25 min • R$ ... */}
-                          <div className="py-1 text-[11px] space-y-0.5">
-                            <div className="flex items-center gap-1.5 font-medium">
-                              <span className="font-extrabold" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>Padrão</span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                                <Clock className="w-3 h-3 text-slate-400" />
-                                {currentTenant.config?.estimatedDeliveryTime || '10-25'} min
+                            {/* Botão de Mesa Compacto */}
+                            <div className={`relative z-20 p-2.5 rounded-xl border flex items-center justify-between text-xs ${
+                              isLight ? 'bg-white/80 border-slate-200 text-slate-900' : 'bg-black/40 border-neutral-800 text-white'
+                            }`}>
+                              <span className="font-bold flex items-center gap-1.5">
+                                <UtensilsCrossed className="w-3.5 h-3.5 text-sky-400" />
+                                Consumo no Salão / Mesas
                               </span>
-                              <span>•</span>
-                              <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
-                                {currentTenant.config?.deliveryFee ? `R$ ${currentTenant.config.deliveryFee.toFixed(2).replace('.', ',')}` : 'Frete Grátis'}
+                              <span className="text-sky-400 font-bold text-[10px]">Toque p/ pedir</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* OPÇÃO 3 CELULAR: CARROSSEL PROMOCIONAL */}
+                        {bannerLayout === 'carousel_promos' && (
+                          <div className="space-y-2 pb-3">
+                            {/* Carrossel de Slides Rotativos */}
+                            <div className="relative h-40 w-full overflow-hidden bg-slate-900">
+                              {promoSlides.length > 0 && (
+                                <img
+                                  src={promoSlides[0]}
+                                  alt="Slide Promocional"
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+
+                              {/* Indicadores de Slides */}
+                              <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+                                <div className="w-5 h-1.5 rounded-full bg-white" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
+                              </div>
+
+                              <span className="absolute top-2.5 right-2.5 z-20 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold shadow-md">
+                                Oferta em Destaque
                               </span>
                             </div>
-                            <p className={`text-[10px] ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
-                              Mais opções disponíveis na sacola
-                            </p>
+
+                            {/* Card da Loja Compacto */}
+                            <div className="px-4 pt-1 space-y-2">
+                              <div className="flex items-center gap-2.5">
+                                <div
+                                  className={`w-12 h-12 rounded-xl shadow-md border-2 shrink-0 overflow-hidden flex items-center justify-center ${
+                                    isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-800'
+                                  }`}
+                                >
+                                  {brandingEdits?.logoUrl ? (
+                                    <img
+                                      src={brandingEdits.logoUrl}
+                                      alt="Logo da Loja"
+                                      className="w-full h-full object-cover rounded-lg"
+                                    />
+                                  ) : (
+                                    <div
+                                      className="w-full h-full rounded-lg flex items-center justify-center font-black text-lg text-white"
+                                      style={{ backgroundColor: brandPrimary }}
+                                    >
+                                      {currentTenant.name.charAt(0)}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <h1 className="text-sm font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                    {currentTenant.name}
+                                  </h1>
+                                  <p className={`text-[11px] font-medium line-clamp-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                                    {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   );
                 }
 
                 // =========================================================================
-                // 2. MODO PRÉVIA COMPUTADOR (WIDESCREEN)
+                // 2. MODO PRÉVIA COMPUTADOR: DINÂMICO PARA OS 3 LAYOUTS
                 // =========================================================================
+                if (bannerLayout === 'ifood_cover') {
+                  return (
+                    <div
+                      className={`rounded-3xl border shadow-2xl overflow-hidden transition-all duration-300 relative backdrop-blur-xl ${
+                        isLight ? 'bg-white text-slate-900 shadow-slate-200/50' : 'bg-neutral-950 text-white shadow-black/60'
+                      }`}
+                      style={{ borderColor: luxuryBorder }}
+                    >
+                      {/* Capa Panorâmica Superior no Computador */}
+                      <div className="relative h-52 md:h-60 w-full overflow-hidden bg-slate-900">
+                        {bannerImage ? (
+                          <img
+                            src={bannerImage}
+                            alt="Capa da Loja"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full" style={{ background: luxuryBg }} />
+                        )}
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35 pointer-events-none" />
+
+                        {/* Feixe Flash */}
+                        <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
+                          <div
+                            className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
+                            style={{
+                              background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
+                            }}
+                          />
+                        </div>
+
+                        {/* Botões Superiores */}
+                        <div className="absolute top-4 inset-x-6 z-20 flex items-center justify-between">
+                          <div className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-lg border border-white/20">
+                            <ArrowLeft className="w-4 h-4" />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-lg border border-white/20">
+                              <Heart className="w-4 h-4" />
+                            </div>
+                            <div className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center shadow-lg border border-white/20">
+                              <Search className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500 text-white font-bold shadow-md">
+                              ● Aberto Agora
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Sobreposto com Logo Quadradinha no Computador */}
+                      <div className={`px-6 pb-6 relative z-20 -mt-8 rounded-t-3xl pt-0 transition-colors ${
+                        isLight ? 'bg-white' : 'bg-neutral-950'
+                      }`}>
+                        <div className="flex justify-start -mt-16 mb-2.5">
+                          <div
+                            className={`w-24 h-24 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
+                              isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
+                            }`}
+                            style={{
+                              boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.35)'
+                            }}
+                          >
+                            {brandingEdits?.logoUrl ? (
+                              <img
+                                src={brandingEdits.logoUrl}
+                                alt="Logo da Loja"
+                                className="w-full h-full object-cover rounded-xl"
+                              />
+                            ) : (
+                              <div
+                                className="w-full h-full rounded-xl flex items-center justify-center font-black text-3xl text-white shadow-inner"
+                                style={{ backgroundColor: brandPrimary }}
+                              >
+                                {currentTenant.name.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between py-1">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0"
+                                style={{ backgroundColor: brandAccent }}
+                              >
+                                <Sparkles className="w-3 h-3" />
+                              </span>
+                              <h1 className="text-xl font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                {currentTenant.name}
+                              </h1>
+                            </div>
+                            <p className={`text-xs mt-0.5 font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                              {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-slate-400" />
+                        </div>
+
+                        {/* Barra de Mesa e Entrega */}
+                        <div className={`mt-3 p-3 rounded-2xl border flex items-center justify-between text-xs ${
+                          isLight ? 'bg-sky-50/70 border-sky-200 text-sky-950' : 'bg-sky-950/25 border-sky-500/30 text-sky-200'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <UtensilsCrossed className="w-4 h-4 text-sky-500" />
+                            <span className="font-extrabold">🍽️ Consumo no Salão / Mesas — Toque aqui para selecionar sua Mesa</span>
+                          </div>
+                          <span className="font-bold text-sky-500">Selecionar Mesa ➔</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (bannerLayout === 'carousel_promos') {
+                  return (
+                    <div className="space-y-4">
+                      {/* Carrossel Promocional Widescreen */}
+                      <div
+                        className="relative h-52 md:h-60 rounded-3xl overflow-hidden border shadow-xl bg-slate-900"
+                        style={{ borderColor: luxuryBorder }}
+                      >
+                        {promoSlides.length > 0 && (
+                          <img
+                            src={promoSlides[0]}
+                            alt="Promoção Carrossel"
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+
+                        <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
+                          <div
+                            className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
+                            style={{
+                              background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
+                            }}
+                          />
+                        </div>
+
+                        {/* Indicadores Bolinhas */}
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+                          <div className="w-6 h-1.5 rounded-full bg-white" />
+                          <div className="w-2 h-1.5 rounded-full bg-white/50" />
+                          <div className="w-2 h-1.5 rounded-full bg-white/50" />
+                        </div>
+                      </div>
+
+                      {/* Card da Loja Integrado */}
+                      <div
+                        className={`p-5 rounded-3xl border shadow-xl flex items-center justify-between gap-4 ${
+                          isLight ? 'bg-white border-slate-200' : 'bg-neutral-950 border-neutral-800'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-14 h-14 rounded-2xl shadow-lg border-2 shrink-0 overflow-hidden flex items-center justify-center ${
+                              isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-800'
+                            }`}
+                          >
+                            {brandingEdits?.logoUrl ? (
+                              <img
+                                src={brandingEdits.logoUrl}
+                                alt="Logo da Loja"
+                                className="w-full h-full object-cover rounded-xl"
+                              />
+                            ) : (
+                              <div
+                                className="w-full h-full rounded-xl flex items-center justify-center font-black text-xl text-white"
+                                style={{ backgroundColor: brandPrimary }}
+                              >
+                                {currentTenant.name.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <h1 className="text-lg font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                              {currentTenant.name}
+                            </h1>
+                            <p className={`text-xs font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                              {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            ● Aberto Agora
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // OPÇÃO 2 PADRÃO COMPUTADOR: CARD INTEGRADO 99FOOD
                 return (
                   <div
                     className={`rounded-3xl border shadow-2xl relative overflow-hidden transition-all duration-300 p-4 sm:p-6 backdrop-blur-xl ${
@@ -524,20 +860,19 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         <div className="flex items-center gap-3 pt-0.5">
                           {brandingEdits?.logoUrl ? (
                             <div 
-                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl p-1 shrink-0 shadow-md"
-                              style={{
-                                backgroundColor: isLight ? '#ffffff' : 'rgba(10, 10, 10, 0.75)',
-                              }}
+                              className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl shadow-lg border-2 shrink-0 overflow-hidden flex items-center justify-center ${
+                                isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-800'
+                              }`}
                             >
                               <img
                                 src={brandingEdits.logoUrl}
                                 alt="Logo Preview"
-                                className="w-full h-full object-contain rounded-xl"
+                                className="w-full h-full object-cover rounded-xl"
                               />
                             </div>
                           ) : (
                             <div 
-                              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-md shrink-0 text-white"
+                              className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center font-black text-xl shadow-md shrink-0 text-white"
                               style={{ 
                                 backgroundColor: brandPrimary,
                                 boxShadow: `0 6px 14px -3px ${brandPrimary}50`
@@ -559,7 +894,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                               className="text-[11px] sm:text-xs mt-0.5 font-medium line-clamp-1"
                               style={{ color: isLight ? '#475569' : '#d4d4d8' }}
                             >
-                              {sloganEdit || currentTenant.slogan || 'Massa artesanal, borda recheada e forno à lenha'}
+                              {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
                             </p>
                             <span 
                               className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold mt-0.5 px-2 py-0.5 rounded-full border shadow-2xs"
@@ -904,11 +1239,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           };
                           setBrandingEdits(updated);
                           updateTenant(currentTenant.id, { branding: updated });
-                          showAlert({
-                            title: 'Capa Definida!',
-                            message: `A imagem "${wp.title}" foi aplicada como capa da vitrine.`,
-                            variant: 'success'
-                          });
                         }}
                         className={`group relative rounded-xl overflow-hidden border-2 cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
                           isSelected

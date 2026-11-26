@@ -2,20 +2,20 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Product, OrderItem, PaymentMethod, Order, ProductPackOption } from '../../types';
 import { getTenantActiveCategories } from '../../data/businessSegments';
-import { 
-  Barcode, 
-  ShoppingCart, 
-  Trash2, 
-  Plus, 
-  Minus, 
-  CheckCircle, 
-  Search, 
-  DollarSign, 
-  CreditCard, 
-  QrCode, 
-  Banknote, 
-  Printer, 
-  RotateCcw, 
+import {
+  Barcode,
+  ShoppingCart,
+  Trash2,
+  Plus,
+  Minus,
+  CheckCircle,
+  Search,
+  DollarSign,
+  CreditCard,
+  QrCode,
+  Banknote,
+  Printer,
+  RotateCcw,
   AlertCircle,
   Snowflake,
   Flame,
@@ -42,10 +42,10 @@ import {
 import { PDVPixModal } from './PDVPixModal';
 
 export const PDVSalesView: React.FC = () => {
-  const { 
-    currentTenant, 
-    tenantProducts, 
-    findProductByBarcode, 
+  const {
+    currentTenant,
+    tenantProducts,
+    findProductByBarcode,
     findProductOrPackByBarcode,
     registerPDVSale,
     showAlert,
@@ -71,7 +71,7 @@ export const PDVSalesView: React.FC = () => {
   const [customerName, setCustomerName] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('dinheiro');
   const [cashAmountGiven, setCashAmountGiven] = useState<string>('');
-  
+
   // Completed sale receipt modal
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
 
@@ -92,23 +92,23 @@ export const PDVSalesView: React.FC = () => {
       setIsFullscreenPDV(true);
       try {
         if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
+          document.documentElement.requestFullscreen().catch(() => { });
         }
-      } catch {}
+      } catch { }
     } else {
       setIsFullscreenPDV(false);
       try {
         if (document.fullscreenElement) {
-          document.exitFullscreen().catch(() => {});
+          document.exitFullscreen().catch(() => { });
         }
-      } catch {}
+      } catch { }
     }
   };
 
   // Product catalog browsing state
   const [categoryFilter, setCategoryFilter] = useState<string>('todas');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Segmento do comércio ativo (Fardos de bebidas SOMENTE em adega)
   const isAdega = currentTenant?.businessSegment === 'adega';
   const isFoodOrPizza = currentTenant?.businessSegment === 'pizzaria' || currentTenant?.businessSegment === 'restaurante_lanchonete' || currentTenant?.businessSegment === 'comida_japonesa';
@@ -177,7 +177,7 @@ export const PDVSalesView: React.FC = () => {
       const gain = audioCtx.createGain();
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-      
+
       if (success) {
         osc.frequency.value = 880; // A5 pleasant chime
         gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
@@ -271,7 +271,7 @@ export const PDVSalesView: React.FC = () => {
   // Add wholesale pack (fardo 6, 12, 18 ou caixa 24) to cart
   const addPackToCart = (product: Product, pack: ProductPackOption) => {
     setCartItems(prev => {
-      const existingIdx = prev.findIndex(item => 
+      const existingIdx = prev.findIndex(item =>
         item.productId === product.id && item.packUnits === pack.unitsCount
       );
       if (existingIdx >= 0) {
@@ -445,25 +445,23 @@ export const PDVSalesView: React.FC = () => {
   // Filter products for catalog search
   const filteredProducts = tenantProducts.filter(p => {
     const matchesCat = categoryFilter === 'todas' || p.category === categoryFilter;
-    const matchesQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         (p.barcode && p.barcode.includes(searchQuery));
+    const matchesQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.barcode && p.barcode.includes(searchQuery));
     return matchesCat && matchesQuery;
   });
 
   return (
     <div className={isFullscreenPDV ? (isLight ? 'fixed inset-0 z-50 bg-[#F1F5F9] text-slate-900 p-3 flex flex-col gap-3 overflow-hidden select-none' : 'fixed inset-0 z-50 bg-[#0A0E13] text-white p-3 flex flex-col gap-3 overflow-hidden select-none') : 'space-y-4'}>
-      
+
       {/* Top Header do PDV: Modo Bipar com Leitor USB vs Modo Cardápio / Catálogo Ágil & Botão Tela Cheia */}
-      <div className={`p-3.5 rounded-2xl border transition-colors ${
-        isLight ? 'bg-white border-slate-200 text-slate-800 shadow-sm' : 'bg-[#0D141C] border-[#1A2533] text-white shadow-sm'
-      }`}>
+      <div className={`p-3.5 rounded-2xl border transition-colors ${isLight ? 'bg-white border-slate-200 text-slate-800 shadow-sm' : 'bg-[#0D141C] border-[#1A2533] text-white shadow-sm'
+        }`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          
+
           <div className="flex items-center gap-3">
-            <div 
-              className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${
-                isLight ? 'bg-sky-50 text-sky-600 border-sky-200' : 'bg-sky-500/10 text-sky-400 border-sky-500/20'
-              }`}
+            <div
+              className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${isLight ? 'bg-sky-50 text-sky-600 border-sky-200' : 'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                }`}
             >
               {currentTenant?.businessSegment === 'petshop' ? (
                 <Dog className="w-6 h-6" />
@@ -490,15 +488,13 @@ export const PDVSalesView: React.FC = () => {
                   </span>
                 )}
                 {isBarcodeScannerEnabled ? (
-                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
-                    isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                  }`}>
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                    }`}>
                     Leitor Pronto
                   </span>
                 ) : (
-                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
-                    isLight ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-sky-500/20 text-sky-400 border-sky-500/30'
-                  }`}>
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${isLight ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-sky-500/20 text-sky-400 border-sky-500/30'
+                    }`}>
                     Modo Balcão / Tablet
                   </span>
                 )}
@@ -523,11 +519,10 @@ export const PDVSalesView: React.FC = () => {
                     value={barcodeInput}
                     onChange={(e) => setBarcodeInput(e.target.value)}
                     placeholder="Bipar código de barras..."
-                    className={`w-full pl-9 pr-3 py-1.5 rounded-xl font-mono text-xs outline-none transition-colors ${
-                      isLight 
-                        ? 'bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400' 
+                    className={`w-full pl-9 pr-3 py-1.5 rounded-xl font-mono text-xs outline-none transition-colors ${isLight
+                        ? 'bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400'
                         : 'bg-[#070B0E] border border-[#1E2B3A] text-white placeholder:text-slate-500'
-                    }`}
+                      }`}
                   />
                 </div>
                 <button
@@ -543,11 +538,10 @@ export const PDVSalesView: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowSwitchOperatorModal(true)}
-              className={`px-3.5 py-2.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95 ${
-                isLight 
-                  ? 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200/70' 
+              className={`px-3.5 py-2.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95 ${isLight
+                  ? 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200/70'
                   : 'bg-[#0C2340]/70 border-sky-500/30 text-white hover:bg-[#0E2A4D]'
-              }`}
+                }`}
               title="Clique para alternar o operador do caixa"
             >
               <User className="w-3.5 h-3.5 text-sky-500" />
@@ -559,11 +553,10 @@ export const PDVSalesView: React.FC = () => {
             <button
               type="button"
               onClick={toggleFullscreen}
-              className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap active:scale-[0.98] shadow-lg ${
-                isFullscreenPDV
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap active:scale-[0.98] shadow-lg ${isFullscreenPDV
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black shadow-amber-500/25 border border-amber-300'
                   : 'bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white shadow-sky-600/25 border border-sky-400/30'
-              }`}
+                }`}
               title={isFullscreenPDV ? 'Sair do Modo Tela Cheia' : 'Abrir PDV em Tela Cheia para Tablet ou Computador'}
             >
               <div className="w-4 h-4 rounded flex items-center justify-center shrink-0">
@@ -577,11 +570,10 @@ export const PDVSalesView: React.FC = () => {
 
         {/* Scan Feedback Alert */}
         {barcodeScanFeedback && isBarcodeScannerEnabled && (
-          <div className={`mt-3 px-3 py-2 rounded-lg text-xs flex items-center gap-2 font-semibold ${
-            barcodeScanFeedback.isError 
-              ? isLight ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40' 
+          <div className={`mt-3 px-3 py-2 rounded-lg text-xs flex items-center gap-2 font-semibold ${barcodeScanFeedback.isError
+              ? isLight ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
               : isLight ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-          }`}>
+            }`}>
             {barcodeScanFeedback.isError ? <AlertCircle className="w-4 h-4 shrink-0" /> : <CheckCircle className="w-4 h-4 shrink-0" />}
             <span>{barcodeScanFeedback.message}</span>
           </div>
@@ -589,9 +581,8 @@ export const PDVSalesView: React.FC = () => {
 
         {/* Barcode Test Simulator Bar (somente se leitor ativo) */}
         {isBarcodeScannerEnabled && (
-          <div className={`mt-3 pt-3 border-t flex items-center gap-2 flex-wrap text-xs ${
-            isLight ? 'border-slate-200' : 'border-[#1A2533]'
-          }`}>
+          <div className={`mt-3 pt-3 border-t flex items-center gap-2 flex-wrap text-xs ${isLight ? 'border-slate-200' : 'border-[#1A2533]'
+            }`}>
             <span className={`text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
               Simulador de Leitor (1-Clique):
             </span>
@@ -600,11 +591,10 @@ export const PDVSalesView: React.FC = () => {
                 key={idx}
                 type="button"
                 onClick={() => handleSimulateScan(item.barcode)}
-                className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 transition-colors text-[11px] font-semibold cursor-pointer ${
-                  isLight 
-                    ? 'border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700' 
+                className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 transition-colors text-[11px] font-semibold cursor-pointer ${isLight
+                    ? 'border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700'
                     : 'border-[#1A2533] bg-[#070B0E] hover:bg-[#141E28] text-slate-200 hover:text-white'
-                }`}
+                  }`}
               >
                 <Barcode className="w-3.5 h-3.5 text-sky-500" />
                 <span>{item.label}</span>
@@ -616,40 +606,36 @@ export const PDVSalesView: React.FC = () => {
       </div>
 
       {/* Main PDV Layout com 2 Colunas: Esquerda (Categorias Superiores + Busca + Grade Ampla), Direita (Comanda) */}
-      <div className={`flex flex-col lg:flex-row gap-4 items-stretch ${
-        isFullscreenPDV ? 'flex-1 min-h-0 overflow-hidden' : ''
-      }`}>
-        
-        {/* COLUNA ESQUERDA / PRINCIPAL: CATEGORIAS SUPERIORES + BUSCA + GRID DE PRODUTOS */}
-        <div className={`flex-1 min-w-0 flex flex-col gap-3 ${
-          isFullscreenPDV ? 'overflow-hidden max-h-full' : ''
+      <div className={`flex flex-col lg:flex-row gap-4 items-stretch ${isFullscreenPDV ? 'flex-1 min-h-0 overflow-hidden' : ''
         }`}>
-          
+
+        {/* COLUNA ESQUERDA / PRINCIPAL: CATEGORIAS SUPERIORES + BUSCA + GRID DE PRODUTOS */}
+        <div className={`flex-1 min-w-0 flex flex-col gap-3 ${isFullscreenPDV ? 'overflow-hidden max-h-full' : ''
+          }`}>
+
           {/* BARRA SUPERIOR DE CATEGORIAS (HORIZONTAL COM SCROLL SUAVE) */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1.5 select-none scrollbar-none">
             {/* Botão "Todas" */}
             <button
               type="button"
               onClick={() => setCategoryFilter('todas')}
-              className={`px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 ${
-                categoryFilter === 'todas'
+              className={`px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 ${categoryFilter === 'todas'
                   ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40'
                   : isLight
-                  ? 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm'
-                  : 'bg-[#0D141C] hover:bg-[#131E2B] text-slate-300 border border-[#1A2533]'
-              }`}
+                    ? 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm'
+                    : 'bg-[#0D141C] hover:bg-[#131E2B] text-slate-300 border border-[#1A2533]'
+                }`}
             >
               <div className="flex items-center gap-1.5">
                 <Boxes className="w-4 h-4 text-sky-400" />
                 <span>Todas as Categorias</span>
               </div>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                categoryFilter === 'todas' 
-                  ? 'bg-white/20 text-white' 
-                  : isLight 
-                  ? 'bg-slate-100 text-slate-600' 
-                  : 'bg-white/10 text-slate-400'
-              }`}>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${categoryFilter === 'todas'
+                  ? 'bg-white/20 text-white'
+                  : isLight
+                    ? 'bg-slate-100 text-slate-600'
+                    : 'bg-white/10 text-slate-400'
+                }`}>
                 {tenantProducts.length}
               </span>
             </button>
@@ -662,42 +648,40 @@ export const PDVSalesView: React.FC = () => {
                   key={cat.id}
                   type="button"
                   onClick={() => setCategoryFilter(cat.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 ${
-                    isSelected
+                  className={`px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 ${isSelected
                       ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40'
                       : isLight
-                      ? 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm'
-                      : 'bg-[#0D141C] hover:bg-[#131E2B] text-slate-300 border border-[#1A2533]'
-                  }`}
+                        ? 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm'
+                        : 'bg-[#0D141C] hover:bg-[#131E2B] text-slate-300 border border-[#1A2533]'
+                    }`}
                 >
                   <span className="text-sm">
                     {cat.id.includes('cerveja') ? '🍺' :
-                     cat.id.includes('vinho') ? '🍷' :
-                     cat.id.includes('pizza') ? '🍕' :
-                     cat.id.includes('lanche') || cat.id.includes('hamb') ? '🍔' :
-                     cat.id.includes('sushi') || cat.id.includes('japa') ? '🍣' :
-                     cat.id.includes('bebida') || cat.id.includes('refri') ? '🥤' :
-                     cat.id.includes('porcao') || cat.id.includes('petisco') ? '🍟' :
-                     cat.id.includes('destil') || cat.id.includes('whisky') ? '🥃' :
-                     cat.id.includes('sobremesa') || cat.id.includes('doce') || cat.id.includes('bolo') ? '🍰' :
-                     cat.id.includes('roupa') || cat.id.includes('moda') ? '👗' :
-                     cat.id.includes('sorvete') || cat.id.includes('acai') ? '🍧' :
-                     cat.id.includes('pao') || cat.id.includes('padaria') ? '🥖' :
-                     cat.id.includes('salgado') || cat.id.includes('coxinha') ? '🥟' :
-                     cat.id.includes('carne') || cat.id.includes('acougue') ? '🥩' :
-                     cat.id.includes('fruta') || cat.id.includes('legume') || cat.id.includes('horti') ? '🍎' :
-                     cat.id.includes('agua') || cat.id.includes('gas') ? '💧' :
-                     cat.id.includes('cafe') ? '☕' :
-                     '🏷️'}
+                      cat.id.includes('vinho') ? '🍷' :
+                        cat.id.includes('pizza') ? '🍕' :
+                          cat.id.includes('lanche') || cat.id.includes('hamb') ? '🍔' :
+                            cat.id.includes('sushi') || cat.id.includes('japa') ? '🍣' :
+                              cat.id.includes('bebida') || cat.id.includes('refri') ? '🥤' :
+                                cat.id.includes('porcao') || cat.id.includes('petisco') ? '🍟' :
+                                  cat.id.includes('destil') || cat.id.includes('whisky') ? '🥃' :
+                                    cat.id.includes('sobremesa') || cat.id.includes('doce') || cat.id.includes('bolo') ? '🍰' :
+                                      cat.id.includes('roupa') || cat.id.includes('moda') ? '👗' :
+                                        cat.id.includes('sorvete') || cat.id.includes('acai') ? '🍧' :
+                                          cat.id.includes('pao') || cat.id.includes('padaria') ? '🥖' :
+                                            cat.id.includes('salgado') || cat.id.includes('coxinha') ? '🥟' :
+                                              cat.id.includes('carne') || cat.id.includes('acougue') ? '🥩' :
+                                                cat.id.includes('fruta') || cat.id.includes('legume') || cat.id.includes('horti') ? '🍎' :
+                                                  cat.id.includes('agua') || cat.id.includes('gas') ? '💧' :
+                                                    cat.id.includes('cafe') ? '☕' :
+                                                      '🏷️'}
                   </span>
                   <span>{cat.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    isSelected 
-                      ? 'bg-white/20 text-white' 
-                      : isLight 
-                      ? 'bg-slate-100 text-slate-600' 
-                      : 'bg-white/10 text-slate-400'
-                  }`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isSelected
+                      ? 'bg-white/20 text-white'
+                      : isLight
+                        ? 'bg-slate-100 text-slate-600'
+                        : 'bg-white/10 text-slate-400'
+                    }`}>
                     {cat.count}
                   </span>
                   {isSelected && (
@@ -709,31 +693,27 @@ export const PDVSalesView: React.FC = () => {
           </div>
 
           {/* Barra de Busca de Produtos */}
-          <div className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 shadow-sm ${
-            isLight ? 'bg-white border-slate-200' : 'border-[#1A2533] bg-[#0D141C]'
-          }`}>
+          <div className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 shadow-sm ${isLight ? 'bg-white border-slate-200' : 'border-[#1A2533] bg-[#0D141C]'
+            }`}>
             <div className="relative flex-1">
-              <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
-                isLight ? 'text-slate-400' : 'text-slate-400'
-              }`} />
+              <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${isLight ? 'text-slate-400' : 'text-slate-400'
+                }`} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar produto por nome ou código..."
-                className={`w-full pl-8 pr-7 py-2 rounded-lg text-xs font-semibold outline-none transition-all ${
-                  isLight
+                className={`w-full pl-8 pr-7 py-2 rounded-lg text-xs font-semibold outline-none transition-all ${isLight
                     ? 'bg-slate-50 border border-slate-200 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-sky-500'
                     : 'bg-[#070B0E] border border-[#1E2B3A] text-white placeholder:text-slate-500 focus:border-sky-500'
-                }`}
+                  }`}
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-0.5 ${
-                    isLight ? 'text-slate-400 hover:text-slate-700' : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-0.5 ${isLight ? 'text-slate-400 hover:text-slate-700' : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -741,16 +721,14 @@ export const PDVSalesView: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className={`text-[10px] font-bold whitespace-nowrap px-2.5 py-1.5 rounded-lg border ${
-                isLight ? 'bg-slate-50 text-slate-600 border-slate-200' : 'bg-[#070B0E] text-slate-400 border-[#1E2B3A]'
-              }`}>
+              <span className={`text-[10px] font-bold whitespace-nowrap px-2.5 py-1.5 rounded-lg border ${isLight ? 'bg-slate-50 text-slate-600 border-slate-200' : 'bg-[#070B0E] text-slate-400 border-[#1E2B3A]'
+                }`}>
                 {filteredProducts.length} itens
               </span>
 
               {/* Seletor Rápido: Grade em 4 Colunas vs Lista Compacta */}
-              <div className={`flex items-center rounded-lg p-0.5 border ${
-                isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#070B0E] border-[#1E2B3A]'
-              }`}>
+              <div className={`flex items-center rounded-lg p-0.5 border ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#070B0E] border-[#1E2B3A]'
+                }`}>
                 <button
                   type="button"
                   onClick={() => {
@@ -761,11 +739,10 @@ export const PDVSalesView: React.FC = () => {
                     }
                   }}
                   title="Exibir em Grade (4 colunas)"
-                  className={`p-1 rounded-md transition-all cursor-pointer ${
-                    (currentTenant?.config?.posLayout || 'grid') === 'grid'
+                  className={`p-1 rounded-md transition-all cursor-pointer ${(currentTenant?.config?.posLayout || 'grid') === 'grid'
                       ? 'bg-sky-500 text-white shadow-xs'
                       : 'text-slate-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
                 </button>
@@ -779,11 +756,10 @@ export const PDVSalesView: React.FC = () => {
                     }
                   }}
                   title="Exibir em Lista Compacta"
-                  className={`p-1 rounded-md transition-all cursor-pointer ${
-                    currentTenant?.config?.posLayout === 'list'
+                  className={`p-1 rounded-md transition-all cursor-pointer ${currentTenant?.config?.posLayout === 'list'
                       ? 'bg-sky-500 text-white shadow-xs'
                       : 'text-slate-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <List className="w-3.5 h-3.5" />
                 </button>
@@ -794,9 +770,8 @@ export const PDVSalesView: React.FC = () => {
           {/* Exibição dos Produtos: Lista Compacta vs Grade em 4 Colunas */}
           {(currentTenant?.config?.posLayout === 'list') ? (
             /* Modo Lista Compacta */
-            <div className={`space-y-2 overflow-y-auto pr-1 ${
-              isFullscreenPDV ? 'flex-1 min-h-0' : 'max-h-[640px]'
-            }`}>
+            <div className={`space-y-2 overflow-y-auto pr-1 ${isFullscreenPDV ? 'flex-1 min-h-0' : 'max-h-[640px]'
+              }`}>
               {filteredProducts.map(product => {
                 const price = product.promoPrice ?? product.price;
                 const isBeverage = product.category === 'bebidas' || product.category === 'bebidas_lanche' || product.category === 'refrigerantes' || product.category === 'sucos' || product.category === 'cervejas';
@@ -812,17 +787,15 @@ export const PDVSalesView: React.FC = () => {
                       addItemToCart(product);
                       playBeep(true);
                     }}
-                    className={`p-2.5 rounded-xl border flex items-center justify-between gap-3 transition-all cursor-pointer group active:scale-[0.99] select-none shadow-xs ${
-                      isLight
+                    className={`p-2.5 rounded-xl border flex items-center justify-between gap-3 transition-all cursor-pointer group active:scale-[0.99] select-none shadow-xs ${isLight
                         ? 'bg-white border-slate-200 hover:border-sky-400 hover:shadow-md'
                         : 'border-[#1A2533] bg-[#0D141C] hover:bg-[#121B26] hover:border-sky-500/50'
-                    } ${isOutOfStock ? 'opacity-60' : ''}`}
+                      } ${isOutOfStock ? 'opacity-60' : ''}`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {/* Miniatura Quadrada do Produto */}
-                      <div className={`w-12 h-12 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border ${
-                        isLight ? 'bg-slate-100 border-slate-200' : 'bg-black/40 border-[#1E2B3A]'
-                      }`}>
+                      <div className={`w-12 h-12 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-black/40 border-[#1E2B3A]'
+                        }`}>
                         {product.imageUrl ? (
                           <img
                             src={product.imageUrl}
@@ -838,26 +811,24 @@ export const PDVSalesView: React.FC = () => {
 
                       {/* Informações: Nome, Categoria e Estoque */}
                       <div className="min-w-0">
-                        <h4 className={`text-xs font-bold leading-tight truncate ${
-                          isLight ? 'text-slate-800' : 'text-white'
-                        }`}>
+                        <h4 className={`text-xs font-bold leading-tight truncate ${isLight ? 'text-slate-800' : 'text-white'
+                          }`}>
                           {product.name}
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <span className={`text-[10px] font-semibold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                             {product.volume || (isCardapio ? '🍽️ Cardápio' : 'Unidade')}
                           </span>
-                          <span className={`px-1.5 py-0.2 rounded font-bold text-[9px] ${
-                            isCardapio
+                          <span className={`px-1.5 py-0.2 rounded font-bold text-[9px] ${isCardapio
                               ? 'text-emerald-500 bg-emerald-500/15 border border-emerald-500/30'
-                              : isOutOfStock 
-                              ? 'text-red-500 bg-red-500/15 border border-red-500/30' 
-                              : isLowStock 
-                              ? 'text-amber-500 bg-amber-500/15 border border-amber-500/30' 
-                              : isLight 
-                              ? 'text-slate-600 bg-slate-100 border border-slate-200'
-                              : 'text-neutral-300 bg-neutral-800'
-                          }`}>
+                              : isOutOfStock
+                                ? 'text-red-500 bg-red-500/15 border border-red-500/30'
+                                : isLowStock
+                                  ? 'text-amber-500 bg-amber-500/15 border border-amber-500/30'
+                                  : isLight
+                                    ? 'text-slate-600 bg-slate-100 border border-slate-200'
+                                    : 'text-neutral-300 bg-neutral-800'
+                            }`}>
                             {isCardapio ? 'Feito na Hora' : `${product.stockQuantity} un`}
                           </span>
                         </div>
@@ -866,9 +837,8 @@ export const PDVSalesView: React.FC = () => {
 
                     {/* Preço e Botão Adicionar */}
                     <div className="flex items-center gap-2.5 shrink-0">
-                      <span className={`text-sm font-black tabular-nums ${
-                        isLight ? 'text-sky-600' : 'text-sky-400'
-                      }`}>
+                      <span className={`text-sm font-black tabular-nums ${isLight ? 'text-sky-600' : 'text-sky-400'
+                        }`}>
                         R$ {price.toFixed(2).replace('.', ',')}
                       </span>
 
@@ -880,11 +850,10 @@ export const PDVSalesView: React.FC = () => {
                               e.stopPropagation();
                               setSelectedProductForPackModal(product);
                             }}
-                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
-                              isLight
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${isLight
                                 ? 'bg-slate-100 hover:bg-slate-200 text-sky-700 border-slate-200'
                                 : 'bg-[#070B0E] hover:bg-[#141E28] text-sky-400 border-[#1A2533]'
-                            }`}
+                              }`}
                             title="Fardos e caixas"
                           >
                             📦 Fardos
@@ -902,9 +871,8 @@ export const PDVSalesView: React.FC = () => {
             </div>
           ) : (
             /* Modo Grade Fixo em 4 Colunas */
-            <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-3 overflow-y-auto pr-1 ${
-              isFullscreenPDV ? 'flex-1 min-h-0' : 'max-h-[640px]'
-            }`}>
+            <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-3 overflow-y-auto pr-1 ${isFullscreenPDV ? 'flex-1 min-h-0' : 'max-h-[640px]'
+              }`}>
               {filteredProducts.map(product => {
                 const price = product.promoPrice ?? product.price;
                 const isBeverage = product.category === 'bebidas' || product.category === 'bebidas_lanche' || product.category === 'refrigerantes' || product.category === 'sucos' || product.category === 'cervejas';
@@ -920,11 +888,10 @@ export const PDVSalesView: React.FC = () => {
                       addItemToCart(product);
                       playBeep(true);
                     }}
-                    className={`p-3 rounded-2xl border flex flex-col justify-between transition-all relative cursor-pointer group active:scale-[0.98] select-none shadow-sm ${
-                      isLight
+                    className={`p-3 rounded-2xl border flex flex-col justify-between transition-all relative cursor-pointer group active:scale-[0.98] select-none shadow-sm ${isLight
                         ? 'bg-white border-slate-200 hover:border-sky-400 hover:shadow-md'
                         : 'border-[#1A2533] bg-[#0D141C] hover:bg-[#121B26] hover:border-sky-500/50'
-                    } ${isOutOfStock ? 'opacity-60' : ''}`}
+                      } ${isOutOfStock ? 'opacity-60' : ''}`}
                   >
                     <div>
                       {/* Header: Volume/Tipo e Estoque */}
@@ -932,33 +899,30 @@ export const PDVSalesView: React.FC = () => {
                         <span className={`truncate font-semibold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                           {product.volume || (isCardapio ? '🍽️ Cardápio' : 'Unidade')}
                         </span>
-                        <span className={`px-1.5 py-0.5 rounded font-bold text-[9px] ${
-                          isCardapio
+                        <span className={`px-1.5 py-0.5 rounded font-bold text-[9px] ${isCardapio
                             ? 'text-emerald-500 bg-emerald-500/15 border border-emerald-500/30'
-                            : isOutOfStock 
-                            ? 'text-red-500 bg-red-500/15 border border-red-500/30' 
-                            : isLowStock 
-                            ? 'text-amber-500 bg-amber-500/15 border border-amber-500/30' 
-                            : isLight 
-                            ? 'text-slate-600 bg-slate-100 border border-slate-200'
-                            : 'text-neutral-300 bg-neutral-800'
-                        }`}>
+                            : isOutOfStock
+                              ? 'text-red-500 bg-red-500/15 border border-red-500/30'
+                              : isLowStock
+                                ? 'text-amber-500 bg-amber-500/15 border border-amber-500/30'
+                                : isLight
+                                  ? 'text-slate-600 bg-slate-100 border border-slate-200'
+                                  : 'text-neutral-300 bg-neutral-800'
+                          }`}>
                           {isCardapio ? 'Feito na Hora' : `${product.stockQuantity} un`}
                         </span>
                       </div>
 
                       {/* Descrição / Nome do Produto no Topo */}
-                      <h4 className={`text-xs font-bold leading-snug line-clamp-2 min-h-[30px] mb-2 ${
-                        isLight ? 'text-slate-800' : 'text-white'
-                      }`}>
+                      <h4 className={`text-xs font-bold leading-snug line-clamp-2 min-h-[30px] mb-2 ${isLight ? 'text-slate-800' : 'text-white'
+                        }`}>
                         {product.name}
                       </h4>
 
                       {/* Foto Auto-Adaptável que Estende Completando a Área */}
                       {product.imageUrl && (
-                        <div className={`w-full aspect-[16/10] sm:aspect-video rounded-xl overflow-hidden mb-2 relative flex items-center justify-center ${
-                          isLight ? 'bg-slate-100' : 'bg-black/30'
-                        }`}>
+                        <div className={`w-full aspect-[16/10] sm:aspect-video rounded-xl overflow-hidden mb-2 relative flex items-center justify-center ${isLight ? 'bg-slate-100' : 'bg-black/30'
+                          }`}>
                           <img
                             src={product.imageUrl}
                             alt={product.name}
@@ -969,13 +933,11 @@ export const PDVSalesView: React.FC = () => {
                     </div>
 
                     {/* Preço e Botão Adicionar */}
-                    <div className={`mt-2.5 pt-2 border-t flex items-center justify-between gap-1.5 ${
-                      isLight ? 'border-slate-100' : 'border-[#1A2533]'
-                    }`}>
+                    <div className={`mt-2.5 pt-2 border-t flex items-center justify-between gap-1.5 ${isLight ? 'border-slate-100' : 'border-[#1A2533]'
+                      }`}>
                       <div>
-                        <span className={`text-sm font-black tabular-nums block ${
-                          isLight ? 'text-sky-600' : 'text-sky-400'
-                        }`}>
+                        <span className={`text-sm font-black tabular-nums block ${isLight ? 'text-sky-600' : 'text-sky-400'
+                          }`}>
                           R$ {price.toFixed(2).replace('.', ',')}
                         </span>
                       </div>
@@ -988,11 +950,10 @@ export const PDVSalesView: React.FC = () => {
                               e.stopPropagation();
                               setSelectedProductForPackModal(product);
                             }}
-                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
-                              isLight
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${isLight
                                 ? 'bg-slate-100 hover:bg-slate-200 text-sky-700 border-slate-200'
                                 : 'bg-[#070B0E] hover:bg-[#141E28] text-sky-400 border-[#1A2533]'
-                            }`}
+                              }`}
                             title="Fardos e caixas"
                           >
                             📦 Fardos
@@ -1013,15 +974,13 @@ export const PDVSalesView: React.FC = () => {
         </div>
 
         {/* RIGHT COLUMN: Active Sale Checkout / Cashier Box */}
-        <div className={`w-full lg:w-[380px] xl:w-[420px] shrink-0 rounded-2xl border p-4.5 space-y-4 transition-colors flex flex-col justify-between ${
-          isLight
+        <div className={`w-full lg:w-[380px] xl:w-[420px] shrink-0 rounded-2xl border p-4.5 space-y-4 transition-colors flex flex-col justify-between ${isLight
             ? 'bg-white border-slate-200 text-slate-800 shadow-xl shadow-slate-200/50'
             : 'bg-[#0D141C] border-[#1A2533] text-white shadow-xl'
-        } ${isFullscreenPDV ? 'overflow-y-auto' : ''}`}>
-          
-          <div className={`flex items-center justify-between border-b pb-3 ${
-            isLight ? 'border-slate-100' : 'border-[#1A2533]'
-          }`}>
+          } ${isFullscreenPDV ? 'overflow-y-auto' : ''}`}>
+
+          <div className={`flex items-center justify-between border-b pb-3 ${isLight ? 'border-slate-100' : 'border-[#1A2533]'
+            }`}>
             <div className="flex items-center gap-2">
               <ShoppingCart className="w-5 h-5 text-sky-500" />
               <h3 className={`text-sm font-bold ${isLight ? 'text-slate-800' : 'text-white'}`}>
@@ -1045,29 +1004,26 @@ export const PDVSalesView: React.FC = () => {
           </div>
 
           {/* Customer Name */}
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${
-            isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1E2B3A] bg-[#070B0E]'
-          }`}>
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1E2B3A] bg-[#070B0E]'
+            }`}>
             <User className="w-3.5 h-3.5 text-slate-400" />
             <input
               type="text"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Nome do Cliente (opcional - Padrão: Balcão)"
-              className={`w-full bg-transparent text-xs outline-none focus:outline-none ${
-                isLight ? 'text-slate-800 placeholder:text-slate-400' : 'text-white placeholder:text-slate-500'
-              }`}
+              className={`w-full bg-transparent text-xs outline-none focus:outline-none ${isLight ? 'text-slate-800 placeholder:text-slate-400' : 'text-white placeholder:text-slate-500'
+                }`}
             />
           </div>
 
           {/* Cart Itemized List */}
           <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
             {cartItems.map((item, idx) => (
-              <div 
+              <div
                 key={idx}
-                className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs transition-colors ${
-                  isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1A2533] bg-[#070B0E]'
-                }`}
+                className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs transition-colors ${isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1A2533] bg-[#070B0E]'
+                  }`}
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -1080,16 +1036,14 @@ export const PDVSalesView: React.FC = () => {
                         {item.packUnits * item.quantity} un baixadas
                       </span>
                     ) : (
-                      <span className={`text-[9px] font-medium px-1.5 py-0.2 rounded ${
-                        isLight ? 'bg-slate-200 text-slate-600' : 'bg-neutral-800 text-neutral-400'
-                      }`}>
+                      <span className={`text-[9px] font-medium px-1.5 py-0.2 rounded ${isLight ? 'bg-slate-200 text-slate-600' : 'bg-neutral-800 text-neutral-400'
+                        }`}>
                         Unidade Avulsa
                       </span>
                     )}
                   </div>
-                  <div className={`flex items-center gap-2 text-[11px] mt-0.5 ${
-                    isLight ? 'text-slate-500' : 'text-slate-400'
-                  }`}>
+                  <div className={`flex items-center gap-2 text-[11px] mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'
+                    }`}>
                     <span>{item.volume}</span>
                     <span>·</span>
                     <span className={`font-mono font-bold ${isLight ? 'text-sky-600' : 'text-sky-400'}`}>
@@ -1102,31 +1056,27 @@ export const PDVSalesView: React.FC = () => {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={() => updateQuantity(idx, -1)}
-                    className={`w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                      isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-[#141E28] hover:bg-[#1E2B3A] text-white'
-                    }`}
+                    className={`w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer ${isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-[#141E28] hover:bg-[#1E2B3A] text-white'
+                      }`}
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className={`w-6 text-center font-bold tabular-nums ${
-                    isLight ? 'text-slate-800' : 'text-white'
-                  }`}>
+                  <span className={`w-6 text-center font-bold tabular-nums ${isLight ? 'text-slate-800' : 'text-white'
+                    }`}>
                     {item.quantity}
                   </span>
                   <button
                     onClick={() => updateQuantity(idx, 1)}
-                    className={`w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                      isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-[#141E28] hover:bg-[#1E2B3A] text-white'
-                    }`}
+                    className={`w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer ${isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-[#141E28] hover:bg-[#1E2B3A] text-white'
+                      }`}
                   >
                     <Plus className="w-3 h-3" />
                   </button>
                 </div>
 
                 <div className="text-right shrink-0 w-16">
-                  <span className={`font-extrabold tabular-nums font-mono ${
-                    isLight ? 'text-sky-600' : 'text-sky-400'
-                  }`}>
+                  <span className={`font-extrabold tabular-nums font-mono ${isLight ? 'text-sky-600' : 'text-sky-400'
+                    }`}>
                     R$ {(item.price * item.quantity).toFixed(2)}
                   </span>
                 </div>
@@ -1141,9 +1091,8 @@ export const PDVSalesView: React.FC = () => {
             ))}
 
             {cartItems.length === 0 && (
-              <div className={`p-8 text-center border border-dashed rounded-xl space-y-2 ${
-                isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1A2533] bg-[#070B0E]/60'
-              }`}>
+              <div className={`p-8 text-center border border-dashed rounded-xl space-y-2 ${isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1A2533] bg-[#070B0E]/60'
+                }`}>
                 <Barcode className="w-8 h-8 mx-auto text-slate-400" />
                 <p className={`text-xs font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                   Nenhum produto adicionado ao caixa ainda.<br />
@@ -1172,13 +1121,12 @@ export const PDVSalesView: React.FC = () => {
                     key={method.id}
                     type="button"
                     onClick={() => setPaymentMethod(method.id as PaymentMethod)}
-                    className={`p-2.5 rounded-xl text-center flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
-                      isSelected
+                    className={`p-2.5 rounded-xl text-center flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 ${isSelected
                         ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40'
                         : isLight
-                        ? 'bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                        : 'bg-[#070B0E] border border-[#1A2533] text-slate-400 hover:text-white hover:bg-[#131E2B]'
-                    }`}
+                          ? 'bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                          : 'bg-[#070B0E] border border-[#1A2533] text-slate-400 hover:text-white hover:bg-[#131E2B]'
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     <span className="text-[11px] font-semibold">{method.label}</span>
@@ -1190,9 +1138,8 @@ export const PDVSalesView: React.FC = () => {
 
           {/* Cash Change Calculator (If Dinheiro) */}
           {paymentMethod === 'dinheiro' && (
-            <div className={`p-3 rounded-xl border space-y-2 ${
-              isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1A2533] bg-[#070B0E]'
-            }`}>
+            <div className={`p-3 rounded-xl border space-y-2 ${isLight ? 'border-slate-200 bg-slate-50' : 'border-[#1A2533] bg-[#070B0E]'
+              }`}>
               <div className="flex items-center justify-between text-xs">
                 <span className={`font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
                   Valor Entregue pelo Cliente:
@@ -1205,11 +1152,10 @@ export const PDVSalesView: React.FC = () => {
                     onChange={(e) => setCashAmountGiven(e.target.value)}
                     placeholder={total > 0 ? total.toFixed(2) : '0,00'}
                     style={{ outline: 'none', boxShadow: 'none' }}
-                    className={`w-full pl-7 pr-2 py-1 rounded text-right text-xs font-mono font-bold outline-none border focus:border-sky-500 ${
-                      isLight
+                    className={`w-full pl-7 pr-2 py-1 rounded text-right text-xs font-mono font-bold outline-none border focus:border-sky-500 ${isLight
                         ? 'bg-white border-slate-200 text-slate-800'
                         : 'bg-[#121820] border-[#1E2B3A] text-white'
-                    }`}
+                      }`}
                   />
                 </div>
               </div>
@@ -1222,11 +1168,10 @@ export const PDVSalesView: React.FC = () => {
                     key={i}
                     type="button"
                     onClick={() => setCashAmountGiven(val.toFixed(2))}
-                    className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-colors cursor-pointer border ${
-                      isLight
+                    className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-colors cursor-pointer border ${isLight
                         ? 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
                         : 'bg-[#141E28] hover:bg-[#1E2B3A] text-slate-200 border-[#1A2533]'
-                    }`}
+                      }`}
                   >
                     R$ {val.toFixed(2)}
                   </button>
@@ -1234,9 +1179,8 @@ export const PDVSalesView: React.FC = () => {
               </div>
 
               {changeDue > 0 && (
-                <div className={`pt-2 border-t flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400 ${
-                  isLight ? 'border-slate-200' : 'border-[#1A2533]'
-                }`}>
+                <div className={`pt-2 border-t flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400 ${isLight ? 'border-slate-200' : 'border-[#1A2533]'
+                  }`}>
                   <span>Troco a Devolver:</span>
                   <span className="font-mono font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
                     R$ {changeDue.toFixed(2)}
@@ -1267,11 +1211,10 @@ export const PDVSalesView: React.FC = () => {
                 }
               }}
               disabled={cartItems.length === 0}
-              className={`w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
-                cartItems.length > 0
+              className={`w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${cartItems.length > 0
                   ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40 border-0 active:scale-[0.98] hover:brightness-110'
                   : 'bg-neutral-800 text-neutral-500 cursor-not-allowed border-0'
-              }`}
+                }`}
             >
               <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
                 {paymentMethod === 'pix' ? (
@@ -1293,10 +1236,9 @@ export const PDVSalesView: React.FC = () => {
       {/* Sale Receipt Modal (Cupom de Venda Balcão) */}
       {completedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className={`w-full max-w-md rounded-2xl border shadow-2xl overflow-hidden ${
-            isLight ? 'bg-white border-neutral-300 text-neutral-900' : 'bg-neutral-900 border-neutral-700 text-neutral-100'
-          }`}>
-            
+          <div className={`w-full max-w-md rounded-2xl border shadow-2xl overflow-hidden ${isLight ? 'bg-white border-neutral-300 text-neutral-900' : 'bg-neutral-900 border-neutral-700 text-neutral-100'
+            }`}>
+
             <div className="p-6 space-y-4">
               <div className={`text-center space-y-1 border-b border-dashed pb-4 ${isLight ? 'border-neutral-300' : 'border-neutral-700'}`}>
                 <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto mb-2">
@@ -1330,9 +1272,8 @@ export const PDVSalesView: React.FC = () => {
                   <span>Pagamento:</span>
                   <span className="capitalize font-semibold">{completedOrder.paymentMethod.replace('_', ' ')}</span>
                 </div>
-                <div className={`flex justify-between text-base font-bold pt-2 border-t ${
-                  isLight ? 'border-neutral-300 text-neutral-900' : 'border-neutral-800 text-white'
-                }`}>
+                <div className={`flex justify-between text-base font-bold pt-2 border-t ${isLight ? 'border-neutral-300 text-neutral-900' : 'border-neutral-800 text-white'
+                  }`}>
                   <span>TOTAL:</span>
                   <span className="text-amber-600 dark:text-amber-400 font-mono font-extrabold">
                     R$ {completedOrder.total.toFixed(2)}
@@ -1341,9 +1282,8 @@ export const PDVSalesView: React.FC = () => {
               </div>
 
               {/* Stock Deducted Notice */}
-              <div className={`p-3 rounded-xl border text-xs flex items-center gap-2 ${
-                isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-emerald-950/30 border-emerald-500/30 text-emerald-300'
-              }`}>
+              <div className={`p-3 rounded-xl border text-xs flex items-center gap-2 ${isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-emerald-950/30 border-emerald-500/30 text-emerald-300'
+                }`}>
                 <CheckCircle className="w-4 h-4 shrink-0 text-emerald-600" />
                 <span>Estoque deduzido e sincronizado no sistema da loja.</span>
               </div>
@@ -1353,11 +1293,10 @@ export const PDVSalesView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className={`flex-1 py-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
-                    isLight 
-                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800' 
+                  className={`flex-1 py-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${isLight
+                      ? 'bg-neutral-100 hover:bg-neutral-200 border-neutral-300 text-neutral-800'
                       : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
-                  }`}
+                    }`}
                 >
                   <Printer className="w-4 h-4" />
                   <span>Imprimir Cupom</span>
@@ -1380,14 +1319,12 @@ export const PDVSalesView: React.FC = () => {
       {/* Modal Rápido de Seleção de Atacado / Fardos no Balcão */}
       {selectedProductForPackModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-          <div className={`w-full max-w-md rounded-2xl border shadow-2xl overflow-hidden transition-colors ${
-            isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-neutral-900 border-neutral-700 text-white'
-          }`}>
-            <div className={`flex items-center justify-between px-5 py-3.5 border-b ${
-              isLight ? 'bg-slate-50 border-slate-200' : 'bg-neutral-950 border-neutral-800'
+          <div className={`w-full max-w-md rounded-2xl border shadow-2xl overflow-hidden transition-colors ${isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-neutral-900 border-neutral-700 text-white'
             }`}>
+            <div className={`flex items-center justify-between px-5 py-3.5 border-b ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-neutral-950 border-neutral-800'
+              }`}>
               <div className="flex items-center gap-2.5">
-                <div 
+                <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center font-bold bg-sky-500/15 text-sky-500"
                 >
                   <Boxes className="w-4 h-4" />
@@ -1418,11 +1355,10 @@ export const PDVSalesView: React.FC = () => {
                   playBeep(true);
                   setSelectedProductForPackModal(null);
                 }}
-                className={`w-full p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
-                  isLight 
-                    ? 'bg-slate-50 hover:bg-slate-100 border-slate-200' 
+                className={`w-full p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${isLight
+                    ? 'bg-slate-50 hover:bg-slate-100 border-slate-200'
                     : 'bg-neutral-850 hover:bg-neutral-800 border-neutral-800'
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2.5">
                   <span className="w-8 h-8 rounded-lg bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-sm font-bold">
@@ -1444,7 +1380,7 @@ export const PDVSalesView: React.FC = () => {
 
               {/* Fardos Cadastrados (12, 18, 24, 6) */}
               <div className="pt-2">
-                <span 
+                <span
                   className="text-[10px] font-bold uppercase tracking-wider block mb-1.5 text-sky-600 dark:text-sky-400"
                 >
                   Opções de Fardos & Caixas:
@@ -1462,16 +1398,15 @@ export const PDVSalesView: React.FC = () => {
                           addPackToCart(selectedProductForPackModal, pack);
                           setSelectedProductForPackModal(null);
                         }}
-                        className={`w-full p-3 rounded-xl border flex items-center justify-between transition-all ${
-                          hasStock
+                        className={`w-full p-3 rounded-xl border flex items-center justify-between transition-all ${hasStock
                             ? isLight
                               ? 'bg-slate-50/70 hover:bg-slate-100 border-slate-200 cursor-pointer shadow-2xs'
                               : 'bg-neutral-950 hover:bg-neutral-800 border-neutral-800 cursor-pointer'
                             : 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-neutral-900 border-slate-200'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <span 
+                          <span
                             className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold bg-sky-500/15 text-sky-500"
                           >
                             📦
@@ -1503,9 +1438,8 @@ export const PDVSalesView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedProductForPackModal(null)}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
-                  isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-neutral-800 hover:bg-neutral-700 text-white'
-                }`}
+                className={`px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-neutral-800 hover:bg-neutral-700 text-white'
+                  }`}
               >
                 Fechar
               </button>
@@ -1566,16 +1500,14 @@ export const PDVSalesView: React.FC = () => {
                         variant: 'success'
                       });
                     }}
-                    className={`w-full p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                      isCurrent
+                    className={`w-full p-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${isCurrent
                         ? 'border-sky-500 bg-sky-500/15 ring-1 ring-sky-500/30'
                         : 'border-[#1E2B3A] bg-[#121A26] hover:border-slate-600'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${
-                        isCurrent ? 'bg-sky-500 text-white' : 'bg-neutral-800 text-slate-300'
-                      }`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${isCurrent ? 'bg-sky-500 text-white' : 'bg-neutral-800 text-slate-300'
+                        }`}>
                         {u.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
