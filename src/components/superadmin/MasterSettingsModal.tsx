@@ -31,7 +31,9 @@ import {
   QrCode,
   UtensilsCrossed,
   ChefHat,
-  CheckCircle2
+  CheckCircle2,
+  Plus,
+  Minus
 } from 'lucide-react';
 
 interface MasterSettingsModalProps {
@@ -57,6 +59,16 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
 
   // Estado da aba de permissões
   const [selectedTarget, setSelectedTarget] = useState<'global' | BusinessSegmentType>('global');
+
+  // Estado para expandir cards com opções detalhadas de cada módulo (+ para abrir pra baixo)
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
+
+  const toggleModuleExpand = (moduleKey: string) => {
+    setExpandedModules(prev => ({
+      ...prev,
+      [moduleKey]: !prev[moduleKey]
+    }));
+  };
 
   // Estado local para os 5 planos
   const [plansState, setPlansState] = useState<SaaSSubscriptionPlan[]>(globalConfig.plans);
@@ -171,6 +183,19 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
       });
     } else {
       updateSegmentPermissions(selectedTarget, { [feature]: newValue });
+    }
+  };
+
+  const handleUpdateFeatureValue = (feature: keyof SaaSFeaturePermissions, value: any) => {
+    if (selectedTarget === 'global') {
+      updateGlobalConfig({
+        defaultPermissions: {
+          ...globalConfig.defaultPermissions,
+          [feature]: value,
+        }
+      });
+    } else {
+      updateSegmentPermissions(selectedTarget, { [feature]: value });
     }
   };
 
@@ -365,199 +390,623 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                 </div>
               </div>
 
-              {/* Grid de Módulos & Chaves de Ativação */}
+              {/* Grid de Módulos & Chaves de Ativação com Expansão (+) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
                 
                 {/* 1. Cardápio & Vitrine Online */}
-                <div className={`p-4 rounded-2xl border flex items-start justify-between gap-4 transition-all ${
+                <div className={`p-4 rounded-2xl border transition-all ${
                   currentPermissions.enableStorefront
                     ? (isLight ? 'bg-sky-50/50 border-sky-200' : 'bg-sky-950/15 border-sky-900/40')
                     : (isLight ? 'bg-slate-100/60 border-slate-200 opacity-60' : 'bg-[#121820]/60 border-[#1C2631] opacity-60')
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-500 border border-sky-500/20 shrink-0">
-                      <ShoppingCart className="w-5 h-5" />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-500 border border-sky-500/20 shrink-0">
+                        <ShoppingCart className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
+                          Cardápio & Vitrine Online
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Permite receber pedidos na web e WhatsApp com catálogo público.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
-                        Cardápio & Vitrine Online
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Permite receber pedidos na web e WhatsApp com catálogo público.
-                      </p>
+
+                    <div className="flex items-center gap-1.5 shrink-0 mt-1">
+                      {/* Botão + para abrir opções para baixo */}
+                      <button
+                        type="button"
+                        onClick={() => toggleModuleExpand('cardapio')}
+                        title={expandedModules['cardapio'] ? 'Recolher opções' : 'Abrir opções detalhadas deste módulo'}
+                        className={`p-1.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+                          expandedModules['cardapio']
+                            ? 'bg-sky-500 text-white border-sky-400 shadow-xs'
+                            : isLight
+                            ? 'bg-white hover:bg-slate-100 border-slate-200 text-sky-600'
+                            : 'bg-[#151D24] hover:bg-[#1E2732] border-[#253342] text-sky-400'
+                        }`}
+                      >
+                        {expandedModules['cardapio'] ? (
+                          <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        ) : (
+                          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        )}
+                      </button>
+
+                      {/* Switch Geral */}
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeature('enableStorefront')}
+                        className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                          currentPermissions.enableStorefront ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                          currentPermissions.enableStorefront ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleFeature('enableStorefront')}
-                    className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer shrink-0 mt-1 ${
-                      currentPermissions.enableStorefront ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
-                    }`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                      currentPermissions.enableStorefront ? 'translate-x-6' : 'translate-x-0'
-                    }`} />
-                  </button>
+
+                  {/* Painel Expansível de Opções Específicas do Cardápio */}
+                  {expandedModules['cardapio'] && (
+                    <div className={`mt-3 pt-3 border-t space-y-2.5 animate-in fade-in duration-150 ${
+                      isLight ? 'border-sky-200/60' : 'border-[#1C2631]'
+                    }`}>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block">
+                        Configurações Específicas do Cardápio:
+                      </span>
+
+                      {/* Opção: Entregas (Delivery) */}
+                      <div className="flex items-center justify-between text-xs py-1">
+                        <div>
+                          <span className="font-bold block">Entregas no Cardápio (Delivery)</span>
+                          <span className="text-[10px] text-slate-500">Permitir pedidos para entrega a domicílio</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.storefrontDeliveryEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('storefrontDeliveryEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Opção: Consumo no Salão / Mesas */}
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Consumo no Salão / Mesas</span>
+                          <span className="text-[10px] text-slate-500">Permitir seleção de mesa e QR Code no salão</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.storefrontTablesEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('storefrontTablesEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Opção: Número de Mesas Padrão */}
+                      {currentPermissions.storefrontTablesEnabled !== false && (
+                        <div className="flex items-center justify-between text-xs py-1 pl-3 border-l-2 border-sky-400">
+                          <div>
+                            <span className="font-bold block">Quantidade de Mesas Padrão</span>
+                            <span className="text-[10px] text-slate-500">Número de mesas do comércio</span>
+                          </div>
+                          <input
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={currentPermissions.defaultTableCount || 12}
+                            onChange={(e) => handleUpdateFeatureValue('defaultTableCount', parseInt(e.target.value) || 12)}
+                            className={`w-16 px-2 py-1 rounded-lg text-xs font-bold text-center border ${
+                              isLight ? 'bg-white border-slate-300' : 'bg-[#0B0F14] border-[#1C2631] text-white'
+                            }`}
+                          />
+                        </div>
+                      )}
+
+                      {/* Opção: Retirada no Balcão */}
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Retirada no Balcão (Takeaway)</span>
+                          <span className="text-[10px] text-slate-500">Cliente retira o pedido no balcão</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.storefrontPickupEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('storefrontPickupEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Opção: Pedidos no WhatsApp */}
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Envio de Pedidos via WhatsApp</span>
+                          <span className="text-[10px] text-slate-500">Enviar mensagens automáticas formatadas</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.storefrontWhatsAppOrders !== false}
+                          onChange={(e) => handleUpdateFeatureValue('storefrontWhatsAppOrders', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 2. Frente de Caixa Balcão (PDV) */}
-                <div className={`p-4 rounded-2xl border flex items-start justify-between gap-4 transition-all ${
+                <div className={`p-4 rounded-2xl border transition-all ${
                   currentPermissions.enablePDVBalcao
                     ? (isLight ? 'bg-sky-50/50 border-sky-200' : 'bg-sky-950/15 border-sky-900/40')
                     : (isLight ? 'bg-slate-100/60 border-slate-200 opacity-60' : 'bg-[#121820]/60 border-[#1C2631] opacity-60')
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20 shrink-0">
-                      <Store className="w-5 h-5" />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20 shrink-0">
+                        <Store className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
+                          Vendas no Balcão (PDV Ágil)
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Acesso ao caixa rápido presencial, mesas e emissão de comprovantes.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
-                        Vendas no Balcão (PDV Ágil)
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Acesso ao caixa rápido presencial, mesas e emissão de comprovantes.
-                      </p>
+
+                    <div className="flex items-center gap-1.5 shrink-0 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleModuleExpand('pdv')}
+                        title={expandedModules['pdv'] ? 'Recolher opções' : 'Abrir opções detalhadas deste módulo'}
+                        className={`p-1.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+                          expandedModules['pdv']
+                            ? 'bg-sky-500 text-white border-sky-400 shadow-xs'
+                            : isLight
+                            ? 'bg-white hover:bg-slate-100 border-slate-200 text-sky-600'
+                            : 'bg-[#151D24] hover:bg-[#1E2732] border-[#253342] text-sky-400'
+                        }`}
+                      >
+                        {expandedModules['pdv'] ? (
+                          <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        ) : (
+                          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeature('enablePDVBalcao')}
+                        className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                          currentPermissions.enablePDVBalcao ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                          currentPermissions.enablePDVBalcao ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleFeature('enablePDVBalcao')}
-                    className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer shrink-0 mt-1 ${
-                      currentPermissions.enablePDVBalcao ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
-                    }`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                      currentPermissions.enablePDVBalcao ? 'translate-x-6' : 'translate-x-0'
-                    }`} />
-                  </button>
+
+                  {/* Painel Expansível de Opções do PDV */}
+                  {expandedModules['pdv'] && (
+                    <div className={`mt-3 pt-3 border-t space-y-2.5 animate-in fade-in duration-150 ${
+                      isLight ? 'border-sky-200/60' : 'border-[#1C2631]'
+                    }`}>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block">
+                        Configurações Específicas do PDV Balcão:
+                      </span>
+
+                      <div className="flex items-center justify-between text-xs py-1">
+                        <div>
+                          <span className="font-bold block">Venda em Fardos / Caixas</span>
+                          <span className="text-[10px] text-slate-500">Permitir botão de fardos e atacado</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.pdvPacksEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('pdvPacksEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Descontos Manuais no Caixa</span>
+                          <span className="text-[10px] text-slate-500">Operador pode aplicar desconto em R$</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.pdvDiscountEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('pdvDiscountEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Identificação de Cliente / CPF</span>
+                          <span className="text-[10px] text-slate-500">Campo para registrar nome/CPF na venda</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.pdvCustomerCpfEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('pdvCustomerCpfEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 3. Controle de Estoque */}
-                <div className={`p-4 rounded-2xl border flex items-start justify-between gap-4 transition-all ${
+                <div className={`p-4 rounded-2xl border transition-all ${
                   currentPermissions.enableStockControl
                     ? (isLight ? 'bg-sky-50/50 border-sky-200' : 'bg-sky-950/15 border-sky-900/40')
                     : (isLight ? 'bg-slate-100/60 border-slate-200 opacity-60' : 'bg-[#121820]/60 border-[#1C2631] opacity-60')
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
-                      <Boxes className="w-5 h-5" />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
+                        <Boxes className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
+                          Controle de Estoque & Reposição
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Entradas, saídas automáticas, custo e avisos de produtos acabando.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
-                        Controle de Estoque & Reposição
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Entradas, saídas automáticas, custo e avisos de produtos acabando.
-                      </p>
+
+                    <div className="flex items-center gap-1.5 shrink-0 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleModuleExpand('estoque')}
+                        title={expandedModules['estoque'] ? 'Recolher opções' : 'Abrir opções detalhadas deste módulo'}
+                        className={`p-1.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+                          expandedModules['estoque']
+                            ? 'bg-sky-500 text-white border-sky-400 shadow-xs'
+                            : isLight
+                            ? 'bg-white hover:bg-slate-100 border-slate-200 text-sky-600'
+                            : 'bg-[#151D24] hover:bg-[#1E2732] border-[#253342] text-sky-400'
+                        }`}
+                      >
+                        {expandedModules['estoque'] ? (
+                          <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        ) : (
+                          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeature('enableStockControl')}
+                        className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                          currentPermissions.enableStockControl ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                          currentPermissions.enableStockControl ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleFeature('enableStockControl')}
-                    className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer shrink-0 mt-1 ${
-                      currentPermissions.enableStockControl ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
-                    }`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                      currentPermissions.enableStockControl ? 'translate-x-6' : 'translate-x-0'
-                    }`} />
-                  </button>
+
+                  {/* Painel Expansível de Opções do Estoque */}
+                  {expandedModules['estoque'] && (
+                    <div className={`mt-3 pt-3 border-t space-y-2.5 animate-in fade-in duration-150 ${
+                      isLight ? 'border-sky-200/60' : 'border-[#1C2631]'
+                    }`}>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block">
+                        Configurações Específicas do Estoque:
+                      </span>
+
+                      <div className="flex items-center justify-between text-xs py-1">
+                        <div>
+                          <span className="font-bold block">Alertas de Estoque Baixo</span>
+                          <span className="text-[10px] text-slate-500">Notificar quando produto estiver acabando</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.stockAlertEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('stockAlertEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Bloquear Venda quando Zerar Estoque</span>
+                          <span className="text-[10px] text-slate-500">Impedir venda no balcão sem estoque</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.blockOutOfStockSale ?? false}
+                          onChange={(e) => handleUpdateFeatureValue('blockOutOfStockSale', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 4. Delivery & Frete por Raio */}
-                <div className={`p-4 rounded-2xl border flex items-start justify-between gap-4 transition-all ${
+                <div className={`p-4 rounded-2xl border transition-all ${
                   currentPermissions.enableDeliveryRadius
                     ? (isLight ? 'bg-sky-50/50 border-sky-200' : 'bg-sky-950/15 border-sky-900/40')
                     : (isLight ? 'bg-slate-100/60 border-slate-200 opacity-60' : 'bg-[#121820]/60 border-[#1C2631] opacity-60')
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
-                      <Truck className="w-5 h-5" />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
+                        <Truck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
+                          Delivery & Taxa por Raio (KM)
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Cálculo dinâmico de taxa por distância e regras de frete grátis.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
-                        Delivery & Taxa por Raio (KM)
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Cálculo dinâmico de taxa por distância e regras de frete grátis.
-                      </p>
+
+                    <div className="flex items-center gap-1.5 shrink-0 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleModuleExpand('delivery')}
+                        title={expandedModules['delivery'] ? 'Recolher opções' : 'Abrir opções detalhadas deste módulo'}
+                        className={`p-1.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+                          expandedModules['delivery']
+                            ? 'bg-sky-500 text-white border-sky-400 shadow-xs'
+                            : isLight
+                            ? 'bg-white hover:bg-slate-100 border-slate-200 text-sky-600'
+                            : 'bg-[#151D24] hover:bg-[#1E2732] border-[#253342] text-sky-400'
+                        }`}
+                      >
+                        {expandedModules['delivery'] ? (
+                          <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        ) : (
+                          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeature('enableDeliveryRadius')}
+                        className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                          currentPermissions.enableDeliveryRadius ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                          currentPermissions.enableDeliveryRadius ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleFeature('enableDeliveryRadius')}
-                    className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer shrink-0 mt-1 ${
-                      currentPermissions.enableDeliveryRadius ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
-                    }`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                      currentPermissions.enableDeliveryRadius ? 'translate-x-6' : 'translate-x-0'
-                    }`} />
-                  </button>
+
+                  {/* Painel Expansível de Opções do Delivery */}
+                  {expandedModules['delivery'] && (
+                    <div className={`mt-3 pt-3 border-t space-y-2.5 animate-in fade-in duration-150 ${
+                      isLight ? 'border-sky-200/60' : 'border-[#1C2631]'
+                    }`}>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block">
+                        Configurações Específicas do Delivery:
+                      </span>
+
+                      <div className="flex items-center justify-between text-xs py-1">
+                        <div>
+                          <span className="font-bold block">Taxa Dinâmica por KM</span>
+                          <span className="text-[10px] text-slate-500">Calcular frete pela distância até o cliente</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.deliveryKmFeeEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('deliveryKmFeeEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Raio Máximo Padrão (KM)</span>
+                          <span className="text-[10px] text-slate-500">Distância máxima atendida</span>
+                        </div>
+                        <input
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={currentPermissions.defaultDeliveryRadiusKm || 10}
+                          onChange={(e) => handleUpdateFeatureValue('defaultDeliveryRadiusKm', parseFloat(e.target.value) || 10)}
+                          className={`w-16 px-2 py-1 rounded-lg text-xs font-bold text-center border ${
+                            isLight ? 'bg-white border-slate-300' : 'bg-[#0B0F14] border-[#1C2631] text-white'
+                          }`}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Taxa Fixa / Mínima Padrão (R$)</span>
+                          <span className="text-[10px] text-slate-500">Valor base da entrega</span>
+                        </div>
+                        <input
+                          type="number"
+                          step="0.50"
+                          value={currentPermissions.defaultDeliveryFee || 7.00}
+                          onChange={(e) => handleUpdateFeatureValue('defaultDeliveryFee', parseFloat(e.target.value) || 7.00)}
+                          className={`w-20 px-2 py-1 rounded-lg text-xs font-bold text-center border ${
+                            isLight ? 'bg-white border-slate-300' : 'bg-[#0B0F14] border-[#1C2631] text-white'
+                          }`}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Pedido Mínimo Padrão (R$)</span>
+                          <span className="text-[10px] text-slate-500">Valor mínimo para aceitar entrega</span>
+                        </div>
+                        <input
+                          type="number"
+                          step="5.00"
+                          value={currentPermissions.defaultMinimumOrder || 20.00}
+                          onChange={(e) => handleUpdateFeatureValue('defaultMinimumOrder', parseFloat(e.target.value) || 20.00)}
+                          className={`w-20 px-2 py-1 rounded-lg text-xs font-bold text-center border ${
+                            isLight ? 'bg-white border-slate-300' : 'bg-[#0B0F14] border-[#1C2631] text-white'
+                          }`}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Frete Grátis com Valor Mínimo</span>
+                          <span className="text-[10px] text-slate-500">Liberar frete grátis para compras acima da meta</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.freeDeliveryEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('freeDeliveryEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 5. Relatórios & Métricas */}
-                <div className={`p-4 rounded-2xl border flex items-start justify-between gap-4 transition-all ${
+                <div className={`p-4 rounded-2xl border transition-all ${
                   currentPermissions.enableFinancialMetrics
                     ? (isLight ? 'bg-sky-50/50 border-sky-200' : 'bg-sky-950/15 border-sky-900/40')
                     : (isLight ? 'bg-slate-100/60 border-slate-200 opacity-60' : 'bg-[#121820]/60 border-[#1C2631] opacity-60')
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
-                      <BarChart3 className="w-5 h-5" />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
+                        <BarChart3 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
+                          Relatórios & Métricas Financeiras
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Painel de faturamento diário, ticket médio e produtos mais vendidos.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
-                        Relatórios & Métricas Financeiras
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Painel de faturamento diário, ticket médio e produtos mais vendidos.
-                      </p>
+
+                    <div className="flex items-center gap-1.5 shrink-0 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleModuleExpand('metricas')}
+                        title={expandedModules['metricas'] ? 'Recolher opções' : 'Abrir opções detalhadas deste módulo'}
+                        className={`p-1.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+                          expandedModules['metricas']
+                            ? 'bg-sky-500 text-white border-sky-400 shadow-xs'
+                            : isLight
+                            ? 'bg-white hover:bg-slate-100 border-slate-200 text-sky-600'
+                            : 'bg-[#151D24] hover:bg-[#1E2732] border-[#253342] text-sky-400'
+                        }`}
+                      >
+                        {expandedModules['metricas'] ? (
+                          <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        ) : (
+                          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeature('enableFinancialMetrics')}
+                        className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                          currentPermissions.enableFinancialMetrics ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                          currentPermissions.enableFinancialMetrics ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleFeature('enableFinancialMetrics')}
-                    className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer shrink-0 mt-1 ${
-                      currentPermissions.enableFinancialMetrics ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
-                    }`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                      currentPermissions.enableFinancialMetrics ? 'translate-x-6' : 'translate-x-0'
-                    }`} />
-                  </button>
+
+                  {/* Painel Expansível de Opções Financeiras */}
+                  {expandedModules['metricas'] && (
+                    <div className={`mt-3 pt-3 border-t space-y-2.5 animate-in fade-in duration-150 ${
+                      isLight ? 'border-sky-200/60' : 'border-[#1C2631]'
+                    }`}>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 block">
+                        Configurações Específicas do Financeiro:
+                      </span>
+
+                      <div className="flex items-center justify-between text-xs py-1">
+                        <div>
+                          <span className="font-bold block">Demonstrativo de Lucro Real e Custos</span>
+                          <span className="text-[10px] text-slate-500">Calcular margem de lucro com custo do produto</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.financialProfitEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('financialProfitEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <div>
+                          <span className="font-bold block">Exportar Relatórios em Excel / PDF</span>
+                          <span className="text-[10px] text-slate-500">Permitir download de planilhas de fechamento</span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={currentPermissions.financialExportEnabled !== false}
+                          onChange={(e) => handleUpdateFeatureValue('financialExportEnabled', e.target.checked)}
+                          className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 6. Leitor de Código de Barras */}
-                <div className={`p-4 rounded-2xl border flex items-start justify-between gap-4 transition-all ${
+                <div className={`p-4 rounded-2xl border transition-all ${
                   currentPermissions.enableBarcodeScanner
                     ? (isLight ? 'bg-sky-50/50 border-sky-200' : 'bg-sky-950/15 border-sky-900/40')
                     : (isLight ? 'bg-slate-100/60 border-slate-200 opacity-60' : 'bg-[#121820]/60 border-[#1C2631] opacity-60')
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 shrink-0">
-                      <Barcode className="w-5 h-5" />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 shrink-0">
+                        <Barcode className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
+                          Leitor de Código de Barras USB / BT
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Bipe rápido de latas, garrafas e pacotes com leitor óptico.
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white">
-                        Leitor de Código de Barras USB / BT
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Bipe rápido de latas, garrafas e pacotes com leitor óptico.
-                      </p>
+
+                    <div className="flex items-center gap-1.5 shrink-0 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeature('enableBarcodeScanner')}
+                        className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                          currentPermissions.enableBarcodeScanner ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                          currentPermissions.enableBarcodeScanner ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleFeature('enableBarcodeScanner')}
-                    className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer shrink-0 mt-1 ${
-                      currentPermissions.enableBarcodeScanner ? 'bg-sky-600' : 'bg-slate-400 dark:bg-neutral-700'
-                    }`}
-                  >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                      currentPermissions.enableBarcodeScanner ? 'translate-x-6' : 'translate-x-0'
-                    }`} />
-                  </button>
                 </div>
 
               </div>

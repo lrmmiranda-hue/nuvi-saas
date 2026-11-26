@@ -363,6 +363,29 @@ export interface SaaSFeaturePermissions {
   enableFinancialMetrics: boolean;  // Relatórios & Métricas Financeiras
   enableBarcodeScanner: boolean;    // Leitor de Código de Barras USB / Bluetooth
   enableKitchenKDS?: boolean;       // KDS Cozinha / Painel de Pedidos
+
+  // Configurações Detalhadas Expansíveis (por Segmento / Global)
+  storefrontDeliveryEnabled?: boolean;     // Ativar/desativar entregas no cardápio
+  storefrontTablesEnabled?: boolean;       // Ativar/desativar mesas no cardápio
+  storefrontPickupEnabled?: boolean;       // Ativar/desativar retirada no balcão
+  storefrontWhatsAppOrders?: boolean;      // Pedidos diretos via WhatsApp
+  defaultTableCount?: number;              // Quantidade padrão de mesas
+
+  pdvPacksEnabled?: boolean;               // Venda em fardos/caixas
+  pdvDiscountEnabled?: boolean;            // Descontos manuais no caixa
+  pdvCustomerCpfEnabled?: boolean;         // CPF/Nome do cliente no balcão
+
+  deliveryKmFeeEnabled?: boolean;          // Cobrança dinâmica por KM
+  defaultDeliveryRadiusKm?: number;        // Raio padrão em KM
+  defaultDeliveryFee?: number;             // Taxa padrão de frete
+  defaultMinimumOrder?: number;            // Pedido mínimo padrão
+  freeDeliveryEnabled?: boolean;           // Frete grátis por valor
+
+  stockAlertEnabled?: boolean;             // Alerta de estoque baixo
+  blockOutOfStockSale?: boolean;           // Bloquear venda quando zerar estoque
+
+  financialProfitEnabled?: boolean;        // Exibir lucro real e custos
+  financialExportEnabled?: boolean;        // Exportar relatórios
 }
 
 export interface SaaSSubscriptionPlan {
