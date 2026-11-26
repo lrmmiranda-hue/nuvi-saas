@@ -1005,8 +1005,11 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     // 3. Escuta Pedidos em Tempo Real
     const unsubOrders = listenToOrders((remoteOrders) => {
-      if (remoteOrders && remoteOrders.length > 0) {
+      if (remoteOrders) {
         setAllOrders(remoteOrders);
+        try {
+          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(remoteOrders));
+        } catch { }
       }
     });
 
@@ -1053,7 +1056,6 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(allOrders));
-      allOrders.forEach((ord) => saveOrderFirestore(ord));
     } catch (e) {
       console.error(e);
     }
@@ -2124,6 +2126,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     });
 
     setAllOrders((prev) => [newOrder, ...prev]);
+    try {
+      saveOrderFirestore(newOrder);
+    } catch { }
 
     // Update tenant total metrics
     setTenants((prev) =>
@@ -2213,12 +2218,19 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       createdAt: new Date().toISOString(),
     };
 
+    // Dispara a deleção e salvamento no Firestore
+    try {
+      saveOrderFirestore(consolidatedOrder);
+      partialIds.forEach(id => {
+        deleteOrderFirestore(id);
+      });
+    } catch { }
+
     setAllOrders(prev => {
       const remaining = prev.filter(o => !partialIds.includes(o.id));
       const updated = [consolidatedOrder, ...remaining];
       try {
-        saveOrderFirestore(consolidatedOrder);
-        partialIds.forEach(id => deleteOrderFirestore(id));
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
       } catch { }
       return updated;
     });
