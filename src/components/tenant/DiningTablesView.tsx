@@ -929,28 +929,40 @@ export const DiningTablesView: React.FC = () => {
 
             {/* Divisão de Conta Inteligente (Racha Conta) */}
             <div className={`p-3.5 rounded-2xl border space-y-2.5 ${
-              isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+              isLight ? 'bg-slate-50 border-slate-300' : 'bg-[#121820] border-[#1C2631]'
             }`}>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold flex items-center gap-1.5 text-slate-300">
-                  <Users className="w-3.5 h-3.5 text-sky-400" />
+                <span className={`text-xs font-bold flex items-center gap-1.5 ${
+                  isLight ? 'text-slate-800' : 'text-slate-200'
+                }`}>
+                  <Users className={`w-3.5 h-3.5 ${isLight ? 'text-sky-600' : 'text-sky-400'}`} />
                   Dividir Conta por Pessoa:
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setSplitCount(Math.max(1, splitCount - 1))}
-                    className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-neutral-800 text-sm font-bold flex items-center justify-center cursor-pointer hover:bg-slate-300 dark:hover:bg-neutral-700"
+                    className={`w-7 h-7 rounded-lg text-sm font-bold flex items-center justify-center cursor-pointer transition-colors border ${
+                      isLight
+                        ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100 shadow-xs'
+                        : 'bg-neutral-800 border-[#1E2B3A] text-white hover:bg-neutral-700'
+                    }`}
                   >
                     -
                   </button>
-                  <span className="font-mono font-bold text-xs min-w-8 text-center text-white">
+                  <span className={`font-mono font-black text-xs min-w-8 text-center ${
+                    isLight ? 'text-slate-900 font-extrabold' : 'text-white'
+                  }`}>
                     {splitCount} {splitCount === 1 ? 'pessoa' : 'pessoas'}
                   </span>
                   <button
                     type="button"
                     onClick={() => setSplitCount(splitCount + 1)}
-                    className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-neutral-800 text-sm font-bold flex items-center justify-center cursor-pointer hover:bg-slate-300 dark:hover:bg-neutral-700"
+                    className={`w-7 h-7 rounded-lg text-sm font-bold flex items-center justify-center cursor-pointer transition-colors border ${
+                      isLight
+                        ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100 shadow-xs'
+                        : 'bg-neutral-800 border-[#1E2B3A] text-white hover:bg-neutral-700'
+                    }`}
                   >
                     +
                   </button>
@@ -958,11 +970,15 @@ export const DiningTablesView: React.FC = () => {
               </div>
 
               {splitCount > 1 && (
-                <div className="pt-2 border-t border-slate-200 dark:border-[#1C2631] flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Valor individual:</span>
-                  <span className="text-emerald-400 font-mono font-black text-sm">
+                <div className={`pt-2 border-t flex items-center justify-between text-xs ${
+                  isLight ? 'border-slate-200' : 'border-[#1C2631]'
+                }`}>
+                  <span className={isLight ? 'text-slate-600 font-semibold' : 'text-slate-400'}>Valor individual:</span>
+                  <span className={`font-mono font-black text-sm ${
+                    isLight ? 'text-emerald-700' : 'text-emerald-400'
+                  }`}>
                     R$ {((currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)) / splitCount).toFixed(2).replace('.', ',')}
-                    <span className="text-[10px] font-normal text-slate-400 ml-1">/ pessoa</span>
+                    <span className={`text-[10px] font-normal ml-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>/ pessoa</span>
                   </span>
                 </div>
               )}
@@ -1002,26 +1018,6 @@ export const DiningTablesView: React.FC = () => {
             </div>
 
             {/* Detalhes Específicos da Forma de Pagamento */}
-            {paymentMethod === 'pix' && (
-              <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-center space-y-2">
-                <div className="flex items-center justify-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-black text-xs">
-                  <QrCode className="w-4 h-4" />
-                  <span>Pagamento Instantâneo via PIX com QR Code</span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Ao confirmar ou clicar no botão abaixo, o QR Code dinâmico será gerado na tela com o valor exato para o cliente escanear.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setIsPixPaymentModalOpen(true)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
-                >
-                  <QrCode className="w-4 h-4" />
-                  <span>Exibir QR Code PIX na Tela 📱</span>
-                </button>
-              </div>
-            )}
-
             {paymentMethod === 'dinheiro' && (() => {
               const totalComTaxa = currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0);
               const valorDado = parseFloat(cashAmountGiven.replace(',', '.')) || 0;
