@@ -70,6 +70,9 @@ export const DiningTablesView: React.FC = () => {
 
   // Divisão de Conta (Racha Conta por pessoas)
   const [splitCount, setSplitCount] = useState(1);
+  // Registro de pagamentos por pessoa: { [personIndex: number]: { paid: boolean; method: PaymentMethod; amount: number; at: string } }
+  const [splitPayments, setSplitPayments] = useState<Record<number, { paid: boolean; method: PaymentMethod; amount: number; at: string }>>({});
+  const [activePayingPerson, setActivePayingPerson] = useState<number | null>(null);
 
   // Modal de fechamento de conta
   const [isClosingModalOpen, setIsClosingModalOpen] = useState(false);
@@ -382,6 +385,47 @@ export const DiningTablesView: React.FC = () => {
     setIsPixPaymentModalOpen(false);
     setSelectedTableNum(null);
     setCashAmountGiven('');
+    setSplitCount(1);
+    setSplitPayments({});
+    setActivePayingPerson(null);
+  };
+
+  // Registrar pagamento individual de uma pessoa no racha-conta
+  const handlePayIndividualSplit = (personIdx: number, methodToUse: PaymentMethod = paymentMethod) => {
+    if (!currentTable) return;
+    const totalComTaxa = currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0);
+    const valorPorPessoa = totalComTaxa / splitCount;
+
+    if (methodToUse === 'pix') {
+      setActivePayingPerson(personIdx);
+      setIsPixPaymentModalOpen(true);
+      return;
+    }
+
+    const updated = {
+      ...splitPayments,
+      [personIdx]: {
+        paid: true,
+        method: methodToUse,
+        amount: valorPorPessoa,
+        at: new Date().toLocaleTimeString('pt-BR')
+      }
+    };
+    setSplitPayments(updated);
+
+    showAlert({
+      title: 'Parte Paga com Sucesso!',
+      message: `Pessoa ${personIdx + 1} pagou sua parte de R$ ${valorPorPessoa.toFixed(2).replace('.', ',')} via ${methodToUse.replace('_', ' ')}.`,
+      variant: 'success'
+    });
+
+    // Se todas as pessoas pagaram suas partes, finaliza a mesa automaticamente!
+    const paidCount = Object.values(updated).filter(p => p.paid).length;
+    if (paidCount >= splitCount) {
+      setTimeout(() => {
+        executeCloseTable(methodToUse);
+      }, 600);
+    }
   };
 
   // Fechar a mesa, registrar recebimento e liberar mesa
@@ -928,7 +972,7 @@ export const DiningTablesView: React.FC = () => {
             </div>
 
             {/* Divisão de Conta Inteligente (Racha Conta) */}
-            <div className={`p-3.5 rounded-2xl border space-y-2.5 ${
+            <div className={`p-3.5 rounded-2xl border space-y-3 ${
               isLight ? 'bg-slate-50 border-slate-300' : 'bg-[#121820] border-[#1C2631]'
             }`}>
               <div className="flex items-center justify-between">
@@ -941,7 +985,11 @@ export const DiningTablesView: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setSplitCount(Math.max(1, splitCount - 1))}
+                    onClick={() => {
+                      const newCount = Math.max(1, splitCount - 1);
+                      setSplitCount(newCount);
+                      setSplitPayments({});
+                    }}
                     className={`w-7 h-7 rounded-lg text-sm font-bold flex items-center justify-center cursor-pointer transition-colors border ${
                       isLight
                         ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100 shadow-xs'
@@ -957,7 +1005,11 @@ export const DiningTablesView: React.FC = () => {
                   </span>
                   <button
                     type="button"
-                    onClick={() => setSplitCount(splitCount + 1)}
+                    onClick={() => {
+                      const newCount = splitCount + 1;
+                      setSplitCount(newCount);
+                      setSplitPayments({});
+                    }}
                     className={`w-7 h-7 rounded-lg text-sm font-bold flex items-center justify-center cursor-pointer transition-colors border ${
                       isLight
                         ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100 shadow-xs'
@@ -969,19 +1021,99 @@ export const DiningTablesView: React.FC = () => {
                 </div>
               </div>
 
-              {splitCount > 1 && (
-                <div className={`pt-2 border-t flex items-center justify-between text-xs ${
-                  isLight ? 'border-slate-200' : 'border-[#1C2631]'
-                }`}>
-                  <span className={isLight ? 'text-slate-600 font-semibold' : 'text-slate-400'}>Valor individual:</span>
-                  <span className={`font-mono font-black text-sm ${
-                    isLight ? 'text-emerald-700' : 'text-emerald-400'
-                  }`}>
-                    R$ {((currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)) / splitCount).toFixed(2).replace('.', ',')}
-                    <span className={`text-[10px] font-normal ml-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>/ pessoa</span>
-                  </span>
-                </div>
-              )}
+              {splitCount > 1 && (() => {
+                const totalComTaxa = currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0);
+                const valorPorPessoa = totalComTaxa / splitCount;
+                const paidList = Object.values(splitPayments).filter(p => p.paid);
+                const totalPagoAteAgora = paidList.reduce((acc, p) => acc + p.amount, 0);
+                const saldoRestante = Math.max(0, totalComTaxa - totalPagoAteAgora);
+
+                return (
+                  <div className="space-y-2.5 pt-2 border-t border-slate-200 dark:border-[#1C2631]">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className={isLight ? 'text-slate-600 font-semibold' : 'text-slate-400'}>
+                        Valor por pessoa:
+                      </span>
+                      <span className={`font-mono font-black text-sm ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
+                        R$ {valorPorPessoa.toFixed(2).replace('.', ',')}
+                      </span>
+                    </div>
+
+                    {/* Barra de Progresso de Pagamento das Partes */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] font-semibold">
+                        <span className={isLight ? 'text-slate-600' : 'text-slate-400'}>
+                          Pagos: {paidList.length} de {splitCount}
+                        </span>
+                        <span className="font-mono text-sky-500 font-bold">
+                          Restam: R$ {saldoRestante.toFixed(2).replace('.', ',')}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-black/40 overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 transition-all duration-300"
+                          style={{ width: `${(paidList.length / splitCount) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Lista de Pessoas para Pagamento Individual */}
+                    <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                      {Array.from({ length: splitCount }, (_, idx) => {
+                        const payment = splitPayments[idx];
+                        const isPaid = payment?.paid;
+
+                        return (
+                          <div
+                            key={idx}
+                            className={`p-2 rounded-xl border flex items-center justify-between gap-2 text-xs transition-all ${
+                              isPaid
+                                ? isLight
+                                  ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                                  : 'bg-emerald-950/30 border-emerald-500/40 text-emerald-300'
+                                : isLight
+                                ? 'bg-white border-slate-200 text-slate-800'
+                                : 'bg-[#0B1017] border-[#1A2533] text-slate-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] ${
+                                isPaid ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-neutral-800 text-slate-600 dark:text-slate-300'
+                              }`}>
+                                {idx + 1}
+                              </div>
+                              <span className="font-semibold text-[11px]">
+                                Pessoa {idx + 1}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-bold text-[11px]">
+                                R$ {valorPorPessoa.toFixed(2).replace('.', ',')}
+                              </span>
+
+                              {isPaid ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                  Pago ({payment.method.toUpperCase()})
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handlePayIndividualSplit(idx, paymentMethod)}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
+                                >
+                                  <span>Pagar Parte</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Forma de Pagamento */}
@@ -1222,11 +1354,50 @@ export const DiningTablesView: React.FC = () => {
       {/* Modal de Pagamento PIX com QR Code Dinâmico na Tela */}
       {isPixPaymentModalOpen && currentTable && currentTenant && (
         <PDVPixModal
-          totalAmount={currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)}
+          totalAmount={
+            splitCount > 1
+              ? (currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)) / splitCount
+              : currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)
+          }
           tenant={currentTenant}
           isLight={isLight}
-          onConfirmPayment={() => executeCloseTable('pix')}
-          onClose={() => setIsPixPaymentModalOpen(false)}
+          onConfirmPayment={() => {
+            if (splitCount > 1 && activePayingPerson !== null) {
+              const valorPorPessoa = (currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)) / splitCount;
+              const updated = {
+                ...splitPayments,
+                [activePayingPerson]: {
+                  paid: true,
+                  method: 'pix' as PaymentMethod,
+                  amount: valorPorPessoa,
+                  at: new Date().toLocaleTimeString('pt-BR')
+                }
+              };
+              setSplitPayments(updated);
+              setIsPixPaymentModalOpen(false);
+              setActivePayingPerson(null);
+
+              showAlert({
+                title: 'Parte Paga via PIX!',
+                message: `Pessoa ${activePayingPerson + 1} pagou sua parte de R$ ${valorPorPessoa.toFixed(2).replace('.', ',')} via PIX.`,
+                variant: 'success'
+              });
+
+              // Se todos pagaram, encerra
+              const paidCount = Object.values(updated).filter(p => p.paid).length;
+              if (paidCount >= splitCount) {
+                setTimeout(() => {
+                  executeCloseTable('pix');
+                }, 600);
+              }
+            } else {
+              executeCloseTable('pix');
+            }
+          }}
+          onClose={() => {
+            setIsPixPaymentModalOpen(false);
+            setActivePayingPerson(null);
+          }}
         />
       )}
 
