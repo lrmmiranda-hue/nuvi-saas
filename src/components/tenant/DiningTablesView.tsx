@@ -19,7 +19,14 @@ import {
   CreditCard,
   Banknote,
   Boxes,
-  Check
+  Check,
+  Trash2,
+  ArrowRightLeft,
+  Share2,
+  Send,
+  Smartphone,
+  Calculator,
+  UserCheck
 } from 'lucide-react';
 import { PDVPixModal } from './PDVPixModal';
 
@@ -31,6 +38,10 @@ export const DiningTablesView: React.FC = () => {
     updateOrderStatus,
     createOrder,
     closeAndConsolidateTableOrders,
+    removeOrderItemFromTable,
+    transferTableOrders,
+    currentStoreUser,
+    showConfirm,
     themeMode,
     showAlert
   } = useStore();
@@ -48,6 +59,17 @@ export const DiningTablesView: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [itemQuantity, setItemQuantity] = useState(1);
   const [itemNotes, setItemNotes] = useState('');
+
+  // Modal de transferência de mesa (exclusivo do lojista/gestor)
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [targetTableNum, setTargetTableNum] = useState<number | ''>('');
+
+  // Envio de conta pelo WhatsApp
+  const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [showWhatsappInput, setShowWhatsappInput] = useState(false);
+
+  // Divisão de Conta (Racha Conta por pessoas)
+  const [splitCount, setSplitCount] = useState(1);
 
   // Modal de fechamento de conta
   const [isClosingModalOpen, setIsClosingModalOpen] = useState(false);
@@ -225,6 +247,116 @@ export const DiningTablesView: React.FC = () => {
     printWin.document.close();
     printWin.focus();
     printWin.print();
+  };
+
+  // Enviar extrato / pré-conta formatada no WhatsApp da mesa
+  const handleSendBillViaWhatsApp = (targetPhone?: string) => {
+    if (!currentTable) return;
+    const phone = (targetPhone || whatsappPhone).replace(/\D/g, '');
+    if (!phone) {
+      showAlert({
+        title: 'Telefone Obrigatório',
+        message: 'Digite o número do WhatsApp com DDD para enviar a comanda.',
+        variant: 'warning'
+      });
+      return;
+    }
+
+    const subtotal = currentTable.totalAmount;
+    const serviceFee = applyServiceFee ? subtotal * 0.10 : 0;
+    const finalTotal = subtotal + serviceFee;
+
+    const itemsText = currentTable.orders
+      .flatMap(o => o.items)
+      .map(it => `• ${it.quantity}x ${it.productName} - R$ ${(it.price * it.quantity).toFixed(2).replace('.', ',')}`)
+      .join('\n');
+
+    let msg = `🧾 *CONTA / EXTRATO - ${currentTable.name}*\n`;
+    msg += `🏬 *${currentTenant?.name || 'Nosso Estabelecimento'}*\n`;
+    msg += `─────────────────────────\n`;
+    msg += `*Itens Consumidos:*\n${itemsText}\n`;
+    msg += `─────────────────────────\n`;
+    msg += `Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    if (applyServiceFee) {
+      msg += `Taxa de Serviço (10%): R$ ${serviceFee.toFixed(2).replace('.', ',')}\n`;
+    }
+    msg += `*TOTAL A PAGAR: R$ ${finalTotal.toFixed(2).replace('.', ',')}*\n`;
+    if (splitCount > 1) {
+      const perPerson = finalTotal / splitCount;
+      msg += `👥 *Divisão (${splitCount} pessoas):* R$ ${perPerson.toFixed(2).replace('.', ',')} por pessoa\n`;
+    }
+    if (currentTenant?.pixKey) {
+      msg += `\n🔑 *Chave PIX:* ${currentTenant.pixKey}\n`;
+      if (currentTenant.pixName) msg += `(${currentTenant.pixName})\n`;
+    }
+    msg += `\nMuito obrigado pela preferência e volte sempre! 🙏✨`;
+
+    const encoded = encodeURIComponent(msg);
+    window.open(`https://api.whatsapp.com/send?phone=55${phone}&text=${encoded}`, '_blank');
+  };
+
+  // Transferência de Mesa (Restrito ao dono/gerente do estabelecimento)
+  const handleTransferTable = () => {
+    if (!currentTable || !targetTableNum) return;
+
+    // Validação de permissão: somente gerente ou dono (admin)
+    const isOwnerOrManager = !currentStoreUser || currentStoreUser.role === 'admin' || currentStoreUser.role === 'manager';
+    if (!isOwnerOrManager) {
+      showAlert({
+        title: 'Acesso Restrito',
+        message: 'Apenas o dono ou gerente do estabelecimento tem autorização para transferir comandas entre mesas.',
+        variant: 'danger'
+      });
+      return;
+    }
+
+    const toNum = Number(targetTableNum);
+    if (toNum === currentTable.number) {
+      showAlert({
+        title: 'Mesa Inválida',
+        message: 'A mesa de destino deve ser diferente da mesa atual.',
+        variant: 'warning'
+      });
+      return;
+    }
+
+    const success = transferTableOrders(currentTable.number.toString(), toNum.toString());
+
+    if (success) {
+      showAlert({
+        title: 'Mesa Transferida com Sucesso!',
+        message: `Todos os pedidos e consumo da ${currentTable.name} foram transferidos para a Mesa ${toNum.toString().padStart(2, '0')}.`,
+        variant: 'success'
+      });
+      setIsTransferModalOpen(false);
+      setTargetTableNum('');
+      setSelectedTableNum(toNum);
+    } else {
+      showAlert({
+        title: 'Erro na Transferência',
+        message: 'Não foi possível encontrar pedidos ativos nesta mesa para transferir.',
+        variant: 'danger'
+      });
+    }
+  };
+
+  // Remover item lançado por engano com confirmação
+  const handleRemoveItem = (orderId: string, itemIdx: number, itemName: string) => {
+    showConfirm({
+      title: 'Remover Item Lançado?',
+      message: `Deseja realmente excluir "${itemName}" desta comanda? O total da mesa será recalculado automaticamente.`,
+      confirmText: 'Sim, Remover',
+      cancelText: 'Cancelar',
+      variant: 'danger',
+      onConfirm: () => {
+        removeOrderItemFromTable(orderId, itemIdx);
+        showAlert({
+          title: 'Item Removido',
+          message: `"${itemName}" foi retirado da comanda da ${currentTable?.name}.`,
+          variant: 'success'
+        });
+      }
+    });
   };
 
   // Executa o encerramento e consolidação definitiva da mesa
@@ -438,9 +570,27 @@ export const DiningTablesView: React.FC = () => {
                     <p className="text-[11px] font-semibold text-sky-600 dark:text-sky-400 truncate">
                       {table.customerName || `${table.orders.length} pedidos`}
                     </p>
-                    <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      {table.openedAt ? `Desde ${new Date(table.openedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : ''}
-                    </p>
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className={isLight ? 'text-slate-500' : 'text-slate-400'}>
+                        {table.openedAt ? `${new Date(table.openedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : ''}
+                      </span>
+                      {table.openedAt && (() => {
+                        const diffMins = Math.floor((Date.now() - new Date(table.openedAt).getTime()) / 60000);
+                        const isLongStay = diffMins >= 45;
+                        return (
+                          <span
+                            className={`font-mono font-bold px-1.5 py-0.2 rounded ${
+                              isLongStay
+                                ? 'bg-amber-500/20 text-amber-500 font-extrabold'
+                                : 'text-slate-400'
+                            }`}
+                            title={isLongStay ? 'Mesa há bastante tempo no salão! Que tal oferecer mais um pedido?' : 'Tempo de permanência'}
+                          >
+                            ⏱️ {diffMins}m
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </div>
                 ) : (
                   <p className={`text-[11px] ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
@@ -520,27 +670,80 @@ export const DiningTablesView: React.FC = () => {
             <div className="p-6 space-y-5 overflow-y-auto max-h-[60vh]">
               
               {/* Botões de Ações Rápidas */}
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => setIsAddItemModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500/15 text-sky-500 border border-sky-500/30 hover:bg-sky-500/25 font-bold text-xs transition-colors cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Lançar Item pelo Garçom/Balcão</span>
-                </button>
-
-                {currentTable.isOccupied && (
+              <div className="flex items-center justify-between gap-2.5 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
-                    onClick={handlePrintBill}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-neutral-800 hover:bg-slate-200 dark:hover:bg-neutral-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer border border-slate-200 dark:border-neutral-700"
+                    onClick={() => setIsAddItemModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-500/15 text-sky-500 border border-sky-500/30 hover:bg-sky-500/25 font-bold text-xs transition-colors cursor-pointer"
                   >
-                    <Printer className="w-4 h-4" />
-                    <span>Imprimir Pré-Conta</span>
+                    <Plus className="w-4 h-4" />
+                    <span>Lançar Item</span>
                   </button>
+
+                  {/* Transferir Mesa (Restrito ao Dono / Gerente) */}
+                  {currentTable.isOccupied && (
+                    <button
+                      type="button"
+                      onClick={() => setIsTransferModalOpen(true)}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-500/15 text-purple-400 border border-purple-500/30 hover:bg-purple-500/25 font-bold text-xs transition-colors cursor-pointer"
+                      title="Mudar de Mesa (Somente Gestor/Dono)"
+                    >
+                      <ArrowRightLeft className="w-3.5 h-3.5" />
+                      <span>Mudar de Mesa</span>
+                    </button>
+                  )}
+                </div>
+
+                {currentTable.isOccupied && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowWhatsappInput(!showWhatsappInput)}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 hover:bg-emerald-500/25 font-bold text-xs transition-colors cursor-pointer"
+                      title="Enviar extrato detalhado para o WhatsApp do cliente"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handlePrintBill}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 dark:bg-neutral-800 hover:bg-slate-200 dark:hover:bg-neutral-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer border border-slate-200 dark:border-neutral-700"
+                    >
+                      <Printer className="w-4 h-4" />
+                      <span>Imprimir</span>
+                    </button>
+                  </div>
                 )}
               </div>
+
+              {/* Input Rápido de Enviar WhatsApp */}
+              {showWhatsappInput && currentTable.isOccupied && (
+                <div className={`p-3 rounded-2xl border flex items-center gap-2 animate-in fade-in duration-150 ${
+                  isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-950/20 border-emerald-500/30'
+                }`}>
+                  <Smartphone className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <input
+                    type="tel"
+                    placeholder="DDD + WhatsApp do cliente (Ex: 11999998888)"
+                    value={whatsappPhone}
+                    onChange={(e) => setWhatsappPhone(e.target.value)}
+                    className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-mono outline-none border ${
+                      isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-black/40 border-emerald-500/30 text-white'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleSendBillViaWhatsApp()}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Send className="w-3 h-3" />
+                    <span>Enviar</span>
+                  </button>
+                </div>
+              )}
 
               {/* Lista dos Pedidos e Itens da Mesa */}
               {currentTable.orders.length > 0 ? (
@@ -596,19 +799,29 @@ export const DiningTablesView: React.FC = () => {
 
                       <div className="space-y-1.5">
                         {order.items.map((item, iIdx) => (
-                          <div key={iIdx} className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-2">
+                          <div key={iIdx} className="flex items-center justify-between text-xs group/item py-0.5">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
                               <span className="font-black text-sky-500">{item.quantity}x</span>
-                              <span className={`font-semibold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                              <span className={`font-semibold truncate ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
                                 {item.productName}
                               </span>
                               {item.notes && (
-                                <span className="text-[10px] italic text-amber-500">({item.notes})</span>
+                                <span className="text-[10px] italic text-amber-500 shrink-0">({item.notes})</span>
                               )}
                             </div>
-                            <span className="font-mono font-bold text-slate-500 dark:text-slate-400">
-                              R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
-                            </span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="font-mono font-bold text-slate-500 dark:text-slate-400">
+                                R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveItem(order.id, iIdx, item.productName)}
+                                className="p-1 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer opacity-70 group-hover/item:opacity-100"
+                                title="Excluir item lançado por engano"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -708,10 +921,51 @@ export const DiningTablesView: React.FC = () => {
 
               <div className="flex items-center justify-between text-base font-black pt-2 border-t border-slate-200 dark:border-[#1C2631]">
                 <span>TOTAL A PAGAR:</span>
-                <span className="text-sky-500 text-xl">
+                <span className="text-sky-500 text-xl font-mono">
                   R$ {(currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)).toFixed(2).replace('.', ',')}
                 </span>
               </div>
+            </div>
+
+            {/* Divisão de Conta Inteligente (Racha Conta) */}
+            <div className={`p-3.5 rounded-2xl border space-y-2.5 ${
+              isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold flex items-center gap-1.5 text-slate-300">
+                  <Users className="w-3.5 h-3.5 text-sky-400" />
+                  Dividir Conta por Pessoa:
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSplitCount(Math.max(1, splitCount - 1))}
+                    className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-neutral-800 text-sm font-bold flex items-center justify-center cursor-pointer hover:bg-slate-300 dark:hover:bg-neutral-700"
+                  >
+                    -
+                  </button>
+                  <span className="font-mono font-bold text-xs min-w-8 text-center text-white">
+                    {splitCount} {splitCount === 1 ? 'pessoa' : 'pessoas'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSplitCount(splitCount + 1)}
+                    className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-neutral-800 text-sm font-bold flex items-center justify-center cursor-pointer hover:bg-slate-300 dark:hover:bg-neutral-700"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {splitCount > 1 && (
+                <div className="pt-2 border-t border-slate-200 dark:border-[#1C2631] flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Valor individual:</span>
+                  <span className="text-emerald-400 font-mono font-black text-sm">
+                    R$ {((currentTable.totalAmount * (applyServiceFee ? 1.10 : 1.0)) / splitCount).toFixed(2).replace('.', ',')}
+                    <span className="text-[10px] font-normal text-slate-400 ml-1">/ pessoa</span>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Forma de Pagamento */}
@@ -978,6 +1232,88 @@ export const DiningTablesView: React.FC = () => {
           onConfirmPayment={() => executeCloseTable('pix')}
           onClose={() => setIsPixPaymentModalOpen(false)}
         />
+      )}
+
+      {/* Modal de Transferência / Troca de Mesa (Restrito ao Dono / Gestor) */}
+      {isTransferModalOpen && currentTable && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className={`w-full max-w-sm rounded-3xl border shadow-2xl p-6 space-y-4 ${
+            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#0E1318] border-[#1C2631] text-white'
+          }`}>
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-[#1C2631]">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                  <ArrowRightLeft className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Transferir Comanda</h3>
+                  <p className="text-[11px] text-slate-400">Origem: {currentTable.name}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTransferModalOpen(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div className={`p-3 rounded-xl border text-xs flex items-center gap-2 ${
+                isLight ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-amber-950/20 border-amber-500/30 text-amber-300'
+              }`}>
+                <UserCheck className="w-4 h-4 text-amber-500 shrink-0" />
+                <span>Apenas o dono ou gerente do estabelecimento pode efetuar a troca de mesas.</span>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-1">
+                  Selecione a Mesa de Destino:
+                </label>
+                <select
+                  value={targetTableNum}
+                  onChange={(e) => setTargetTableNum(e.target.value ? Number(e.target.value) : '')}
+                  className={`w-full p-2.5 rounded-xl border text-xs font-bold outline-none cursor-pointer ${
+                    isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-[#121820] border-[#1C2631] text-white'
+                  }`}
+                >
+                  <option value="">Selecione a nova mesa...</option>
+                  {tables
+                    .filter((t) => t.number !== currentTable.number)
+                    .map((t) => (
+                      <option key={t.number} value={t.number}>
+                        {t.name} {t.isOccupied ? `(Já tem pedidos - Juntar contas)` : '(Livre)'}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="pt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsTransferModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-[#1C2631] text-xs font-bold text-slate-400 hover:bg-neutral-800 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleTransferTable}
+                  disabled={!targetTableNum}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    targetTableNum
+                      ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-md'
+                      : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+                  }`}
+                >
+                  <ArrowRightLeft className="w-3.5 h-3.5" />
+                  <span>Transferir</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

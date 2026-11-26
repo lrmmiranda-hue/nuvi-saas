@@ -87,6 +87,8 @@ interface StoreContextType {
     paymentMethod: PaymentMethod,
     applyServiceFee: boolean
   ) => Order | undefined;
+  removeOrderItemFromTable: (orderId: string, itemIndex: number) => void;
+  transferTableOrders: (fromTableNumber: string, toTableNumber: string) => boolean;
   findProductByBarcode: (barcode: string) => Product | undefined;
   findProductOrPackByBarcode: (barcode: string) => { product: Product; pack?: import('../types').ProductPackOption } | undefined;
   importProductsFromExcel: (
@@ -2224,6 +2226,87 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return consolidatedOrder;
   };
 
+  // Remover item de um pedido de mesa (exclusão de item lançado por engano)
+  const removeOrderItemFromTable = (orderId: string, itemIndex: number) => {
+    setAllOrders(prev => {
+      const targetOrder = prev.find(o => o.id === orderId);
+      if (!targetOrder) return prev;
+
+      const updatedItems = [...targetOrder.items];
+      if (itemIndex < 0 || itemIndex >= updatedItems.length) return prev;
+
+      const removedItem = updatedItems.splice(itemIndex, 1)[0];
+
+      // Se não sobrou nenhum item no pedido, exclui o pedido inteiro
+      if (updatedItems.length === 0) {
+        try {
+          deleteOrderFirestore(orderId);
+        } catch { }
+        return prev.filter(o => o.id !== orderId);
+      }
+
+      // Recalcula subtotal e total do pedido
+      const newSubtotal = updatedItems.reduce((acc, it) => acc + (it.price * it.quantity), 0);
+      const newTotal = newSubtotal + (targetOrder.deliveryFee || 0);
+
+      const updatedOrder: Order = {
+        ...targetOrder,
+        items: updatedItems,
+        subtotal: newSubtotal,
+        total: newTotal
+      };
+
+      try {
+        saveOrderFirestore(updatedOrder);
+      } catch { }
+
+      return prev.map(o => o.id === orderId ? updatedOrder : o);
+    });
+  };
+
+  // Transferência de mesa (troca de mesa - restrito ao gestor/dono)
+  const transferTableOrders = (fromTableNumber: string, toTableNumber: string): boolean => {
+    const fromClean = fromTableNumber.replace(/\D/g, '');
+    const toClean = toTableNumber.replace(/\D/g, '');
+    const fromInt = parseInt(fromClean, 10);
+    const toInt = parseInt(toClean, 10);
+
+    const padTo = !isNaN(toInt) ? String(toInt).padStart(2, '0') : toTableNumber;
+
+    let modifiedCount = 0;
+
+    setAllOrders(prev => {
+      const updated = prev.map(o => {
+        if (o.tenantId !== currentTenantId) return o;
+        if (o.status === 'finalizado' || o.status === 'cancelado' || o.tableStatus === 'fechada') return o;
+
+        const oNum = (o.tableNumber || '').replace(/\D/g, '');
+        const oInt = parseInt(oNum, 10);
+
+        const match = (!isNaN(fromInt) && !isNaN(oInt) && fromInt === oInt) ||
+          (o.tableNumber?.toLowerCase().includes(`mesa ${fromInt}`) ?? false);
+
+        if (match) {
+          modifiedCount++;
+          const newOrder: Order = {
+            ...o,
+            tableNumber: `Mesa ${padTo}`,
+            notes: o.notes ? `${o.notes} (Transferido da Mesa ${fromTableNumber})` : `Transferido da Mesa ${fromTableNumber}`
+          };
+          try {
+            saveOrderFirestore(newOrder);
+          } catch { }
+          return newOrder;
+        }
+        return o;
+      });
+
+      return updated;
+    });
+
+    return modifiedCount > 0;
+  };
+
   // WhatsApp Message Generators
   const generateWhatsAppOrderUrl = (order: Order, tenant: Tenant): string => {
     const itemsFormatted = order.items
@@ -2486,6 +2569,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         receiveStock,
         registerPDVSale,
         closeAndConsolidateTableOrders,
+        removeOrderItemFromTable,
+        transferTableOrders,
         findProductByBarcode,
         findProductOrPackByBarcode,
         importProductsFromExcel,
