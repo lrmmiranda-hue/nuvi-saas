@@ -4,6 +4,7 @@ import { Tenant, TenantPlan } from '../../types';
 import { buildStoreUrl } from '../../utils/routes';
 import { getSegmentById } from '../../data/businessSegments';
 import { MasterSettingsModal } from './MasterSettingsModal';
+import { MediaBankModal } from './MediaBankModal';
 import { 
   Building2, 
   Store, 
@@ -43,7 +44,8 @@ import {
   Repeat,
   MoreVertical,
   X,
-  Check
+  Check,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface SuperAdminDashboardProps {
@@ -69,12 +71,14 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     currentTenant,
     logoutMaster,
     globalConfig,
+    mediaLibrary,
   } = useStore();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isPixKeyModalOpen, setIsPixKeyModalOpen] = useState(false);
+  const [isMediaBankModalOpen, setIsMediaBankModalOpen] = useState(false);
   const [activeMenuTenantId, setActiveMenuTenantId] = useState<string | null>(null);
 
   const [masterPixKey, setMasterPixKey] = useState<string>(() => {
@@ -417,6 +421,24 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0 flex-nowrap self-start lg:self-center">
+            {/* Botão Banco de Imagens por Segmento */}
+            <button
+              type="button"
+              onClick={() => setIsMediaBankModalOpen(true)}
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer shadow-xs whitespace-nowrap shrink-0 ${
+                themeMode === 'light'
+                  ? 'bg-sky-50/80 hover:bg-sky-100/90 border-sky-300 text-sky-800'
+                  : 'bg-sky-950/30 hover:bg-sky-900/40 border-sky-600/40 text-sky-300'
+              }`}
+              title="Gerenciar imagens, capas e banners oficiais para cada tipo de comércio"
+            >
+              <ImageIcon className="w-4 h-4 text-sky-500 shrink-0" />
+              <span>Banco de Imagens</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-sky-500 text-white font-black">
+                {mediaLibrary.length}
+              </span>
+            </button>
+
             {/* Botão Configurar Chave PIX */}
             <button
               type="button"
@@ -1354,6 +1376,12 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       <MasterSettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+      />
+
+      {/* Modal do Banco Central de Imagens por Tipo de Comércio */}
+      <MediaBankModal
+        isOpen={isMediaBankModalOpen}
+        onClose={() => setIsMediaBankModalOpen(false)}
       />
     </div>
   );

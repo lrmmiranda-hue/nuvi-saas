@@ -61,6 +61,7 @@ export const StorefrontView: React.FC = () => {
     toggleThemeMode,
     isFeatureAllowed,
     showAlert,
+    mediaLibrary,
   } = useStore();
 
   const isLight = themeMode === 'light';
@@ -300,7 +301,7 @@ export const StorefrontView: React.FC = () => {
         const bannerStyle = currentTenant.branding?.bannerStyle || 'silver_flash';
         const rawBannerLayout = currentTenant.branding?.bannerLayout || 'ifood_cover';
         const bannerLayout: 'ifood_cover' | 'carousel_promos' = rawBannerLayout === 'card_99food' ? 'ifood_cover' : (rawBannerLayout as any);
-        const segmentWallpapers = getSegmentWallpapers(currentTenant.businessSegment);
+        const segmentWallpapers = getSegmentWallpapers(currentTenant.businessSegment, mediaLibrary);
         const bannerImage = currentTenant.branding?.bannerUrl || (segmentWallpapers.length > 0 ? segmentWallpapers[0].url : '');
         const promoSlides = (currentTenant.branding?.promoBanners && currentTenant.branding.promoBanners.length > 0)
           ? currentTenant.branding.promoBanners

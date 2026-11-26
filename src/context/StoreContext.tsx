@@ -6,6 +6,7 @@ import { getSegmentById, getTenantCategories } from '../data/businessSegments';
 import { getStarterProductsForSegment } from '../data/segmentProducts';
 import { detectPortalMode } from '../utils/portalEnvironment';
 import { parseCurrentRoute, findTenantBySlugOrId } from '../utils/routes';
+import { StoreWallpaper, getStoredWallpapers, saveStoredWallpapers, STORE_WALLPAPERS } from '../data/wallpapers';
 import {
   listenToTenants,
   saveTenantFirestore,
@@ -135,6 +136,11 @@ interface StoreContextType {
   updatePromoBanner: (banner: Partial<SaaSPromoBanner>) => void;
   isFeatureAllowed: (feature: keyof SaaSFeaturePermissions, tenant?: Tenant) => boolean;
   syncAllDataToFirestore: () => Promise<void>;
+  // Banco Central de Imagens & Mídias por Segmento
+  mediaLibrary: StoreWallpaper[];
+  addMediaItem: (item: Omit<StoreWallpaper, 'id'>) => StoreWallpaper;
+  deleteMediaItem: (id: string) => void;
+  resetMediaLibrary: () => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -2398,9 +2404,45 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
+  // Banco Central de Imagens por Segmento
+  const [mediaLibrary, setMediaLibrary] = useState<StoreWallpaper[]>(() => {
+    return getStoredWallpapers();
+  });
+
+  const addMediaItem = useCallback((item: Omit<StoreWallpaper, 'id'>) => {
+    const newItem: StoreWallpaper = {
+      ...item,
+      id: `media_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      createdAt: new Date().toISOString(),
+    };
+    setMediaLibrary(prev => {
+      const updated = [newItem, ...prev];
+      saveStoredWallpapers(updated);
+      return updated;
+    });
+    return newItem;
+  }, []);
+
+  const deleteMediaItem = useCallback((id: string) => {
+    setMediaLibrary(prev => {
+      const updated = prev.filter(m => m.id !== id);
+      saveStoredWallpapers(updated);
+      return updated;
+    });
+  }, []);
+
+  const resetMediaLibrary = useCallback(() => {
+    setMediaLibrary(STORE_WALLPAPERS);
+    saveStoredWallpapers(STORE_WALLPAPERS);
+  }, []);
+
   return (
     <StoreContext.Provider
       value={{
+        mediaLibrary,
+        addMediaItem,
+        deleteMediaItem,
+        resetMediaLibrary,
         tenants,
         currentTenantId,
         currentTenant,

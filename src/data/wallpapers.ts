@@ -1,12 +1,16 @@
 import { BusinessSegmentType } from '../types';
 
+export type MediaUsageType = 'cover' | 'slide' | 'product' | 'all';
+
 export interface StoreWallpaper {
   id: string;
   category: BusinessSegmentType;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   url: string;
-  tag: string;
+  tag?: string;
+  usageType?: MediaUsageType;
+  createdAt?: string;
 }
 
 export const WALLPAPER_CATEGORIES: { id: BusinessSegmentType; label: string; icon: string }[] = [
@@ -1074,14 +1078,46 @@ export const STORE_WALLPAPERS: StoreWallpaper[] = [
   },
 ];
 
+const STORAGE_KEY = 'nuvi_custom_media_bank_v1';
+
 /**
- * Retorna estritamente as 6 imagens do segmento do estabelecimento.
+ * Obtém a lista atual de imagens (do localStorage se customizado pelo SuperAdmin, ou os padrões originais).
  */
-export const getSegmentWallpapers = (segment?: BusinessSegmentType): StoreWallpaper[] => {
-  const seg = segment || 'adega';
-  const filtered = STORE_WALLPAPERS.filter((w) => w.category === seg);
-  if (filtered.length > 0) {
-    return filtered.slice(0, 6);
+export const getStoredWallpapers = (): StoreWallpaper[] => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn('Erro ao carregar banco de imagens customizado:', err);
   }
-  return STORE_WALLPAPERS.filter((w) => w.category === 'adega').slice(0, 6);
+  return STORE_WALLPAPERS;
+};
+
+/**
+ * Salva a lista de imagens no armazenamento persistente do navegador.
+ */
+export const saveStoredWallpapers = (list: StoreWallpaper[]): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  } catch (err) {
+    console.error('Erro ao salvar banco de imagens customizado:', err);
+  }
+};
+
+/**
+ * Retorna as imagens do segmento do estabelecimento (do banco personalizado gerenciado pelo SuperAdmin).
+ */
+export const getSegmentWallpapers = (segment?: BusinessSegmentType, customList?: StoreWallpaper[]): StoreWallpaper[] => {
+  const seg = segment || 'adega';
+  const source = customList || getStoredWallpapers();
+  const filtered = source.filter((w) => w.category === seg);
+  if (filtered.length > 0) {
+    return filtered;
+  }
+  return source.filter((w) => w.category === 'adega');
 };

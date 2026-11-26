@@ -48,7 +48,7 @@ interface StoreBrandingSettingsProps {
 }
 
 export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ isLight = false }) => {
-  const { currentTenant, updateTenant, setViewRole, showAlert, isFeatureAllowed } = useStore();
+  const { currentTenant, updateTenant, setViewRole, showAlert, isFeatureAllowed, mediaLibrary } = useStore();
 
   const [brandingEdits, setBrandingEdits] = useState(currentTenant?.branding);
   const [sloganEdit, setSloganEdit] = useState(currentTenant?.slogan || '');
@@ -147,8 +147,8 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
   }, [currentTenant?.businessSegment]);
 
   const segmentWallpapers = useMemo(() => {
-    return getSegmentWallpapers(currentTenant?.businessSegment);
-  }, [currentTenant?.businessSegment]);
+    return getSegmentWallpapers(currentTenant?.businessSegment, mediaLibrary);
+  }, [currentTenant?.businessSegment, mediaLibrary]);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
