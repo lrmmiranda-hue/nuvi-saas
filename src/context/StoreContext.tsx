@@ -835,7 +835,18 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const targetTenant = tenant || currentTenant;
     if (!targetTenant) return Boolean(globalConfig.defaultPermissions[feature]);
 
-    // Mapeamento explícito entre os tipos de planos do lojista e os IDs dos 4 planos oficiais
+    // 1. Se a loja individual tiver configuração direta explícita
+    if ((targetTenant.config as any)?.[feature] !== undefined) {
+      return Boolean((targetTenant.config as any)[feature]);
+    }
+
+    // 2. Se houver regra específica configurada pelo Master para o segmento da loja (ex: Moda & Roupas sem delivery)
+    const segment = targetTenant?.businessSegment;
+    if (segment && globalConfig.segmentPermissions?.[segment]?.[feature] !== undefined) {
+      return Boolean(globalConfig.segmentPermissions[segment]![feature]);
+    }
+
+    // 3. Mapeamento explícito entre os tipos de planos do lojista e os IDs dos 4 planos oficiais
     const PLAN_ID_MAP: Record<string, string> = {
       vitrine: 'plan_cardapio',
       plan_cardapio: 'plan_cardapio',
@@ -853,7 +864,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const targetPlanId = PLAN_ID_MAP[targetTenant.plan] || targetTenant.plan;
 
-    // 1. Checa se o plano do lojista possui regras e permissões configuradas pelo Master
+    // Checa se o plano do lojista possui regras e permissões configuradas pelo Master
     const planObj = globalConfig.plans?.find(p => p.id === targetPlanId || p.id === targetTenant.plan || p.id === `plan_${targetTenant.plan}`);
     if (planObj?.permissions && planObj.permissions[feature] !== undefined) {
       return Boolean(planObj.permissions[feature]);
@@ -864,19 +875,13 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       return true;
     }
 
-    // 2. Fallback nas permissões padrão do plano oficial
+    // Fallback nas permissões padrão do plano oficial
     const defaultPlan = DEFAULT_GLOBAL_CONFIG.plans.find(p => p.id === targetPlanId || p.id === targetTenant.plan);
     if (defaultPlan?.permissions && defaultPlan.permissions[feature] !== undefined) {
       return Boolean(defaultPlan.permissions[feature]);
     }
 
-    // 3. Se houver regra específica para o segmento da loja
-    const segment = targetTenant?.businessSegment;
-    if (segment && globalConfig.segmentPermissions?.[segment]?.[feature] !== undefined) {
-      return Boolean(globalConfig.segmentPermissions[segment]![feature]);
-    }
-
-    // 4. Caso contrário, adota a permissão padrão configurada pelo Master
+    // Caso contrário, adota a permissão padrão configurada pelo Master
     return Boolean(globalConfig.defaultPermissions[feature]);
   };
 

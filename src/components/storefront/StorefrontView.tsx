@@ -66,7 +66,7 @@ export const StorefrontView: React.FC = () => {
   const isLight = themeMode === 'light';
 
   // Validação de Permissão de Mesas pelo Plano e Configuração Operacional do Lojista
-  const isDiningTablesPlanAllowed = isFeatureAllowed('enableDiningTables');
+  const isDiningTablesPlanAllowed = isFeatureAllowed('enableDiningTables') && isFeatureAllowed('storefrontTablesEnabled');
   const serviceMode = currentTenant?.config?.storefrontServiceMode || 'hybrid';
   const selectionMode = currentTenant?.config?.tableSelectionMode || 'both';
 
@@ -76,6 +76,39 @@ export const StorefrontView: React.FC = () => {
     currentTenant?.config?.enableTableService !== false &&
     serviceMode !== 'delivery_only'
   );
+
+  // Validação de Permissão de Delivery pelo Plano, Segmento e Configuração da Loja
+  const isDeliveryPlanAllowed = isFeatureAllowed('enableDeliveryRadius') && isFeatureAllowed('storefrontDeliveryEnabled');
+  const isDeliveryAvailable = Boolean(
+    isDeliveryPlanAllowed &&
+    currentTenant?.config?.enableDelivery !== false &&
+    serviceMode !== 'tables_only'
+  );
+
+  // Validação de Retirada no Balcão
+  const isPickupAllowed = isFeatureAllowed('storefrontPickupEnabled') && currentTenant?.config?.allowPickup !== false;
+
+  // Modalidade de Atendimento Ativa escolhida pelo Cliente
+  const [selectedServiceType, setSelectedServiceType] = useState<'delivery' | 'pickup' | 'dine_in'>(() => {
+    try {
+      const saved = sessionStorage.getItem('nuvi_service_type');
+      if (saved === 'dine_in' || saved === 'pickup' || saved === 'delivery') return saved as any;
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mesa') || params.get('table')) return 'dine_in';
+    } catch {}
+    return 'delivery';
+  });
+
+  const activeServiceType = useMemo<'delivery' | 'pickup' | 'dine_in'>(() => {
+    if (Boolean(tableNumber) && isTableServiceAvailable) return 'dine_in';
+    if (selectedServiceType === 'dine_in' && isTableServiceAvailable) return 'dine_in';
+    if (selectedServiceType === 'delivery' && isDeliveryAvailable) return 'delivery';
+    if (selectedServiceType === 'pickup' && isPickupAllowed) return 'pickup';
+    if (isDeliveryAvailable) return 'delivery';
+    if (isPickupAllowed) return 'pickup';
+    if (isTableServiceAvailable) return 'dine_in';
+    return 'pickup';
+  }, [selectedServiceType, tableNumber, isTableServiceAvailable, isDeliveryAvailable, isPickupAllowed]);
 
   // Atendimento em Mesas (Salão / Dine-in)
   const [tableNumber, setTableNumber] = useState<string | null>(() => {
@@ -475,112 +508,199 @@ export const StorefrontView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 3. CONTEÚDO DINÂMICO: MESA SELECIONADA vs RETIRADA/DELIVERY */}
+                {/* 3. SELETOR INTELIGENTE DE MODALIDADE: ENTREGA / RETIRADA / MESA */}
                 {(() => {
                   const deliveryRadius = currentTenant.address?.deliveryRadiusKm || (currentTenant.config as any)?.deliveryRadiusKm || 5;
                   const minimumOrder = currentTenant.address?.minimumOrder || currentTenant.config?.minimumOrderValue || 0;
                   const deliveryFee = currentTenant.address?.standardDeliveryFee || (currentTenant.config as any)?.deliveryFee || 0;
+                  const estimatedTime = (currentTenant as any).deliveryEstimatedTime || (currentTenant.address as any)?.deliveryEstimatedTime || currentTenant.config?.estimatedDeliveryTime || '25 - 40';
 
-                  // SE A MESA ESTIVER SELECIONADA: NÃO MOSTRAR NADA SOBRE RETIRADA OU ENTREGA!
-                  if (Boolean(tableNumber)) {
-                    return (
-                      <div className="pt-2 pb-1 space-y-2">
-                        <div className={`p-2.5 rounded-2xl border flex items-center justify-between gap-3 ${
-                          isLight ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950' : 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
-                        }`}>
+                  const availableModesCount = [isDeliveryAvailable, isPickupAllowed, isTableServiceAvailable].filter(Boolean).length;
+
+                  return (
+                    <div className="space-y-2 pt-2 pb-1">
+                      {/* BARRA DE SELEÇÃO DE MODALIDADES (Se houver mais de uma opção) */}
+                      {availableModesCount > 1 && (
+                        <div className="flex items-center gap-1.5 flex-wrap pb-0.5">
+                          {isDeliveryAvailable && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedServiceType('delivery');
+                                try { sessionStorage.setItem('nuvi_service_type', 'delivery'); } catch {}
+                                if (tableNumber) setTableNumber(null);
+                              }}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                                activeServiceType === 'delivery'
+                                  ? isLight ? 'bg-sky-600 text-white shadow-sm' : 'bg-sky-500 text-white shadow-sm'
+                                  : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-300'
+                              }`}
+                            >
+                              <span>🛵 Entrega</span>
+                            </button>
+                          )}
+
+                          {isPickupAllowed && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedServiceType('pickup');
+                                try { sessionStorage.setItem('nuvi_service_type', 'pickup'); } catch {}
+                                if (tableNumber) setTableNumber(null);
+                              }}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                                activeServiceType === 'pickup'
+                                  ? isLight ? 'bg-sky-600 text-white shadow-sm' : 'bg-sky-500 text-white shadow-sm'
+                                  : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-300'
+                              }`}
+                            >
+                              <span>🛍️ Retirada</span>
+                            </button>
+                          )}
+
+                          {isTableServiceAvailable && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedServiceType('dine_in');
+                                try { sessionStorage.setItem('nuvi_service_type', 'dine_in'); } catch {}
+                                if (!tableNumber) {
+                                  setTempTableInput(tableNumber || '');
+                                  setIsTableSelectorOpen(true);
+                                }
+                              }}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                                activeServiceType === 'dine_in'
+                                  ? isLight ? 'bg-sky-600 text-white shadow-sm' : 'bg-sky-500 text-white shadow-sm'
+                                  : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-300'
+                              }`}
+                            >
+                              <span>🍽️ Mesa / Salão</span>
+                              {tableNumber && (
+                                <span className="text-[10px] px-1.5 py-0.2 bg-white/20 rounded-md font-black">
+                                  {tableNumber.replace(/[^0-9]/g, '') || tableNumber}
+                                </span>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* CONTEÚDO ESPECÍFICO CONFORME A MODALIDADE ATIVA */}
+                      {activeServiceType === 'dine_in' && isTableServiceAvailable ? (
+                        Boolean(tableNumber) ? (
+                          <div className={`p-2.5 rounded-2xl border flex items-center justify-between gap-3 ${
+                            isLight ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950' : 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
+                          }`}>
+                            <div
+                              onClick={() => {
+                                setTempTableInput(tableNumber || '');
+                                setIsTableSelectorOpen(true);
+                              }}
+                              className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
+                              title="Toque para alterar a mesa"
+                            >
+                              <div
+                                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
+                                style={{ backgroundColor: brandPrimary }}
+                              >
+                                <UtensilsCrossed className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <span className="text-[10px] font-black uppercase tracking-wider block opacity-85 flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  Consumo no Salão
+                                </span>
+                                <span className="text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                  Mesa {tableNumber?.replace(/[^0-9]/g, '') || tableNumber}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setIsTableOrdersModalOpen(true)}
+                                className="px-3 py-1.5 rounded-xl text-xs font-black text-white shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
+                                style={{ backgroundColor: brandPrimary }}
+                              >
+                                <ReceiptText className="w-3.5 h-3.5" />
+                                <span>Extrato (R$ {tableOrdersTotal.toFixed(2)})</span>
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
                           <div
                             onClick={() => {
                               setTempTableInput(tableNumber || '');
                               setIsTableSelectorOpen(true);
                             }}
-                            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
-                            title="Toque para alterar a mesa"
+                            className={`flex items-center justify-between text-xs py-2 px-3 rounded-xl border cursor-pointer group transition-all my-1 ${
+                              isLight
+                                ? 'bg-sky-50/70 hover:bg-sky-100/80 border-sky-200 text-sky-950'
+                                : 'bg-sky-950/25 hover:bg-sky-900/35 border-sky-500/30 text-sky-200'
+                            }`}
                           >
-                            <div
-                              className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
-                              style={{ backgroundColor: brandPrimary }}
-                            >
-                              <UtensilsCrossed className="w-4 h-4" />
+                            <div className="flex items-center gap-2.5">
+                              <div
+                                className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white shadow-xs shrink-0"
+                                style={{ backgroundColor: brandPrimary }}
+                              >
+                                <UtensilsCrossed className="w-3.5 h-3.5" />
+                              </div>
+                              <div>
+                                <span className="font-extrabold text-xs block">
+                                  🍽️ Consumo no Salão / Mesas
+                                </span>
+                                <span className={`text-[10px] ${isLight ? 'text-sky-700' : 'text-sky-300'}`}>
+                                  Está no estabelecimento? Toque aqui para selecionar sua Mesa
+                                </span>
+                              </div>
                             </div>
-                            <div>
-                              <span className="text-[10px] font-black uppercase tracking-wider block opacity-85 flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                Consumo no Local
-                              </span>
-                              <span className="text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                                Mesa {tableNumber?.replace(/[^0-9]/g, '') || tableNumber}
-                              </span>
+                            <div className="flex items-center gap-1 text-sky-600 dark:text-sky-400 font-bold text-xs">
+                              <span>Selecionar Mesa</span>
+                              <ChevronRight className="w-4 h-4 text-sky-500 group-hover:translate-x-0.5 transition-transform shrink-0" />
                             </div>
                           </div>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setIsTableOrdersModalOpen(true)}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black text-white shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
-                              style={{ backgroundColor: brandPrimary }}
-                            >
-                              <ReceiptText className="w-3.5 h-3.5" />
-                              <span>Extrato (R$ {tableOrdersTotal.toFixed(2)})</span>
-                            </button>
-                          </div>
+                        )
+                      ) : activeServiceType === 'pickup' && isPickupAllowed ? (
+                        <div className={`text-xs flex items-center gap-2 flex-wrap font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Retirada no Balcão
+                          </span>
+                          <span>•</span>
+                          <span>Pronto em ~15-25 min</span>
+                          <span>•</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Sem taxa de entrega</span>
+                          <span>•</span>
+                          <span>Retirar no endereço da loja</span>
                         </div>
-                      </div>
-                    );
-                  }
-
-                  // SE NÃO HÁ MESA SELECIONADA: MOSTRA BOTÃO DE ESCOLHER MESA + RAIO E MÍNIMO CONFIGURADOS + TEMPO E SACOLA
-                  return (
-                    <div className="space-y-1.5 pt-1">
-                      {/* BOTÃO PARA SELECIONAR A MESA (onde estava avaliações e super loja) */}
-                      <div
-                        onClick={() => {
-                          setTempTableInput(tableNumber || '');
-                          setIsTableSelectorOpen(true);
-                        }}
-                        className={`flex items-center justify-between text-xs py-2 px-3 rounded-xl border cursor-pointer group transition-all my-1 ${
-                          isLight
-                            ? 'bg-sky-50/70 hover:bg-sky-100/80 border-sky-200 text-sky-950'
-                            : 'bg-sky-950/25 hover:bg-sky-900/35 border-sky-500/30 text-sky-200'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div
-                            className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white shadow-xs shrink-0"
-                            style={{ backgroundColor: brandPrimary }}
-                          >
-                            <UtensilsCrossed className="w-3.5 h-3.5" />
-                          </div>
-                          <div>
-                            <span className="font-extrabold text-xs block">
-                              🍽️ Consumo no Salão / Mesas
-                            </span>
-                            <span className={`text-[10px] ${isLight ? 'text-sky-700' : 'text-sky-300'}`}>
-                              Está no estabelecimento? Toque aqui para selecionar sua Mesa
-                            </span>
-                          </div>
+                      ) : isDeliveryAvailable ? (
+                        <div className={`text-xs flex items-center gap-1.5 flex-wrap font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">🕒 {estimatedTime} min</span>
+                          <span>•</span>
+                          <span>Raio: até {deliveryRadius} km</span>
+                          <span>•</span>
+                          <span>Mínimo: R$ {minimumOrder.toFixed(2).replace('.', ',')}</span>
+                          {deliveryFee > 0 ? (
+                            <>
+                              <span>•</span>
+                              <span>Frete: R$ {deliveryFee.toFixed(2).replace('.', ',')}</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>•</span>
+                              <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">Frete Grátis</span>
+                            </>
+                          )}
                         </div>
-                        <div className="flex items-center gap-1 text-sky-600 dark:text-sky-400 font-bold text-xs">
-                          <span>Selecionar</span>
-                          <ChevronRight className="w-4 h-4 text-sky-500 group-hover:translate-x-0.5 transition-transform shrink-0" />
+                      ) : (
+                        <div className={`text-xs flex items-center gap-2 font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                          <Store className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                          <span>Atendimento presencial no estabelecimento físico • Pronta Entrega</span>
                         </div>
-                      </div>
-
-                      {/* DIVISÓRIA FINA */}
-                      <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
-
-                      {/* RAIO DE ENTREGA E PEDIDO MÍNIMO CONFIGURADOS PELO ESTABELECIMENTO */}
-                      <div className={`text-xs flex items-center gap-1.5 flex-wrap font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                        <span>Raio de entrega: até {deliveryRadius} km</span>
-                        <span>•</span>
-                        <span>Mínimo para entrega: R$ {minimumOrder.toFixed(2).replace('.', ',')}</span>
-                        {deliveryFee > 0 && (
-                          <>
-                            <span>•</span>
-                            <span>Frete: R$ {deliveryFee.toFixed(2).replace('.', ',')}</span>
-                          </>
-                        )}
-                      </div>
+                      )}
                     </div>
                   );
                 })()}

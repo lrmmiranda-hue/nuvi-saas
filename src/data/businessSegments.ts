@@ -401,29 +401,6 @@ export const BUSINESS_SEGMENTS: BusinessSegmentConfig[] = [
     ]
   },
   {
-    id: 'agua_gas',
-    title: 'Distribuidora de Água Mineral & Gás de Cozinha',
-    shortLabel: 'Água & Gás',
-    emoji: '💧',
-    description: 'Botijões de gás P13, galões de água mineral 20L, fardos de água garrafa e acessórios seguros.',
-    pitch: 'Venda expressa via WhatsApp e PDV ágil com despacho instantâneo para motoentregadores no bairro.',
-    namePlaceholder: 'Ex: SuperGás & Água Express, Disk Água Central, Ultragás do Bairro',
-    sloganExample: 'Disk entrega mais rápida da região: gás seguro e água mineral na sua porta',
-    badgeNotice: 'Entrega em até 20 minutos com instalação segura e gratuita',
-    primaryColor: '#0369A1', // Azul Gás & Água
-    accentColor: '#F59E0B', // Chama Dourada
-    themeStyle: 'clean_light',
-    bannerUrl: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=1600&q=80',
-    packTerm: 'Fardos & Cascos',
-    suggestedCategories: [
-      { id: 'gas_cozinha', label: 'Gás de Cozinha (P13, P20, P45)' },
-      { id: 'agua_20l', label: 'Galões de Água 20L (Retornável)' },
-      { id: 'agua_garrafas', label: 'Fardos de Água Mineral (500ml e 1.5L)' },
-      { id: 'acessorios_gas', label: 'Reguladores, Mangueiras & Suportes' },
-      { id: 'carvao_gelo', label: 'Gelo & Carvão' },
-    ]
-  },
-  {
     id: 'cafeteria',
     title: 'Cafeteria, Bistrô & Casa de Chá',
     shortLabel: 'Cafeteria & Bistrô',
@@ -445,30 +422,6 @@ export const BUSINESS_SEGMENTS: BusinessSegmentConfig[] = [
       { id: 'brunch_sanduiches', label: 'Brunch & Sanduíches Especiais' },
       { id: 'bolos_doces', label: 'Fatias de Bolo & Tortas Finas' },
       { id: 'graos_moidos', label: 'Pacotes de Café em Grão e Moído' },
-    ]
-  },
-  {
-    id: 'farmacia',
-    title: 'Farmácia, Drogaria & Cuidados Diários',
-    shortLabel: 'Farmácia & Drogaria',
-    emoji: '💊',
-    description: 'Medicamentos isentos de prescrição, vitaminas, fraldas, higiene pessoal e primeiros socorros.',
-    pitch: 'Atendimento de balcão ágil com leitor de código de barras e delivery rápido para medicamentos e cuidados.',
-    namePlaceholder: 'Ex: Drogaria Saúde & Vida, Farmácia Popular Central, DrogaMaster',
-    sloganExample: 'Cuidando da sua saúde e da sua família com preço acessível e entrega rápida',
-    badgeNotice: 'Entrega emergencial rápida no seu bairro com farmacêutico de plantão',
-    primaryColor: '#059669', // Verde Farmácia
-    accentColor: '#0284C7', // Azul Saúde
-    themeStyle: 'modern_emerald',
-    bannerUrl: 'https://images.unsplash.com/photo-1586015555751-63c2c10b7a4f?auto=format&fit=crop&w=1600&q=80',
-    packTerm: 'Caixas & Kits',
-    suggestedCategories: [
-      { id: 'primeiros_socorros', label: 'Primeiros Socorros & Curativos' },
-      { id: 'vitaminas_suplementos', label: 'Vitaminas & Suplementos' },
-      { id: 'infantil_bebe', label: 'Mamãe & Bebê (Fraldas e Lenços)' },
-      { id: 'higiene_pessoal', label: 'Higiene & Cuidados Pessoais' },
-      { id: 'dermocosmeticos', label: 'Dermocosméticos & Protetor Solar' },
-      { id: 'medicamentos_isentos', label: 'Medicamentos Isentos (MIPs)' },
     ]
   }
 ];
