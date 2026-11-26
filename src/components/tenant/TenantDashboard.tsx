@@ -68,10 +68,13 @@ import {
   LogOut,
   X,
   MessageCircle,
+  Printer,
+  Navigation,
+  VolumeX,
+  Play,
   Lock,
   ChevronDown,
   Copy,
-  Printer,
   User
 } from 'lucide-react';
 import { TableQRCodeModal } from './TableQRCodeModal';
@@ -116,8 +119,11 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     'produtos' | 'vendas' | 'estoque' | 'pedidos' | 'mesas' | 'cozinha' | 'configuracoes' | 'visual' | 'whatsapp' | 'entrega' | 'metricas'
   >('produtos');
 
-  // Orders filter
+  // Orders filter & Search & Som
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('todos');
+  const [orderSearchQuery, setOrderSearchQuery] = useState('');
+  const [orderSoundEnabled, setOrderSoundEnabled] = useState(true);
+  const [lastKnownOrderCount, setLastKnownOrderCount] = useState(0);
 
   // Promo banner dismiss state
   const [isPromoDismissed, setIsPromoDismissed] = useState(false);
@@ -282,10 +288,141 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     );
   }
 
-  // Filtered orders
+  // Som de novo pedido com Web Audio API nativo (sem dependências externas)
+  const playNewOrderNotificationSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      
+      const now = ctx.currentTime;
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now); // D5
+      osc1.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+      gain1.gain.setValueAtTime(0.3, now);
+      gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.3);
+
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880, now + 0.18);
+      osc2.frequency.exponentialRampToValueAtTime(1174.66, now + 0.4); // D6
+      gain2.gain.setValueAtTime(0.35, now + 0.18);
+      gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.18);
+      osc2.stop(now + 0.55);
+    } catch { }
+  };
+
+  // Monitora novos pedidos que chegam e toca som de alerta
+  useEffect(() => {
+    const currentCount = tenantOrders.filter(o => o.status === 'novo').length;
+    if (lastKnownOrderCount > 0 && currentCount > lastKnownOrderCount && orderSoundEnabled) {
+      playNewOrderNotificationSound();
+    }
+    setLastKnownOrderCount(currentCount);
+  }, [tenantOrders, orderSoundEnabled]);
+
+  // Impressão da Comanda de Entrega para o Motoboy / Balcão
+  const handlePrintDeliveryTicket = (order: Order) => {
+    const printWindow = window.open('', '_blank', 'width=380,height=600');
+    if (!printWindow) return;
+
+    const channelText = order.deliveryType === 'delivery'
+      ? '🛵 ENTREGA / DELIVERY'
+      : order.deliveryType === 'mesa'
+      ? `🍽️ MESA ${order.tableNumber || 'S/N'}`
+      : '🛍️ RETIRADA NO BALCÃO';
+
+    const itemsHtml = order.items
+      .map(
+        (it) => `
+        <div style="margin-bottom: 6px; border-bottom: 1px dashed #ccc; padding-bottom: 3px; font-size: 13px;">
+          <div style="font-weight: bold;">${it.quantity}x ${it.productName}</div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #555;">
+            <span>${it.volume || 'Unidade'}${it.chilled ? ' ❄️ GELADA' : ''}</span>
+            <span>R$ ${(it.price * it.quantity).toFixed(2)}</span>
+          </div>
+          ${it.notes ? `<div style="font-size: 11px; font-style: italic; color: #b00;">Obs: ${it.notes}</div>` : ''}
+        </div>
+      `
+      )
+      .join('');
+
+    const addressHtml = order.address
+      ? `
+        <div style="background: #f4f4f4; border: 1px solid #ddd; padding: 6px; border-radius: 4px; margin: 8px 0; font-size: 12px;">
+          <div style="font-weight: bold; font-size: 13px;">📍 ENDEREÇO DE ENTREGA:</div>
+          <div>${order.address.street}, ${order.address.number}${order.address.complement ? ` - ${order.address.complement}` : ''}</div>
+          <div><b>Bairro:</b> ${order.address.neighborhood} - ${order.address.city}</div>
+          ${order.address.referencePoint ? `<div style="color: #444;">Ref: ${order.address.referencePoint}</div>` : ''}
+        </div>
+      `
+      : '<div style="font-weight: bold; padding: 6px 0;">🏪 RETIRADA FÍSICA NO BALCÃO</div>';
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Comanda - ${order.id}</title>
+          <style>
+            body { font-family: 'Courier New', monospace; padding: 10px; width: 280px; margin: 0 auto; color: #000; }
+            .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px; }
+            .title { font-size: 16px; font-weight: bold; }
+            .badge { font-size: 16px; font-weight: 900; background: #000; color: #fff; padding: 4px; margin: 6px 0; }
+            .meta { font-size: 12px; margin-bottom: 4px; }
+            .footer { font-size: 11px; text-align: center; border-top: 2px solid #000; padding-top: 6px; margin-top: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">${currentTenant.name}</div>
+            <div class="badge">${channelText}</div>
+            <div class="meta">PEDIDO: <b>#${order.id}</b></div>
+            <div class="meta">HORA: ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            <div class="meta"><b>CLIENTE:</b> ${order.customerName}</div>
+            <div class="meta"><b>FONE:</b> ${order.customerPhone}</div>
+          </div>
+          ${addressHtml}
+          <div>${itemsHtml}</div>
+          <div style="border-top: 1px solid #000; padding-top: 6px; margin-top: 6px; font-size: 12px;">
+            <div style="display: flex; justify-content: space-between;"><span>Subtotal:</span><span>R$ ${order.subtotal.toFixed(2)}</span></div>
+            <div style="display: flex; justify-content: space-between;"><span>Taxa de Entrega:</span><span>R$ ${order.deliveryFee.toFixed(2)}</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: bold; margin-top: 4px;">
+              <span>TOTAL A COBRAR:</span><span>R$ ${order.total.toFixed(2)}</span>
+            </div>
+            <div style="margin-top: 4px; font-size: 11px;"><b>PAGAMENTO:</b> ${order.paymentMethod.replace('_', ' ').toUpperCase()}${order.cashChangeFor ? ` (Troco para R$ ${order.cashChangeFor.toFixed(2)})` : ''}</div>
+          </div>
+          ${order.notes ? `<div style="background: #eee; padding: 4px; margin-top: 6px; font-size: 11px;"><b>OBS:</b> ${order.notes}</div>` : ''}
+          <div class="footer">NUVI SAAS • CUPOM DO MOTOBOY</div>
+          <script>window.onload = function() { window.print(); window.close(); }</script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  // Filtered orders com suporte a busca rápida por nome, número ou telefone
   const filteredOrders = tenantOrders.filter((order) => {
-    if (orderStatusFilter === 'todos') return true;
-    return order.status === orderStatusFilter;
+    if (orderStatusFilter !== 'todos' && order.status !== orderStatusFilter) {
+      return false;
+    }
+    if (orderSearchQuery.trim()) {
+      const q = orderSearchQuery.toLowerCase();
+      const matchId = order.id.toLowerCase().includes(q);
+      const matchName = order.customerName.toLowerCase().includes(q);
+      const matchPhone = order.customerPhone.includes(q);
+      const matchStreet = order.address?.street?.toLowerCase().includes(q);
+      return matchId || matchName || matchPhone || matchStreet;
+    }
+    return true;
   });
 
   // Filtered products
@@ -739,8 +876,9 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
       {activeTab === 'pedidos' && (
         <div className="space-y-4">
           
-          {/* Status Subfilters */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
+          {/* Barra de Filtros, Busca Rápida e Controle de Som */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            {/* Status Subfilters */}
             <div className={`flex items-center gap-1.5 p-1 rounded-xl border text-xs overflow-x-auto ${
               isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
             }`}>
@@ -766,9 +904,49 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               ))}
             </div>
 
-            <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-              {filteredOrders.length} {filteredOrders.length === 1 ? 'pedido listado' : 'pedidos listados'}
-            </p>
+            {/* Busca Rápida e Botão de Som */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1 sm:w-64">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Buscar pedido, cliente, fone..."
+                  value={orderSearchQuery}
+                  onChange={(e) => setOrderSearchQuery(e.target.value)}
+                  className={`w-full pl-8 pr-3 py-1.5 rounded-xl text-xs outline-none border ${
+                    isLight ? 'bg-white border-slate-300 text-slate-800 focus:border-sky-500' : 'bg-[#11161B] border-[#1C2631] text-white focus:border-sky-500'
+                  }`}
+                />
+                {orderSearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setOrderSearchQuery('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Botão de Som de Notificação */}
+              <button
+                type="button"
+                onClick={() => {
+                  const newState = !orderSoundEnabled;
+                  setOrderSoundEnabled(newState);
+                  if (newState) playNewOrderNotificationSound();
+                }}
+                className={`p-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all ${
+                  orderSoundEnabled
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                    : 'bg-neutral-800/80 border-neutral-700 text-neutral-400'
+                }`}
+                title={orderSoundEnabled ? 'Notificação sonora de novos pedidos ATIVADA (clique para silenciar)' : 'Notificação sonora DESATIVADA'}
+              >
+                {orderSoundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                <span className="hidden sm:inline text-[11px]">{orderSoundEnabled ? 'Som Ativo' : 'Mudo'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Orders Cards List */}
@@ -887,33 +1065,95 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                     </div>
                   </div>
 
-                  {/* Action Controls: Change Status & WhatsApp */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-neutral-400">Alterar Status:</span>
+                  {/* Action Controls: Status Ágil, Impressão, Rota GPS e WhatsApp */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-neutral-800/80">
+                    {/* Botões Rápidos de Mudança de Status */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {order.status === 'novo' && (
+                        <button
+                          type="button"
+                          onClick={() => updateOrderStatus(order.id, 'preparando')}
+                          className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-xs"
+                        >
+                          <Play className="w-3.5 h-3.5" />
+                          <span>Iniciar Preparo →</span>
+                        </button>
+                      )}
+
+                      {order.status === 'preparando' && (
+                        <button
+                          type="button"
+                          onClick={() => updateOrderStatus(order.id, order.deliveryType === 'delivery' ? 'em_entrega' : 'finalizado')}
+                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-xs"
+                        >
+                          <ArrowRight className="w-3.5 h-3.5" />
+                          <span>{order.deliveryType === 'delivery' ? 'Despachar (Saiu p/ Entrega) →' : 'Pronto / Finalizar ✓'}</span>
+                        </button>
+                      )}
+
+                      {order.status === 'em_entrega' && (
+                        <button
+                          type="button"
+                          onClick={() => updateOrderStatus(order.id, 'finalizado')}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-xs"
+                        >
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>Concluir Entrega ✓</span>
+                        </button>
+                      )}
+
+                      {/* Seletor manual para outros casos (cancelar, reabrir) */}
                       <select
                         value={order.status}
                         onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
-                        className="px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-xs text-white focus:outline-none focus:border-blue-500"
+                        className="px-2.5 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-xs text-neutral-300 focus:outline-none focus:border-blue-500 cursor-pointer"
                       >
-                        <option value="novo">Novo Pedido</option>
+                        <option value="novo">Novo</option>
                         <option value="preparando">Em Preparo</option>
-                        <option value="em_entrega">Saiu para Entrega</option>
-                        <option value="finalizado">Finalizado / Entregue</option>
-                        <option value="cancelado">Cancelado</option>
+                        <option value="em_entrega">Em Entrega</option>
+                        <option value="finalizado">Finalizado</option>
+                        <option value="cancelado">Cancelar</option>
                       </select>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    {/* Ações: Imprimir Comanda, Abrir Rota GPS e WhatsApp */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Botão Imprimir Comanda do Motoboy */}
+                      <button
+                        type="button"
+                        onClick={() => handlePrintDeliveryTicket(order)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-200 text-xs font-bold transition-colors cursor-pointer border border-neutral-700"
+                        title="Imprimir Cupom do Motoboy / Balcão"
+                      >
+                        <Printer className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Imprimir</span>
+                      </button>
+
+                      {/* Botão Rota GPS Google Maps para o Entregador */}
+                      {order.address && (
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                            `${order.address.street}, ${order.address.number}, ${order.address.neighborhood}, ${order.address.city}`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-sky-600/20 hover:bg-sky-600/30 text-sky-400 border border-sky-500/30 text-xs font-bold transition-colors cursor-pointer"
+                          title="Abrir rota no Google Maps para o motoboy"
+                        >
+                          <Navigation className="w-3.5 h-3.5" />
+                          <span>Rota GPS</span>
+                        </a>
+                      )}
+
                       {/* Send Status Update to Client WhatsApp */}
                       <a
                         href={generateWhatsAppStatusUpdateUrl(order, currentTenant, order.status)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
                       >
                         <Send className="w-3.5 h-3.5" />
-                        <span>Avisar Cliente no WhatsApp</span>
+                        <span>Avisar no Zap</span>
                       </a>
 
                       {/* Direct message */}
@@ -921,7 +1161,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                         href={`https://wa.me/55${order.customerPhone.replace(/\D/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs transition-colors cursor-pointer"
                         title="Abrir chat direto com o cliente"
                       >
                         <Phone className="w-3.5 h-3.5" />
