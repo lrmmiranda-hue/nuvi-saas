@@ -88,6 +88,26 @@ export const StorefrontView: React.FC = () => {
   // Validação de Retirada no Balcão
   const isPickupAllowed = isFeatureAllowed('storefrontPickupEnabled') && currentTenant?.config?.allowPickup !== false;
 
+  // Atendimento em Mesas (Salão / Dine-in)
+  const [tableNumber, setTableNumber] = useState<string | null>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('mesa') || params.get('table') || sessionStorage.getItem('nuvi_store_table') || null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (tableNumber) {
+        sessionStorage.setItem('nuvi_store_table', tableNumber);
+      } else {
+        sessionStorage.removeItem('nuvi_store_table');
+      }
+    } catch {}
+  }, [tableNumber]);
+
   // Modalidade de Atendimento Ativa escolhida pelo Cliente
   const [selectedServiceType, setSelectedServiceType] = useState<'delivery' | 'pickup' | 'dine_in'>(() => {
     try {
@@ -110,25 +130,6 @@ export const StorefrontView: React.FC = () => {
     return 'pickup';
   }, [selectedServiceType, tableNumber, isTableServiceAvailable, isDeliveryAvailable, isPickupAllowed]);
 
-  // Atendimento em Mesas (Salão / Dine-in)
-  const [tableNumber, setTableNumber] = useState<string | null>(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('mesa') || params.get('table') || sessionStorage.getItem('nuvi_store_table') || null;
-    } catch {
-      return null;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      if (tableNumber) {
-        sessionStorage.setItem('nuvi_store_table', tableNumber);
-      } else {
-        sessionStorage.removeItem('nuvi_store_table');
-      }
-    } catch {}
-  }, [tableNumber]);
   const [isTableSelectorOpen, setIsTableSelectorOpen] = useState(false);
   const [isTableOrdersModalOpen, setIsTableOrdersModalOpen] = useState(false);
   const [tempTableInput, setTempTableInput] = useState('');
