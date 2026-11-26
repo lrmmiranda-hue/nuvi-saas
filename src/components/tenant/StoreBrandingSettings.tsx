@@ -682,9 +682,9 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         </div>
                       </div>
 
-                      {/* SELETOR INTERATIVO DE MODALIDADES NO COMPUTADOR (CENTRALIZADO) */}
+                      {/* SELETOR INTERATIVO DE MODALIDADES NO COMPUTADOR (ALINHADO À ESQUERDA) */}
                       {(isDeliveryAvailable || isPickupAllowed || isTableServiceAvailable) && (
-                        <div className="flex justify-center w-full my-3">
+                        <div className="flex justify-start w-full my-3">
                           <div className="inline-flex items-center gap-2 p-1.5 rounded-2xl border bg-slate-100/90 dark:bg-neutral-900/90 border-slate-200 dark:border-neutral-800 shadow-2xs">
                             {isDeliveryAvailable && (
                               <button
@@ -741,8 +741,8 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           <span className="font-bold text-sky-500">Selecionar Mesa ➔</span>
                         </div>
                       ) : previewServiceType === 'pickup' && isPickupAllowed ? (
-                        <div className={`text-xs flex items-center justify-center gap-2 flex-wrap font-medium py-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400">🛍️ Retire no Balcão</span>
+                        <div className={`text-xs flex items-center justify-start gap-2 flex-wrap font-medium py-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">🛍️ Retirada no Balcão</span>
                           <span>•</span>
                           <span>Pronto em ~15-25 min</span>
                           <span>•</span>
@@ -751,7 +751,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           <span>Retirar no endereço da loja</span>
                         </div>
                       ) : isDeliveryAvailable ? (
-                        <div className={`text-xs flex items-center justify-center gap-2 flex-wrap font-medium py-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        <div className={`text-xs flex items-center justify-start gap-2 flex-wrap font-medium py-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                           <span className="font-bold text-emerald-600 dark:text-emerald-400">🕒 {estimatedTime} min</span>
                           <span>•</span>
                           <span className="font-bold text-sky-600 dark:text-sky-400">📍 Raio: até {deliveryRadius} km</span>
@@ -761,7 +761,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           <span>{deliveryFee > 0 ? `Frete: R$ ${deliveryFee.toFixed(2).replace('.', ',')}` : 'Frete Grátis'}</span>
                         </div>
                       ) : (
-                        <div className={`text-xs flex items-center justify-center gap-2 font-medium py-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        <div className={`text-xs flex items-center justify-start gap-2 font-medium py-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                           <Store className="w-4 h-4 text-sky-500 shrink-0" />
                           <span>Atendimento presencial no estabelecimento físico • Pronta Entrega</span>
                         </div>

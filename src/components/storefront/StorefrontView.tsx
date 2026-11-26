@@ -557,9 +557,9 @@ export const StorefrontView: React.FC = () => {
 
                   return (
                     <div className="space-y-2 pt-2 pb-1">
-                      {/* BARRA DE SELEÇÃO DE MODALIDADES (Entrega / Retire / Mesa) */}
+                      {/* BARRA DE SELEÇÃO DE MODALIDADES (Entrega / Retirada / Mesa) */}
                       {(isDeliveryAvailable || isPickupAllowed || isTableServiceAvailable) && (
-                        <div className="w-full flex justify-center my-1.5">
+                        <div className="w-full flex justify-center sm:justify-start my-1.5">
                           <div className="inline-flex items-center gap-1.5 p-1 rounded-2xl border bg-slate-100/90 dark:bg-neutral-900/90 border-slate-200 dark:border-neutral-800 shadow-2xs relative">
                             {isDeliveryAvailable && (
                               <button
@@ -704,7 +704,7 @@ export const StorefrontView: React.FC = () => {
                           </div>
                         )
                       ) : activeServiceType === 'pickup' && isPickupAllowed ? (
-                        <div className={`text-xs flex items-center justify-center text-center gap-2 flex-wrap font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        <div className={`text-xs flex items-center justify-center sm:justify-start text-center sm:text-left gap-2 flex-wrap font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                           <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Retirada no Balcão
@@ -717,7 +717,7 @@ export const StorefrontView: React.FC = () => {
                           <span>Retirar no endereço da loja</span>
                         </div>
                       ) : isDeliveryAvailable ? (
-                        <div className={`text-xs flex items-center justify-center text-center gap-1.5 flex-wrap font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        <div className={`text-xs flex items-center justify-center sm:justify-start text-center sm:text-left gap-1.5 flex-wrap font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                           <span className="font-bold text-emerald-600 dark:text-emerald-400">🕒 {estimatedTime} min</span>
                           <span>•</span>
                           <span>Raio: até {deliveryRadius} km</span>
@@ -736,7 +736,7 @@ export const StorefrontView: React.FC = () => {
                           )}
                         </div>
                       ) : (
-                        <div className={`text-xs flex items-center justify-center text-center gap-2 font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        <div className={`text-xs flex items-center justify-center sm:justify-start text-center sm:text-left gap-2 font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                           <Store className="w-3.5 h-3.5 text-sky-500 shrink-0" />
                           <span>Atendimento presencial no estabelecimento físico • Pronta Entrega</span>
                         </div>
