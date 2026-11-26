@@ -357,56 +357,60 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                               </div>
                             </div>
 
-                            {/* Card Sobreposto com Logo Quadradinha no Canto Esquerdo */}
+                            {/* Card Sobreposto com Logo Quadradinha + Nome e Slogan na Frente */}
                             <div className={`px-4 pb-4 relative z-20 -mt-6 rounded-t-3xl pt-0 transition-colors ${
                               isLight ? 'bg-white' : 'bg-neutral-950'
                             }`}>
-                              {/* Logo Quadradinha subindo mais e preenchendo completamente o quadradinho */}
-                              <div className="flex justify-start pl-1 -mt-14 mb-2">
-                                <div
-                                  className={`w-20 h-20 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
-                                    isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
-                                  }`}
-                                  style={{
-                                    boxShadow: '0 10px 25px -3px rgba(0, 0, 0, 0.35)'
-                                  }}
-                                >
-                                  {brandingEdits?.logoUrl ? (
-                                    <img
-                                      src={brandingEdits.logoUrl}
-                                      alt="Logo da Loja"
-                                      className="w-full h-full object-cover rounded-xl"
-                                    />
-                                  ) : (
-                                    <div
-                                      className="w-full h-full rounded-xl flex items-center justify-center font-black text-2xl text-white shadow-inner"
-                                      style={{ backgroundColor: brandPrimary }}
-                                    >
-                                      {currentTenant.name.charAt(0)}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* Nome da Loja com Badge, Slogan e Seta > */}
-                              <div className="flex items-center justify-between py-1">
-                                <div className="min-w-0">
-                                  <div className="flex items-center gap-1.5 min-w-0">
-                                    <span
-                                      className="w-4 h-4 rounded-full flex items-center justify-center text-white shrink-0"
-                                      style={{ backgroundColor: brandAccent }}
-                                    >
-                                      <Sparkles className="w-2.5 h-2.5" />
-                                    </span>
-                                    <h1 className="text-sm font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                                      {currentTenant.name}
-                                    </h1>
+                              {/* Cabeçalho do Card: Logo + Nome & Slogan na frente */}
+                              <div className="flex items-end justify-between gap-2.5 -mt-12 mb-2">
+                                <div className="flex items-end gap-2.5 min-w-0 flex-1">
+                                  {/* Logo Quadradinha */}
+                                  <div
+                                    className={`w-18 h-18 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
+                                      isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
+                                    }`}
+                                    style={{
+                                      boxShadow: '0 10px 25px -3px rgba(0, 0, 0, 0.35)'
+                                    }}
+                                  >
+                                    {brandingEdits?.logoUrl ? (
+                                      <img
+                                        src={brandingEdits.logoUrl}
+                                        alt="Logo da Loja"
+                                        className="w-full h-full object-cover rounded-xl"
+                                      />
+                                    ) : (
+                                      <div
+                                        className="w-full h-full rounded-xl flex items-center justify-center font-black text-2xl text-white shadow-inner"
+                                        style={{ backgroundColor: brandPrimary }}
+                                      >
+                                        {currentTenant.name.charAt(0)}
+                                      </div>
+                                    )}
                                   </div>
-                                  <p className={`text-[10px] mt-0.5 font-medium line-clamp-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                                    {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
-                                  </p>
+
+                                  {/* Nome e Slogan na frente da logo */}
+                                  <div className="min-w-0 flex-1 pb-1">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <span
+                                        className="w-4 h-4 rounded-full flex items-center justify-center text-white shrink-0"
+                                        style={{ backgroundColor: brandAccent }}
+                                      >
+                                        <Sparkles className="w-2.5 h-2.5" />
+                                      </span>
+                                      <h1 className="text-sm font-black truncate" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                        {currentTenant.name}
+                                      </h1>
+                                    </div>
+                                    <p className={`text-[10px] mt-0.5 font-medium line-clamp-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                                      {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                                    </p>
+                                  </div>
                                 </div>
-                                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+
+                                <div className="p-1 pb-1.5 shrink-0">
+                                  <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                                </div>
                               </div>
 
                               {/* Seletor de Mesa / Consumo no Salão */}
@@ -637,54 +641,59 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         </div>
                       </div>
 
-                      {/* Card Sobreposto com Logo Quadradinha no Computador */}
+                      {/* Card Sobreposto com Logo Quadradinha + Nome e Slogan na Frente no Computador */}
                       <div className={`px-6 pb-6 relative z-20 -mt-8 rounded-t-3xl pt-0 transition-colors ${
                         isLight ? 'bg-white' : 'bg-neutral-950'
                       }`}>
-                        <div className="flex justify-start -mt-16 mb-2.5">
-                          <div
-                            className={`w-24 h-24 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
-                              isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
-                            }`}
-                            style={{
-                              boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.35)'
-                            }}
-                          >
-                            {brandingEdits?.logoUrl ? (
-                              <img
-                                src={brandingEdits.logoUrl}
-                                alt="Logo da Loja"
-                                className="w-full h-full object-cover rounded-xl"
-                              />
-                            ) : (
-                              <div
-                                className="w-full h-full rounded-xl flex items-center justify-center font-black text-3xl text-white shadow-inner"
-                                style={{ backgroundColor: brandPrimary }}
-                              >
-                                {currentTenant.name.charAt(0)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between py-1">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span
-                                className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0"
-                                style={{ backgroundColor: brandAccent }}
-                              >
-                                <Sparkles className="w-3 h-3" />
-                              </span>
-                              <h1 className="text-xl font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                                {currentTenant.name}
-                              </h1>
+                        {/* Cabeçalho do Card: Logo + Nome & Slogan na frente */}
+                        <div className="flex items-end justify-between gap-4 -mt-16 mb-3">
+                          <div className="flex items-end gap-4 min-w-0 flex-1">
+                            <div
+                              className={`w-24 h-24 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
+                                isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
+                              }`}
+                              style={{
+                                boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.35)'
+                              }}
+                            >
+                              {brandingEdits?.logoUrl ? (
+                                <img
+                                  src={brandingEdits.logoUrl}
+                                  alt="Logo da Loja"
+                                  className="w-full h-full object-cover rounded-xl"
+                                />
+                              ) : (
+                                <div
+                                  className="w-full h-full rounded-xl flex items-center justify-center font-black text-3xl text-white shadow-inner"
+                                  style={{ backgroundColor: brandPrimary }}
+                                >
+                                  {currentTenant.name.charAt(0)}
+                                </div>
+                              )}
                             </div>
-                            <p className={`text-xs mt-0.5 font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                              {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
-                            </p>
+
+                            {/* Nome e Slogan na frente da logo */}
+                            <div className="min-w-0 flex-1 pb-1">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0"
+                                  style={{ backgroundColor: brandAccent }}
+                                >
+                                  <Sparkles className="w-3 h-3" />
+                                </span>
+                                <h1 className="text-xl font-black" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                                  {currentTenant.name}
+                                </h1>
+                              </div>
+                              <p className={`text-xs mt-0.5 font-medium ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                                {sloganEdit || currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                              </p>
+                            </div>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-slate-400" />
+
+                          <div className="p-1 pb-2 shrink-0">
+                            <ChevronRight className="w-5 h-5 text-slate-400" />
+                          </div>
                         </div>
 
                         {/* Barra de Mesa e Entrega */}

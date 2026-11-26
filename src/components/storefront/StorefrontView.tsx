@@ -412,60 +412,67 @@ export const StorefrontView: React.FC = () => {
               <div className={`px-4 sm:px-6 pb-4 sm:pb-6 relative z-20 -mt-6 sm:-mt-8 rounded-t-[28px] sm:rounded-t-3xl pt-0 transition-colors ${
                 isLight ? 'bg-white' : 'bg-neutral-950'
               }`}>
-                {/* 1. LOGO QUADRADINHO NO CANTO SUPERIOR ESQUERDO SOBRE O RAIO DA BORDA */}
-                <div className="flex justify-start -mt-14 sm:-mt-16 mb-2.5">
+                {/* 1. CABEÇALHO DO CARD: LOGO QUADRADINHO + NOME E SLOGAN NA FRENTE DO LOGO */}
+                <div className="flex items-end justify-between gap-3 sm:gap-4 -mt-14 sm:-mt-16 mb-2.5">
                   <div
                     onClick={() => setIsStoreInfoModalOpen(true)}
-                    className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-2xl border-4 cursor-pointer shrink-0 transition-transform hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 ${
-                      isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
-                    }`}
-                    style={{
-                      boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.28), 0 4px 12px -2px rgba(0, 0, 0, 0.15)'
-                    }}
+                    className="flex items-end gap-3 sm:gap-4 min-w-0 flex-1 cursor-pointer group"
                   >
-                    {currentTenant.branding.logoUrl ? (
-                      <img
-                        src={currentTenant.branding.logoUrl}
-                        alt={currentTenant.name}
-                        className="w-full h-full object-cover rounded-xl"
-                      />
-                    ) : (
-                      <div
-                        className="w-full h-full rounded-xl flex items-center justify-center font-black text-2xl text-white shadow-inner"
-                        style={{ backgroundColor: brandPrimary }}
-                      >
-                        {currentTenant.name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 2. NOME DA LOJA COM BADGE, SLOGAN E SETA > */}
-                <div
-                  onClick={() => setIsStoreInfoModalOpen(true)}
-                  className="flex items-center justify-between cursor-pointer group py-1"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
-                        style={{ backgroundColor: brandAccent }}
-                      >
-                        <Sparkles className="w-3 h-3" />
-                      </span>
-                      <h1
-                        className="text-base sm:text-xl font-black tracking-tight truncate flex items-center gap-1.5"
-                        style={{ color: isLight ? '#0f172a' : '#ffffff' }}
-                      >
-                        {currentTenant.name}
-                      </h1>
+                    {/* LOGO QUADRADINHO NO CANTO SUPERIOR ESQUERDO SOBRE O RAIO DA BORDA */}
+                    <div
+                      className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-2xl border-4 shrink-0 transition-transform group-hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 ${
+                        isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
+                      }`}
+                      style={{
+                        boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.28), 0 4px 12px -2px rgba(0, 0, 0, 0.15)'
+                      }}
+                    >
+                      {currentTenant.branding.logoUrl ? (
+                        <img
+                          src={currentTenant.branding.logoUrl}
+                          alt={currentTenant.name}
+                          className="w-full h-full object-cover rounded-xl"
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full rounded-xl flex items-center justify-center font-black text-2xl text-white shadow-inner"
+                          style={{ backgroundColor: brandPrimary }}
+                        >
+                          {currentTenant.name.charAt(0)}
+                        </div>
+                      )}
                     </div>
-                    {/* Slogan abaixo do nome Donana */}
-                    <p className={`text-xs mt-0.5 font-medium line-clamp-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      {currentTenant.slogan || 'Qualidade, sabor e tradição'}
-                    </p>
+
+                    {/* NOME DA LOJA (DONANA) E SLOGAN NA FRENTE DO LOGO */}
+                    <div className="min-w-0 flex-1 pb-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
+                          style={{ backgroundColor: brandAccent }}
+                        >
+                          <Sparkles className="w-3 h-3" />
+                        </span>
+                        <h1
+                          className="text-base sm:text-xl font-black tracking-tight truncate flex items-center gap-1.5"
+                          style={{ color: isLight ? '#0f172a' : '#ffffff' }}
+                        >
+                          {currentTenant.name}
+                        </h1>
+                      </div>
+                      {/* Slogan ao lado do nome Donana */}
+                      <p className={`text-xs mt-0.5 font-medium line-clamp-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                        {currentTenant.slogan || 'Qualidade, sabor e tradição'}
+                      </p>
+                    </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white shrink-0 transition-transform group-hover:translate-x-0.5" />
+
+                  <div
+                    onClick={() => setIsStoreInfoModalOpen(true)}
+                    className="cursor-pointer group p-1.5 pb-2 shrink-0"
+                    title="Ver detalhes da loja"
+                  >
+                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white shrink-0 transition-transform group-hover:translate-x-0.5" />
+                  </div>
                 </div>
 
                 {/* 3. CONTEÚDO DINÂMICO: MESA SELECIONADA vs RETIRADA/DELIVERY */}
