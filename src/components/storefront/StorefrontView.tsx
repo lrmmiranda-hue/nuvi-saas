@@ -66,7 +66,7 @@ export const StorefrontView: React.FC = () => {
   const isLight = themeMode === 'light';
 
   // Validação de Permissão de Mesas pelo Plano e Configuração Operacional do Lojista
-  const isDiningTablesPlanAllowed = isFeatureAllowed('enableDiningTables') && isFeatureAllowed('storefrontTablesEnabled');
+  const isDiningTablesPlanAllowed = isFeatureAllowed('enableDiningTables') !== false && isFeatureAllowed('storefrontTablesEnabled') !== false;
   const serviceMode = currentTenant?.config?.storefrontServiceMode || 'hybrid';
   const selectionMode = currentTenant?.config?.tableSelectionMode || 'both';
 
@@ -78,7 +78,7 @@ export const StorefrontView: React.FC = () => {
   );
 
   // Validação de Permissão de Delivery pelo Plano, Segmento e Configuração da Loja
-  const isDeliveryPlanAllowed = isFeatureAllowed('enableDeliveryRadius') && isFeatureAllowed('storefrontDeliveryEnabled');
+  const isDeliveryPlanAllowed = isFeatureAllowed('enableDeliveryRadius') !== false && isFeatureAllowed('storefrontDeliveryEnabled') !== false;
   const isDeliveryAvailable = Boolean(
     isDeliveryPlanAllowed &&
     currentTenant?.config?.enableDelivery !== false &&
@@ -86,7 +86,7 @@ export const StorefrontView: React.FC = () => {
   );
 
   // Validação de Retirada no Balcão
-  const isPickupAllowed = isFeatureAllowed('storefrontPickupEnabled') && currentTenant?.config?.allowPickup !== false;
+  const isPickupAllowed = isFeatureAllowed('storefrontPickupEnabled') !== false && currentTenant?.config?.allowPickup !== false;
 
   // Atendimento em Mesas (Salão / Dine-in)
   const [tableNumber, setTableNumber] = useState<string | null>(() => {
@@ -520,9 +520,9 @@ export const StorefrontView: React.FC = () => {
 
                   return (
                     <div className="space-y-2 pt-2 pb-1">
-                      {/* BARRA DE SELEÇÃO DE MODALIDADES (Se houver mais de uma opção) */}
-                      {availableModesCount > 1 && (
-                        <div className="flex items-center gap-1.5 flex-wrap pb-0.5">
+                      {/* BARRA DE SELEÇÃO DE MODALIDADES (Entrega / Retirada / Mesa) */}
+                      {(isDeliveryAvailable || isPickupAllowed || isTableServiceAvailable) && (
+                        <div className="inline-flex items-center gap-1 p-1 rounded-2xl border bg-slate-100/90 dark:bg-neutral-900/90 border-slate-200 dark:border-neutral-800 shadow-2xs">
                           {isDeliveryAvailable && (
                             <button
                               type="button"
@@ -533,8 +533,8 @@ export const StorefrontView: React.FC = () => {
                               }}
                               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                 activeServiceType === 'delivery'
-                                  ? isLight ? 'bg-sky-600 text-white shadow-sm' : 'bg-sky-500 text-white shadow-sm'
-                                  : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-300'
+                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                               }`}
                             >
                               <span>🛵 Entrega</span>
@@ -551,8 +551,8 @@ export const StorefrontView: React.FC = () => {
                               }}
                               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                 activeServiceType === 'pickup'
-                                  ? isLight ? 'bg-sky-600 text-white shadow-sm' : 'bg-sky-500 text-white shadow-sm'
-                                  : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-300'
+                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                               }`}
                             >
                               <span>🛍️ Retirada</span>
@@ -572,8 +572,8 @@ export const StorefrontView: React.FC = () => {
                               }}
                               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                 activeServiceType === 'dine_in'
-                                  ? isLight ? 'bg-sky-600 text-white shadow-sm' : 'bg-sky-500 text-white shadow-sm'
-                                  : isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-neutral-900 hover:bg-neutral-800 text-neutral-300'
+                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                               }`}
                             >
                               <span>🍽️ Mesa / Salão</span>
@@ -918,7 +918,7 @@ export const StorefrontView: React.FC = () => {
                         {currentTenant.slogan || 'Massa artesanal, borda recheada e forno à lenha todos os dias'}
                       </p>
 
-                      <div className="flex items-center gap-2 pt-1">
+                      <div className="flex items-center gap-2 pt-1 flex-wrap">
                         <span
                           className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-2xs group-hover:brightness-110 transition-all"
                           style={{
@@ -931,6 +931,76 @@ export const StorefrontView: React.FC = () => {
                           <span>Ver horários, endereço e cartões ℹ️</span>
                         </span>
                       </div>
+
+                      {/* Seletor de Modalidade no Card 99Food / Carrossel */}
+                      {(isDeliveryAvailable || isPickupAllowed || isTableServiceAvailable) && (
+                        <div className="inline-flex items-center gap-1 p-1 rounded-2xl border bg-slate-100/90 dark:bg-neutral-900/90 border-slate-200 dark:border-neutral-800 shadow-2xs mt-2">
+                          {isDeliveryAvailable && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedServiceType('delivery');
+                                try { sessionStorage.setItem('nuvi_service_type', 'delivery'); } catch {}
+                                if (tableNumber) setTableNumber(null);
+                              }}
+                              className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                                activeServiceType === 'delivery'
+                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
+                              }`}
+                            >
+                              <span>🛵 Entrega</span>
+                            </button>
+                          )}
+
+                          {isPickupAllowed && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedServiceType('pickup');
+                                try { sessionStorage.setItem('nuvi_service_type', 'pickup'); } catch {}
+                                if (tableNumber) setTableNumber(null);
+                              }}
+                              className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                                activeServiceType === 'pickup'
+                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
+                              }`}
+                            >
+                              <span>🛍️ Retirada</span>
+                            </button>
+                          )}
+
+                          {isTableServiceAvailable && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedServiceType('dine_in');
+                                try { sessionStorage.setItem('nuvi_service_type', 'dine_in'); } catch {}
+                                if (!tableNumber) {
+                                  setTempTableInput(tableNumber || '');
+                                  setIsTableSelectorOpen(true);
+                                }
+                              }}
+                              className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                                activeServiceType === 'dine_in'
+                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
+                              }`}
+                            >
+                              <span>🍽️ Mesa / Salão</span>
+                              {tableNumber && (
+                                <span className="text-[10px] px-1.5 py-0.2 bg-white/20 rounded-md font-black">
+                                  {tableNumber.replace(/[^0-9]/g, '') || tableNumber}
+                                </span>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -985,7 +1055,43 @@ export const StorefrontView: React.FC = () => {
                         <span>R$ {tableOrdersTotal.toFixed(2)}</span>
                       </button>
                     </div>
-                  ) : (
+                  ) : activeServiceType === 'pickup' ? (
+                    <div
+                      className="rounded-2xl p-2.5 sm:p-3 border backdrop-blur-md transition-all shadow-sm flex items-center justify-between gap-3 min-w-[190px]"
+                      style={{
+                        borderColor: `${brandAccent}45`,
+                        backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
+                          style={{ backgroundColor: brandPrimary }}
+                        >
+                          <ShoppingBag className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <span className="text-[9px] font-black uppercase tracking-wider block opacity-75" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
+                            Retirada
+                          </span>
+                          <span className="text-xs sm:text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                            Pronto em ~20 min
+                          </span>
+                        </div>
+                      </div>
+
+                      <span
+                        className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0"
+                        style={{
+                          backgroundColor: `${brandAccent}15`,
+                          borderColor: `${brandAccent}35`,
+                          color: isLight ? '#92400e' : brandAccent
+                        }}
+                      >
+                        Balcão
+                      </span>
+                    </div>
+                  ) : isDeliveryAvailable ? (
                     <div
                       className="rounded-2xl p-2.5 sm:p-3 border backdrop-blur-md transition-all shadow-sm flex items-center justify-between gap-3 min-w-[190px]"
                       style={{
@@ -1019,6 +1125,42 @@ export const StorefrontView: React.FC = () => {
                         }}
                       >
                         Delivery
+                      </span>
+                    </div>
+                  ) : (
+                    <div
+                      className="rounded-2xl p-2.5 sm:p-3 border backdrop-blur-md transition-all shadow-sm flex items-center justify-between gap-3 min-w-[190px]"
+                      style={{
+                        borderColor: `${brandAccent}45`,
+                        backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
+                          style={{ backgroundColor: brandPrimary }}
+                        >
+                          <Store className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <span className="text-[9px] font-black uppercase tracking-wider block opacity-75" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
+                            Atendimento
+                          </span>
+                          <span className="text-xs sm:text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
+                            Loja Física
+                          </span>
+                        </div>
+                      </div>
+
+                      <span
+                        className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0"
+                        style={{
+                          backgroundColor: `${brandAccent}15`,
+                          borderColor: `${brandAccent}35`,
+                          color: isLight ? '#92400e' : brandAccent
+                        }}
+                      >
+                        Presencial
                       </span>
                     </div>
                   )}

@@ -156,11 +156,15 @@ const STORAGE_KEYS = {
 export const DEFAULT_GLOBAL_CONFIG: GlobalSaaSConfig = {
   defaultPermissions: {
     enableStorefront: true,
+    enableDiningTables: true,
     enablePDVBalcao: true,
     enableStockControl: true,
     enableDeliveryRadius: true,
     enableFinancialMetrics: true,
     enableBarcodeScanner: true,
+    storefrontDeliveryEnabled: true,
+    storefrontTablesEnabled: true,
+    storefrontPickupEnabled: true,
   },
   segmentPermissions: {
     adega: {
@@ -844,6 +848,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const segment = targetTenant?.businessSegment;
     if (segment && globalConfig.segmentPermissions?.[segment]?.[feature] !== undefined) {
       return Boolean(globalConfig.segmentPermissions[segment]![feature]);
+    }
+
+    // Para as opções detalhadas do cardápio, se não houver bloqueio explícito (false), o padrão é liberado (true)
+    if (
+      feature === 'storefrontDeliveryEnabled' ||
+      feature === 'storefrontTablesEnabled' ||
+      feature === 'storefrontPickupEnabled'
+    ) {
+      return true;
     }
 
     // 3. Mapeamento explícito entre os tipos de planos do lojista e os IDs dos 4 planos oficiais
