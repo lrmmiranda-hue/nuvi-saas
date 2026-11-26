@@ -295,12 +295,18 @@ export const StorefrontView: React.FC = () => {
   return (
     <div className="space-y-6 pb-28" style={{ '--brand-accent': brandAccent, '--brand-primary': brandPrimary } as React.CSSProperties}>
 
-      {/* Brand Hero Banner - 3 Opções de Layout Estilo iFood / 99Food (Borda Cinza Claro & Flash) */}
+      {/* Brand Hero Banner - 2 Opções de Layout: Capa Panorâmica ou Carrossel Promocional em Slides */}
       {(() => {
         const bannerStyle = currentTenant.branding?.bannerStyle || 'silver_flash';
-        const bannerLayout = currentTenant.branding?.bannerLayout || 'ifood_cover';
+        const rawBannerLayout = currentTenant.branding?.bannerLayout || 'ifood_cover';
+        const bannerLayout: 'ifood_cover' | 'carousel_promos' = rawBannerLayout === 'card_99food' ? 'ifood_cover' : (rawBannerLayout as any);
         const segmentWallpapers = getSegmentWallpapers(currentTenant.businessSegment);
         const bannerImage = currentTenant.branding?.bannerUrl || (segmentWallpapers.length > 0 ? segmentWallpapers[0].url : '');
+        const promoSlides = (currentTenant.branding?.promoBanners && currentTenant.branding.promoBanners.length > 0)
+          ? currentTenant.branding.promoBanners
+          : segmentWallpapers.length > 0
+          ? segmentWallpapers.slice(0, 3).map(w => w.url)
+          : [bannerImage].filter(Boolean);
 
         // Borda Cinza Claro Fina e Elegante
         const luxuryBorder = isLight ? '#cbd5e1' : '#334155';
@@ -321,28 +327,59 @@ export const StorefrontView: React.FC = () => {
             : `radial-gradient(ellipse 80% 70% at 80% 20%, ${brandAccent}22 0%, transparent 65%), linear-gradient(140deg, #0b0e14 0%, #111620 45%, #080a0f 100%)`;
         }
 
-        // =========================================================================
-        // OPÇÃO 1: ESTILO IFOOD TRADICIONAL (CAPA PANORÂMICA + LOGO FLUTUANTE)
-        // =========================================================================
-        if (bannerLayout === 'ifood_cover') {
-          return (
-            <div
-              className={`rounded-3xl border shadow-xl mb-4 sm:mb-6 overflow-hidden transition-all duration-300 backdrop-blur-xl ${
-                isLight ? 'bg-white text-slate-900 shadow-slate-200/50' : 'bg-neutral-950 text-white shadow-black/60'
-              }`}
-              style={{ borderColor: luxuryBorder }}
-            >
-              {/* Capa Panorâmica Superior com Imagem e Animação Flash */}
-              <div className="relative h-44 sm:h-52 md:h-60 w-full overflow-hidden bg-slate-900">
-                {bannerImage ? (
-                  <img
-                    src={bannerImage}
-                    alt="Capa da Loja"
-                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full" style={{ background: luxuryBg }} />
-                )}
+        return (
+          <div
+            className={`rounded-3xl border shadow-xl mb-4 sm:mb-6 overflow-hidden transition-all duration-300 backdrop-blur-xl ${
+              isLight ? 'bg-white text-slate-900 shadow-slate-200/50' : 'bg-neutral-950 text-white shadow-black/60'
+            }`}
+            style={{ borderColor: luxuryBorder }}
+          >
+            {/* Capa Panorâmica Superior com Imagem ou Slides do Carrossel */}
+            <div className="relative h-44 sm:h-52 md:h-60 w-full overflow-hidden bg-slate-900">
+              {bannerLayout === 'carousel_promos' && promoSlides.length > 0 ? (
+                <>
+                  {promoSlides.map((slideUrl, idx) => (
+                    <div
+                      key={idx}
+                      className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                        idx === activeSlideIndex % promoSlides.length ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                      }`}
+                    >
+                      <img
+                        src={slideUrl}
+                        alt={`Destaque ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+
+                  {/* Indicadores Bolinhas do Carrossel Panorâmico */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+                    {promoSlides.map((_, dotIdx) => (
+                      <button
+                        key={dotIdx}
+                        type="button"
+                        onClick={() => setActiveSlideIndex(dotIdx)}
+                        className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                          dotIdx === activeSlideIndex % promoSlides.length ? 'w-6 bg-white shadow-md' : 'w-2 bg-white/50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <span className="absolute top-4 right-20 z-20 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-amber-500 text-slate-950 font-bold shadow-md">
+                    📢 Ofertas em Slides
+                  </span>
+                </>
+              ) : bannerImage ? (
+                <img
+                  src={bannerImage}
+                  alt="Capa da Loja"
+                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                />
+              ) : (
+                <div className="w-full h-full" style={{ background: luxuryBg }} />
+              )}
 
                 {/* Vinheta Escura para Contraste com os Botões e Informações */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35 pointer-events-none" />
@@ -520,70 +557,72 @@ export const StorefrontView: React.FC = () => {
 
                   return (
                     <div className="space-y-2 pt-2 pb-1">
-                      {/* BARRA DE SELEÇÃO DE MODALIDADES (Entrega / Retirada / Mesa) */}
+                      {/* BARRA DE SELEÇÃO DE MODALIDADES (Entrega / Retire / Mesa) */}
                       {(isDeliveryAvailable || isPickupAllowed || isTableServiceAvailable) && (
-                        <div className="inline-flex items-center gap-1 p-1 rounded-2xl border bg-slate-100/90 dark:bg-neutral-900/90 border-slate-200 dark:border-neutral-800 shadow-2xs">
-                          {isDeliveryAvailable && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedServiceType('delivery');
-                                try { sessionStorage.setItem('nuvi_service_type', 'delivery'); } catch {}
-                                if (tableNumber) setTableNumber(null);
-                              }}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                                activeServiceType === 'delivery'
-                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
-                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
-                              }`}
-                            >
-                              <span>🛵 Entrega</span>
-                            </button>
-                          )}
+                        <div className="w-full flex justify-center my-1.5">
+                          <div className="inline-flex items-center gap-1.5 p-1 rounded-2xl border bg-slate-100/90 dark:bg-neutral-900/90 border-slate-200 dark:border-neutral-800 shadow-2xs relative">
+                            {isDeliveryAvailable && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedServiceType('delivery');
+                                  try { sessionStorage.setItem('nuvi_service_type', 'delivery'); } catch {}
+                                  if (tableNumber) setTableNumber(null);
+                                }}
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                                  activeServiceType === 'delivery'
+                                    ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                    : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
+                                }`}
+                              >
+                                <span>🛵 Entrega</span>
+                              </button>
+                            )}
 
-                          {isPickupAllowed && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedServiceType('pickup');
-                                try { sessionStorage.setItem('nuvi_service_type', 'pickup'); } catch {}
-                                if (tableNumber) setTableNumber(null);
-                              }}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                                activeServiceType === 'pickup'
-                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
-                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
-                              }`}
-                            >
-                              <span>🛍️ Retirada</span>
-                            </button>
-                          )}
+                            {isPickupAllowed && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedServiceType('pickup');
+                                  try { sessionStorage.setItem('nuvi_service_type', 'pickup'); } catch {}
+                                  if (tableNumber) setTableNumber(null);
+                                }}
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                                  activeServiceType === 'pickup'
+                                    ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                    : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
+                                }`}
+                              >
+                                <span>🛍️ Retirada</span>
+                              </button>
+                            )}
 
-                          {isTableServiceAvailable && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedServiceType('dine_in');
-                                try { sessionStorage.setItem('nuvi_service_type', 'dine_in'); } catch {}
-                                if (!tableNumber) {
-                                  setTempTableInput(tableNumber || '');
-                                  setIsTableSelectorOpen(true);
-                                }
-                              }}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                                activeServiceType === 'dine_in'
-                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
-                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
-                              }`}
-                            >
-                              <span>🍽️ Mesa / Salão</span>
-                              {tableNumber && (
-                                <span className="text-[10px] px-1.5 py-0.2 bg-white/20 rounded-md font-black">
-                                  {tableNumber.replace(/[^0-9]/g, '') || tableNumber}
-                                </span>
-                              )}
-                            </button>
-                          )}
+                            {isTableServiceAvailable && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedServiceType('dine_in');
+                                  try { sessionStorage.setItem('nuvi_service_type', 'dine_in'); } catch {}
+                                  if (!tableNumber) {
+                                    setTempTableInput(tableNumber || '');
+                                    setIsTableSelectorOpen(true);
+                                  }
+                                }}
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                                  activeServiceType === 'dine_in'
+                                    ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                    : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
+                                }`}
+                              >
+                                <span>🍽️ Mesa / Salão</span>
+                                {tableNumber && (
+                                  <span className="text-[10px] px-1.5 py-0.2 bg-white/20 rounded-md font-black">
+                                    {tableNumber.replace(/[^0-9]/g, '') || tableNumber}
+                                  </span>
+                                )}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
 
@@ -665,7 +704,7 @@ export const StorefrontView: React.FC = () => {
                           </div>
                         )
                       ) : activeServiceType === 'pickup' && isPickupAllowed ? (
-                        <div className={`text-xs flex items-center gap-2 flex-wrap font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        <div className={`text-xs flex items-center justify-center text-center gap-2 flex-wrap font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                           <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Retirada no Balcão
@@ -678,7 +717,7 @@ export const StorefrontView: React.FC = () => {
                           <span>Retirar no endereço da loja</span>
                         </div>
                       ) : isDeliveryAvailable ? (
-                        <div className={`text-xs flex items-center gap-1.5 flex-wrap font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        <div className={`text-xs flex items-center justify-center text-center gap-1.5 flex-wrap font-medium py-0.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                           <span className="font-bold text-emerald-600 dark:text-emerald-400">🕒 {estimatedTime} min</span>
                           <span>•</span>
                           <span>Raio: até {deliveryRadius} km</span>
@@ -697,7 +736,7 @@ export const StorefrontView: React.FC = () => {
                           )}
                         </div>
                       ) : (
-                        <div className={`text-xs flex items-center gap-2 font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                        <div className={`text-xs flex items-center justify-center text-center gap-2 font-medium py-1 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                           <Store className="w-3.5 h-3.5 text-sky-500 shrink-0" />
                           <span>Atendimento presencial no estabelecimento físico • Pronta Entrega</span>
                         </div>
@@ -707,493 +746,6 @@ export const StorefrontView: React.FC = () => {
                 })()}
               </div>
             </div>
-          );
-        }
-
-        // =========================================================================
-        // OPÇÃO 3: CARROSSEL DE BANNERS PROMOCIONAIS ESTILO IFOOD NO TOPO
-        // =========================================================================
-        const promoSlides = (currentTenant.branding?.promoBanners && currentTenant.branding.promoBanners.length > 0)
-          ? currentTenant.branding.promoBanners
-          : segmentWallpapers.length > 0
-          ? segmentWallpapers.slice(0, 3).map(w => w.url)
-          : [bannerImage].filter(Boolean);
-
-        return (
-          <div className="space-y-3 mb-4 sm:mb-6">
-            {/* Bloco do Carrossel Promocional (quando selecionado 'carousel_promos') */}
-            {bannerLayout === 'carousel_promos' && promoSlides.length > 0 && (
-              <div 
-                className="relative h-40 sm:h-52 md:h-64 rounded-3xl overflow-hidden border shadow-xl"
-                style={{ borderColor: luxuryBorder }}
-              >
-                {promoSlides.map((slideUrl, idx) => (
-                  <div
-                    key={idx}
-                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                      idx === activeSlideIndex % promoSlides.length ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`}
-                  >
-                    <img
-                      src={slideUrl}
-                      alt={`Promoção ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  </div>
-                ))}
-
-                {/* Feixe de Luz Flash no Carrossel */}
-                <div className="pointer-events-none absolute inset-0 overflow-hidden z-20">
-                  <div
-                    className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
-                    style={{
-                      background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
-                    }}
-                  />
-                </div>
-
-                {/* Linha Acetinada no Topo do Carrossel */}
-                <div
-                  className="absolute top-0 inset-x-0 h-[1.5px] pointer-events-none opacity-60 z-20"
-                  style={{
-                    background: isLight
-                      ? 'linear-gradient(90deg, transparent 0%, #94a3b8 20%, #ffffff 50%, #94a3b8 80%, transparent 100%)'
-                      : 'linear-gradient(90deg, transparent 0%, #475569 20%, #e2e8f0 50%, #475569 80%, transparent 100%)'
-                  }}
-                />
-
-                {/* Setas e Indicadores de Bolinhas */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5">
-                  {promoSlides.map((_, dotIdx) => (
-                    <button
-                      key={dotIdx}
-                      type="button"
-                      onClick={() => setActiveSlideIndex(dotIdx)}
-                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                        dotIdx === activeSlideIndex % promoSlides.length ? 'w-6 bg-white' : 'w-2 bg-white/50'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* OPÇÃO 2: CARD INTEGRADO 99FOOD COM BORDA CINZA CLARO & FLASH */}
-            <div
-              className={`rounded-3xl border shadow-2xl relative overflow-hidden transition-all duration-300 p-4 sm:p-6 md:p-8 backdrop-blur-xl ${
-                isLight ? 'bg-white/95 text-slate-900 shadow-slate-200/50' : 'bg-neutral-950/90 text-white shadow-black/60'
-              }`}
-              style={{
-                background: luxuryBg,
-                borderColor: luxuryBorder,
-              }}
-            >
-              {/* Foto de Fundo Suave Acetinada */}
-              {bannerImage && (
-                <div 
-                  className="absolute inset-0 opacity-15 pointer-events-none mix-blend-overlay"
-                  style={{
-                    backgroundImage: `url("${bannerImage}")`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                />
-              )}
-
-              {/* Iluminação Ambiente Suave nos Cantos */}
-              {bannerStyle !== 'platinum_minimal' && (
-                <>
-                  <div
-                    className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl opacity-35 mix-blend-screen"
-                    style={{
-                      background: `radial-gradient(circle, ${brandAccent}55 0%, transparent 70%)`
-                    }}
-                  />
-                  <div
-                    className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-20 mix-blend-screen"
-                    style={{
-                      background: `radial-gradient(circle, ${brandPrimary}60 0%, transparent 70%)`
-                    }}
-                  />
-                </>
-              )}
-
-              {/* Feixe de Luz Flash Metálico de Alto Impacto */}
-              <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
-                <div
-                  className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
-                  style={{
-                    background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
-                  }}
-                />
-              </div>
-
-              {/* Linha Acetinada Prateada com Reflexo Flash no Topo */}
-              <div
-                className="absolute top-0 inset-x-0 h-[1.5px] pointer-events-none opacity-60"
-                style={{
-                  background: isLight
-                    ? 'linear-gradient(90deg, transparent 0%, #94a3b8 20%, #ffffff 50%, #94a3b8 80%, transparent 100%)'
-                    : 'linear-gradient(90deg, transparent 0%, #475569 20%, #e2e8f0 50%, #475569 80%, transparent 100%)'
-                }}
-              />
-
-              {/* Conteúdo Principal do Card */}
-              <div className="relative z-20 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
-                
-                {/* Lado Esquerdo: Identidade da Loja */}
-                <div className="space-y-2 sm:space-y-3 max-w-2xl">
-                  {/* Status Aberto/Fechado + Selo Destaque */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span
-                      className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-2xs flex items-center gap-1.5 ${
-                        currentTenant.isOpen
-                          ? isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                          : isLight ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
-                      }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${currentTenant.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-                      {currentTenant.isOpen ? 'Aberto Agora' : 'Fechado no momento'}
-                    </span>
-
-                    <span
-                      className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md border"
-                      style={{
-                        backgroundColor: `${brandAccent}15`,
-                        color: brandAccent,
-                        borderColor: `${brandAccent}35`,
-                      }}
-                    >
-                      ★ {currentTenant.businessSegment === 'pizzaria' ? 'Pizzaria & Forno' : currentTenant.businessSegment === 'adega' ? 'Adega & Bebidas' : 'Seleção Especial'}
-                    </span>
-                  </div>
-
-                  {/* Logo, Nome e Slogan */}
-                  <div
-                    onClick={() => setIsStoreInfoModalOpen(true)}
-                    className="flex items-start sm:items-center gap-3 sm:gap-4 pt-1 cursor-pointer group select-none transition-all active:scale-[0.99]"
-                    title="Toque para ver horários, cartões aceitos e endereço do estabelecimento"
-                  >
-                    {currentTenant.branding.logoUrl ? (
-                      <div
-                        className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl p-1 shrink-0 shadow-lg border transition-transform group-hover:scale-105"
-                        style={{
-                          backgroundColor: isLight ? '#ffffff' : 'rgba(10, 10, 10, 0.75)',
-                          borderColor: luxuryBorder,
-                        }}
-                      >
-                        <img
-                          src={currentTenant.branding.logoUrl}
-                          alt={currentTenant.name}
-                          className="w-full h-full object-contain rounded-xl"
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-2xl flex items-center justify-center font-black text-2xl sm:text-3xl shadow-lg border shrink-0 transition-transform group-hover:scale-105 text-white"
-                        style={{
-                          backgroundColor: brandPrimary,
-                          borderColor: luxuryBorder,
-                          boxShadow: `0 8px 20px -4px ${brandPrimary}50`
-                        }}
-                      >
-                        {currentTenant.name.charAt(0)}
-                      </div>
-                    )}
-
-                    <div>
-                      <h1
-                        className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight group-hover:underline flex items-center gap-1.5"
-                        style={{ color: isLight ? '#0f172a' : '#ffffff' }}
-                      >
-                        <span>{currentTenant.name}</span>
-                        <Info className="w-4 h-4 opacity-80 group-hover:opacity-100 shrink-0 transition-opacity" style={{ color: brandAccent }} />
-                      </h1>
-
-                      <p
-                        className="text-xs sm:text-sm mt-0.5 font-medium line-clamp-2 max-w-lg"
-                        style={{ color: isLight ? '#475569' : '#d4d4d8' }}
-                      >
-                        {currentTenant.slogan || 'Massa artesanal, borda recheada e forno à lenha todos os dias'}
-                      </p>
-
-                      <div className="flex items-center gap-2 pt-1 flex-wrap">
-                        <span
-                          className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-2xs group-hover:brightness-110 transition-all"
-                          style={{
-                            backgroundColor: `${brandAccent}15`,
-                            color: isLight ? '#0f172a' : brandAccent,
-                            borderColor: `${brandAccent}40`,
-                          }}
-                        >
-                          <Clock className="w-3 h-3 shrink-0" style={{ color: brandAccent }} />
-                          <span>Ver horários, endereço e cartões ℹ️</span>
-                        </span>
-                      </div>
-
-                      {/* Seletor de Modalidade no Card 99Food / Carrossel */}
-                      {(isDeliveryAvailable || isPickupAllowed || isTableServiceAvailable) && (
-                        <div className="inline-flex items-center gap-1 p-1 rounded-2xl border bg-slate-100/90 dark:bg-neutral-900/90 border-slate-200 dark:border-neutral-800 shadow-2xs mt-2">
-                          {isDeliveryAvailable && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedServiceType('delivery');
-                                try { sessionStorage.setItem('nuvi_service_type', 'delivery'); } catch {}
-                                if (tableNumber) setTableNumber(null);
-                              }}
-                              className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                                activeServiceType === 'delivery'
-                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
-                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
-                              }`}
-                            >
-                              <span>🛵 Entrega</span>
-                            </button>
-                          )}
-
-                          {isPickupAllowed && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedServiceType('pickup');
-                                try { sessionStorage.setItem('nuvi_service_type', 'pickup'); } catch {}
-                                if (tableNumber) setTableNumber(null);
-                              }}
-                              className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                                activeServiceType === 'pickup'
-                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
-                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
-                              }`}
-                            >
-                              <span>🛍️ Retirada</span>
-                            </button>
-                          )}
-
-                          {isTableServiceAvailable && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedServiceType('dine_in');
-                                try { sessionStorage.setItem('nuvi_service_type', 'dine_in'); } catch {}
-                                if (!tableNumber) {
-                                  setTempTableInput(tableNumber || '');
-                                  setIsTableSelectorOpen(true);
-                                }
-                              }}
-                              className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                                activeServiceType === 'dine_in'
-                                  ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
-                                  : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
-                              }`}
-                            >
-                              <span>🍽️ Mesa / Salão</span>
-                              {tableNumber && (
-                                <span className="text-[10px] px-1.5 py-0.2 bg-white/20 rounded-md font-black">
-                                  {tableNumber.replace(/[^0-9]/g, '') || tableNumber}
-                                </span>
-                              )}
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Lado Direito: Mesa ou Tempo Médio + Sacola */}
-                <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-2 sm:pt-0">
-                  {isTableActive ? (
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <div
-                        onClick={() => {
-                          if (selectionMode === 'qrcode_fixed' && tableNumber) {
-                            showAlert({
-                              title: 'Mesa Fixada pelo QR Code',
-                              message: `Você está na Mesa ${tableNumber.replace(/[^0-9]/g, '') || tableNumber}, vinculada pela plaquinha da sua mesa.`,
-                              variant: 'info'
-                            });
-                            return;
-                          }
-                          setTempTableInput(tableNumber || '');
-                          setIsTableSelectorOpen(true);
-                        }}
-                        className="cursor-pointer group flex items-center gap-2 transition-all hover:opacity-90"
-                      >
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
-                          style={{ backgroundColor: brandPrimary }}
-                        >
-                          <UtensilsCrossed className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span className="text-[10px] font-black uppercase tracking-wider block opacity-75 flex items-center gap-1" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            No Estabelecimento
-                          </span>
-                          <span className="text-xs sm:text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                            {tableNumber ? (
-                              <>Mesa <span style={{ color: brandPrimary }}>{tableNumber.replace(/[^0-9]/g, '') || tableNumber}</span></>
-                            ) : (
-                              <>Escolha sua Mesa ➔</>
-                            )}
-                          </span>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setIsTableOrdersModalOpen(true)}
-                        className="px-2.5 py-1.5 rounded-xl text-xs font-black text-white shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
-                        style={{ backgroundColor: brandPrimary }}
-                      >
-                        <ReceiptText className="w-3.5 h-3.5" />
-                        <span>R$ {tableOrdersTotal.toFixed(2)}</span>
-                      </button>
-                    </div>
-                  ) : activeServiceType === 'pickup' ? (
-                    <div
-                      className="rounded-2xl p-2.5 sm:p-3 border backdrop-blur-md transition-all shadow-sm flex items-center justify-between gap-3 min-w-[190px]"
-                      style={{
-                        borderColor: `${brandAccent}45`,
-                        backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
-                          style={{ backgroundColor: brandPrimary }}
-                        >
-                          <ShoppingBag className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span className="text-[9px] font-black uppercase tracking-wider block opacity-75" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
-                            Retirada
-                          </span>
-                          <span className="text-xs sm:text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                            Pronto em ~20 min
-                          </span>
-                        </div>
-                      </div>
-
-                      <span
-                        className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0"
-                        style={{
-                          backgroundColor: `${brandAccent}15`,
-                          borderColor: `${brandAccent}35`,
-                          color: isLight ? '#92400e' : brandAccent
-                        }}
-                      >
-                        Balcão
-                      </span>
-                    </div>
-                  ) : isDeliveryAvailable ? (
-                    <div
-                      className="rounded-2xl p-2.5 sm:p-3 border backdrop-blur-md transition-all shadow-sm flex items-center justify-between gap-3 min-w-[190px]"
-                      style={{
-                        borderColor: `${brandAccent}45`,
-                        backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
-                          style={{ backgroundColor: brandPrimary }}
-                        >
-                          <Clock className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span className="text-[9px] font-black uppercase tracking-wider block opacity-75" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
-                            Tempo Médio
-                          </span>
-                          <span className="text-xs sm:text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                            {(currentTenant as any).deliveryEstimatedTime || (currentTenant.address as any)?.deliveryEstimatedTime || '25 - 40 min'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <span
-                        className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0"
-                        style={{
-                          backgroundColor: `${brandAccent}15`,
-                          borderColor: `${brandAccent}35`,
-                          color: isLight ? '#92400e' : brandAccent
-                        }}
-                      >
-                        Delivery
-                      </span>
-                    </div>
-                  ) : (
-                    <div
-                      className="rounded-2xl p-2.5 sm:p-3 border backdrop-blur-md transition-all shadow-sm flex items-center justify-between gap-3 min-w-[190px]"
-                      style={{
-                        borderColor: `${brandAccent}45`,
-                        backgroundColor: isLight ? 'rgba(255, 255, 255, 0.90)' : 'rgba(20, 20, 22, 0.85)',
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
-                          style={{ backgroundColor: brandPrimary }}
-                        >
-                          <Store className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span className="text-[9px] font-black uppercase tracking-wider block opacity-75" style={{ color: isLight ? '#475569' : '#a1a1aa' }}>
-                            Atendimento
-                          </span>
-                          <span className="text-xs sm:text-sm font-black block" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                            Loja Física
-                          </span>
-                        </div>
-                      </div>
-
-                      <span
-                        className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0"
-                        style={{
-                          backgroundColor: `${brandAccent}15`,
-                          borderColor: `${brandAccent}35`,
-                          color: isLight ? '#92400e' : brandAccent
-                        }}
-                      >
-                        Presencial
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Sacola de Compras */}
-                  <div className="flex items-center justify-end gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setIsCartOpen(true)}
-                      style={{
-                        backgroundColor: isLight ? '#ffffff' : 'rgba(15, 15, 18, 0.85)',
-                        color: isLight ? '#0f172a' : '#ffffff',
-                        borderColor: `${brandAccent}45`,
-                      }}
-                      className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-2xl border font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer relative"
-                    >
-                      <ShoppingCart className="w-4 h-4" style={{ color: brandAccent }} />
-                      <span className="font-extrabold hidden sm:inline">Sacola</span>
-                      {cart.length > 0 && (
-                        <span
-                          className="w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center text-white shrink-0 shadow-xs"
-                          style={{ backgroundColor: brandAccent }}
-                        >
-                          {cart.reduce((sum, item) => sum + item.quantity, 0)}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
         );
       })()}
 
@@ -1284,69 +836,27 @@ export const StorefrontView: React.FC = () => {
 
       {/* SEÇÃO PRINCIPAL DO CARDÁPIO: EXIBE TODOS OS ITENS DIRETAMENTE */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            {selectedCategory !== 'todas' && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedCategory('todas');
-                  setSearchQuery('');
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${isLight
-                    ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
-                    : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
-                  }`}
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Ver Todos os Itens</span>
-              </button>
-            )}
-
+        {selectedCategory !== 'todas' && (
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCategory('todas');
+                setSearchQuery('');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${isLight
+                  ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                  : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
+                }`}
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Ver Todos os Itens</span>
+            </button>
             <h2 className={`text-sm sm:text-base font-extrabold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-              {selectedCategory === 'todas'
-                ? (isAdega ? 'Todos os Produtos' : 'Todos os Itens do Cardápio')
-                : activeCategories.find((c) => c.id === selectedCategory)?.label || 'Produtos Selecionados'}
+              {activeCategories.find((c) => c.id === selectedCategory)?.label || 'Produtos Selecionados'}
             </h2>
           </div>
-
-          <div className="flex items-center gap-3">
-            <span className={`text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'item disponível' : 'itens disponíveis'}
-            </span>
-
-            {/* Alternador Rápido de Layout na Vitrine (Grade vs Lista com Miniatura) */}
-            <div className={`flex items-center p-0.5 rounded-lg border ${isLight ? 'bg-slate-100 border-slate-300' : 'bg-neutral-800 border-neutral-700'
-              }`}>
-              <button
-                type="button"
-                onClick={() => setViewModeOverride('grid')}
-                title="Exibir em Grade com Fotos em Destaque (4 Colunas)"
-                className={`p-1.5 rounded-md transition-all cursor-pointer ${!isListLayout
-                    ? isLight
-                      ? 'bg-sky-500/15 text-sky-800 border border-sky-400/50 font-bold shadow-none'
-                      : 'bg-neutral-800 text-white shadow-none'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewModeOverride('list')}
-                title="Exibir em Lista Compacta com Miniatura Lateral"
-                className={`p-1.5 rounded-md transition-all cursor-pointer ${isListLayout
-                    ? isLight
-                      ? 'bg-sky-500/15 text-sky-800 border border-sky-400/50 font-bold shadow-none'
-                      : 'bg-neutral-800 text-white shadow-none'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-              >
-                <List className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
+        )}
 
         {isListLayout ? (
           /* MODO LISTA COMPACTA COM MINIATURA LATERAL (Estilo Restaurante / Delivery Tradicional) */
