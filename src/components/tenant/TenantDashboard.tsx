@@ -627,75 +627,8 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
             </div>
           </div>
 
-          {/* Ações Rápidas do Topo: Atalhos Diretos para Salão & Cozinha (Exclusivo para planos com permissão ativa) */}
+          {/* Ações Rápidas do Topo: Status da Loja, Ver Vitrine e Sair */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Botão Rápido: Gestão de Salão / Mesas (Apenas se o plano tiver permissão) */}
-            {isTableServiceActive && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('mesas')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer border ${
-                  activeTab === 'mesas'
-                    ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/30'
-                    : isLight
-                    ? 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
-                    : 'bg-blue-950/40 border-blue-800/60 text-blue-300 hover:bg-blue-900/50'
-                }`}
-              >
-                <UtensilsCrossed className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Salão & Mesas</span>
-                <span className="sm:hidden">Mesas</span>
-                {activeTableOrdersCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-blue-500 text-white font-bold">
-                    {activeTableOrdersCount}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* Botão Rápido: Visão da Cozinha KDS (Apenas se o plano tiver permissão) */}
-            {allowKitchenKDS && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('cozinha')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer border ${
-                  activeTab === 'cozinha'
-                    ? 'bg-amber-500 text-neutral-950 border-amber-400 shadow-md shadow-amber-500/30'
-                    : isLight
-                    ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100'
-                    : 'bg-amber-950/40 border-amber-800/60 text-amber-300 hover:bg-amber-900/50'
-                }`}
-              >
-                <ChefHat className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Cozinha KDS</span>
-                <span className="sm:hidden">Cozinha</span>
-                {pendingKitchenCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-black font-black animate-pulse">
-                    {pendingKitchenCount}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* Botão Rápido: Gestão Financeira & Métricas (Apenas se o plano tiver permissão) */}
-            {allowMetrics && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('metricas')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer border ${
-                  activeTab === 'metricas'
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-500/30'
-                    : isLight
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100'
-                    : 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300 hover:bg-emerald-900/50'
-                }`}
-              >
-                <BarChart3 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Métricas & Finanças</span>
-                <span className="sm:hidden">Finanças</span>
-              </button>
-            )}
-
             {/* Ícone sem Fundo: Loja Aberta / Fechada */}
             <button
               type="button"

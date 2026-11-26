@@ -30,6 +30,7 @@ import {
   Database,
   QrCode,
   UtensilsCrossed,
+  ChefHat,
   CheckCircle2
 } from 'lucide-react';
 
@@ -98,7 +99,7 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
 
     // Mesas & QR Code
     if (perms.enableDiningTables !== false) {
-      list.push({ label: 'Cardápio Digital & QR Code nas Mesas', enabled: true });
+      list.push({ label: 'Gestão das Mesas & QR Code no Salão', enabled: true });
     }
 
     // PDV Balcão
@@ -732,16 +733,10 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
 
                 const planFeaturesConfig: { key: keyof SaaSFeaturePermissions; label: string; desc: string; icon: any }[] = [
                   {
-                    key: 'enableStorefront',
-                    label: 'Vitrine Web & Cardápio Aberto',
-                    desc: 'Catálogo público online com link próprio para visualização externa dos produtos.',
-                    icon: Store
-                  },
-                  {
                     key: 'enableDiningTables',
-                    label: 'Cardápio Digital & QR Code Mesas',
-                    desc: 'Acesso às comandas/mesas do salão e visualização de QR Code nas mesas.',
-                    icon: QrCode
+                    label: 'Gestão das Mesas',
+                    desc: 'Acesso ao mapa de mesas, controle de comandas do salão e cardápio QR Code.',
+                    icon: UtensilsCrossed
                   },
                   {
                     key: 'enablePDVBalcao',
@@ -777,13 +772,19 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                     key: 'enableKitchenKDS',
                     label: 'KDS Cozinha / Monitor de Pedidos',
                     desc: 'Tela de preparação de pedidos em tempo real para a cozinha.',
-                    icon: UtensilsCrossed
+                    icon: ChefHat
+                  },
+                  {
+                    key: 'enableStorefront',
+                    label: 'Vitrine Web & Cardápio Aberto',
+                    desc: 'Catálogo público online com link próprio para visualização externa dos produtos.',
+                    icon: Store
                   }
                 ];
 
                 return (
                   <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className={`relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden ${
+                    <div className={`relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden ${
                       isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#0F1722] border-[#1C2631] text-white'
                     }`}>
                       {/* Top Header */}
@@ -815,8 +816,8 @@ export const MasterSettingsModal: React.FC<MasterSettingsModalProps> = ({ isOpen
                         </button>
                       </div>
 
-                      {/* Lista de Permissões do Plano com Switches */}
-                      <div className="p-5 overflow-y-auto space-y-3 max-h-[60vh]">
+                      {/* Lista de Permissões do Plano com Switches em 2 Colunas */}
+                      <div className="p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[65vh]">
                         {planFeaturesConfig.map(({ key, label, desc, icon: IconComponent }) => {
                           const isEnabled = perms[key] !== false; // Padrão true se não especificado
                           return (

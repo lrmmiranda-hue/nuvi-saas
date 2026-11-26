@@ -68,6 +68,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     toggleThemeMode,
     currentTenant,
     logoutMaster,
+    globalConfig,
   } = useStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -114,25 +115,35 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     return () => window.removeEventListener('click', handleOutsideClick);
   }, []);
 
-  // Preços oficiais de referência dos 4 planos
+  // Preços oficiais dinâmicos dos planos configurados nas Configurações Gerais
+  const planCardapio = globalConfig?.plans?.find(p => p.id === 'plan_cardapio');
+  const planBalcao = globalConfig?.plans?.find(p => p.id === 'plan_balcao_pdv');
+  const planDelivery = globalConfig?.plans?.find(p => p.id === 'plan_delivery_estoque');
+  const planPro = globalConfig?.plans?.find(p => p.id === 'plan_nuvi_pro');
+
+  const cardapioPrice = planCardapio?.price ?? 49.90;
+  const balcaoPrice = planBalcao?.price ?? 89.90;
+  const deliveryPrice = planDelivery?.price ?? 139.90;
+  const proPrice = planPro?.price ?? 199.90;
+
   const PLAN_PRICES: Record<string, number> = {
-    vitrine: 49.90,
-    balcao: 89.90,
-    starter: 139.90,
-    hibrido: 139.90,
-    balcao_estoque: 89.90,
-    pro: 199.90,
-    enterprise: 199.90
+    vitrine: cardapioPrice,
+    balcao: balcaoPrice,
+    starter: deliveryPrice,
+    hibrido: deliveryPrice,
+    balcao_estoque: balcaoPrice,
+    pro: proPrice,
+    enterprise: proPrice
   };
 
   const PLAN_TITLES: Record<string, string> = {
-    vitrine: 'Cardápio Digital & QR Mesas (R$ 49,90)',
-    balcao: 'Balcão & PDV Caixa Rápido (R$ 89,90)',
-    balcao_estoque: 'Balcão & PDV Caixa Rápido (R$ 89,90)',
-    starter: 'Delivery & Estoque Pro (R$ 139,90)',
-    hibrido: 'Delivery & Estoque Pro (R$ 139,90)',
-    pro: 'Nuvi Pro Total (R$ 199,90)',
-    enterprise: 'Nuvi Pro Total (R$ 199,90)'
+    vitrine: `${planCardapio?.name || 'Cardápio QR Mesas'} (R$ ${cardapioPrice.toFixed(2).replace('.', ',')})`,
+    balcao: `${planBalcao?.name || 'Balcão & PDV Caixa Rápido'} (R$ ${balcaoPrice.toFixed(2).replace('.', ',')})`,
+    balcao_estoque: `${planBalcao?.name || 'Balcão & PDV Caixa Rápido'} (R$ ${balcaoPrice.toFixed(2).replace('.', ',')})`,
+    starter: `${planDelivery?.name || 'Delivery & Estoque Pro'} (R$ ${deliveryPrice.toFixed(2).replace('.', ',')})`,
+    hibrido: `${planDelivery?.name || 'Delivery & Estoque Pro'} (R$ ${deliveryPrice.toFixed(2).replace('.', ',')})`,
+    pro: `${planPro?.name || 'Nuvi Pro Total'} (R$ ${proPrice.toFixed(2).replace('.', ',')})`,
+    enterprise: `${planPro?.name || 'Nuvi Pro Total'} (R$ ${proPrice.toFixed(2).replace('.', ',')})`
   };
 
   // Cálculo da assinatura e vencimento de cada loja
@@ -755,10 +766,10 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                               : 'bg-[#151D24] border-[#253342] text-white focus:bg-[#1E2732]'
                           }`}
                         >
-                          <option value="vitrine">📱 Cardápio QR Mesas (R$ 49,90)</option>
-                          <option value="balcao">⚡ Balcão & PDV (R$ 89,90)</option>
-                          <option value="starter">🚚 Delivery & Estoque Pro (R$ 139,90)</option>
-                          <option value="pro">👑 Nuvi Pro Total (R$ 199,90)</option>
+                          <option value="vitrine">📱 {planCardapio?.name || 'Cardápio QR Mesas'} (R$ {cardapioPrice.toFixed(2).replace('.', ',')})</option>
+                          <option value="balcao">⚡ {planBalcao?.name || 'Balcão & PDV'} (R$ {balcaoPrice.toFixed(2).replace('.', ',')})</option>
+                          <option value="starter">🚚 {planDelivery?.name || 'Delivery & Estoque Pro'} (R$ {deliveryPrice.toFixed(2).replace('.', ',')})</option>
+                          <option value="pro">👑 {planPro?.name || 'Nuvi Pro Total'} (R$ {proPrice.toFixed(2).replace('.', ',')})</option>
                         </select>
                       </td>
 

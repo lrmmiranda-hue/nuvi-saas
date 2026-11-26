@@ -831,7 +831,7 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
                 );
               })()}
 
-              {/* Modelo de Exibição dos Itens (Grade vs Lista) - Apenas se o plano contemplar Vitrine */}
+              {/* Modelo de Exibição dos Itens na Vitrine (Grade vs Lista) - Apenas se o plano contemplar Vitrine */}
               {isFeatureAllowed('enableStorefront') && (
                 <div className={`p-5 rounded-2xl border space-y-4 ${
                   isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631]'
@@ -890,6 +890,71 @@ export const StoreSettingsView: React.FC<StoreSettingsViewProps> = ({ isLight })
                       </div>
                       <p className="text-[11px] text-slate-400">
                         Ideal para cardápios rápidos estilo restaurante, lanchonete e delivery.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Modelo de Exibição dos Itens no PDV Balcão (Grade vs Lista) */}
+              {isFeatureAllowed('enablePDVBalcao') && (
+                <div className={`p-5 rounded-2xl border space-y-4 ${
+                  isLight ? 'bg-white border-slate-200 shadow-2xs' : 'bg-[#0E1318] border-[#1C2631]'
+                }`}>
+                  <div>
+                    <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      <ShoppingCart className="w-4 h-4 text-sky-500" />
+                      <span>Estilo Visual do PDV Balcão (Caixa)</span>
+                    </h3>
+                    <p className={`text-xs mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      Escolha se prefere visualizar os produtos em Grade de 4 colunas ou Lista compacta na tela de vendas.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setConfigEdits({ ...configEdits, posLayout: 'grid' })}
+                      className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                        (configEdits.posLayout || 'grid') === 'grid'
+                          ? 'border-sky-500 bg-sky-500/10'
+                          : isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <LayoutGrid className="w-4 h-4 text-sky-500" />
+                          <span className="font-bold text-xs">Grade em 4 Colunas</span>
+                        </div>
+                        {(configEdits.posLayout || 'grid') === 'grid' && (
+                          <CheckCircle2 className="w-4 h-4 text-sky-500" />
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-400">
+                        Cards visuais em 4 colunas com fotos dos produtos, estoque e botão rápido.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setConfigEdits({ ...configEdits, posLayout: 'list' })}
+                      className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                        configEdits.posLayout === 'list'
+                          ? 'border-sky-500 bg-sky-500/10'
+                          : isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <List className="w-4 h-4 text-sky-500" />
+                          <span className="font-bold text-xs">Lista Compacta</span>
+                        </div>
+                        {configEdits.posLayout === 'list' && (
+                          <CheckCircle2 className="w-4 h-4 text-sky-500" />
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-400">
+                        Linhas compactas de alta densidade com miniatura. Ideal para agilidade máxima no caixa.
                       </p>
                     </button>
                   </div>

@@ -174,6 +174,7 @@ export interface StoreManagementConfig {
   tableCount?: number; // Quantidade de mesas do salão (padrão: 12)
   serviceFeePercentage?: number; // Taxa de serviço opcional para fechamento de mesa (ex: 10%)
   catalogLayout?: 'grid' | 'list'; // 'grid': Grade com fotos grandes; 'list': Lista compacta com miniatura
+  posLayout?: 'grid' | 'list'; // 'grid': Grade em 4 colunas; 'list': Lista compacta com miniatura para agilidade no balcão
   pixKey?: string;
   acceptPix: boolean;
   acceptCard: boolean;

@@ -35,7 +35,9 @@ import {
   Clock,
   Wine,
   Tag,
-  CheckCircle2
+  CheckCircle2,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { PDVPixModal } from './PDVPixModal';
 
@@ -51,6 +53,7 @@ export const PDVSalesView: React.FC = () => {
     currentStoreUser,
     tenantUsers,
     setCurrentStoreUserId,
+    updateTenant,
   } = useStore();
 
   const isLight = themeMode === 'light';
@@ -737,121 +740,276 @@ export const PDVSalesView: React.FC = () => {
               )}
             </div>
 
-            <span className={`text-[10px] font-bold whitespace-nowrap px-2.5 py-1.5 rounded-lg border ${
-              isLight ? 'bg-slate-50 text-slate-600 border-slate-200' : 'bg-[#070B0E] text-slate-400 border-[#1E2B3A]'
-            }`}>
-              {filteredProducts.length} itens encontrados
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] font-bold whitespace-nowrap px-2.5 py-1.5 rounded-lg border ${
+                isLight ? 'bg-slate-50 text-slate-600 border-slate-200' : 'bg-[#070B0E] text-slate-400 border-[#1E2B3A]'
+              }`}>
+                {filteredProducts.length} itens
+              </span>
+
+              {/* Seletor Rápido: Grade em 4 Colunas vs Lista Compacta */}
+              <div className={`flex items-center rounded-lg p-0.5 border ${
+                isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#070B0E] border-[#1E2B3A]'
+              }`}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (currentTenant) {
+                      updateTenant(currentTenant.id, {
+                        config: { ...currentTenant.config, posLayout: 'grid' }
+                      });
+                    }
+                  }}
+                  title="Exibir em Grade (4 colunas)"
+                  className={`p-1 rounded-md transition-all cursor-pointer ${
+                    (currentTenant?.config?.posLayout || 'grid') === 'grid'
+                      ? 'bg-sky-500 text-white shadow-xs'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (currentTenant) {
+                      updateTenant(currentTenant.id, {
+                        config: { ...currentTenant.config, posLayout: 'list' }
+                      });
+                    }
+                  }}
+                  title="Exibir em Lista Compacta"
+                  className={`p-1 rounded-md transition-all cursor-pointer ${
+                    currentTenant?.config?.posLayout === 'list'
+                      ? 'bg-sky-500 text-white shadow-xs'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Grid de Produtos Amplo */}
-          <div className={`grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 overflow-y-auto pr-1 ${
-            isFullscreenPDV ? 'flex-1 min-h-0' : 'max-h-[640px]'
-          }`}>
-            {filteredProducts.map(product => {
-              const price = product.promoPrice ?? product.price;
-              const isBeverage = product.category === 'bebidas' || product.category === 'bebidas_lanche' || product.category === 'refrigerantes' || product.category === 'sucos' || product.category === 'cervejas';
-              const isCardapio = (isFoodOrPizza && !isBeverage) || product.itemType === 'cardapio';
-              const isLowStock = !isCardapio && product.stockQuantity <= (product.minStockAlert || 5);
-              const isOutOfStock = !isCardapio && product.stockQuantity <= 0;
-              const enabledPacks = isCardapio ? [] : getEffectiveProductPacks(product);
+          {/* Exibição dos Produtos: Lista Compacta vs Grade em 4 Colunas */}
+          {(currentTenant?.config?.posLayout === 'list') ? (
+            /* Modo Lista Compacta */
+            <div className={`space-y-2 overflow-y-auto pr-1 ${
+              isFullscreenPDV ? 'flex-1 min-h-0' : 'max-h-[640px]'
+            }`}>
+              {filteredProducts.map(product => {
+                const price = product.promoPrice ?? product.price;
+                const isBeverage = product.category === 'bebidas' || product.category === 'bebidas_lanche' || product.category === 'refrigerantes' || product.category === 'sucos' || product.category === 'cervejas';
+                const isCardapio = (isFoodOrPizza && !isBeverage) || product.itemType === 'cardapio';
+                const isLowStock = !isCardapio && product.stockQuantity <= (product.minStockAlert || 5);
+                const isOutOfStock = !isCardapio && product.stockQuantity <= 0;
+                const enabledPacks = isCardapio ? [] : getEffectiveProductPacks(product);
 
-              return (
-                <div
-                  key={product.id}
-                  onClick={() => {
-                    addItemToCart(product);
-                    playBeep(true);
-                  }}
-                  className={`p-3 rounded-2xl border flex flex-col justify-between transition-all relative cursor-pointer group active:scale-[0.98] select-none shadow-sm ${
-                    isLight
-                      ? 'bg-white border-slate-200 hover:border-sky-400 hover:shadow-md'
-                      : 'border-[#1A2533] bg-[#0D141C] hover:bg-[#121B26] hover:border-sky-500/50'
-                  } ${isOutOfStock ? 'opacity-60' : ''}`}
-                >
-                  <div>
-                    {/* Header: Volume/Tipo e Estoque */}
-                    <div className="flex items-center justify-between text-[10px] mb-1.5">
-                      <span className={`truncate font-semibold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                        {product.volume || (isCardapio ? '🍽️ Cardápio' : 'Unidade')}
-                      </span>
-                      <span className={`px-1.5 py-0.5 rounded font-bold text-[9px] ${
-                        isCardapio
-                          ? 'text-emerald-500 bg-emerald-500/15 border border-emerald-500/30'
-                          : isOutOfStock 
-                          ? 'text-red-500 bg-red-500/15 border border-red-500/30' 
-                          : isLowStock 
-                          ? 'text-amber-500 bg-amber-500/15 border border-amber-500/30' 
-                          : isLight 
-                          ? 'text-slate-600 bg-slate-100 border border-slate-200'
-                          : 'text-neutral-300 bg-neutral-800'
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => {
+                      addItemToCart(product);
+                      playBeep(true);
+                    }}
+                    className={`p-2.5 rounded-xl border flex items-center justify-between gap-3 transition-all cursor-pointer group active:scale-[0.99] select-none shadow-xs ${
+                      isLight
+                        ? 'bg-white border-slate-200 hover:border-sky-400 hover:shadow-md'
+                        : 'border-[#1A2533] bg-[#0D141C] hover:bg-[#121B26] hover:border-sky-500/50'
+                    } ${isOutOfStock ? 'opacity-60' : ''}`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Miniatura Quadrada do Produto */}
+                      <div className={`w-12 h-12 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border ${
+                        isLight ? 'bg-slate-100 border-slate-200' : 'bg-black/40 border-[#1E2B3A]'
                       }`}>
-                        {isCardapio ? 'Feito na Hora' : `${product.stockQuantity} un`}
-                      </span>
+                        {product.imageUrl ? (
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                        ) : (
+                          <span className="text-base font-bold text-slate-400">
+                            {product.name.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Informações: Nome, Categoria e Estoque */}
+                      <div className="min-w-0">
+                        <h4 className={`text-xs font-bold leading-tight truncate ${
+                          isLight ? 'text-slate-800' : 'text-white'
+                        }`}>
+                          {product.name}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`text-[10px] font-semibold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                            {product.volume || (isCardapio ? '🍽️ Cardápio' : 'Unidade')}
+                          </span>
+                          <span className={`px-1.5 py-0.2 rounded font-bold text-[9px] ${
+                            isCardapio
+                              ? 'text-emerald-500 bg-emerald-500/15 border border-emerald-500/30'
+                              : isOutOfStock 
+                              ? 'text-red-500 bg-red-500/15 border border-red-500/30' 
+                              : isLowStock 
+                              ? 'text-amber-500 bg-amber-500/15 border border-amber-500/30' 
+                              : isLight 
+                              ? 'text-slate-600 bg-slate-100 border border-slate-200'
+                              : 'text-neutral-300 bg-neutral-800'
+                          }`}>
+                            {isCardapio ? 'Feito na Hora' : `${product.stockQuantity} un`}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Descrição / Nome do Produto no Topo */}
-                    <h4 className={`text-xs font-bold leading-snug line-clamp-2 min-h-[30px] mb-2 ${
-                      isLight ? 'text-slate-800' : 'text-white'
-                    }`}>
-                      {product.name}
-                    </h4>
-
-                    {/* Foto Auto-Adaptável que Estende Completando a Área */}
-                    {product.imageUrl && (
-                      <div className={`w-full aspect-[16/10] sm:aspect-video rounded-xl overflow-hidden mb-2 relative flex items-center justify-center ${
-                        isLight ? 'bg-slate-100' : 'bg-black/30'
-                      }`}>
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Preço e Botão Adicionar */}
-                  <div className={`mt-2.5 pt-2 border-t flex items-center justify-between gap-1.5 ${
-                    isLight ? 'border-slate-100' : 'border-[#1A2533]'
-                  }`}>
-                    <div>
-                      <span className={`text-sm font-black tabular-nums block ${
+                    {/* Preço e Botão Adicionar */}
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <span className={`text-sm font-black tabular-nums ${
                         isLight ? 'text-sky-600' : 'text-sky-400'
                       }`}>
                         R$ {price.toFixed(2).replace('.', ',')}
                       </span>
-                    </div>
 
-                    <div className="flex items-center gap-1">
-                      {isAdega && !isCardapio && enabledPacks.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedProductForPackModal(product);
-                          }}
-                          className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
-                            isLight
-                              ? 'bg-slate-100 hover:bg-slate-200 text-sky-700 border-slate-200'
-                              : 'bg-[#070B0E] hover:bg-[#141E28] text-sky-400 border-[#1A2533]'
-                          }`}
-                          title="Fardos e caixas"
-                        >
-                          📦 Fardos
-                        </button>
-                      )}
+                      <div className="flex items-center gap-1">
+                        {isAdega && !isCardapio && enabledPacks.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProductForPackModal(product);
+                            }}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
+                              isLight
+                                ? 'bg-slate-100 hover:bg-slate-200 text-sky-700 border-slate-200'
+                                : 'bg-[#070B0E] hover:bg-[#141E28] text-sky-400 border-[#1A2533]'
+                            }`}
+                            title="Fardos e caixas"
+                          >
+                            📦 Fardos
+                          </button>
+                        )}
 
-                      {/* Botão Adicionar com Formatação Igual ao Selecionado Dinheiro/PIX */}
-                      <span className="w-7 h-7 rounded-xl nuvi-btn-cyber-blue text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#0C2340]/40 border-0 transition-transform active:scale-95 hover:brightness-110">
-                        <Plus className="w-4 h-4 stroke-[2.5]" />
-                      </span>
+                        <span className="w-7 h-7 rounded-lg nuvi-btn-cyber-blue text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#0C2340]/40 border-0 transition-transform active:scale-95 hover:brightness-110">
+                          <Plus className="w-4 h-4 stroke-[2.5]" />
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            /* Modo Grade Fixo em 4 Colunas */
+            <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-3 overflow-y-auto pr-1 ${
+              isFullscreenPDV ? 'flex-1 min-h-0' : 'max-h-[640px]'
+            }`}>
+              {filteredProducts.map(product => {
+                const price = product.promoPrice ?? product.price;
+                const isBeverage = product.category === 'bebidas' || product.category === 'bebidas_lanche' || product.category === 'refrigerantes' || product.category === 'sucos' || product.category === 'cervejas';
+                const isCardapio = (isFoodOrPizza && !isBeverage) || product.itemType === 'cardapio';
+                const isLowStock = !isCardapio && product.stockQuantity <= (product.minStockAlert || 5);
+                const isOutOfStock = !isCardapio && product.stockQuantity <= 0;
+                const enabledPacks = isCardapio ? [] : getEffectiveProductPacks(product);
+
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => {
+                      addItemToCart(product);
+                      playBeep(true);
+                    }}
+                    className={`p-3 rounded-2xl border flex flex-col justify-between transition-all relative cursor-pointer group active:scale-[0.98] select-none shadow-sm ${
+                      isLight
+                        ? 'bg-white border-slate-200 hover:border-sky-400 hover:shadow-md'
+                        : 'border-[#1A2533] bg-[#0D141C] hover:bg-[#121B26] hover:border-sky-500/50'
+                    } ${isOutOfStock ? 'opacity-60' : ''}`}
+                  >
+                    <div>
+                      {/* Header: Volume/Tipo e Estoque */}
+                      <div className="flex items-center justify-between text-[10px] mb-1.5">
+                        <span className={`truncate font-semibold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                          {product.volume || (isCardapio ? '🍽️ Cardápio' : 'Unidade')}
+                        </span>
+                        <span className={`px-1.5 py-0.5 rounded font-bold text-[9px] ${
+                          isCardapio
+                            ? 'text-emerald-500 bg-emerald-500/15 border border-emerald-500/30'
+                            : isOutOfStock 
+                            ? 'text-red-500 bg-red-500/15 border border-red-500/30' 
+                            : isLowStock 
+                            ? 'text-amber-500 bg-amber-500/15 border border-amber-500/30' 
+                            : isLight 
+                            ? 'text-slate-600 bg-slate-100 border border-slate-200'
+                            : 'text-neutral-300 bg-neutral-800'
+                        }`}>
+                          {isCardapio ? 'Feito na Hora' : `${product.stockQuantity} un`}
+                        </span>
+                      </div>
+
+                      {/* Descrição / Nome do Produto no Topo */}
+                      <h4 className={`text-xs font-bold leading-snug line-clamp-2 min-h-[30px] mb-2 ${
+                        isLight ? 'text-slate-800' : 'text-white'
+                      }`}>
+                        {product.name}
+                      </h4>
+
+                      {/* Foto Auto-Adaptável que Estende Completando a Área */}
+                      {product.imageUrl && (
+                        <div className={`w-full aspect-[16/10] sm:aspect-video rounded-xl overflow-hidden mb-2 relative flex items-center justify-center ${
+                          isLight ? 'bg-slate-100' : 'bg-black/30'
+                        }`}>
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Preço e Botão Adicionar */}
+                    <div className={`mt-2.5 pt-2 border-t flex items-center justify-between gap-1.5 ${
+                      isLight ? 'border-slate-100' : 'border-[#1A2533]'
+                    }`}>
+                      <div>
+                        <span className={`text-sm font-black tabular-nums block ${
+                          isLight ? 'text-sky-600' : 'text-sky-400'
+                        }`}>
+                          R$ {price.toFixed(2).replace('.', ',')}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        {isAdega && !isCardapio && enabledPacks.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProductForPackModal(product);
+                            }}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
+                              isLight
+                                ? 'bg-slate-100 hover:bg-slate-200 text-sky-700 border-slate-200'
+                                : 'bg-[#070B0E] hover:bg-[#141E28] text-sky-400 border-[#1A2533]'
+                            }`}
+                            title="Fardos e caixas"
+                          >
+                            📦 Fardos
+                          </button>
+                        )}
+
+                        {/* Botão Adicionar */}
+                        <span className="w-7 h-7 rounded-xl nuvi-btn-cyber-blue text-white flex items-center justify-center font-bold text-xs shadow-md shadow-[#0C2340]/40 border-0 transition-transform active:scale-95 hover:brightness-110">
+                          <Plus className="w-4 h-4 stroke-[2.5]" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN: Active Sale Checkout / Cashier Box */}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '../../context/StoreContext';
-import { Check, X, Sparkles, QrCode, ChefHat, Truck, ShoppingCart, Boxes, BarChart3, TrendingUp } from 'lucide-react';
+import { Check, X, Sparkles, QrCode, ChefHat, Truck, ShoppingCart, Boxes, BarChart3, TrendingUp, UtensilsCrossed } from 'lucide-react';
 
 interface PlansComparisonTableProps {
   selectedPlanId?: string;
@@ -128,10 +128,10 @@ export const PlansComparisonTable: React.FC<PlansComparisonTableProps> = ({
               isLight ? 'bg-slate-100/90 border-slate-200 text-slate-700' : 'bg-[#0B0F14] border-[#1C2631] text-slate-400'
             }`}>
               <th className="py-2.5 px-3 min-w-[170px] sm:min-w-[190px]">Plano & Valor</th>
-              <th className="py-2.5 px-1.5 text-center">
+              <th className="py-2.5 px-2 text-center min-w-[130px]">
                 <div className="flex items-center justify-center gap-1">
-                  <QrCode className="w-3.5 h-3.5 text-sky-500" />
-                  <span>Mesas</span>
+                  <UtensilsCrossed className="w-3.5 h-3.5 text-sky-500" />
+                  <span>Gestão das Mesas</span>
                 </div>
               </th>
               <th className="py-2.5 px-1.5 text-center">

@@ -412,23 +412,26 @@ export const StorefrontView: React.FC = () => {
               <div className={`px-4 sm:px-6 pb-4 sm:pb-6 relative z-20 -mt-6 sm:-mt-8 rounded-t-[28px] sm:rounded-t-3xl pt-0 transition-colors ${
                 isLight ? 'bg-white' : 'bg-neutral-950'
               }`}>
-                {/* 1. LOGO NO CANTO ARREDONDADO ESQUERDO (CONFORME SOLICITADO PELO USUÁRIO) */}
-                <div className="flex justify-start pl-2 sm:pl-4 -mt-10 sm:-mt-12 mb-2">
+                {/* 1. LOGO QUADRADINHO NO CANTO SUPERIOR ESQUERDO SOBRE O RAIO DA BORDA */}
+                <div className="flex justify-start -mt-12 sm:-mt-14 mb-2.5">
                   <div
                     onClick={() => setIsStoreInfoModalOpen(true)}
-                    className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full p-1 shadow-2xl border-4 cursor-pointer shrink-0 transition-transform hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 ${
+                    className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl p-1 shadow-2xl border-4 cursor-pointer shrink-0 transition-transform hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 ${
                       isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
                     }`}
+                    style={{
+                      boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.28), 0 4px 12px -2px rgba(0, 0, 0, 0.15)'
+                    }}
                   >
                     {currentTenant.branding.logoUrl ? (
                       <img
                         src={currentTenant.branding.logoUrl}
                         alt={currentTenant.name}
-                        className="w-full h-full object-cover rounded-full"
+                        className="w-full h-full object-cover rounded-xl"
                       />
                     ) : (
                       <div
-                        className="w-full h-full rounded-full flex items-center justify-center font-black text-2xl text-white shadow-inner"
+                        className="w-full h-full rounded-xl flex items-center justify-center font-black text-2xl text-white shadow-inner"
                         style={{ backgroundColor: brandPrimary }}
                       >
                         {currentTenant.name.charAt(0)}
@@ -570,55 +573,6 @@ export const StorefrontView: React.FC = () => {
                             <span>Frete: R$ {deliveryFee.toFixed(2).replace('.', ',')}</span>
                           </>
                         )}
-                      </div>
-
-                      {/* DIVISÓRIA FINA */}
-                      <div className={`border-t my-1.5 ${isLight ? 'border-slate-100' : 'border-neutral-800'}`} />
-
-                      {/* TEMPO DE ENTREGA E SACOLA RÁPIDA */}
-                      <div className="py-1 text-xs space-y-0.5">
-                        <div className="flex items-center justify-between font-medium">
-                          <div className="flex items-center gap-2">
-                            <span className="font-extrabold" style={{ color: isLight ? '#0f172a' : '#ffffff' }}>
-                              Padrão
-                            </span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-semibold">
-                              <Clock className="w-3.5 h-3.5 text-slate-400" />
-                              {currentTenant.config?.estimatedDeliveryTime || '10-25'} min
-                            </span>
-                            <span>•</span>
-                            <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
-                              {deliveryFee > 0 ? `R$ ${deliveryFee.toFixed(2).replace('.', ',')}` : 'Frete Grátis'}
-                            </span>
-                          </div>
-
-                          {/* Botão Sacola Rápida */}
-                          <button
-                            type="button"
-                            onClick={() => setIsCartOpen(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer"
-                            style={{
-                              backgroundColor: `${brandAccent}15`,
-                              borderColor: `${brandAccent}40`,
-                              color: isLight ? '#0f172a' : brandAccent
-                            }}
-                          >
-                            <ShoppingCart className="w-3.5 h-3.5" style={{ color: brandAccent }} />
-                            <span>Sacola</span>
-                            {cart.length > 0 && (
-                              <span
-                                className="w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-white shrink-0 ml-0.5"
-                                style={{ backgroundColor: brandAccent }}
-                              >
-                                {cart.reduce((sum, item) => sum + item.quantity, 0)}
-                              </span>
-                            )}
-                          </button>
-                        </div>
-                        <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                          Mais opções disponíveis na sacola
-                        </p>
                       </div>
                     </div>
                   );

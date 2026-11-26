@@ -23,7 +23,9 @@ import {
   MapPin,
   Phone,
   User,
-  Zap
+  Zap,
+  Search,
+  ChevronDown
 } from 'lucide-react';
 
 interface NewTenantModalProps {
@@ -46,6 +48,15 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
   // Estados do formulário
   const [selectedSegment, setSelectedSegment] = useState<BusinessSegmentType>('adega');
   const segmentConfig = getSegmentById(selectedSegment);
+
+  const [isBranchFilterOpen, setIsBranchFilterOpen] = useState(false);
+  const [branchSearchQuery, setBranchSearchQuery] = useState('');
+
+  const filteredBranches = BUSINESS_SEGMENTS.filter(seg =>
+    seg.title.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
+    seg.shortLabel.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
+    seg.pitch.toLowerCase().includes(branchSearchQuery.toLowerCase())
+  );
 
   const [name, setName] = useState('');
   const [slogan, setSlogan] = useState('');
@@ -450,8 +461,8 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
               {step === 1 && (
                 <div className="space-y-6">
 
-                  {/* 1. Escolha do Ramo / Segmento de Comércio */}
-                  <div className={`p-4 rounded-2xl border space-y-3 ${
+                  {/* 1. Escolha do Ramo / Segmento de Comércio Compacto com Busca */}
+                  <div className={`p-4 rounded-2xl border space-y-2.5 ${
                     isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#121820] border-[#1C2631]'
                   }`}>
                     <div className="flex items-center justify-between">
@@ -463,40 +474,111 @@ export const NewTenantModal: React.FC<NewTenantModalProps> = ({
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {BUSINESS_SEGMENTS.map((seg) => {
-                        const isSelected = selectedSegment === seg.id;
-                        return (
-                          <button
-                            key={seg.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedSegment(seg.id);
-                              if (!slogan) setSlogan(seg.sloganExample);
-                            }}
-                            className={`p-2.5 rounded-xl text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 outline-none ${
-                              isSelected
-                                ? 'nuvi-btn-cyber-blue text-white shadow-md shadow-[#0C2340]/40'
-                                : isLight
-                                ? 'bg-white hover:bg-sky-50/50 border border-slate-200 text-slate-700'
-                                : 'bg-[#0B0F12] hover:bg-[#161D24] border border-[#1C2631] text-slate-300'
+                    {/* Botão Seletor Compacto */}
+                    <button
+                      type="button"
+                      onClick={() => setIsBranchFilterOpen(!isBranchFilterOpen)}
+                      className={`w-full p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                        isLight
+                          ? 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800'
+                          : 'bg-[#0E1520] hover:bg-[#131b26] border-[#1C2631] text-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xl leading-none">{segmentConfig.emoji}</span>
+                        <div className="text-left">
+                          <span className="font-bold text-xs block text-slate-900 dark:text-white">
+                            {segmentConfig.title}
+                          </span>
+                          <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                            Clique para alterar o ramo
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-neutral-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-neutral-700">
+                          Selecionado
+                        </span>
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isBranchFilterOpen ? 'rotate-180' : ''}`} />
+                      </div>
+                    </button>
+
+                    {/* Painel do Filtro com Busca em tempo real */}
+                    {isBranchFilterOpen && (
+                      <div className={`p-3 rounded-2xl border shadow-xl space-y-2.5 transition-all ${
+                        isLight ? 'bg-white border-slate-200 shadow-slate-200/50' : 'bg-[#0E1520] border-[#1C2631] shadow-black/80'
+                      }`}>
+                        {/* Input de Busca com ícone de lupa */}
+                        <div className="relative">
+                          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <input
+                            type="text"
+                            value={branchSearchQuery}
+                            onChange={(e) => setBranchSearchQuery(e.target.value)}
+                            placeholder="Digite para buscar ramo (ex: Adega, Pizzaria)..."
+                            className={`w-full pl-9 pr-8 py-2 rounded-lg text-xs font-medium outline-none border focus:border-sky-500 transition-colors ${
+                              isLight
+                                ? 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white'
+                                : 'bg-[#080E17] border-[#1C2631] text-white placeholder-slate-500'
                             }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-xl leading-none">{seg.emoji}</span>
-                              {isSelected && (
-                                <CheckCircle2 className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-                              )}
-                            </div>
-                            <span className={`text-[11px] leading-tight line-clamp-1 ${
-                              isSelected ? 'text-white font-bold' : 'font-medium'
-                            }`}>
-                              {seg.shortLabel}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                            autoFocus
+                          />
+                          {branchSearchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setBranchSearchQuery('')}
+                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Cabeçalho da Lista */}
+                        <div className="flex items-center justify-between px-1 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                          <span>Marcar ramo exibido ({filteredBranches.length})</span>
+                        </div>
+
+                        {/* Lista vertical rolável com barra de scroll */}
+                        <div className="max-h-56 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
+                          {filteredBranches.map((seg) => {
+                            const isSelected = selectedSegment === seg.id;
+                            return (
+                              <button
+                                key={seg.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedSegment(seg.id);
+                                  if (!slogan) setSlogan(seg.sloganExample);
+                                  setIsBranchFilterOpen(false);
+                                  setBranchSearchQuery('');
+                                }}
+                                className={`w-full p-2.5 rounded-lg flex items-center justify-between text-left transition-colors cursor-pointer ${
+                                  isSelected
+                                    ? isLight
+                                      ? 'bg-slate-100 text-slate-900 font-bold'
+                                      : 'bg-slate-800 text-white font-bold'
+                                    : isLight
+                                    ? 'hover:bg-slate-100 text-slate-700'
+                                    : 'hover:bg-[#121B27] text-slate-300'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <span className="text-lg leading-none">{seg.emoji}</span>
+                                  <div>
+                                    <span className="text-xs font-bold block">{seg.title}</span>
+                                    <span className="text-[10px] text-slate-400">{seg.shortLabel}</span>
+                                  </div>
+                                </div>
+                                {isSelected && (
+                                  <Check className="w-4 h-4 text-sky-500 stroke-[2.5]" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* 2. Nome do Estabelecimento e Slogan Comercial */}
