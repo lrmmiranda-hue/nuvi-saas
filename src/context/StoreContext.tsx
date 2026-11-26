@@ -79,7 +79,8 @@ interface StoreContextType {
     items: OrderItem[],
     paymentMethod: PaymentMethod,
     customerName?: string,
-    cashChangeFor?: number | null
+    cashChangeFor?: number | null,
+    discount?: number
   ) => Order;
   closeAndConsolidateTableOrders: (
     tableNumber: string,
@@ -1740,10 +1741,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     items: OrderItem[],
     paymentMethod: PaymentMethod,
     customerName = 'Cliente Balcão',
-    cashChangeFor?: number | null
+    cashChangeFor?: number | null,
+    discount = 0
   ): Order => {
     const subtotal = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
-    const total = subtotal; // no delivery fee for in-store balcão
+    const validDiscount = Math.min(subtotal, Math.max(0, discount || 0));
+    const total = Math.max(0, subtotal - validDiscount); // no delivery fee for in-store balcão
 
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const orderId = `PDV-${randomNum}`;
@@ -1760,6 +1763,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       deliveryFee: 0,
       items,
       subtotal,
+      discount: validDiscount > 0 ? validDiscount : undefined,
       total,
       paymentMethod,
       cashChangeFor,

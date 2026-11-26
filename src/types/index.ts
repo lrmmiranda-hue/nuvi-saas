@@ -82,6 +82,7 @@ export interface Order {
   deliveryFee: number;
   items: OrderItem[];
   subtotal: number;
+  discount?: number;
   total: number;
   paymentMethod: PaymentMethod;
   cashChangeFor?: number | null;
