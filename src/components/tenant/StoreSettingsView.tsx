@@ -15,6 +15,7 @@ import {
   UtensilsCrossed,
   LayoutGrid,
   List,
+  ShoppingCart,
   CheckCircle2,
   Copy,
   Check,

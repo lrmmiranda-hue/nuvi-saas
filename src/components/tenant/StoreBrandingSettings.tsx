@@ -361,12 +361,12 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                             <div className={`px-4 pb-4 relative z-20 -mt-6 rounded-t-3xl pt-0 transition-colors ${
                               isLight ? 'bg-white' : 'bg-neutral-950'
                             }`}>
-                              {/* Cabeçalho do Card: Logo + Nome & Slogan na frente */}
-                              <div className="flex items-end justify-between gap-2.5 -mt-12 mb-2">
+                              {/* Cabeçalho do Card: Logo com metade em cima da imagem + Nome & Slogan na frente */}
+                              <div className="flex items-end justify-between gap-2.5 mb-2">
                                 <div className="flex items-end gap-2.5 min-w-0 flex-1">
-                                  {/* Logo Quadradinha */}
+                                  {/* Logo Quadradinha: metade em cima da foto e metade no card */}
                                   <div
-                                    className={`w-18 h-18 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
+                                    className={`w-20 h-20 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 -mt-10 ${
                                       isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
                                     }`}
                                     style={{
@@ -390,7 +390,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                                   </div>
 
                                   {/* Nome e Slogan na frente da logo */}
-                                  <div className="min-w-0 flex-1 pb-1">
+                                  <div className="min-w-0 flex-1 pb-1 pt-2">
                                     <div className="flex items-center gap-1.5 min-w-0">
                                       <span
                                         className="w-4 h-4 rounded-full flex items-center justify-center text-white shrink-0"
@@ -646,10 +646,10 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         isLight ? 'bg-white' : 'bg-neutral-950'
                       }`}>
                         {/* Cabeçalho do Card: Logo + Nome & Slogan na frente */}
-                        <div className="flex items-end justify-between gap-4 -mt-16 mb-3">
+                        <div className="flex items-end justify-between gap-4 mb-3">
                           <div className="flex items-end gap-4 min-w-0 flex-1">
                             <div
-                              className={`w-24 h-24 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 ${
+                              className={`w-24 h-24 rounded-2xl shadow-2xl border-4 shrink-0 overflow-hidden flex items-center justify-center relative z-30 -mt-12 ${
                                 isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
                               }`}
                               style={{

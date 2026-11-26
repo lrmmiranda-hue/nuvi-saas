@@ -412,19 +412,19 @@ export const StorefrontView: React.FC = () => {
               <div className={`px-4 sm:px-6 pb-4 sm:pb-6 relative z-20 -mt-6 sm:-mt-8 rounded-t-[28px] sm:rounded-t-3xl pt-0 transition-colors ${
                 isLight ? 'bg-white' : 'bg-neutral-950'
               }`}>
-                {/* 1. CABEÇALHO DO CARD: LOGO QUADRADINHO + NOME E SLOGAN NA FRENTE DO LOGO */}
-                <div className="flex items-end justify-between gap-3 sm:gap-4 -mt-14 sm:-mt-16 mb-2.5">
+                {/* 1. CABEÇALHO DO CARD: LOGO COM METADE SOBRE A IMAGEM + NOME E SLOGAN NA FRENTE */}
+                <div className="flex items-end justify-between gap-3 sm:gap-4 mb-2.5">
                   <div
                     onClick={() => setIsStoreInfoModalOpen(true)}
                     className="flex items-end gap-3 sm:gap-4 min-w-0 flex-1 cursor-pointer group"
                   >
-                    {/* LOGO QUADRADINHO NO CANTO SUPERIOR ESQUERDO SOBRE O RAIO DA BORDA */}
+                    {/* LOGO QUADRADINHO COM METADE EM CIMA DA IMAGEM E METADE NO CARD */}
                     <div
-                      className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-2xl border-4 shrink-0 transition-transform group-hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 ${
+                      className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-2xl border-4 shrink-0 transition-transform group-hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 -mt-10 sm:-mt-12 ${
                         isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
                       }`}
                       style={{
-                        boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.28), 0 4px 12px -2px rgba(0, 0, 0, 0.15)'
+                        boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.2)'
                       }}
                     >
                       {currentTenant.branding.logoUrl ? (
@@ -444,7 +444,7 @@ export const StorefrontView: React.FC = () => {
                     </div>
 
                     {/* NOME DA LOJA (DONANA) E SLOGAN NA FRENTE DO LOGO */}
-                    <div className="min-w-0 flex-1 pb-1">
+                    <div className="min-w-0 flex-1 pb-1 pt-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
