@@ -381,12 +381,43 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                               </div>
                             </div>
                           </div>
+
+                          {/* Flyer / Badge de Aviso no Banner */}
+                          {brandingEdits?.badgeNotice && (
+                            <div className="absolute bottom-6 right-3 z-20 max-w-[85%] pointer-events-none">
+                              <div
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black shadow-lg backdrop-blur-md border border-white/30 text-white truncate"
+                                style={{
+                                  background: `linear-gradient(135deg, ${brandPrimary}ee, ${brandAccent}ee)`,
+                                  boxShadow: `0 4px 15px ${brandPrimary}60`,
+                                }}
+                              >
+                                <Megaphone className="w-3 h-3 text-white shrink-0 animate-bounce" />
+                                <span className="truncate">{brandingEdits.badgeNotice}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {/* Card Sobreposto com Logo Quadradinha + Nome e Slogan na Frente */}
                         <div className={`px-4 pb-4 relative z-20 -mt-6 rounded-t-3xl pt-0 transition-colors ${
                           isLight ? 'bg-white' : 'bg-neutral-950'
                         }`}>
+                          {/* Linha Acetinada com Luz Fluindo da DIREITA para a ESQUERDA em Degradê */}
+                          <div className="absolute top-0 inset-x-0 h-[2.5px] pointer-events-none rounded-t-3xl overflow-hidden z-20">
+                            <div
+                              className="absolute inset-0 opacity-40"
+                              style={{
+                                background: `linear-gradient(270deg, ${brandAccent}, ${brandPrimary}, ${brandAccent})`
+                              }}
+                            />
+                            <div
+                              className="absolute inset-y-0 w-2/3 animate-border-light-rtl mix-blend-screen"
+                              style={{
+                                background: `linear-gradient(270deg, transparent 0%, ${brandAccent}90 20%, #ffffff 50%, ${brandPrimary}90 80%, transparent 100%)`
+                              }}
+                            />
+                          </div>
                           {/* Cabeçalho do Card: Logo com metade em cima da imagem + Nome & Slogan na frente */}
                           <div className="flex items-end justify-between gap-2.5 mb-2">
                             <div className="flex items-end gap-2.5 min-w-0 flex-1">
@@ -538,6 +569,22 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           )}
                         </div>
                       </div>
+
+                      {/* Flyer / Badge de Aviso no Banner Desktop */}
+                      {brandingEdits?.badgeNotice && (
+                        <div className="absolute bottom-8 right-6 z-20 max-w-md pointer-events-none">
+                          <div
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg backdrop-blur-md border border-white/30 text-white truncate"
+                            style={{
+                              background: `linear-gradient(135deg, ${brandPrimary}ee, ${brandAccent}ee)`,
+                              boxShadow: `0 4px 18px ${brandPrimary}60`,
+                            }}
+                          >
+                            <Megaphone className="w-3.5 h-3.5 text-white shrink-0 animate-bounce" />
+                            <span className="truncate">{brandingEdits.badgeNotice}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 }
@@ -599,12 +646,43 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           </span>
                         </div>
                       </div>
+
+                      {/* Flyer / Badge de Aviso no Banner Desktop */}
+                      {brandingEdits?.badgeNotice && (
+                        <div className="absolute bottom-8 right-6 z-20 max-w-md pointer-events-none">
+                          <div
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg backdrop-blur-md border border-white/30 text-white truncate"
+                            style={{
+                              background: `linear-gradient(135deg, ${brandPrimary}ee, ${brandAccent}ee)`,
+                              boxShadow: `0 4px 18px ${brandPrimary}60`,
+                            }}
+                          >
+                            <Megaphone className="w-3.5 h-3.5 text-white shrink-0 animate-bounce" />
+                            <span className="truncate">{brandingEdits.badgeNotice}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Card Sobreposto com Logo Quadradinha + Nome e Slogan na Frente no Computador */}
                     <div className={`px-6 pb-6 relative z-20 -mt-8 rounded-t-3xl pt-0 transition-colors ${
                       isLight ? 'bg-white' : 'bg-neutral-950'
                     }`}>
+                      {/* Linha Acetinada com Luz Fluindo da DIREITA para a ESQUERDA em Degradê */}
+                      <div className="absolute top-0 inset-x-0 h-[2.5px] pointer-events-none rounded-t-3xl overflow-hidden z-20">
+                        <div
+                          className="absolute inset-0 opacity-40"
+                          style={{
+                            background: `linear-gradient(270deg, ${brandAccent}, ${brandPrimary}, ${brandAccent})`
+                          }}
+                        />
+                        <div
+                          className="absolute inset-y-0 w-2/3 animate-border-light-rtl mix-blend-screen"
+                          style={{
+                            background: `linear-gradient(270deg, transparent 0%, ${brandAccent}90 20%, #ffffff 50%, ${brandPrimary}90 80%, transparent 100%)`
+                          }}
+                        />
+                      </div>
                       {/* Cabeçalho do Card: Logo + Nome & Slogan na frente */}
                       <div className="flex items-end justify-between gap-4 mb-3">
                         <div className="flex items-end gap-4 min-w-0 flex-1">
@@ -956,40 +1034,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                   </button>
                 );
               })}
-            </div>
-
-            {/* DICAS: O QUE COLOCAR NOS BANNERS DE SLIDE DO CARROSSEL */}
-            <div className={`p-4 rounded-xl border space-y-2.5 transition-colors ${
-              isLight ? 'bg-amber-50/70 border-amber-200' : 'bg-amber-950/20 border-amber-500/30'
-            }`}>
-              <div className="flex items-center gap-2">
-                <Megaphone className="w-4 h-4 text-amber-500 shrink-0" />
-                <span className="text-xs font-black text-amber-700 dark:text-amber-300">
-                  💡 O que você pode colocar nos Banners de Slide (Dicas para aumentar vendas):
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-slate-700 dark:text-slate-300">
-                <div className="p-2.5 rounded-lg bg-white/80 dark:bg-black/30 border border-amber-200/60 dark:border-amber-500/20 space-y-1">
-                  <span className="text-base">🍕</span>
-                  <strong className="block text-slate-900 dark:text-white font-bold">1. Promoções & Combos</strong>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Ex: "Pizza Grande + Refri 2L", "Compre 1 Leve 2", "Prato do Dia".</p>
-                </div>
-                <div className="p-2.5 rounded-lg bg-white/80 dark:bg-black/30 border border-amber-200/60 dark:border-amber-500/20 space-y-1">
-                  <span className="text-base">🛵</span>
-                  <strong className="block text-slate-900 dark:text-white font-bold">2. Frete & Entregas</strong>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Ex: "Frete Grátis acima de R$ 50", "Entrega Rápida em 30 min".</p>
-                </div>
-                <div className="p-2.5 rounded-lg bg-white/80 dark:bg-black/30 border border-amber-200/60 dark:border-amber-500/20 space-y-1">
-                  <span className="text-base">📸</span>
-                  <strong className="block text-slate-900 dark:text-white font-bold">3. Fotos dos Melhores Pratos</strong>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Fotos de alta qualidade dos produtos mais vendidos para atrair clientes.</p>
-                </div>
-                <div className="p-2.5 rounded-lg bg-white/80 dark:bg-black/30 border border-amber-200/60 dark:border-amber-500/20 space-y-1">
-                  <span className="text-base">🔥</span>
-                  <strong className="block text-slate-900 dark:text-white font-bold">4. Ambiente & Tradição</strong>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Foto do forno à lenha, fachada da loja, adega ou preparo artesanal.</p>
-                </div>
-              </div>
             </div>
           </div>
 

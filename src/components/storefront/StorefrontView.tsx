@@ -38,6 +38,7 @@ import {
   X,
   ArrowLeft,
   Info,
+  Megaphone,
   CreditCard,
   ExternalLink,
   Sun,
@@ -448,19 +449,43 @@ export const StorefrontView: React.FC = () => {
                     </span>
                   </div>
                 </div>
+
+                {/* Badge de Aviso Promocional no Banner (Flyer) */}
+                {currentTenant.branding?.badgeNotice && (
+                  <div className="absolute bottom-9 right-3 sm:right-6 z-20 max-w-[85%] sm:max-w-md pointer-events-none">
+                    <div
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-black shadow-lg backdrop-blur-md border border-white/30 text-white truncate animate-fade-in"
+                      style={{
+                        background: `linear-gradient(135deg, ${brandPrimary}ee, ${brandAccent}ee)`,
+                        boxShadow: `0 4px 18px ${brandPrimary}60`,
+                      }}
+                    >
+                      <Megaphone className="w-3.5 h-3.5 text-white shrink-0 animate-bounce" />
+                      <span className="truncate">{currentTenant.branding.badgeNotice}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* CARD SOBREPOSTO ESTILO IFOOD (CONFORME FOTO DO USUÁRIO) */}
               <div className={`px-4 sm:px-6 pb-4 sm:pb-6 relative z-20 -mt-6 sm:-mt-8 rounded-t-[28px] sm:rounded-t-3xl pt-0 transition-colors ${
                 isLight ? 'bg-white' : 'bg-neutral-950'
               }`}>
-                {/* Linha Acetinada Suave de Transição com a Mistura da Primária e Secundária */}
-                <div
-                  className="absolute top-0 inset-x-0 h-[2.5px] pointer-events-none rounded-t-3xl"
-                  style={{
-                    background: `linear-gradient(90deg, transparent 0%, ${brandPrimary} 25%, ${brandAccent} 75%, transparent 100%)`
-                  }}
-                />
+                {/* Linha Acetinada com Luz Reluzente Fluindo da DIREITA para ESQUERDA em Degradê (Superior) */}
+                <div className="absolute top-0 inset-x-0 h-[2.5px] pointer-events-none rounded-t-3xl overflow-hidden z-20">
+                  <div
+                    className="absolute inset-0 opacity-40"
+                    style={{
+                      background: `linear-gradient(270deg, ${brandAccent}, ${brandPrimary}, ${brandAccent})`
+                    }}
+                  />
+                  <div
+                    className="absolute inset-y-0 w-2/3 animate-border-light-rtl mix-blend-screen"
+                    style={{
+                      background: `linear-gradient(270deg, transparent 0%, ${brandAccent}90 20%, #ffffff 50%, ${brandPrimary}90 80%, transparent 100%)`
+                    }}
+                  />
+                </div>
 
                 {/* 1. CABEÇALHO DO CARD: LOGO COM METADE SOBRE A IMAGEM + NOME E SLOGAN NA FRENTE */}
                 <div className="flex items-end justify-between gap-3 sm:gap-4 mb-2.5">
@@ -759,6 +784,22 @@ export const StorefrontView: React.FC = () => {
                     </div>
                   );
                 })()}
+              </div>
+
+              {/* Linha Acetinada Inferior com Luz Fluindo da DIREITA para a ESQUERDA em Degradê */}
+              <div className="relative h-[2.5px] w-full overflow-hidden pointer-events-none">
+                <div
+                  className="absolute inset-0 opacity-40"
+                  style={{
+                    background: `linear-gradient(270deg, ${brandAccent}, ${brandPrimary}, ${brandAccent})`
+                  }}
+                />
+                <div
+                  className="absolute inset-y-0 w-2/3 animate-border-light-rtl mix-blend-screen"
+                  style={{
+                    background: `linear-gradient(270deg, transparent 0%, ${brandAccent}90 20%, #ffffff 50%, ${brandPrimary}90 80%, transparent 100%)`
+                  }}
+                />
               </div>
             </div>
         );
