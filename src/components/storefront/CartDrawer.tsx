@@ -52,6 +52,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   } = useStore();
 
   const isLight = themeMode === 'light';
+  const brandAccent = tenant.branding?.accentColor || '#F59E0B';
+  const brandPrimary = tenant.branding?.primaryColor || '#881337';
   const isTablesOnly = tenant.config?.storefrontServiceMode === 'tables_only';
   const isDeliveryOnly = tenant.config?.storefrontServiceMode === 'delivery_only';
   const tableSelectionMode = tenant.config?.tableSelectionMode || 'both';
@@ -229,15 +231,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-x-0 top-0 bottom-[58px] sm:bottom-0 sm:inset-0 z-40 sm:z-50 overflow-hidden">
+    <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
       {/* Backdrop para desktop */}
       <div 
         className="hidden sm:block absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" 
         onClick={onClose} 
       />
 
-      <div className="absolute inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:max-w-full flex">
-        <div className={`w-full sm:w-screen sm:max-w-md sm:border-l flex flex-col shadow-2xl transition-colors ${
+      <div className="relative w-full h-full sm:w-screen sm:max-w-md sm:border-l flex flex-col shadow-2xl transition-colors">
+        <div className={`w-full h-full flex flex-col shadow-2xl transition-colors ${
           isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-neutral-900 border-neutral-800 text-neutral-100'
         }`}>
           
@@ -459,20 +461,30 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       <button
                         type="button"
                         onClick={() => setDeliveryType('delivery')}
-                        className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
+                        className={`p-2.5 rounded-2xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
                           deliveryType === 'delivery'
-                            ? isLight
-                              ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
-                              : 'border-blue-500 bg-neutral-800 text-white font-bold ring-1 ring-blue-500/40'
+                            ? 'font-bold shadow-sm'
                             : isLight
                             ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                             : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
                         }`}
-                        style={deliveryType === 'delivery' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
+                        style={
+                          deliveryType === 'delivery'
+                            ? {
+                                borderColor: brandPrimary,
+                                background: isLight ? `${brandPrimary}15` : `${brandPrimary}25`,
+                                boxShadow: `0 0 0 1.5px ${brandPrimary}`,
+                                color: isLight ? '#0f172a' : '#ffffff',
+                              }
+                            : {}
+                        }
                       >
-                        <Truck className="w-4 h-4" />
+                        <Truck
+                          className="w-4 h-4"
+                          style={deliveryType === 'delivery' ? { color: brandAccent } : {}}
+                        />
                         <span>Em Casa</span>
-                        <span className="text-[10px] opacity-75">
+                        <span className="text-[10px] opacity-80">
                           {deliveryFee === 0 ? 'Grátis' : `Taxa R$ ${deliveryFee.toFixed(2)}`}
                         </span>
                       </button>
@@ -480,18 +492,28 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       <button
                         type="button"
                         onClick={() => setDeliveryType('pickup')}
-                        className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
+                        className={`p-2.5 rounded-2xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
                           deliveryType === 'pickup'
-                            ? isLight
-                              ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
-                              : 'border-blue-500 bg-neutral-800 text-white font-bold ring-1 ring-blue-500/40'
+                            ? 'font-bold shadow-sm'
                             : isLight
                             ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                             : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
                         }`}
-                        style={deliveryType === 'pickup' && tenant.branding?.accentColor ? { borderColor: tenant.branding.accentColor } : {}}
+                        style={
+                          deliveryType === 'pickup'
+                            ? {
+                                borderColor: brandPrimary,
+                                background: isLight ? `${brandPrimary}15` : `${brandPrimary}25`,
+                                boxShadow: `0 0 0 1.5px ${brandPrimary}`,
+                                color: isLight ? '#0f172a' : '#ffffff',
+                              }
+                            : {}
+                        }
                       >
-                        <Store className="w-4 h-4" />
+                        <Store
+                          className="w-4 h-4"
+                          style={deliveryType === 'pickup' ? { color: brandAccent } : {}}
+                        />
                         <span>Retirar</span>
                         <span className="text-[10px] text-emerald-500 font-bold">Sem taxa</span>
                       </button>
@@ -500,19 +522,30 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         <button
                           type="button"
                           onClick={() => setDeliveryType('mesa')}
-                          className={`p-2.5 rounded-xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
+                          className={`p-2.5 rounded-2xl border flex flex-col items-center text-center gap-1 font-medium transition-all cursor-pointer ${
                             deliveryType === 'mesa'
-                              ? isLight
-                                ? 'border-blue-600 bg-blue-50 text-blue-950 font-bold ring-1 ring-blue-500/40'
-                                : 'border-blue-500 bg-blue-500/20 text-blue-300 font-bold ring-1 ring-blue-500/40'
+                              ? 'font-bold shadow-sm'
                               : isLight
                               ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
                               : 'border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white'
                           }`}
+                          style={
+                            deliveryType === 'mesa'
+                              ? {
+                                  borderColor: brandPrimary,
+                                  background: isLight ? `${brandPrimary}15` : `${brandPrimary}25`,
+                                  boxShadow: `0 0 0 1.5px ${brandPrimary}`,
+                                  color: isLight ? '#0f172a' : '#ffffff',
+                                }
+                              : {}
+                          }
                         >
-                          <UtensilsCrossed className="w-4 h-4 text-blue-500" />
+                          <UtensilsCrossed
+                            className="w-4 h-4"
+                            style={deliveryType === 'mesa' ? { color: brandAccent } : {}}
+                          />
                           <span>Na Mesa</span>
-                          <span className="text-[10px] text-blue-400 font-bold">Salão / Cozinha</span>
+                          <span className="text-[10px] text-emerald-500 font-bold">Salão / Cozinha</span>
                         </button>
                       )}
                     </div>
@@ -794,31 +827,33 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
           {/* Drawer Footer with Totals & WhatsApp CTA */}
           {cart.length > 0 && (
-            <div className={`p-6 border-t space-y-3 shrink-0 ${
+            <div className={`p-4 border-t space-y-2.5 shrink-0 ${
               isLight ? 'bg-slate-50 border-slate-200' : 'bg-neutral-950 border-neutral-800'
             }`}>
-              <div className={`space-y-1.5 text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
-                <div className="flex justify-between">
+              <div className={`space-y-1 text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                <div className="flex justify-between items-center">
                   <span>{deliveryType === 'mesa' ? 'Subtotal dos Itens:' : 'Subtotal:'}</span>
-                  <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-neutral-200'}`}>R$ {subtotal.toFixed(2)}</span>
+                  <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
+                    R$ {subtotal.toFixed(2)}
+                  </span>
                 </div>
                 {deliveryType !== 'mesa' && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center text-[11px]">
                     <span>Taxa de Entrega:</span>
-                    <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
+                    <span className={`font-bold ${deliveryFee === 0 ? 'text-emerald-500' : isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
                       {deliveryFee === 0 ? 'Grátis' : `R$ ${deliveryFee.toFixed(2)}`}
                     </span>
                   </div>
                 )}
-                <div className={`flex justify-between text-base font-bold pt-1 border-t ${
+                <div className={`flex justify-between items-center text-sm font-extrabold pt-1 border-t ${
                   isLight ? 'text-slate-900 border-slate-200' : 'text-white border-neutral-800'
                 }`}>
-                  <span>{deliveryType === 'mesa' ? 'TOTAL DESTA RODADA:' : 'TOTAL:'}</span>
+                  <span>TOTAL:</span>
                   <span 
-                    className="font-black text-lg"
-                    style={{ color: tenant.branding?.accentColor || '#3B82F6' }}
+                    className="font-black text-lg font-mono tabular-nums"
+                    style={{ color: brandPrimary }}
                   >
-                    R$ {subtotal.toFixed(2)}
+                    R$ {total.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -828,14 +863,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <button
                     type="button"
                     onClick={handleCheckout}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm shadow-lg transition-all active:scale-[0.98] cursor-pointer text-white bg-blue-600 hover:bg-blue-500 shadow-blue-500/25"
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer text-white"
+                    style={{
+                      background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                      boxShadow: `0 3px 12px ${brandPrimary}40`,
+                    }}
                   >
                     <UtensilsCrossed className="w-4 h-4" />
                     <span>🍽️ Enviar Itens para a Cozinha ({selectedTable ? `Mesa ${selectedTable.replace(/[^0-9]/g, '') || selectedTable}` : 'Informar Mesa'})</span>
                   </button>
 
-                  <p className="text-[10px] text-blue-500 dark:text-blue-400 text-center font-medium">
-                    ⚡ Pedido instantâneo! Seus itens entram direto no painel da cozinha e acumulam na comanda da sua mesa sem passar pelo WhatsApp.
+                  <p className="text-[10px] text-center font-medium opacity-80" style={{ color: brandAccent }}>
+                    ⚡ Pedido instantâneo! Entra direto na cozinha e acumula na comanda da sua mesa.
                   </p>
                 </>
               ) : tenant.whatsapp.enableWhatsAppOrders !== false ? (
@@ -843,14 +882,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <button
                     type="button"
                     onClick={handleCheckout}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98]"
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <MessageSquare className="w-4 h-4" />
                     <span>Finalizar Pedido via WhatsApp</span>
                   </button>
 
-                  <p className="text-[10px] text-neutral-500 text-center">
-                    Seu pedido será registrado no painel da adega e você enviará a confirmação diretamente no WhatsApp oficial.
+                  <p className="text-[10px] text-neutral-400 text-center">
+                    Seu pedido será registrado no painel de {tenant.name} e você enviará a confirmação no WhatsApp oficial.
                   </p>
                 </>
               ) : (
@@ -858,10 +897,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <button
                     type="button"
                     onClick={handleCheckout}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm shadow-lg transition-all active:scale-[0.98] cursor-pointer text-white"
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer text-white"
                     style={{
-                      backgroundColor: tenant.branding?.accentColor || '#3B82F6',
-                      color: '#ffffff',
+                      background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                      boxShadow: `0 3px 12px ${brandPrimary}40`,
                     }}
                   >
                     <Store className="w-4 h-4" />
@@ -869,7 +908,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   </button>
 
                   <p className="text-[10px] text-neutral-400 text-center">
-                    Modo Direto: Seu pedido será recebido e processado imediatamente pelo painel da loja sem necessidade de WhatsApp.
+                    Seu pedido será recebido e processado imediatamente pelo painel de {tenant.name}.
                   </p>
                 </>
               )}
