@@ -449,22 +449,6 @@ export const StorefrontView: React.FC = () => {
                     </span>
                   </div>
                 </div>
-
-                {/* Badge de Aviso Promocional no Banner (Flyer) - Posicionado para nunca cobrir o logo em nenhuma tela */}
-                {currentTenant.branding?.badgeNotice && (
-                  <div className="absolute top-14 sm:top-auto sm:bottom-8 right-3 sm:right-6 z-20 max-w-[85%] sm:max-w-md pointer-events-none">
-                    <div
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-black shadow-lg backdrop-blur-md border border-white/30 text-white truncate animate-fade-in"
-                      style={{
-                        background: `linear-gradient(135deg, ${brandPrimary}ee, ${brandAccent}ee)`,
-                        boxShadow: `0 4px 18px ${brandPrimary}60`,
-                      }}
-                    >
-                      <Megaphone className="w-3.5 h-3.5 text-white shrink-0 animate-bounce" />
-                      <span className="truncate">{currentTenant.branding.badgeNotice}</span>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* CARD SOBREPOSTO ESTILO IFOOD (CONFORME FOTO DO USUÁRIO) */}

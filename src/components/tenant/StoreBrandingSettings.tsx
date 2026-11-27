@@ -382,21 +382,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                             </div>
                           </div>
 
-                          {/* Flyer / Badge de Aviso no Banner - No topo abaixo dos botões para não colidir com o logo */}
-                          {brandingEdits?.badgeNotice && (
-                            <div className="absolute top-13 right-3 z-20 max-w-[85%] pointer-events-none">
-                              <div
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black shadow-lg backdrop-blur-md border border-white/30 text-white truncate"
-                                style={{
-                                  background: `linear-gradient(135deg, ${brandPrimary}ee, ${brandAccent}ee)`,
-                                  boxShadow: `0 4px 15px ${brandPrimary}60`,
-                                }}
-                              >
-                                <Megaphone className="w-3 h-3 text-white shrink-0 animate-bounce" />
-                                <span className="truncate">{brandingEdits.badgeNotice}</span>
-                              </div>
-                            </div>
-                          )}
                         </div>
 
                         {/* Card Sobreposto com Logo Quadradinha + Nome e Slogan na Frente */}
@@ -615,22 +600,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           </span>
                         </div>
                       </div>
-
-                      {/* Flyer / Badge de Aviso no Banner Desktop */}
-                      {brandingEdits?.badgeNotice && (
-                        <div className="absolute bottom-8 right-6 z-20 max-w-md pointer-events-none">
-                          <div
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg backdrop-blur-md border border-white/30 text-white truncate"
-                            style={{
-                              background: `linear-gradient(135deg, ${brandPrimary}ee, ${brandAccent}ee)`,
-                              boxShadow: `0 4px 18px ${brandPrimary}60`,
-                            }}
-                          >
-                            <Megaphone className="w-3.5 h-3.5 text-white shrink-0 animate-bounce" />
-                            <span className="truncate">{brandingEdits.badgeNotice}</span>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     {/* Card Sobreposto com Logo Quadradinha + Nome e Slogan na Frente no Computador */}
@@ -1478,60 +1447,36 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
           }`}>
             <h3 className={`text-sm font-bold flex items-center gap-2 ${isLight ? 'text-neutral-900' : 'text-white'}`}>
               <Edit3 className="w-4 h-4" style={{ color: activeAccent }} />
-              <span>Slogan & Avisos em Destaque na Vitrine</span>
+              <span>Slogan em Destaque na Vitrine</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className={`block text-xs font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-300'}`}>
-                    Slogan do Estabelecimento
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setSloganEdit(getSegmentById(currentTenant.businessSegment).sloganExample)}
-                    className="text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-opacity hover:opacity-80"
-                    style={{ color: activeAccent }}
-                    title="Usar sugestão recomendada para seu segmento"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    <span>Sugestão ({getSegmentById(currentTenant.businessSegment).shortLabel})</span>
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  value={sloganEdit}
-                  onChange={(e) => setSloganEdit(e.target.value)}
-                  placeholder={getSegmentById(currentTenant.businessSegment).sloganExample}
-                  className={`w-full px-3 py-2 rounded-xl text-xs border focus:outline-none ${
-                    isLight
-                      ? 'bg-neutral-50 border-neutral-300 text-neutral-900'
-                      : 'bg-neutral-950 border-neutral-800 text-white'
-                  }`}
-                />
-              </div>
-
-              <div>
-                <label className={`block text-xs font-semibold mb-1 ${isLight ? 'text-neutral-800' : 'text-neutral-300'}`}>
-                  Badge de Aviso no Banner (Flyer)
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className={`block text-xs font-semibold ${isLight ? 'text-neutral-800' : 'text-neutral-300'}`}>
+                  Slogan do Estabelecimento
                 </label>
-                <input
-                  type="text"
-                  value={brandingEdits?.badgeNotice || ''}
-                  onChange={(e) =>
-                    setBrandingEdits({
-                      ...(brandingEdits || currentTenant.branding),
-                      badgeNotice: e.target.value,
-                    })
-                  }
-                  placeholder="Ex: Entrega expressa em até 30 min!"
-                  className={`w-full px-3 py-2 rounded-xl text-xs border focus:outline-none ${
-                    isLight
-                      ? 'bg-neutral-50 border-neutral-300 text-neutral-900'
-                      : 'bg-neutral-950 border-neutral-800 text-white'
-                  }`}
-                />
+                <button
+                  type="button"
+                  onClick={() => setSloganEdit(getSegmentById(currentTenant.businessSegment).sloganExample)}
+                  className="text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-opacity hover:opacity-80"
+                  style={{ color: activeAccent }}
+                  title="Usar sugestão recomendada para seu segmento"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>Sugestão ({getSegmentById(currentTenant.businessSegment).shortLabel})</span>
+                </button>
               </div>
+              <input
+                type="text"
+                value={sloganEdit}
+                onChange={(e) => setSloganEdit(e.target.value)}
+                placeholder={getSegmentById(currentTenant.businessSegment).sloganExample}
+                className={`w-full px-3 py-2 rounded-xl text-xs border focus:outline-none ${
+                  isLight
+                    ? 'bg-neutral-50 border-neutral-300 text-neutral-900'
+                    : 'bg-neutral-950 border-neutral-800 text-white'
+                }`}
+              />
             </div>
           </div>
 
