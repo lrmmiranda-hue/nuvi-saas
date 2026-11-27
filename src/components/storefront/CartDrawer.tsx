@@ -54,6 +54,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const isLight = themeMode === 'light';
   const isTablesOnly = tenant.config?.storefrontServiceMode === 'tables_only';
   const isDeliveryOnly = tenant.config?.storefrontServiceMode === 'delivery_only';
+  const tableSelectionMode = tenant.config?.tableSelectionMode || 'both';
   const hasTableService = !isDeliveryOnly && Boolean(isTableServiceEnabled ?? (tenant.config?.enableTableService || tableNumber));
 
   const [deliveryType, setDeliveryType] = useState<DeliveryType>(() => {
@@ -537,26 +538,37 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       </div>
                     </div>
 
-                    <div>
-                      <label className={`text-[11px] font-bold block mb-1 ${isLight ? 'text-slate-700' : 'text-neutral-300'}`}>
-                        Qual é o número da sua Mesa? *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={selectedTable}
-                        onChange={(e) => {
-                          setSelectedTable(e.target.value);
-                          if (onSetTableNumber) onSetTableNumber(e.target.value);
-                        }}
-                        placeholder="Ex: Mesa 04 (ou apenas 4)"
-                        className={`w-full px-3 py-2 rounded-lg text-xs font-bold focus:outline-none focus:border-blue-500 ${
-                          isLight
-                            ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
-                            : 'bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500'
-                        }`}
-                      />
-                    </div>
+                    {tableSelectionMode === 'qrcode_fixed' ? (
+                      <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-medium space-y-1">
+                        <p className="font-bold flex items-center gap-1.5">
+                          📱 Escaneie a Plaquinha da Sua Mesa
+                        </p>
+                        <p className="text-[11px] opacity-90">
+                          Este estabelecimento exige a leitura do QR Code colado na mesa para enviar pedidos pelo salão.
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className={`text-[11px] font-bold block mb-1 ${isLight ? 'text-slate-700' : 'text-neutral-300'}`}>
+                          Qual é o número da sua Mesa? *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={selectedTable}
+                          onChange={(e) => {
+                            setSelectedTable(e.target.value);
+                            if (onSetTableNumber) onSetTableNumber(e.target.value);
+                          }}
+                          placeholder="Ex: Mesa 04 (ou apenas 4)"
+                          className={`w-full px-3 py-2 rounded-lg text-xs font-bold focus:outline-none focus:border-blue-500 ${
+                            isLight
+                              ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400'
+                              : 'bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500'
+                          }`}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 

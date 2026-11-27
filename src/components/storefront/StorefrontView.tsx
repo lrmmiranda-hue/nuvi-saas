@@ -604,7 +604,7 @@ export const StorefrontView: React.FC = () => {
                                 onClick={() => {
                                   setSelectedServiceType('dine_in');
                                   try { sessionStorage.setItem('nuvi_service_type', 'dine_in'); } catch {}
-                                  if (!tableNumber) {
+                                  if (!tableNumber && selectionMode !== 'qrcode_fixed') {
                                     setTempTableInput(tableNumber || '');
                                     setIsTableSelectorOpen(true);
                                   }
@@ -668,6 +668,27 @@ export const StorefrontView: React.FC = () => {
                                 <ReceiptText className="w-3.5 h-3.5" />
                                 <span>Extrato (R$ {tableOrdersTotal.toFixed(2)})</span>
                               </button>
+                            </div>
+                          </div>
+                        ) : selectionMode === 'qrcode_fixed' ? (
+                          <div className={`p-3 rounded-2xl border flex items-center justify-between gap-3 my-1 ${
+                            isLight ? 'bg-amber-50/80 border-amber-200 text-amber-950' : 'bg-amber-950/20 border-amber-500/30 text-amber-200'
+                          }`}>
+                            <div className="flex items-center gap-2.5">
+                              <div
+                                className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
+                                style={{ backgroundColor: brandPrimary }}
+                              >
+                                <QrCode className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <span className="font-extrabold text-xs block text-amber-800 dark:text-amber-300">
+                                  📱 Aponte a câmera para o QR Code da sua mesa
+                                </span>
+                                <span className={`text-[11px] ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
+                                  A leitura da plaquinha na sua mesa é necessária para lançar pedidos no salão.
+                                </span>
+                              </div>
                             </div>
                           </div>
                         ) : (
