@@ -382,7 +382,7 @@ export const StorefrontView: React.FC = () => {
 
         return (
           <div
-            className={`rounded-none sm:rounded-3xl border-x-0 border-t-0 sm:border shadow-none sm:shadow-xl mb-3 sm:mb-6 overflow-hidden transition-all duration-300 backdrop-blur-xl ${
+            className={`rounded-none sm:rounded-b-3xl border-0 sm:border-x sm:border-b shadow-none sm:shadow-xl mb-3 sm:mb-6 overflow-hidden transition-all duration-300 backdrop-blur-xl ${
               isLight ? 'bg-white text-slate-900 border-slate-200 shadow-slate-200/50' : 'bg-neutral-950 text-white border-neutral-800 shadow-black/60'
             }`}
           >
@@ -533,8 +533,8 @@ export const StorefrontView: React.FC = () => {
                   >
                     {/* LOGO QUADRADINHO COM METADE EM CIMA DA IMAGEM E METADE NO CARD */}
                     <div
-                      className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-2xl border-4 shrink-0 transition-transform group-hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 -mt-10 sm:-mt-12 ${
-                        isLight ? 'bg-white border-white' : 'bg-neutral-900 border-neutral-900'
+                      className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-2xl border-[1.5px] shrink-0 transition-transform group-hover:scale-105 overflow-hidden flex items-center justify-center relative z-30 -mt-10 sm:-mt-12 ${
+                        isLight ? 'bg-white border-slate-200/80' : 'bg-neutral-900 border-neutral-700/80'
                       }`}
                       style={{
                         boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.2)'

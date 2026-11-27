@@ -135,7 +135,7 @@ const AppContent: React.FC = () => {
       {/* Main Container */}
       <main className={`flex-1 w-full mx-auto ${
         viewRole === 'storefront'
-          ? 'max-w-7xl px-0 sm:px-4 lg:px-8 pt-0 sm:pt-4'
+          ? 'max-w-7xl px-0 sm:px-4 lg:px-8 pt-0'
           : isAuthOrRegister
           ? 'px-2 sm:px-4'
           : 'max-w-7xl px-4 sm:px-6 lg:px-8 pt-6'
