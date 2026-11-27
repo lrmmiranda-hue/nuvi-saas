@@ -657,24 +657,22 @@ export const StorefrontView: React.FC = () => {
                             </div>
                           </div>
                         ) : selectionMode === 'qrcode_fixed' ? (
-                          <div className={`p-3 rounded-2xl border flex items-center justify-between gap-3 my-1 ${
-                            isLight ? 'bg-amber-50/80 border-amber-200 text-amber-950' : 'bg-amber-950/20 border-amber-500/30 text-amber-200'
+                          <div className={`py-1.5 px-3 rounded-xl border flex items-center gap-2.5 my-1 ${
+                            isLight ? 'bg-amber-50/80 border-amber-200/90 text-amber-950' : 'bg-amber-950/20 border-amber-500/30 text-amber-200'
                           }`}>
-                            <div className="flex items-center gap-2.5">
-                              <div
-                                className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white shadow-xs shrink-0"
-                                style={{ backgroundColor: brandPrimary }}
-                              >
-                                <QrCode className="w-4 h-4" />
-                              </div>
-                              <div>
-                                <span className="font-extrabold text-xs block text-amber-800 dark:text-amber-300">
-                                  📱 Aponte a câmera para o QR Code da sua mesa
-                                </span>
-                                <span className={`text-[11px] ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
-                                  A leitura da plaquinha na sua mesa é necessária para lançar pedidos no salão.
-                                </span>
-                              </div>
+                            <div
+                              className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-white shadow-2xs shrink-0"
+                              style={{ backgroundColor: brandPrimary }}
+                            >
+                              <QrCode className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                              <span className="font-extrabold text-[11px] text-amber-900 dark:text-amber-300 truncate">
+                                📱 Aponte a câmera para o QR Code da mesa
+                              </span>
+                              <span className={`text-[10px] truncate ${isLight ? 'text-amber-700/80' : 'text-amber-400/80'}`}>
+                                (Necessário para pedidos no salão)
+                              </span>
                             </div>
                           </div>
                         ) : (
