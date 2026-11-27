@@ -1362,9 +1362,8 @@ export const StorefrontView: React.FC = () => {
                   setSearchQuery('');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                style={isActive ? { color: brandAccent } : {}}
                 className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                  isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
                 }`}
               >
                 {isActive && (
@@ -1377,7 +1376,7 @@ export const StorefrontView: React.FC = () => {
                   />
                 )}
                 <BookOpen className="w-[22px] h-[22px] stroke-[1.75]" />
-                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-normal'}`}>
                   Cardápio
                 </span>
               </button>
@@ -1395,9 +1394,8 @@ export const StorefrontView: React.FC = () => {
                   setIsMobileMenuDrawerOpen(false);
                   setIsMobileSearchModalOpen(true);
                 }}
-                style={isActive ? { color: brandAccent } : {}}
                 className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                  isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
                 }`}
               >
                 {isActive && (
@@ -1410,7 +1408,7 @@ export const StorefrontView: React.FC = () => {
                   />
                 )}
                 <Search className="w-[22px] h-[22px] stroke-[1.75]" />
-                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-normal'}`}>
                   Busca
                 </span>
               </button>
@@ -1428,9 +1426,8 @@ export const StorefrontView: React.FC = () => {
                   setIsMobileMenuDrawerOpen(false);
                   setIsMobileAccountModalOpen(true);
                 }}
-                style={isActive ? { color: brandAccent } : {}}
                 className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                  isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
                 }`}
               >
                 {isActive && (
@@ -1443,7 +1440,7 @@ export const StorefrontView: React.FC = () => {
                   />
                 )}
                 <LogIn className="w-[22px] h-[22px] stroke-[1.75]" />
-                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-normal'}`}>
                   Entrar
                 </span>
               </button>
@@ -1468,9 +1465,8 @@ export const StorefrontView: React.FC = () => {
                   setSearchQuery('');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                style={isActive ? { color: brandAccent } : {}}
                 className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                  isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
                 }`}
               >
                 {isActive && (
@@ -1483,7 +1479,7 @@ export const StorefrontView: React.FC = () => {
                   />
                 )}
                 <Home className="w-[22px] h-[22px] stroke-[1.75]" />
-                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-normal'}`}>
                   Início
                 </span>
               </button>
@@ -1502,9 +1498,8 @@ export const StorefrontView: React.FC = () => {
                   setIsMobileMenuDrawerOpen(false);
                   setIsMobileAccountModalOpen(true);
                 }}
-                style={isActive ? { color: brandAccent } : {}}
                 className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                  isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
                 }`}
               >
                 {isActive && (
@@ -1517,7 +1512,7 @@ export const StorefrontView: React.FC = () => {
                   />
                 )}
                 <User className="w-[22px] h-[22px] stroke-[1.75]" />
-                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-normal'}`}>
                   Conta
                 </span>
               </button>
@@ -1536,9 +1531,8 @@ export const StorefrontView: React.FC = () => {
                   setIsMobileMenuDrawerOpen(false);
                   setIsCartOpen(prev => !prev);
                 }}
-                style={isActive ? { color: brandAccent } : {}}
                 className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                  isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
                 }`}
               >
                 {isActive && (
@@ -1559,7 +1553,7 @@ export const StorefrontView: React.FC = () => {
                     {totalCartItems}
                   </span>
                 </div>
-                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-normal'}`}>
                   Carrinho
                 </span>
               </button>
@@ -1578,9 +1572,8 @@ export const StorefrontView: React.FC = () => {
                   setIsMobileMenuDrawerOpen(false);
                   setIsMobileSearchModalOpen(true);
                 }}
-                style={isActive ? { color: brandAccent } : {}}
                 className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
-                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                  isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
                 }`}
               >
                 {isActive && (
@@ -1593,7 +1586,7 @@ export const StorefrontView: React.FC = () => {
                   />
                 )}
                 <Search className="w-[22px] h-[22px] stroke-[1.75]" />
-                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-normal'}`}>
                   Pesquisar
                 </span>
               </button>
