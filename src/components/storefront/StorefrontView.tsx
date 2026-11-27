@@ -299,7 +299,6 @@ export const StorefrontView: React.FC = () => {
 
       {/* Brand Hero Banner - 2 Opções de Layout: Capa Panorâmica ou Carrossel Promocional em Slides */}
       {(() => {
-        const bannerStyle = (currentTenant.branding?.bannerStyle || 'silver_flash') as 'silver_flash' | 'brand_aurora_flash' | 'platinum_minimal';
         const rawBannerLayout = currentTenant.branding?.bannerLayout || 'ifood_cover';
         const bannerLayout: 'ifood_cover' | 'carousel_promos' = rawBannerLayout === 'card_99food' ? 'ifood_cover' : (rawBannerLayout as any);
         const segmentWallpapers = getSegmentWallpapers(currentTenant.businessSegment, mediaLibrary);
@@ -310,72 +309,11 @@ export const StorefrontView: React.FC = () => {
           ? segmentWallpapers.slice(0, 3).map(w => w.url)
           : [bannerImage].filter(Boolean);
 
-        // Helper de Efeitos Visuais Dinâmicos por Estilo de Banner
-        const getBannerStyleEffects = (style: 'silver_flash' | 'brand_aurora_flash' | 'platinum_minimal') => {
-          switch (style) {
-            case 'brand_aurora_flash':
-              return {
-                borderClass: 'border-2',
-                borderStyle: {
-                  borderColor: isLight ? brandAccent : `${brandAccent}dd`,
-                  boxShadow: `0 0 28px ${brandAccent}60, 0 0 12px ${brandPrimary}40, inset 0 0 20px ${brandAccent}25`,
-                },
-                flashClass: 'animate-banner-sweep-aurora',
-                flashGradient: `linear-gradient(90deg, transparent 0%, ${brandPrimary}60 20%, #ffffff 50%, ${brandAccent}80 70%, transparent 100%)`,
-                flashOpacity: 0.92,
-              };
-            case 'platinum_minimal':
-              return {
-                borderClass: 'border',
-                borderStyle: {
-                  borderColor: isLight ? '#cbd5e1' : '#334155',
-                  boxShadow: isLight ? '0 4px 18px rgba(0,0,0,0.06)' : '0 4px 22px rgba(0,0,0,0.4)',
-                },
-                flashClass: 'animate-banner-sweep-minimal',
-                flashGradient: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 35%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.05) 65%, transparent 100%)`,
-                flashOpacity: 0.4,
-              };
-            case 'silver_flash':
-            default:
-              return {
-                borderClass: 'border-2',
-                borderStyle: {
-                  borderColor: isLight ? '#94a3b8' : '#e2e8f0',
-                  boxShadow: isLight
-                    ? '0 0 24px rgba(148, 163, 184, 0.55), inset 0 0 15px rgba(255, 255, 255, 0.7)'
-                    : '0 0 30px rgba(255, 255, 255, 0.25), inset 0 0 15px rgba(226, 232, 240, 0.3)',
-                },
-                flashClass: 'animate-banner-sweep-silver',
-                flashGradient: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 15%, #ffffff 50%, rgba(203, 213, 225, 0.95) 65%, transparent 100%)`,
-                flashOpacity: 0.92,
-              };
-          }
-        };
-
-        const bannerEffects = getBannerStyleEffects(bannerStyle);
-
-        // Backgrounds do Banner
-        let luxuryBg = '';
-        if (bannerStyle === 'platinum_minimal') {
-          luxuryBg = isLight
-            ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)'
-            : 'linear-gradient(140deg, #090b0e 0%, #0e1217 50%, #06080a 100%)';
-        } else if (bannerStyle === 'brand_aurora_flash') {
-          luxuryBg = isLight
-            ? `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}18 0%, transparent 60%), radial-gradient(ellipse 70% 70% at 10% 90%, ${brandPrimary}12 0%, transparent 55%), linear-gradient(135deg, #ffffff 0%, #fbfbfc 50%, #f4f5f7 100%)`
-            : `radial-gradient(ellipse 90% 80% at 85% 15%, ${brandAccent}30 0%, transparent 65%), radial-gradient(ellipse 75% 70% at 10% 90%, ${brandPrimary}40 0%, transparent 60%), linear-gradient(140deg, #0d0f15 0%, #12151f 40%, #090a0f 100%)`;
-        } else {
-          luxuryBg = isLight
-            ? `radial-gradient(ellipse 80% 70% at 80% 20%, ${brandAccent}12 0%, transparent 60%), linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #f1f5f9 100%)`
-            : `radial-gradient(ellipse 80% 70% at 80% 20%, ${brandAccent}22 0%, transparent 65%), linear-gradient(140deg, #0b0e14 0%, #111620 45%, #080a0f 100%)`;
-        }
-
         return (
           <div
-            className={`rounded-3xl ${bannerEffects.borderClass} shadow-xl mb-4 sm:mb-6 overflow-hidden transition-all duration-500 backdrop-blur-xl ${
-              isLight ? 'bg-white text-slate-900 shadow-slate-200/50' : 'bg-neutral-950 text-white shadow-black/60'
+            className={`rounded-3xl border shadow-xl mb-4 sm:mb-6 overflow-hidden transition-all duration-300 backdrop-blur-xl ${
+              isLight ? 'bg-white text-slate-900 border-slate-200 shadow-slate-200/50' : 'bg-neutral-950 text-white border-neutral-800 shadow-black/60'
             }`}
-            style={bannerEffects.borderStyle}
           >
             {/* Capa Panorâmica Superior com Imagem ou Slides do Carrossel */}
             <div className="relative h-44 sm:h-52 md:h-60 w-full overflow-hidden bg-slate-900">
@@ -421,22 +359,11 @@ export const StorefrontView: React.FC = () => {
                   className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                 />
               ) : (
-                <div className="w-full h-full" style={{ background: luxuryBg }} />
+                <div className="w-full h-full bg-slate-900" />
               )}
 
                 {/* Vinheta Escura para Contraste com os Botões e Informações */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35 pointer-events-none" />
-
-                {/* Feixe de Luz Flash Metálico de Alto Impacto na Capa */}
-                <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
-                  <div
-                    className={`w-2/3 h-full absolute inset-y-0 ${bannerEffects.flashClass} mix-blend-screen`}
-                    style={{
-                      background: bannerEffects.flashGradient,
-                      opacity: bannerEffects.flashOpacity,
-                    }}
-                  />
-                </div>
 
                 {/* Linha Acetinada Prateada no Topo */}
                 <div

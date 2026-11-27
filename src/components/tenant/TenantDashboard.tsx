@@ -721,10 +721,10 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
       }`}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           
-          <div className="flex items-center gap-4">
-            {/* Logo Image or Fallback Monogram */}
+          <div className="flex items-center gap-4 sm:gap-5">
+            {/* Logo Image or Fallback Monogram - Tamanho Aumentado */}
             {currentTenant.branding.logoUrl ? (
-              <div className={`w-14 h-14 rounded-2xl overflow-hidden border shadow-xs shrink-0 flex items-center justify-center p-1 ${
+              <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 shadow-md shrink-0 flex items-center justify-center p-1.5 transition-all ${
                 isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#151D24] border-[#222E3A]'
               }`}>
                 <img
@@ -735,7 +735,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               </div>
             ) : (
               <div 
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-xs shrink-0 bg-gradient-to-br from-sky-600 to-blue-600 text-white border border-sky-400/30"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl font-black shadow-md shrink-0 bg-gradient-to-br from-sky-600 to-blue-600 text-white border-2 border-sky-400/30"
               >
                 <span>{currentTenant.name.charAt(0)}</span>
               </div>
