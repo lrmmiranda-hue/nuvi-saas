@@ -308,6 +308,36 @@ select optgroup {
   will-change: transform, opacity;
 }
 
+.animate-banner-sweep-silver {
+  animation: bannerLightSweep 3.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.animate-banner-sweep-aurora {
+  animation: bannerLightSweep 4.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.animate-banner-sweep-minimal {
+  animation: bannerLightSweep 7.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes auroraAuraPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.02);
+  }
+}
+
+.animate-aurora-glow {
+  animation: auroraAuraPulse 3s ease-in-out infinite alternate;
+}
+
 /* Efeito de Spotlight de Luz Pulsante (Lens Flare & Estúdio) */
 @keyframes bannerSpotlightPulse {
 

@@ -309,10 +309,72 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
               {(() => {
                 const brandAccent = brandingEdits?.accentColor || currentTenant.branding.accentColor || '#F59E0B';
                 const brandPrimary = brandingEdits?.primaryColor || currentTenant.branding.primaryColor || '#881337';
-                const bannerStyle = brandingEdits?.bannerStyle || currentTenant.branding?.bannerStyle || 'silver_flash';
+                const bannerStyle = (brandingEdits?.bannerStyle || currentTenant.branding?.bannerStyle || 'silver_flash') as 'silver_flash' | 'brand_aurora_flash' | 'platinum_minimal';
                 const rawBannerLayout = brandingEdits?.bannerLayout || currentTenant.branding?.bannerLayout || 'ifood_cover';
                 const bannerLayout: 'ifood_cover' | 'carousel_promos' = rawBannerLayout === 'card_99food' ? 'ifood_cover' : (rawBannerLayout as any);
                 const bannerImage = brandingEdits?.bannerUrl || (segmentWallpapers.length > 0 ? segmentWallpapers[0].url : '');
+
+                // Helper de Efeitos Visuais Dinâmicos por Estilo
+                const getBannerStyleEffects = (style: 'silver_flash' | 'brand_aurora_flash' | 'platinum_minimal') => {
+                  switch (style) {
+                    case 'brand_aurora_flash':
+                      return {
+                        id: 'brand_aurora_flash' as const,
+                        name: 'Brand Aurora Flash',
+                        icon: '🌟',
+                        borderClass: 'border-2',
+                        borderStyle: {
+                          borderColor: isLight ? brandAccent : `${brandAccent}dd`,
+                          boxShadow: `0 0 28px ${brandAccent}60, 0 0 12px ${brandPrimary}40, inset 0 0 20px ${brandAccent}25`,
+                        },
+                        flashClass: 'animate-banner-sweep-aurora',
+                        flashGradient: `linear-gradient(90deg, transparent 0%, ${brandPrimary}60 20%, #ffffff 50%, ${brandAccent}80 70%, transparent 100%)`,
+                        flashOpacity: '0.92',
+                        badgeText: '🌟 Aurora da Marca',
+                        badgeDesc: 'Aura Neon da Marca',
+                        badgeClass: 'text-amber-300 border border-amber-400/50 bg-black/80 shadow-lg backdrop-blur-md',
+                      };
+                    case 'platinum_minimal':
+                      return {
+                        id: 'platinum_minimal' as const,
+                        name: 'Platinum Minimal',
+                        icon: '💎',
+                        borderClass: 'border',
+                        borderStyle: {
+                          borderColor: isLight ? '#cbd5e1' : '#334155',
+                          boxShadow: isLight ? '0 4px 18px rgba(0,0,0,0.06)' : '0 4px 22px rgba(0,0,0,0.4)',
+                        },
+                        flashClass: 'animate-banner-sweep-minimal',
+                        flashGradient: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 35%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.05) 65%, transparent 100%)`,
+                        flashOpacity: '0.4',
+                        badgeText: '💎 Platinum Minimal',
+                        badgeDesc: 'Ultra Clean Apple',
+                        badgeClass: 'text-slate-200 border border-white/20 bg-black/65 shadow-md backdrop-blur-md',
+                      };
+                    case 'silver_flash':
+                    default:
+                      return {
+                        id: 'silver_flash' as const,
+                        name: 'Flash Silver Luxury',
+                        icon: '✨',
+                        borderClass: 'border-2',
+                        borderStyle: {
+                          borderColor: isLight ? '#94a3b8' : '#e2e8f0',
+                          boxShadow: isLight
+                            ? '0 0 24px rgba(148, 163, 184, 0.55), inset 0 0 15px rgba(255, 255, 255, 0.7)'
+                            : '0 0 30px rgba(255, 255, 255, 0.25), inset 0 0 15px rgba(226, 232, 240, 0.3)',
+                        },
+                        flashClass: 'animate-banner-sweep-silver',
+                        flashGradient: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 15%, #ffffff 50%, rgba(203, 213, 225, 0.95) 65%, transparent 100%)`,
+                        flashOpacity: '0.92',
+                        badgeText: '✨ Flash Silver Luxury',
+                        badgeDesc: 'Cromado Prateado',
+                        badgeClass: 'text-cyan-200 border border-cyan-400/50 bg-black/80 shadow-lg backdrop-blur-md',
+                      };
+                  }
+                };
+
+                const bannerEffects = getBannerStyleEffects(bannerStyle);
 
                 let luxuryBg = '';
                 if (bannerStyle === 'platinum_minimal') {
@@ -328,9 +390,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                     ? `radial-gradient(ellipse 80% 70% at 80% 20%, ${brandAccent}12 0%, transparent 60%), linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #f1f5f9 100%)`
                     : `radial-gradient(ellipse 80% 70% at 80% 20%, ${brandAccent}22 0%, transparent 65%), linear-gradient(140deg, #0b0e14 0%, #111620 45%, #080a0f 100%)`;
                 }
-
-                // Borda Cinza Claro Fina e Elegante solicitada pelo usuário
-                const luxuryBorder = isLight ? '#cbd5e1' : '#334155';
 
                 const promoSlides = (brandingEdits?.promoBanners && brandingEdits.promoBanners.length > 0)
                   ? brandingEdits.promoBanners
@@ -350,10 +409,10 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                   return (
                     <div className="p-4 sm:p-6 flex justify-center bg-slate-900/40">
                       <div
-                        className={`w-full max-w-sm rounded-3xl border shadow-2xl overflow-hidden transition-all duration-300 relative ${
+                        className={`w-full max-w-sm rounded-3xl ${bannerEffects.borderClass} shadow-2xl overflow-hidden transition-all duration-500 relative ${
                           isLight ? 'bg-white text-slate-900' : 'bg-neutral-950 text-white'
                         }`}
-                        style={{ borderColor: luxuryBorder }}
+                        style={bannerEffects.borderStyle}
                       >
                         {/* Capa de Fundo no Celular (Estática ou Carrossel de Slides conforme o layout) */}
                         <div className="relative h-44 w-full overflow-hidden bg-slate-900">
@@ -387,14 +446,23 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           {/* Vinheta Escura */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/40 pointer-events-none" />
 
-                          {/* Feixe Flash */}
+                          {/* Feixe Flash Dinâmico por Estilo */}
                           <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
                             <div
-                              className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
+                              className={`w-2/3 h-full absolute inset-y-0 ${bannerEffects.flashClass} mix-blend-screen`}
                               style={{
-                                background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
+                                background: bannerEffects.flashGradient,
+                                opacity: bannerEffects.flashOpacity,
                               }}
                             />
+                          </div>
+
+                          {/* Badge de Destaque do Estilo Ativo na Prévia */}
+                          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1 ${bannerEffects.badgeClass}`}>
+                              <span>{bannerEffects.icon}</span>
+                              <span>{bannerEffects.badgeText}</span>
+                            </span>
                           </div>
 
                           {/* Botões Flutuantes sobre a Imagem no Topo */}
@@ -562,10 +630,10 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                 // =========================================================================
                 return (
                   <div
-                    className={`rounded-3xl border shadow-2xl overflow-hidden transition-all duration-300 relative backdrop-blur-xl ${
+                    className={`rounded-3xl ${bannerEffects.borderClass} shadow-2xl overflow-hidden transition-all duration-500 relative backdrop-blur-xl ${
                       isLight ? 'bg-white text-slate-900 shadow-slate-200/50' : 'bg-neutral-950 text-white shadow-black/60'
                     }`}
-                    style={{ borderColor: luxuryBorder }}
+                    style={bannerEffects.borderStyle}
                   >
                     {/* Capa Panorâmica Superior no Computador (Estática ou Slides) */}
                     <div className="relative h-52 md:h-60 w-full overflow-hidden bg-slate-900">
@@ -598,14 +666,23 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35 pointer-events-none" />
 
-                      {/* Feixe Flash */}
+                      {/* Feixe Flash Dinâmico por Estilo */}
                       <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
                         <div
-                          className="w-2/3 h-full absolute inset-y-0 animate-banner-light-sweep mix-blend-screen opacity-70"
+                          className={`w-2/3 h-full absolute inset-y-0 ${bannerEffects.flashClass} mix-blend-screen`}
                           style={{
-                            background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 100%)`
+                            background: bannerEffects.flashGradient,
+                            opacity: bannerEffects.flashOpacity,
                           }}
                         />
+                      </div>
+
+                      {/* Badge de Destaque do Estilo Ativo na Prévia Desktop */}
+                      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${bannerEffects.badgeClass}`}>
+                          <span>{bannerEffects.icon}</span>
+                          <span>{bannerEffects.badgeText}</span>
+                        </span>
                       </div>
 
                       {/* Botões Superiores */}
@@ -1141,83 +1218,164 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
             </div>
 
             {/* Grid dos 3 Modelos de Banner com Borda Cinza Claro e Flash */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-              {[
-                {
-                  id: 'silver_flash',
-                  name: 'Flash Silver Luxury',
-                  badge: 'Mais Recomendado',
-                  desc: 'Borda cinza claro nítida, fundo dark obsidian acetinado e feixe flash prateado cruzando o banner.',
-                  icon: '✨',
-                },
-                {
-                  id: 'brand_aurora_flash',
-                  name: 'Brand Aurora Flash',
-                  badge: 'Cores da Marca',
-                  desc: 'Borda cinza claro com aura suave das cores do seu comércio e flash metálico reluzente.',
-                  icon: '🌟',
-                },
-                {
-                  id: 'platinum_minimal',
-                  name: 'Platinum Minimal',
-                  badge: 'Ultra Clean',
-                  desc: 'Fundo preto carbono puro ou branco clean, borda cinza claro e flash sutil estilo Apple.',
-                  icon: '💎',
-                },
-              ].map((style) => {
-                const currentBannerStyle = brandingEdits?.bannerStyle || currentTenant.branding?.bannerStyle || 'silver_flash';
-                const isSelected = currentBannerStyle === style.id;
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+              {(() => {
+                const brandAccent = brandingEdits?.accentColor || currentTenant.branding?.accentColor || '#F59E0B';
+                const brandPrimary = brandingEdits?.primaryColor || currentTenant.branding?.primaryColor || '#881337';
+                const bannerImage = brandingEdits?.bannerUrl || (segmentWallpapers.length > 0 ? segmentWallpapers[0].url : '');
 
-                return (
-                  <button
-                    key={style.id}
-                    type="button"
-                    onClick={() => {
-                      setBrandingEdits({
-                        ...(brandingEdits || currentTenant.branding),
-                        bannerStyle: style.id as any,
-                      });
-                    }}
-                    className={`p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 relative overflow-hidden ${
-                      isSelected
-                        ? isLight
-                          ? 'border-sky-500 bg-sky-50/70 text-slate-900 shadow-sm ring-1 ring-sky-500/30'
-                          : 'border-sky-500 bg-sky-950/40 text-white shadow-sm ring-1 ring-sky-500/30'
-                        : isLight
-                        ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
-                        : 'border-neutral-800 bg-neutral-950/60 hover:bg-neutral-800 text-neutral-300'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-base">{style.icon}</span>
-                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                          isSelected
-                            ? 'bg-sky-500 text-white'
-                            : isLight ? 'bg-slate-200 text-slate-700' : 'bg-neutral-800 text-slate-400'
+                const getBannerStyleEffects = (styleId: 'silver_flash' | 'brand_aurora_flash' | 'platinum_minimal') => {
+                  switch (styleId) {
+                    case 'brand_aurora_flash':
+                      return {
+                        name: 'Brand Aurora Flash',
+                        badge: 'Cores da Marca',
+                        desc: 'Borda iluminada com a aura neon da sua marca e flash reluzente cruzando o banner.',
+                        icon: '🌟',
+                        borderStyle: {
+                          borderColor: brandAccent,
+                          boxShadow: `0 0 20px ${brandAccent}60, inset 0 0 15px ${brandAccent}25`,
+                        },
+                        flashClass: 'animate-banner-sweep-aurora',
+                        flashGradient: `linear-gradient(90deg, transparent 0%, ${brandPrimary}70 20%, #ffffff 50%, ${brandAccent}90 70%, transparent 100%)`,
+                        flashOpacity: 0.95,
+                        sampleLabel: 'Aura Neon da Marca',
+                      };
+                    case 'platinum_minimal':
+                      return {
+                        name: 'Platinum Minimal',
+                        badge: 'Ultra Clean',
+                        desc: 'Acabamento minimalista estilo Apple, borda fina discreta e feixe suave sem ruído visual.',
+                        icon: '💎',
+                        borderStyle: {
+                          borderColor: isLight ? '#cbd5e1' : '#475569',
+                          boxShadow: isLight ? '0 2px 10px rgba(0,0,0,0.06)' : '0 2px 12px rgba(0,0,0,0.3)',
+                        },
+                        flashClass: 'animate-banner-sweep-minimal',
+                        flashGradient: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 35%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.05) 65%, transparent 100%)`,
+                        flashOpacity: 0.45,
+                        sampleLabel: 'Minimalista Apple',
+                      };
+                    case 'silver_flash':
+                    default:
+                      return {
+                        name: 'Flash Silver Luxury',
+                        badge: 'Mais Recomendado',
+                        desc: 'Borda prateada metálica com reflexo cromado nítido e feixe flash brilhante contínuo.',
+                        icon: '✨',
+                        borderStyle: {
+                          borderColor: isLight ? '#94a3b8' : '#e2e8f0',
+                          boxShadow: isLight
+                            ? '0 0 18px rgba(148, 163, 184, 0.6), inset 0 0 12px rgba(255, 255, 255, 0.8)'
+                            : '0 0 22px rgba(255, 255, 255, 0.3), inset 0 0 12px rgba(226, 232, 240, 0.35)',
+                        },
+                        flashClass: 'animate-banner-sweep-silver',
+                        flashGradient: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 15%, #ffffff 50%, rgba(203, 213, 225, 0.95) 65%, transparent 100%)`,
+                        flashOpacity: 0.95,
+                        sampleLabel: 'Cromado Prateado',
+                      };
+                  }
+                };
+
+                const stylesList: Array<'silver_flash' | 'brand_aurora_flash' | 'platinum_minimal'> = [
+                  'silver_flash',
+                  'brand_aurora_flash',
+                  'platinum_minimal',
+                ];
+
+                return stylesList.map((styleId) => {
+                  const styleInfo = getBannerStyleEffects(styleId);
+                  const currentBannerStyle = brandingEdits?.bannerStyle || currentTenant.branding?.bannerStyle || 'silver_flash';
+                  const isSelected = currentBannerStyle === styleId;
+
+                  return (
+                    <button
+                      key={styleId}
+                      type="button"
+                      onClick={() => {
+                        setBrandingEdits({
+                          ...(brandingEdits || currentTenant.branding),
+                          bannerStyle: styleId,
+                        });
+                      }}
+                      className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-3 relative overflow-hidden ${
+                        isSelected
+                          ? isLight
+                            ? 'border-sky-500 bg-sky-50/70 text-slate-900 shadow-md ring-2 ring-sky-500/30'
+                            : 'border-sky-500 bg-sky-950/40 text-white shadow-md ring-2 ring-sky-500/30'
+                          : isLight
+                          ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                          : 'border-neutral-800 bg-neutral-950/60 hover:bg-neutral-800 text-neutral-300'
+                      }`}
+                    >
+                      <div className="space-y-2 w-full">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-base">{styleInfo.icon}</span>
+                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                            isSelected
+                              ? 'bg-sky-500 text-white'
+                              : isLight ? 'bg-slate-200 text-slate-700' : 'bg-neutral-800 text-slate-400'
+                          }`}>
+                            {styleInfo.badge}
+                          </span>
+                        </div>
+
+                        {/* MINI VITRINE / PRÉVIA AO VIVO DIRETO NO BOTÃO COM ANIMAÇÃO REAL */}
+                        <div
+                          className="relative h-20 w-full rounded-xl overflow-hidden border transition-all duration-300 shadow-inner"
+                          style={styleInfo.borderStyle}
+                        >
+                          {bannerImage ? (
+                            <img src={bannerImage} alt={styleInfo.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-slate-900" />
+                          )}
+
+                          {/* Vinheta escura */}
+                          <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+
+                          {/* Feixe animado ao vivo passando neste estilo */}
+                          <div className="pointer-events-none absolute inset-0 overflow-hidden z-10">
+                            <div
+                              className={`w-2/3 h-full absolute inset-y-0 ${styleInfo.flashClass} mix-blend-screen`}
+                              style={{
+                                background: styleInfo.flashGradient,
+                                opacity: styleInfo.flashOpacity,
+                              }}
+                            />
+                          </div>
+
+                          {/* Chip demonstrativo ao vivo */}
+                          <div className="absolute bottom-1.5 inset-x-1.5 z-20 flex items-center justify-between pointer-events-none">
+                            <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-black/75 text-white backdrop-blur-xs border border-white/20">
+                              {styleInfo.icon} {styleInfo.sampleLabel}
+                            </span>
+                            <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-md bg-emerald-500/90 text-white uppercase tracking-wider animate-pulse">
+                              Ao Vivo
+                            </span>
+                          </div>
+                        </div>
+
+                        <h4 className="text-xs font-black pt-1">{styleInfo.name}</h4>
+                        <p className={`text-[11px] leading-relaxed ${
+                          isSelected ? (isLight ? 'text-slate-800' : 'text-slate-200') : (isLight ? 'text-slate-500' : 'text-neutral-400')
                         }`}>
-                          {style.badge}
+                          {styleInfo.desc}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-neutral-800/80 w-full">
+                        <span className="text-[10px] font-bold text-slate-400">
+                          {isSelected ? '👀 Veja na Prévia Acima' : 'Toque p/ Aplicar'}
+                        </span>
+                        <span className={`text-[10px] font-black ${isSelected ? 'text-sky-500 flex items-center gap-1' : 'text-slate-400'}`}>
+                          {isSelected ? '✓ Ativo no Banner' : 'Selecionar'}
                         </span>
                       </div>
-                      <h4 className="text-xs font-black">{style.name}</h4>
-                      <p className={`text-[11px] leading-relaxed mt-1 ${
-                        isSelected ? (isLight ? 'text-slate-800' : 'text-slate-200') : (isLight ? 'text-slate-500' : 'text-neutral-400')
-                      }`}>
-                        {style.desc}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-neutral-800/80">
-                      <span className="text-[10px] font-bold text-slate-400">
-                        Borda: Cinza Claro
-                      </span>
-                      <span className={`text-[10px] font-black ${isSelected ? 'text-sky-500' : 'text-slate-400'}`}>
-                        {isSelected ? '✓ Ativo no Banner' : 'Selecionar'}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                });
+              })()}
             </div>
 
             {/* DICAS: O QUE COLOCAR NOS BANNERS DE SLIDE DO CARROSSEL */}
