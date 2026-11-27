@@ -751,16 +751,16 @@ export const StorefrontView: React.FC = () => {
                               setTempTableInput(tableNumber || '');
                               setIsTableSelectorOpen(true);
                             }}
-                            className={`flex items-center justify-between text-xs py-2 px-3 rounded-xl border cursor-pointer group transition-all my-1 ${
-                              isLight
-                                ? 'bg-sky-50/70 hover:bg-sky-100/80 border-sky-200 text-sky-950'
-                                : 'bg-sky-950/25 hover:bg-sky-900/35 border-sky-500/30 text-sky-200'
-                            }`}
+                            style={{
+                              backgroundColor: `${brandAccent}15`,
+                              borderColor: `${brandAccent}40`,
+                            }}
+                            className="flex items-center justify-between text-xs py-2 px-3 rounded-xl border cursor-pointer group transition-all my-1 hover:brightness-105"
                           >
                             <div className="flex items-center gap-2.5">
                               <div
                                 className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white shadow-xs shrink-0"
-                                style={{ backgroundColor: brandPrimary }}
+                                style={{ backgroundColor: brandAccent }}
                               >
                                 <UtensilsCrossed className="w-3.5 h-3.5" />
                               </div>
@@ -768,14 +768,20 @@ export const StorefrontView: React.FC = () => {
                                 <span className="font-extrabold text-xs block">
                                   🍽️ Consumo no Salão / Mesas
                                 </span>
-                                <span className={`text-[10px] ${isLight ? 'text-sky-700' : 'text-sky-300'}`}>
+                                <span
+                                  className="text-[10px] font-medium"
+                                  style={{ color: brandAccent }}
+                                >
                                   Está no estabelecimento? Toque aqui para selecionar sua Mesa
                                 </span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-1 text-sky-600 dark:text-sky-400 font-bold text-xs">
+                            <div
+                              className="flex items-center gap-1 font-bold text-xs"
+                              style={{ color: brandAccent }}
+                            >
                               <span>Selecionar Mesa</span>
-                              <ChevronRight className="w-4 h-4 text-sky-500 group-hover:translate-x-0.5 transition-transform shrink-0" />
+                              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: brandAccent }} />
                             </div>
                           </div>
                         )
@@ -1871,15 +1877,19 @@ export const StorefrontView: React.FC = () => {
 
           {/* 2. Card de Mesa no Salão (Se estiver em uma mesa) */}
           {tableNumber && (
-            <div className={`p-4 rounded-3xl border space-y-2 shadow-xs ${
-              isLight ? 'bg-sky-50/80 border-sky-200 text-sky-950' : 'bg-sky-950/25 border-sky-500/30 text-sky-200'
-            }`}>
+            <div
+              style={{
+                backgroundColor: `${brandAccent}15`,
+                borderColor: `${brandAccent}40`
+              }}
+              className="p-4 rounded-3xl border space-y-2 shadow-xs"
+            >
               <div className="flex items-center justify-between">
-                <span className="font-extrabold text-xs flex items-center gap-1.5">
-                  <UtensilsCrossed className="w-4 h-4 text-sky-500" />
+                <span className="font-extrabold text-xs flex items-center gap-1.5" style={{ color: brandAccent }}>
+                  <UtensilsCrossed className="w-4 h-4" style={{ color: brandAccent }} />
                   Mesa {tableNumber} (Em Atendimento)
                 </span>
-                <span className="font-mono font-black text-sm text-sky-600 dark:text-sky-400">
+                <span className="font-mono font-black text-sm" style={{ color: brandAccent }}>
                   R$ {tableOrdersTotal.toFixed(2)}
                 </span>
               </div>
@@ -1892,7 +1902,8 @@ export const StorefrontView: React.FC = () => {
                   setIsMobileAccountModalOpen(false);
                   setIsTableOrdersModalOpen(true);
                 }}
-                className="w-full py-2 px-3 rounded-xl font-bold text-xs bg-sky-600 hover:bg-sky-500 text-white transition-all shadow-xs flex items-center justify-center gap-1.5"
+                style={{ backgroundColor: brandAccent }}
+                className="w-full py-2 px-3 rounded-xl font-bold text-xs hover:opacity-90 text-white transition-all shadow-xs flex items-center justify-center gap-1.5"
               >
                 <ReceiptText className="w-3.5 h-3.5" />
                 <span>Ver Extrato da Comanda / Mesa</span>
@@ -2042,7 +2053,10 @@ export const StorefrontView: React.FC = () => {
             }`}>
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-blue-600 text-white">
+                <div
+                  className="p-2 rounded-xl text-white shadow-xs"
+                  style={{ backgroundColor: brandAccent }}
+                >
                   <UtensilsCrossed className="w-4 h-4" />
                 </div>
                 <div>
@@ -2069,10 +2083,11 @@ export const StorefrontView: React.FC = () => {
                 value={tempTableInput}
                 onChange={(e) => setTempTableInput(e.target.value)}
                 placeholder="Ex: Mesa 04 ou 4"
-                className={`w-full px-3.5 py-2.5 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-500 ${isLight
+                className={`w-full px-3.5 py-2.5 rounded-xl text-sm font-bold focus:outline-none focus:ring-1 ${isLight
                     ? 'bg-slate-50 border border-slate-300 text-slate-900'
                     : 'bg-neutral-950 border border-neutral-700 text-white'
                   }`}
+                style={{ ['--tw-ring-color' as any]: brandAccent }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     if (tempTableInput.trim()) {
