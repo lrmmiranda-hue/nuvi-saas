@@ -1315,177 +1315,256 @@ export const StorefrontView: React.FC = () => {
         <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-50 h-[58px] grid grid-cols-3 items-center justify-items-center shadow-lg safe-area-pb transition-colors ${isLight ? 'bg-white border-t border-[#e2e8f0] text-[#0F1111]' : 'bg-[#0E1318]/95 backdrop-blur-md border-t border-[#1C2631] text-white shadow-2xl'
           }`}>
           {/* 1. Cardápio */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsMobileSearchModalOpen(false);
-              setIsMobileAccountModalOpen(false);
-              setIsMobileMenuDrawerOpen(false);
-              setSelectedCategory('todas');
-              setSearchQuery('');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-              }`}
-          >
-            {!isMobileSearchModalOpen && !isMobileAccountModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-                }`} />
-            )}
-            <BookOpen className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${!isMobileSearchModalOpen && !isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
-              }`}>
-              Cardápio
-            </span>
-          </button>
+          {(() => {
+            const isActive = !isMobileSearchModalOpen && !isMobileAccountModalOpen;
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileSearchModalOpen(false);
+                  setIsMobileAccountModalOpen(false);
+                  setIsMobileMenuDrawerOpen(false);
+                  setSelectedCategory('todas');
+                  setSearchQuery('');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                style={isActive ? { color: brandAccent } : {}}
+                className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <span
+                    className="absolute top-0 w-12 h-[4px] rounded-b-full transition-all"
+                    style={{
+                      background: `linear-gradient(90deg, ${brandPrimary}, ${brandAccent})`,
+                      boxShadow: `0 2px 10px ${brandAccent}70`
+                    }}
+                  />
+                )}
+                <BookOpen className="w-[22px] h-[22px] stroke-[1.75]" />
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                  Cardápio
+                </span>
+              </button>
+            );
+          })()}
 
           {/* 2. Busca */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsMobileAccountModalOpen(false);
-              setIsMobileMenuDrawerOpen(false);
-              setIsMobileSearchModalOpen(true);
-            }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-              }`}
-          >
-            {isMobileSearchModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-                }`} />
-            )}
-            <Search className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isMobileSearchModalOpen ? 'font-bold' : 'font-normal'
-              }`}>
-              Busca
-            </span>
-          </button>
+          {(() => {
+            const isActive = isMobileSearchModalOpen;
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileAccountModalOpen(false);
+                  setIsMobileMenuDrawerOpen(false);
+                  setIsMobileSearchModalOpen(true);
+                }}
+                style={isActive ? { color: brandAccent } : {}}
+                className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <span
+                    className="absolute top-0 w-12 h-[4px] rounded-b-full transition-all"
+                    style={{
+                      background: `linear-gradient(90deg, ${brandPrimary}, ${brandAccent})`,
+                      boxShadow: `0 2px 10px ${brandAccent}70`
+                    }}
+                  />
+                )}
+                <Search className="w-[22px] h-[22px] stroke-[1.75]" />
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                  Busca
+                </span>
+              </button>
+            );
+          })()}
 
           {/* 3. Entrar */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsMobileSearchModalOpen(false);
-              setIsMobileMenuDrawerOpen(false);
-              setIsMobileAccountModalOpen(true);
-            }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-              }`}
-          >
-            {isMobileAccountModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-                }`} />
-            )}
-            <LogIn className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
-              }`}>
-              Entrar
-            </span>
-          </button>
+          {(() => {
+            const isActive = isMobileAccountModalOpen;
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileSearchModalOpen(false);
+                  setIsMobileMenuDrawerOpen(false);
+                  setIsMobileAccountModalOpen(true);
+                }}
+                style={isActive ? { color: brandAccent } : {}}
+                className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <span
+                    className="absolute top-0 w-12 h-[4px] rounded-b-full transition-all"
+                    style={{
+                      background: `linear-gradient(90deg, ${brandPrimary}, ${brandAccent})`,
+                      boxShadow: `0 2px 10px ${brandAccent}70`
+                    }}
+                  />
+                )}
+                <LogIn className="w-[22px] h-[22px] stroke-[1.75]" />
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                  Entrar
+                </span>
+              </button>
+            );
+          })()}
         </div>
       ) : (
         <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-50 h-[58px] grid grid-cols-4 items-center justify-items-center shadow-lg safe-area-pb transition-colors ${isLight ? 'bg-white border-t border-[#e2e8f0] text-[#0F1111]' : 'bg-[#0E1318]/95 backdrop-blur-md border-t border-[#1C2631] text-white shadow-2xl'
           }`}>
           {/* 1. Início */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsCartOpen(false);
-              setIsMobileSearchModalOpen(false);
-              setIsMobileAccountModalOpen(false);
-              setIsMobileMenuDrawerOpen(false);
-              setSelectedCategory('todas');
-              setSearchQuery('');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-              }`}
-          >
-            {!isCartOpen && !isMobileSearchModalOpen && !isMobileAccountModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-                }`} />
-            )}
-            <Home className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${!isCartOpen && !isMobileSearchModalOpen && !isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
-              }`}>
-              Início
-            </span>
-          </button>
+          {(() => {
+            const isActive = !isCartOpen && !isMobileSearchModalOpen && !isMobileAccountModalOpen;
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCartOpen(false);
+                  setIsMobileSearchModalOpen(false);
+                  setIsMobileAccountModalOpen(false);
+                  setIsMobileMenuDrawerOpen(false);
+                  setSelectedCategory('todas');
+                  setSearchQuery('');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                style={isActive ? { color: brandAccent } : {}}
+                className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <span
+                    className="absolute top-0 w-12 h-[4px] rounded-b-full transition-all"
+                    style={{
+                      background: `linear-gradient(90deg, ${brandPrimary}, ${brandAccent})`,
+                      boxShadow: `0 2px 10px ${brandAccent}70`
+                    }}
+                  />
+                )}
+                <Home className="w-[22px] h-[22px] stroke-[1.75]" />
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                  Início
+                </span>
+              </button>
+            );
+          })()}
 
           {/* 2. Conta */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsCartOpen(false);
-              setIsMobileSearchModalOpen(false);
-              setIsMobileMenuDrawerOpen(false);
-              setIsMobileAccountModalOpen(true);
-            }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-              }`}
-          >
-            {isMobileAccountModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-                }`} />
-            )}
-            <User className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isMobileAccountModalOpen ? 'font-bold' : 'font-normal'
-              }`}>
-              Conta
-            </span>
-          </button>
+          {(() => {
+            const isActive = isMobileAccountModalOpen;
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCartOpen(false);
+                  setIsMobileSearchModalOpen(false);
+                  setIsMobileMenuDrawerOpen(false);
+                  setIsMobileAccountModalOpen(true);
+                }}
+                style={isActive ? { color: brandAccent } : {}}
+                className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <span
+                    className="absolute top-0 w-12 h-[4px] rounded-b-full transition-all"
+                    style={{
+                      background: `linear-gradient(90deg, ${brandPrimary}, ${brandAccent})`,
+                      boxShadow: `0 2px 10px ${brandAccent}70`
+                    }}
+                  />
+                )}
+                <User className="w-[22px] h-[22px] stroke-[1.75]" />
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                  Conta
+                </span>
+              </button>
+            );
+          })()}
 
           {/* 3. Carrinho */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsMobileSearchModalOpen(false);
-              setIsMobileAccountModalOpen(false);
-              setIsMobileMenuDrawerOpen(false);
-              setIsCartOpen(prev => !prev);
-            }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-              }`}
-          >
-            {isCartOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-                }`} />
-            )}
-            <div className="relative">
-              <ShoppingCart className="w-[22px] h-[22px] stroke-[1.75]" />
-              <span className={`absolute -top-1.5 left-1/2 -translate-x-1/2 text-[10px] font-bold leading-none ${isLight ? 'text-[#0F1111]' : 'text-sky-300'
-                }`}>
-                {totalCartItems}
-              </span>
-            </div>
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isCartOpen ? 'font-bold' : 'font-normal'
-              }`}>
-              Carrinho
-            </span>
-          </button>
+          {(() => {
+            const isActive = isCartOpen;
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileSearchModalOpen(false);
+                  setIsMobileAccountModalOpen(false);
+                  setIsMobileMenuDrawerOpen(false);
+                  setIsCartOpen(prev => !prev);
+                }}
+                style={isActive ? { color: brandAccent } : {}}
+                className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <span
+                    className="absolute top-0 w-12 h-[4px] rounded-b-full transition-all"
+                    style={{
+                      background: `linear-gradient(90deg, ${brandPrimary}, ${brandAccent})`,
+                      boxShadow: `0 2px 10px ${brandAccent}70`
+                    }}
+                  />
+                )}
+                <div className="relative">
+                  <ShoppingCart className="w-[22px] h-[22px] stroke-[1.75]" />
+                  <span
+                    className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[10px] font-black leading-none px-1 rounded-full text-white"
+                    style={{ backgroundColor: brandPrimary }}
+                  >
+                    {totalCartItems}
+                  </span>
+                </div>
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                  Carrinho
+                </span>
+              </button>
+            );
+          })()}
 
           {/* 4. Pesquisar */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsCartOpen(false);
-              setIsMobileAccountModalOpen(false);
-              setIsMobileMenuDrawerOpen(false);
-              setIsMobileSearchModalOpen(true);
-            }}
-            className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${isLight ? 'text-[#0F1111]' : 'text-slate-200 hover:text-white'
-              }`}
-          >
-            {isMobileSearchModalOpen && (
-              <span className={`absolute top-0 w-8 h-[3.5px] rounded-b-sm ${isLight ? 'bg-[#0F1111]' : 'bg-sky-400'
-                }`} />
-            )}
-            <Search className="w-[22px] h-[22px] stroke-[1.75]" />
-            <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isMobileSearchModalOpen ? 'font-bold' : 'font-normal'
-              }`}>
-              Pesquisar
-            </span>
-          </button>
+          {(() => {
+            const isActive = isMobileSearchModalOpen;
+            return (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCartOpen(false);
+                  setIsMobileAccountModalOpen(false);
+                  setIsMobileMenuDrawerOpen(false);
+                  setIsMobileSearchModalOpen(true);
+                }}
+                style={isActive ? { color: brandAccent } : {}}
+                className={`relative w-full h-full flex flex-col items-center justify-center pt-1 pb-1 transition-colors cursor-pointer ${
+                  isActive ? 'font-bold' : isLight ? 'text-[#0F1111]' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <span
+                    className="absolute top-0 w-12 h-[4px] rounded-b-full transition-all"
+                    style={{
+                      background: `linear-gradient(90deg, ${brandPrimary}, ${brandAccent})`,
+                      boxShadow: `0 2px 10px ${brandAccent}70`
+                    }}
+                  />
+                )}
+                <Search className="w-[22px] h-[22px] stroke-[1.75]" />
+                <span className={`text-[11px] leading-tight tracking-tight mt-1 ${isActive ? 'font-black' : 'font-normal'}`}>
+                  Pesquisar
+                </span>
+              </button>
+            );
+          })()}
         </div>
       )}
 
