@@ -45,7 +45,8 @@ import {
   LayoutGrid,
   List,
   ReceiptText,
-  Heart
+  Heart,
+  QrCode
 } from 'lucide-react';
 
 export const StorefrontView: React.FC = () => {
