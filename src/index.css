@@ -338,33 +338,7 @@ select optgroup {
   animation: auroraAuraPulse 3s ease-in-out infinite alternate;
 }
 
-/* Animação com feixe de luz reluzente fluindo da DIREITA para a ESQUERDA em degradê */
-@keyframes borderLightSweepRTL {
-  0% {
-    transform: translateX(200%) skewX(-25deg);
-    opacity: 0;
-  }
-  15% {
-    opacity: 1;
-  }
-  50% {
-    transform: translateX(-200%) skewX(-25deg);
-    opacity: 1;
-  }
-  70% {
-    transform: translateX(-200%) skewX(-25deg);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(-200%) skewX(-25deg);
-    opacity: 0;
-  }
-}
 
-.animate-border-light-rtl {
-  animation: borderLightSweepRTL 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  will-change: transform, opacity;
-}
 
 /* Efeito de Spotlight de Luz Pulsante (Lens Flare & Estúdio) */
 @keyframes bannerSpotlightPulse {

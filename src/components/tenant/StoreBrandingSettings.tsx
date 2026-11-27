@@ -382,9 +382,9 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                             </div>
                           </div>
 
-                          {/* Flyer / Badge de Aviso no Banner */}
+                          {/* Flyer / Badge de Aviso no Banner - Posicionado no topo abaixo dos botões para NUNCA colidir com o logo */}
                           {brandingEdits?.badgeNotice && (
-                            <div className="absolute bottom-6 right-3 z-20 max-w-[85%] pointer-events-none">
+                            <div className="absolute top-13 right-3 z-20 max-w-[85%] pointer-events-none">
                               <div
                                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black shadow-lg backdrop-blur-md border border-white/30 text-white truncate"
                                 style={{
@@ -403,21 +403,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                         <div className={`px-4 pb-4 relative z-20 -mt-6 rounded-t-3xl pt-0 transition-colors ${
                           isLight ? 'bg-white' : 'bg-neutral-950'
                         }`}>
-                          {/* Linha Acetinada com Luz Fluindo da DIREITA para a ESQUERDA em Degradê */}
-                          <div className="absolute top-0 inset-x-0 h-[2.5px] pointer-events-none rounded-t-3xl overflow-hidden z-20">
-                            <div
-                              className="absolute inset-0 opacity-40"
-                              style={{
-                                background: `linear-gradient(270deg, ${brandAccent}, ${brandPrimary}, ${brandAccent})`
-                              }}
-                            />
-                            <div
-                              className="absolute inset-y-0 w-2/3 animate-border-light-rtl mix-blend-screen"
-                              style={{
-                                background: `linear-gradient(270deg, transparent 0%, ${brandAccent}90 20%, #ffffff 50%, ${brandPrimary}90 80%, transparent 100%)`
-                              }}
-                            />
-                          </div>
                           {/* Cabeçalho do Card: Logo com metade em cima da imagem + Nome & Slogan na frente */}
                           <div className="flex items-end justify-between gap-2.5 mb-2">
                             <div className="flex items-end gap-2.5 min-w-0 flex-1">
@@ -569,22 +554,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                           )}
                         </div>
                       </div>
-
-                      {/* Flyer / Badge de Aviso no Banner Desktop */}
-                      {brandingEdits?.badgeNotice && (
-                        <div className="absolute bottom-8 right-6 z-20 max-w-md pointer-events-none">
-                          <div
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg backdrop-blur-md border border-white/30 text-white truncate"
-                            style={{
-                              background: `linear-gradient(135deg, ${brandPrimary}ee, ${brandAccent}ee)`,
-                              boxShadow: `0 4px 18px ${brandPrimary}60`,
-                            }}
-                          >
-                            <Megaphone className="w-3.5 h-3.5 text-white shrink-0 animate-bounce" />
-                            <span className="truncate">{brandingEdits.badgeNotice}</span>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 }
@@ -668,21 +637,6 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                     <div className={`px-6 pb-6 relative z-20 -mt-8 rounded-t-3xl pt-0 transition-colors ${
                       isLight ? 'bg-white' : 'bg-neutral-950'
                     }`}>
-                      {/* Linha Acetinada com Luz Fluindo da DIREITA para a ESQUERDA em Degradê */}
-                      <div className="absolute top-0 inset-x-0 h-[2.5px] pointer-events-none rounded-t-3xl overflow-hidden z-20">
-                        <div
-                          className="absolute inset-0 opacity-40"
-                          style={{
-                            background: `linear-gradient(270deg, ${brandAccent}, ${brandPrimary}, ${brandAccent})`
-                          }}
-                        />
-                        <div
-                          className="absolute inset-y-0 w-2/3 animate-border-light-rtl mix-blend-screen"
-                          style={{
-                            background: `linear-gradient(270deg, transparent 0%, ${brandAccent}90 20%, #ffffff 50%, ${brandPrimary}90 80%, transparent 100%)`
-                          }}
-                        />
-                      </div>
                       {/* Cabeçalho do Card: Logo + Nome & Slogan na frente */}
                       <div className="flex items-end justify-between gap-4 mb-3">
                         <div className="flex items-end gap-4 min-w-0 flex-1">
