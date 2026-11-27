@@ -47,7 +47,11 @@ import {
   List,
   ReceiptText,
   Heart,
-  QrCode
+  QrCode,
+  Smartphone,
+  Download,
+  Share2,
+  Copy
 } from 'lucide-react';
 
 export const StorefrontView: React.FC = () => {
@@ -181,6 +185,52 @@ export const StorefrontView: React.FC = () => {
       }
     } catch {}
   }, [currentTenant?.id]);
+
+  // PWA / Instalação do App na Tela Inicial do Celular
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallAppModalOpen, setIsInstallAppModalOpen] = useState(false);
+  const [isIOSDevice, setIsIOSDevice] = useState(false);
+  const [isCopiedStoreLink, setIsCopiedStoreLink] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    const ua = window.navigator.userAgent.toLowerCase();
+    const isApple = /iphone|ipad|ipod/.test(ua);
+    setIsIOSDevice(isApple);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  // Atualização dinâmica do Título e Ícone Apple Touch Icon com o Logo da Loja
+  useEffect(() => {
+    if (!currentTenant) return;
+    document.title = `${currentTenant.name} - Cardápio Online & Pedidos`;
+
+    if (currentTenant.logoUrl) {
+      let appleIcon = document.querySelector<HTMLLinkElement>("link[rel='apple-touch-icon']");
+      if (!appleIcon) {
+        appleIcon = document.createElement('link');
+        appleIcon.rel = 'apple-touch-icon';
+        document.head.appendChild(appleIcon);
+      }
+      appleIcon.href = currentTenant.logoUrl;
+
+      let favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+      if (!favicon) {
+        favicon = document.createElement('link');
+        favicon.rel = 'icon';
+        document.head.appendChild(favicon);
+      }
+      favicon.href = currentTenant.logoUrl;
+    }
+  }, [currentTenant?.name, currentTenant?.logoUrl]);
 
   // Modals & Drawers
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -395,35 +445,21 @@ export const StorefrontView: React.FC = () => {
                     <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
                   </button>
 
-                  {/* Controles do Canto Direito: Favoritar, Buscar e Status */}
+                  {/* Controles do Canto Direito: Salvar App no Celular, Buscar e Status */}
                   <div className="flex items-center gap-2 relative z-30">
-                    {/* Botão Favoritar / Curtir com Persistência em LocalStorage */}
+                    {/* Botão Salvar App no Celular com Logo */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        const nextFav = !isFavorited;
-                        setIsFavorited(nextFav);
-                        try {
-                          localStorage.setItem(`nuvi_fav_${currentTenant.id}`, String(nextFav));
-                        } catch {}
-                        showAlert({
-                          title: nextFav ? '❤️ Estabelecimento Favoritado!' : 'Removido dos Favoritos',
-                          message: nextFav
-                            ? `${currentTenant.name} agora está nos seus favoritos.`
-                            : `${currentTenant.name} foi removido dos favoritos.`,
-                          variant: 'info'
-                        });
+                        setIsInstallAppModalOpen(true);
                       }}
-                      className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white flex items-center justify-center shadow-lg transition-all border border-white/20 cursor-pointer active:scale-90"
-                      title={isFavorited ? 'Remover dos favoritos' : 'Favoritar Loja'}
+                      className="h-9 px-3 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md text-white flex items-center gap-1.5 shadow-lg transition-all border border-white/20 cursor-pointer active:scale-95 group"
+                      title="Salvar app da loja no seu celular"
                     >
-                      <Heart
-                        className={`w-4 h-4 transition-transform ${
-                          isFavorited ? 'fill-rose-500 text-rose-500 scale-110' : 'text-white'
-                        }`}
-                      />
+                      <Smartphone className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                      <span className="text-[11px] font-bold tracking-tight">Salvar App</span>
                     </button>
 
                     {/* Botão Buscar */}
@@ -2214,6 +2250,139 @@ export const StorefrontView: React.FC = () => {
                 Voltar ao Cardápio
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: SALVAR APP NO CELULAR COM LOGO (PWA) */}
+      {isInstallAppModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-[#11161B] text-slate-900 dark:text-white border border-slate-200 dark:border-[#1C2631] shadow-2xl overflow-hidden text-center">
+            
+            {/* Topo com Botão Fechar */}
+            <div className="p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                📱 Aplicativo da Loja
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsInstallAppModalOpen(false)}
+                className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-neutral-800 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Logo do Estabelecimento */}
+              <div className="relative inline-block mx-auto">
+                {currentTenant.logoUrl ? (
+                  <img
+                    src={currentTenant.logoUrl}
+                    alt={currentTenant.name}
+                    className="w-20 h-20 rounded-2xl object-cover shadow-xl border-2 border-white dark:border-slate-700 ring-4 ring-emerald-500/20 mx-auto"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-xl mx-auto border-2 border-white">
+                    <Store className="w-10 h-10" />
+                  </div>
+                )}
+                <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                </span>
+              </div>
+
+              {/* Informações da Loja */}
+              <div>
+                <h3 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+                  Instalar App {currentTenant.name}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Tenha nosso cardápio na tela inicial do seu celular, com o ícone da loja junto aos seus aplicativos!
+                </p>
+              </div>
+
+              {/* Instruções ou Ação de Instalação */}
+              {deferredPrompt ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    deferredPrompt.prompt();
+                    const choice = await deferredPrompt.userChoice;
+                    if (choice.outcome === 'accepted') {
+                      setIsInstallAppModalOpen(false);
+                      showAlert({
+                        title: '🎉 App Instalado!',
+                        message: `O app da ${currentTenant.name} foi adicionado à sua tela inicial!`,
+                        variant: 'success'
+                      });
+                    }
+                    setDeferredPrompt(null);
+                  }}
+                  className="w-full py-3 px-4 rounded-2xl font-bold text-xs text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Download className="w-4 h-4 stroke-[2.5]" />
+                  <span>Adicionar à Tela Inicial Agora</span>
+                </button>
+              ) : isIOSDevice ? (
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#0B0F14] border border-slate-200 dark:border-slate-800 text-left text-xs space-y-2.5">
+                  <span className="font-bold text-[11px] uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
+                    Como adicionar no iPhone (Safari):
+                  </span>
+                  <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-400">
+                    <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white font-bold flex items-center justify-center text-[10px] shrink-0">1</span>
+                    <span>Toque no botão de <strong>Compartilhar</strong> (ícone do quadrado com a seta para cima na barra inferior).</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-400">
+                    <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white font-bold flex items-center justify-center text-[10px] shrink-0">2</span>
+                    <span>Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong> ➕.</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-400">
+                    <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white font-bold flex items-center justify-center text-[10px] shrink-0">3</span>
+                    <span>Toque em <strong>Adicionar</strong>. O ícone da loja aparecerá na sua tela!</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#0B0F14] border border-slate-200 dark:border-slate-800 text-left text-xs space-y-2">
+                  <span className="font-bold text-[11px] uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
+                    No seu navegador:
+                  </span>
+                  <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                    Toque nos <strong>3 pontinhos</strong> do navegador (canto superior ou inferior) e selecione <strong>"Adicionar à Tela Inicial"</strong> ou <strong>"Instalar Aplicativo"</strong>.
+                  </p>
+                </div>
+              )}
+
+              {/* Botões Secundários: WhatsApp e Copiar Link */}
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <a
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Acesse o cardápio da ${currentTenant.name}: ${window.location.href}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Salvar no Zap</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      navigator.clipboard.writeText(window.location.href);
+                      setIsCopiedStoreLink(true);
+                      setTimeout(() => setIsCopiedStoreLink(false), 2000);
+                    } catch {}
+                  }}
+                  className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  {isCopiedStoreLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-sky-500" />}
+                  <span>{isCopiedStoreLink ? 'Copiado!' : 'Copiar Link'}</span>
+                </button>
+              </div>
+
+            </div>
+
           </div>
         </div>
       )}
