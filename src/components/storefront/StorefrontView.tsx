@@ -208,28 +208,48 @@ export const StorefrontView: React.FC = () => {
     };
   }, []);
 
-  // Atualização dinâmica do Título e Ícone Apple Touch Icon com o Logo da Loja
+  // Configuração inteligente para iPhone e Android: define título, apple-touch-icon e nome da loja
   useEffect(() => {
     if (!currentTenant) return;
     document.title = `${currentTenant.name} - Cardápio Online & Pedidos`;
 
-    if (currentTenant.logoUrl) {
-      let appleIcon = document.querySelector<HTMLLinkElement>("link[rel='apple-touch-icon']");
-      if (!appleIcon) {
-        appleIcon = document.createElement('link');
-        appleIcon.rel = 'apple-touch-icon';
-        document.head.appendChild(appleIcon);
-      }
-      appleIcon.href = currentTenant.logoUrl;
+    const tenantLogo = currentTenant.logoUrl || '/logo3.png';
 
-      let favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
-      if (!favicon) {
-        favicon = document.createElement('link');
-        favicon.rel = 'icon';
-        document.head.appendChild(favicon);
-      }
-      favicon.href = currentTenant.logoUrl;
+    // 1. Apple Touch Icon para iPhone / iPad baixar a logo oficial da página ao compartilhar
+    let appleIcon = document.querySelector<HTMLLinkElement>("link[rel='apple-touch-icon']");
+    if (!appleIcon) {
+      appleIcon = document.createElement('link');
+      appleIcon.rel = 'apple-touch-icon';
+      document.head.appendChild(appleIcon);
     }
+    appleIcon.href = tenantLogo;
+
+    // 2. Favicon do navegador
+    let favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+    if (!favicon) {
+      favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      document.head.appendChild(favicon);
+    }
+    favicon.href = tenantLogo;
+
+    // 3. Nome do App ao adicionar na tela inicial do iPhone
+    let appleTitle = document.querySelector<HTMLMetaElement>("meta[name='apple-mobile-web-app-title']");
+    if (!appleTitle) {
+      appleTitle = document.createElement('meta');
+      appleTitle.name = 'apple-mobile-web-app-title';
+      document.head.appendChild(appleTitle);
+    }
+    appleTitle.content = currentTenant.name;
+
+    // 4. Modo tela cheia para Web App no iOS
+    let appleCapable = document.querySelector<HTMLMetaElement>("meta[name='apple-mobile-web-app-capable']");
+    if (!appleCapable) {
+      appleCapable = document.createElement('meta');
+      appleCapable.name = 'apple-mobile-web-app-capable';
+      document.head.appendChild(appleCapable);
+    }
+    appleCapable.content = 'yes';
   }, [currentTenant?.name, currentTenant?.logoUrl]);
 
   // Modals & Drawers
@@ -445,21 +465,35 @@ export const StorefrontView: React.FC = () => {
                     <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
                   </button>
 
-                  {/* Controles do Canto Direito: Salvar App no Celular, Buscar e Status */}
+                  {/* Controles do Canto Direito: Favoritar, Buscar e Status */}
                   <div className="flex items-center gap-2 relative z-30">
-                    {/* Botão Salvar App no Celular com Logo */}
+                    {/* Botão Favoritar / Curtir (Coração) */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setIsInstallAppModalOpen(true);
+                        const nextFav = !isFavorited;
+                        setIsFavorited(nextFav);
+                        try {
+                          localStorage.setItem(`nuvi_fav_${currentTenant.id}`, String(nextFav));
+                        } catch {}
+                        showAlert({
+                          title: nextFav ? '❤️ Loja Adicionada aos Favoritos!' : 'Removido dos Favoritos',
+                          message: nextFav
+                            ? `${currentTenant.name} foi salva nos seus favoritos.`
+                            : `${currentTenant.name} foi removida dos favoritos.`,
+                          variant: 'info'
+                        });
                       }}
-                      className="h-9 px-3 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-md text-white flex items-center gap-1.5 shadow-lg transition-all border border-white/20 cursor-pointer active:scale-95 group"
-                      title="Salvar app da loja no seu celular"
+                      className="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white flex items-center justify-center shadow-lg transition-all border border-white/20 cursor-pointer active:scale-90"
+                      title={isFavorited ? 'Remover dos favoritos' : 'Favoritar Loja'}
                     >
-                      <Smartphone className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-                      <span className="text-[11px] font-bold tracking-tight">Salvar App</span>
+                      <Heart
+                        className={`w-4 h-4 transition-transform ${
+                          isFavorited ? 'fill-rose-500 text-rose-500 scale-110' : 'text-white'
+                        }`}
+                      />
                     </button>
 
                     {/* Botão Buscar */}
