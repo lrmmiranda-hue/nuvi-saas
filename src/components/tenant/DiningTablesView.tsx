@@ -517,17 +517,21 @@ export const DiningTablesView: React.FC = () => {
             <button
               key={f.id}
               onClick={() => setFilterMode(f.id as any)}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer text-xs flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-xl font-bold transition-all cursor-pointer text-xs flex items-center gap-1.5 ${
                 filterMode === f.id
-                  ? 'nuvi-btn-cyber-blue text-white shadow-sm'
+                  ? isLight
+                    ? 'bg-sky-500/15 text-sky-800 border-0 shadow-none'
+                    : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white border-0 shadow-md shadow-[#0C2340]/40'
                   : isLight
-                  ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                  : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
+                    ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70 font-semibold'
+                    : 'text-slate-400 hover:text-white hover:bg-[#161D24] font-semibold'
               }`}
             >
               <span>{f.label}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                filterMode === f.id ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/10 text-slate-500'
+                filterMode === f.id
+                  ? isLight ? 'bg-sky-200/70 text-sky-900' : 'bg-black/25 text-white'
+                  : isLight ? 'bg-slate-200/70 text-slate-700' : 'bg-white/10 text-slate-400'
               }`}>
                 {f.count}
               </span>

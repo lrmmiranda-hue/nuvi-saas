@@ -382,7 +382,7 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                             </div>
                           </div>
 
-                          {/* Flyer / Badge de Aviso no Banner - Posicionado no topo abaixo dos botões para NUNCA colidir com o logo */}
+                          {/* Flyer / Badge de Aviso no Banner - No topo abaixo dos botões para não colidir com o logo */}
                           {brandingEdits?.badgeNotice && (
                             <div className="absolute top-13 right-3 z-20 max-w-[85%] pointer-events-none">
                               <div

@@ -893,10 +893,14 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 <button
                   key={st.id}
                   onClick={() => setOrderStatusFilter(st.id)}
-                  className={`px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer text-xs ${
                     orderStatusFilter === st.id
-                      ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white font-bold border-0 shadow-md shadow-[#0C2340]/40'
-                      : isLight ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60' : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
+                      ? isLight
+                        ? 'bg-sky-500/15 text-sky-800 border-0 shadow-none'
+                        : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white border-0 shadow-md shadow-[#0C2340]/40'
+                      : isLight
+                        ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70 font-semibold'
+                        : 'text-slate-400 hover:text-white hover:bg-[#161D24] font-semibold'
                   }`}
                 >
                   {st.label}
@@ -1208,9 +1212,13 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
             <button
               onClick={handleOpenAddProduct}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] hover:from-[#0E2A4D] hover:to-[#133763] text-white font-extrabold text-xs border-0 shadow-md shadow-[#0C2340]/40 transition-all active:scale-95 cursor-pointer"
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-extrabold text-xs transition-all active:scale-95 cursor-pointer border ${
+                isLight
+                  ? 'bg-gradient-to-r from-sky-500/15 via-blue-500/15 to-indigo-500/15 hover:from-sky-500/25 hover:to-indigo-500/25 text-sky-800 border-sky-400/40 shadow-xs'
+                  : 'bg-gradient-to-r from-sky-600/25 via-blue-600/25 to-indigo-600/25 hover:from-sky-600/35 hover:to-indigo-600/35 text-sky-200 border-sky-400/40 shadow-xs'
+              }`}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-sky-600 dark:text-sky-300" />
               <span>
                 {isFoodOrPizza 
                   ? (currentTenant.businessSegment === 'pizzaria' 
@@ -1227,30 +1235,48 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
           <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border ${
             isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
           }`}>
-            <div className="flex items-center gap-2 overflow-x-auto text-xs">
+            <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
               <button
                 onClick={() => setProductCategoryFilter('todas')}
-                className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer text-xs ${
                   productCategoryFilter === 'todas'
-                    ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white font-bold border-0 shadow-md shadow-[#0C2340]/40'
-                    : isLight ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70' : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
+                    ? isLight
+                      ? 'bg-sky-500/15 text-sky-800 border-0 shadow-none'
+                      : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white border-0 shadow-md shadow-[#0C2340]/40'
+                    : isLight
+                      ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70 font-semibold'
+                      : 'text-slate-400 hover:text-white hover:bg-[#161D24] font-semibold'
                 }`}
               >
-                Todas ({tenantProducts.length})
+                <span>Todas</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                  productCategoryFilter === 'todas'
+                    ? isLight ? 'bg-sky-200/70 text-sky-900' : 'bg-black/25 text-white'
+                    : isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/10 text-slate-400'
+                }`}>
+                  {tenantProducts.length}
+                </span>
               </button>
-              {tenantCategories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setProductCategoryFilter(cat.id)}
-                  className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
-                    productCategoryFilter === cat.id
-                      ? 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white font-bold border-0 shadow-md shadow-[#0C2340]/40'
-                      : isLight ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70' : 'text-slate-400 hover:text-white hover:bg-[#161D24]'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
+              {tenantCategories.map((cat) => {
+                const isSelected = productCategoryFilter === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setProductCategoryFilter(cat.id)}
+                    className={`px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer text-xs ${
+                      isSelected
+                        ? isLight
+                          ? 'bg-sky-500/15 text-sky-800 border-0 shadow-none'
+                          : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white border-0 shadow-md shadow-[#0C2340]/40'
+                        : isLight
+                          ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70 font-semibold'
+                          : 'text-slate-400 hover:text-white hover:bg-[#161D24] font-semibold'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="relative w-full sm:w-56">

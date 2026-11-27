@@ -904,22 +904,22 @@ export const PDVSalesView: React.FC = () => {
             <button
               type="button"
               onClick={() => setCategoryFilter('todas')}
-              className={`px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 ${categoryFilter === 'todas'
-                  ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40'
+              className={`px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 font-bold ${categoryFilter === 'todas'
+                  ? isLight
+                    ? 'bg-sky-500/15 text-sky-800 border-0 shadow-none'
+                    : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white border-0 shadow-md shadow-[#0C2340]/40'
                   : isLight
-                    ? 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm'
-                    : 'bg-[#0D141C] hover:bg-[#131E2B] text-slate-300 border border-[#1A2533]'
+                    ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70 border-0 font-semibold'
+                    : 'text-slate-400 hover:text-white hover:bg-[#161D24] border-0 font-semibold'
                 }`}
             >
               <div className="flex items-center gap-1.5">
-                <Boxes className="w-4 h-4 text-sky-400" />
+                <Boxes className={`w-4 h-4 ${categoryFilter === 'todas' ? (isLight ? 'text-sky-700' : 'text-white') : 'text-sky-500'}`} />
                 <span>Todas as Categorias</span>
               </div>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${categoryFilter === 'todas'
-                  ? 'bg-white/20 text-white'
-                  : isLight
-                    ? 'bg-slate-100 text-slate-600'
-                    : 'bg-white/10 text-slate-400'
+                  ? isLight ? 'bg-sky-200/70 text-sky-900' : 'bg-black/25 text-white'
+                  : isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/10 text-slate-400'
                 }`}>
                 {tenantProducts.length}
               </span>
@@ -933,11 +933,13 @@ export const PDVSalesView: React.FC = () => {
                   key={cat.id}
                   type="button"
                   onClick={() => setCategoryFilter(cat.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 ${isSelected
-                      ? 'nuvi-btn-cyber-blue text-white font-bold shadow-md shadow-[#0C2340]/40'
+                  className={`px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 active:scale-95 font-bold ${isSelected
+                      ? isLight
+                        ? 'bg-sky-500/15 text-sky-800 border-0 shadow-none'
+                        : 'bg-gradient-to-r from-[#0C2340] via-[#0E2A4D] to-[#0A1E37] text-white border-0 shadow-md shadow-[#0C2340]/40'
                       : isLight
-                        ? 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm'
-                        : 'bg-[#0D141C] hover:bg-[#131E2B] text-slate-300 border border-[#1A2533]'
+                        ? 'text-slate-600 hover:text-sky-600 hover:bg-sky-50/70 border-0 font-semibold'
+                        : 'text-slate-400 hover:text-white hover:bg-[#161D24] border-0 font-semibold'
                     }`}
                 >
                   <span className="text-sm">
