@@ -362,7 +362,7 @@ export const StorefrontView: React.FC = () => {
 
         return (
           <div
-            className={`rounded-3xl border shadow-xl mb-4 sm:mb-6 overflow-hidden transition-all duration-300 backdrop-blur-xl ${
+            className={`rounded-none sm:rounded-3xl border-x-0 border-t-0 sm:border shadow-none sm:shadow-xl mb-3 sm:mb-6 overflow-hidden transition-all duration-300 backdrop-blur-xl ${
               isLight ? 'bg-white text-slate-900 border-slate-200 shadow-slate-200/50' : 'bg-neutral-950 text-white border-neutral-800 shadow-black/60'
             }`}
           >
@@ -488,7 +488,7 @@ export const StorefrontView: React.FC = () => {
               </div>
 
               {/* CARD SOBREPOSTO ESTILO IFOOD (CONFORME FOTO DO USUÁRIO) */}
-              <div className={`px-4 sm:px-6 pb-4 sm:pb-6 relative z-20 -mt-6 sm:-mt-8 rounded-t-[28px] sm:rounded-t-3xl pt-0 transition-colors ${
+              <div className={`px-2.5 sm:px-6 pb-3 sm:pb-6 relative z-20 -mt-6 sm:-mt-8 rounded-t-[20px] sm:rounded-t-3xl pt-0 transition-colors ${
                 isLight ? 'bg-white' : 'bg-neutral-950'
               }`}>
                 {/* 1. CABEÇALHO DO CARD: LOGO COM METADE SOBRE A IMAGEM + NOME E SLOGAN NA FRENTE */}
@@ -790,6 +790,9 @@ export const StorefrontView: React.FC = () => {
             </div>
         );
       })()}
+
+      {/* Container de Conteúdo com Margens Laterais Finas no Celular */}
+      <div className="px-1.5 sm:px-0 space-y-5">
 
       {/* Filter Toolbar & Category Navigation Tabs em Linha Única */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1.5 text-xs scrollbar-none">
@@ -1268,6 +1271,8 @@ export const StorefrontView: React.FC = () => {
         </footer>
       )}
 
+      </div>
+
       {/* Floating Bottom Cart Bar (Apenas se NÃO for modo somente cardápio e houver itens) */}
       {!isMenuOnly && totalCartItems > 0 && (
         <div className="fixed bottom-18 sm:bottom-6 inset-x-4 max-w-lg mx-auto z-30">
@@ -1707,128 +1712,198 @@ export const StorefrontView: React.FC = () => {
 
       {/* TELA INTEIRA DE CONTA NO CELULAR */}
       {isMobileAccountModalOpen && (
-        <div className={`sm:hidden fixed inset-x-0 top-0 bottom-[58px] z-40 overflow-y-auto p-4 sm:p-6 space-y-5 transition-colors ${isLight ? 'bg-white text-slate-900' : 'bg-[#0B0F12] text-white'
-          }`}>
+        <div className={`sm:hidden fixed inset-x-0 top-0 bottom-[58px] z-40 overflow-y-auto p-4 space-y-4 transition-colors ${
+          isLight ? 'bg-slate-50 text-slate-900' : 'bg-[#0B0F12] text-white'
+        }`}>
           {/* Header da Tela de Conta */}
-          <div className={`flex items-center justify-between pb-3 border-b ${isLight ? 'border-slate-200' : 'border-[#1C2631]'
-            }`}>
-            <div>
-              <h2 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Sua Conta</h2>
-              <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{currentTenant.name}</p>
+          <div className={`flex items-center justify-between pb-3 border-b ${
+            isLight ? 'border-slate-200' : 'border-[#1C2631]'
+          }`}>
+            <div className="flex items-center gap-2.5">
+              {currentTenant.logoUrl ? (
+                <img src={currentTenant.logoUrl} alt={currentTenant.name} className="w-8 h-8 rounded-xl object-cover border shadow-xs" />
+              ) : (
+                <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold text-xs">
+                  {currentTenant.name.charAt(0)}
+                </div>
+              )}
+              <div>
+                <h2 className={`text-base font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>Minha Conta</h2>
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{currentTenant.name}</p>
+              </div>
             </div>
             <button
               type="button"
               onClick={() => setIsMobileAccountModalOpen(false)}
-              className={`p-1.5 rounded-full cursor-pointer ${isLight ? 'hover:bg-slate-100 text-slate-500 hover:text-slate-900' : 'hover:bg-[#1C2631] text-slate-400 hover:text-white'
-                }`}
+              className={`p-1.5 rounded-full cursor-pointer ${
+                isLight ? 'hover:bg-slate-200 text-slate-500' : 'hover:bg-[#1C2631] text-slate-400'
+              }`}
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Card de Perfil / Boas-vindas */}
-          <div className={`p-4 rounded-2xl flex items-center gap-3.5 border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
-            }`}>
+          {/* 1. Card de Identificação do Cliente */}
+          <div className={`p-4 rounded-3xl flex items-center gap-3.5 border shadow-xs ${
+            isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+          }`}>
             <div
-              className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-base shadow-xs shrink-0"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-base shadow-xs shrink-0"
               style={{ backgroundColor: `${brandAccent}20`, color: brandAccent }}
             >
               <User className="w-6 h-6" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className={`text-sm font-bold truncate ${isLight ? 'text-slate-900' : 'text-white'}`}>Cliente Convidado</h3>
-              <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Navegando no cardápio de {currentTenant.name}</p>
+              <h3 className={`text-sm font-black truncate ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                Cliente {currentTenant.name}
+              </h3>
+              <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                Pedidos rápidos & acompanhamento
+              </p>
             </div>
           </div>
 
-          {/* Opções e Atalhos */}
-          <div className="space-y-2.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block px-1">
-              Acesso & Serviços
+          {/* 2. Card de Mesa no Salão (Se estiver em uma mesa) */}
+          {tableNumber && (
+            <div className={`p-4 rounded-3xl border space-y-2 shadow-xs ${
+              isLight ? 'bg-sky-50/80 border-sky-200 text-sky-950' : 'bg-sky-950/25 border-sky-500/30 text-sky-200'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="font-extrabold text-xs flex items-center gap-1.5">
+                  <UtensilsCrossed className="w-4 h-4 text-sky-500" />
+                  Mesa {tableNumber} (Em Atendimento)
+                </span>
+                <span className="font-mono font-black text-sm text-sky-600 dark:text-sky-400">
+                  R$ {tableOrdersTotal.toFixed(2)}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Acompanhe os pedidos lançados na sua comanda ou peça a conta.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileAccountModalOpen(false);
+                  setIsTableOrdersModalOpen(true);
+                }}
+                className="w-full py-2 px-3 rounded-xl font-bold text-xs bg-sky-600 hover:bg-sky-500 text-white transition-all shadow-xs flex items-center justify-center gap-1.5"
+              >
+                <ReceiptText className="w-3.5 h-3.5" />
+                <span>Ver Extrato da Comanda / Mesa</span>
+              </button>
+            </div>
+          )}
+
+          {/* 3. Card Destaque: Instalar Aplicativo no Celular com Logo */}
+          <div
+            onClick={() => {
+              setIsMobileAccountModalOpen(false);
+              setIsInstallAppModalOpen(true);
+            }}
+            className="p-4 rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 hover:from-emerald-500/15 flex items-center gap-3.5 cursor-pointer shadow-xs transition-all active:scale-[0.98]"
+          >
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shrink-0">
+              <Smartphone className="w-6 h-6 stroke-[2.2]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 block">
+                Instalar App {currentTenant.name}
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 block leading-tight">
+                Coloque o ícone da loja na sua tela inicial para pedir em 1 toque
+              </span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-emerald-500 shrink-0" />
+          </div>
+
+          {/* 4. Lista de Atalhos Principais para o Cliente */}
+          <div className="space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block px-1">
+              Atalhos & Serviços
             </span>
 
-            {/* 1. Área do Lojista */}
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileAccountModalOpen(false);
-                setViewRole('login_tenant');
-              }}
-              className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs ${isLight
-                  ? 'border-slate-200 bg-white hover:bg-slate-50 text-slate-900'
-                  : 'border-[#1C2631] bg-[#11161B] hover:bg-[#161F28] text-white'
+            {/* Falar no WhatsApp */}
+            {currentTenant.whatsapp?.supportLinkEnabled && (
+              <a
+                href={generateWhatsAppDirectChatUrl(currentTenant)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`w-full p-3.5 rounded-2xl border flex items-center gap-3 font-bold text-xs transition-all shadow-2xs ${
+                  isLight ? 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50' : 'bg-[#11161B] border-[#1C2631] text-white hover:bg-[#161F28]'
                 }`}
-            >
-              <div className={`p-2.5 rounded-xl ${isLight ? 'bg-slate-100 text-slate-700' : 'bg-[#1C2631] text-sky-400'}`}>
-                <Lock className="w-5 h-5" />
-              </div>
-              <div className="text-left flex-1">
-                <span className={`block text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Área do Lojista (Painel & PDV)</span>
-                <span className={`text-xs font-normal ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Acesso com senha e WhatsApp da loja</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </button>
+              >
+                <div className="p-2 rounded-xl bg-emerald-500 text-white">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <div className="text-left flex-1">
+                  <span className="block text-xs font-bold">Falar no WhatsApp da Loja</span>
+                  <span className="text-[10px] font-normal text-slate-400">Atendimento, pedidos especiais e suporte</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-emerald-500" />
+              </a>
+            )}
 
-            {/* 2. Criar Minha Loja */}
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileAccountModalOpen(false);
-                setViewRole('register_tenant');
-              }}
-              className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs ${isLight
-                  ? 'border-blue-200 bg-blue-50/50 hover:bg-blue-50 text-blue-900'
-                  : 'border-[#1C2631] bg-[#11161B] hover:bg-[#161F28] text-white'
-                }`}
-            >
-              <div className={`p-2.5 rounded-xl ${isLight ? 'bg-blue-100 text-blue-700' : 'bg-sky-500/20 text-sky-400'}`}>
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <div className="text-left flex-1">
-                <span className={`block text-sm font-bold ${isLight ? 'text-blue-900' : 'text-white'}`}>Criar Minha Loja Grátis</span>
-                <span className={`text-xs font-normal ${isLight ? 'text-blue-700/80' : 'text-slate-400'}`}>Cadastre seu próprio negócio em 2 minutos</span>
-              </div>
-              <ChevronRight className={`w-4 h-4 ${isLight ? 'text-blue-500' : 'text-slate-400'}`} />
-            </button>
-
-            {/* 3. Informações da Loja */}
+            {/* Informações da Loja, Horários e Mapa */}
             <button
               type="button"
               onClick={() => {
                 setIsMobileAccountModalOpen(false);
                 setIsStoreInfoModalOpen(true);
               }}
-              className="w-full p-4 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs"
+              className={`w-full p-3.5 rounded-2xl border flex items-center gap-3 font-bold text-xs transition-all cursor-pointer shadow-2xs ${
+                isLight ? 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50' : 'bg-[#11161B] border-[#1C2631] text-white hover:bg-[#161F28]'
+              }`}
             >
-              <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700">
-                <Info className="w-5 h-5" />
+              <div className={`p-2 rounded-xl ${isLight ? 'bg-slate-100 text-slate-700' : 'bg-neutral-800 text-neutral-300'}`}>
+                <Info className="w-4 h-4" />
               </div>
               <div className="text-left flex-1">
-                <span className="block text-sm font-bold text-slate-900">Informações do Estabelecimento</span>
-                <span className="text-xs text-slate-500 font-normal">Horários, formas de pagamento e localização</span>
+                <span className="block text-xs font-bold">Informações & Horários</span>
+                <span className="text-[10px] font-normal text-slate-400">Endereço, formas de pagamento e localização</span>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </button>
 
-            {/* 4. WhatsApp */}
-            {currentTenant.whatsapp?.supportLinkEnabled && (
-              <a
-                href={generateWhatsAppDirectChatUrl(currentTenant)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full p-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-50 flex items-center gap-3.5 font-bold text-xs transition-all cursor-pointer shadow-2xs"
-              >
-                <div className="p-2.5 rounded-xl bg-emerald-500 text-white">
-                  <MessageSquare className="w-5 h-5" />
-                </div>
-                <div className="text-left flex-1">
-                  <span className="block text-sm font-bold text-emerald-900">Falar no WhatsApp da Loja</span>
-                  <span className="text-xs text-emerald-700/80 font-normal">Tire dúvidas e faça pedidos especiais</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-emerald-500" />
-              </a>
-            )}
+            {/* Alternar Tema Claro / Escuro */}
+            <button
+              type="button"
+              onClick={toggleThemeMode}
+              className={`w-full p-3.5 rounded-2xl border flex items-center gap-3 font-bold text-xs transition-all cursor-pointer shadow-2xs ${
+                isLight ? 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50' : 'bg-[#11161B] border-[#1C2631] text-white hover:bg-[#161F28]'
+              }`}
+            >
+              <div className={`p-2 rounded-xl ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-neutral-800 text-amber-400'}`}>
+                {isLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              </div>
+              <div className="text-left flex-1">
+                <span className="block text-xs font-bold">{isLight ? 'Ativar Modo Escuro (Dark)' : 'Ativar Modo Claro'}</span>
+                <span className="text-[10px] font-normal text-slate-400">Aparência visual do cardápio</span>
+              </div>
+            </button>
           </div>
+
+          {/* 5. Área Administrativa / Lojista (Discreta no Rodapé) */}
+          <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block px-1">
+              Administração da Loja
+            </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileAccountModalOpen(false);
+                setViewRole('login_tenant');
+              }}
+              className={`w-full p-3 rounded-2xl border flex items-center gap-3 font-semibold text-xs transition-all cursor-pointer ${
+                isLight ? 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700' : 'bg-[#11161B] hover:bg-[#161F28] border-[#1C2631] text-slate-300'
+              }`}
+            >
+              <Lock className="w-4 h-4 text-sky-500" />
+              <span className="flex-1 text-left text-xs">Área do Lojista (Painel & PDV)</span>
+              <ChevronRight className="w-4 h-4 text-slate-400" />
+            </button>
+          </div>
+
         </div>
       )}
 
