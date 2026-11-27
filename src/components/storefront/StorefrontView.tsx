@@ -454,6 +454,14 @@ export const StorefrontView: React.FC = () => {
               <div className={`px-4 sm:px-6 pb-4 sm:pb-6 relative z-20 -mt-6 sm:-mt-8 rounded-t-[28px] sm:rounded-t-3xl pt-0 transition-colors ${
                 isLight ? 'bg-white' : 'bg-neutral-950'
               }`}>
+                {/* Linha Acetinada Suave de Transição com a Mistura da Primária e Secundária */}
+                <div
+                  className="absolute top-0 inset-x-0 h-[2.5px] pointer-events-none rounded-t-3xl"
+                  style={{
+                    background: `linear-gradient(90deg, transparent 0%, ${brandPrimary} 25%, ${brandAccent} 75%, transparent 100%)`
+                  }}
+                />
+
                 {/* 1. CABEÇALHO DO CARD: LOGO COM METADE SOBRE A IMAGEM + NOME E SLOGAN NA FRENTE */}
                 <div className="flex items-end justify-between gap-3 sm:gap-4 mb-2.5">
                   <div
@@ -490,7 +498,7 @@ export const StorefrontView: React.FC = () => {
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
-                          style={{ backgroundColor: brandAccent }}
+                          style={{ background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})` }}
                         >
                           <Sparkles className="w-3 h-3" />
                         </span>
@@ -540,9 +548,14 @@ export const StorefrontView: React.FC = () => {
                                   try { sessionStorage.setItem('nuvi_service_type', 'delivery'); } catch {}
                                   if (tableNumber) setTableNumber(null);
                                 }}
+                                style={activeServiceType === 'delivery' ? {
+                                  background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                  boxShadow: `0 3px 12px ${brandPrimary}45`,
+                                  color: '#ffffff',
+                                } : {}}
                                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   activeServiceType === 'delivery'
-                                    ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                    ? 'text-white'
                                     : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                                 }`}
                               >
@@ -558,9 +571,14 @@ export const StorefrontView: React.FC = () => {
                                   try { sessionStorage.setItem('nuvi_service_type', 'pickup'); } catch {}
                                   if (tableNumber) setTableNumber(null);
                                 }}
+                                style={activeServiceType === 'pickup' ? {
+                                  background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                  boxShadow: `0 3px 12px ${brandPrimary}45`,
+                                  color: '#ffffff',
+                                } : {}}
                                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   activeServiceType === 'pickup'
-                                    ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                    ? 'text-white'
                                     : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                                 }`}
                               >
@@ -579,9 +597,14 @@ export const StorefrontView: React.FC = () => {
                                     setIsTableSelectorOpen(true);
                                   }
                                 }}
+                                style={activeServiceType === 'dine_in' ? {
+                                  background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                  boxShadow: `0 3px 12px ${brandPrimary}45`,
+                                  color: '#ffffff',
+                                } : {}}
                                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   activeServiceType === 'dine_in'
-                                    ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                    ? 'text-white'
                                     : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                                 }`}
                               >
@@ -785,7 +808,8 @@ export const StorefrontView: React.FC = () => {
                   : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
               }`}
             style={selectedCategory === 'todas' ? {
-              backgroundColor: brandAccent,
+              background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+              boxShadow: `0 3px 12px ${brandPrimary}40`,
               color: '#ffffff',
             } : {}}
           >
@@ -806,7 +830,8 @@ export const StorefrontView: React.FC = () => {
                       : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
                   }`}
                 style={isSelected ? {
-                  backgroundColor: brandAccent,
+                  background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                  boxShadow: `0 3px 12px ${brandPrimary}40`,
                   color: '#ffffff',
                 } : {}}
               >
@@ -1011,9 +1036,10 @@ export const StorefrontView: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={(e) => handleQuickAdd(e, product)}
-                                className="flex items-center gap-1 py-1 px-3 rounded-lg font-bold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer text-white"
+                                className="flex items-center gap-1 py-1.5 px-3.5 rounded-xl font-bold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer text-white"
                                 style={{
-                                  backgroundColor: brandAccent,
+                                  background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                  boxShadow: `0 3px 10px ${brandPrimary}40`,
                                   color: '#ffffff',
                                 }}
                               >
@@ -1147,9 +1173,10 @@ export const StorefrontView: React.FC = () => {
                       <button
                         type="button"
                         onClick={(e) => handleQuickAdd(e, product)}
-                        className="flex items-center justify-center gap-1 py-1 px-2 sm:py-1.5 sm:px-3 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs shadow-xs transition-transform active:scale-95 cursor-pointer shrink-0 text-white"
+                        className="flex items-center justify-center gap-1 py-1 px-2.5 sm:py-1.5 sm:px-3.5 rounded-lg sm:rounded-xl font-bold text-[11px] sm:text-xs shadow-xs transition-transform active:scale-95 cursor-pointer shrink-0 text-white"
                         style={{
-                          backgroundColor: brandAccent,
+                          background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                          boxShadow: `0 2px 8px ${brandPrimary}35`,
                           color: '#ffffff',
                         }}
                         title="Adicionar ao Carrinho"
@@ -1238,7 +1265,7 @@ export const StorefrontView: React.FC = () => {
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm"
                 style={{
-                  backgroundColor: brandAccent,
+                  background: brandPrimary,
                   color: '#ffffff',
                 }}
               >
@@ -1254,7 +1281,11 @@ export const StorefrontView: React.FC = () => {
 
             <button
               onClick={() => setIsCartOpen(true)}
-              className="flex items-center gap-1.5 py-2.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all active:scale-[0.98]"
+              style={{
+                background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                boxShadow: `0 4px 16px ${brandPrimary}50`,
+              }}
+              className="flex items-center gap-1.5 py-2.5 px-5 rounded-xl text-white font-extrabold text-xs shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
               <span>Ver Carrinho & Pedir</span>
               <ChevronRight className="w-4 h-4" />

@@ -77,8 +77,8 @@ export const BUSINESS_SEGMENTS: BusinessSegmentConfig[] = [
     namePlaceholder: 'Ex: Bella Napoli Pizzaria, Forno à Lenha',
     sloganExample: 'Massa artesanal, borda recheada e forno à lenha todos os dias',
     badgeNotice: 'Pizzas quentinhas com borda vulcão e refrigerante gelado',
-    primaryColor: '#991B1B', // Vermelho Italiano
-    accentColor: '#10B981', // Verde Manjericão
+    primaryColor: '#991B1B', // Vermelho Italiano Forno à Lenha
+    accentColor: '#EA580C', // Laranja Brasa Quente (Harmonia de Tons Próximos)
     themeStyle: 'amber_pub',
     bannerUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80',
     packTerm: 'Tamanhos & Bordas',
@@ -599,16 +599,22 @@ export const SEGMENT_COLOR_OPTIONS: Record<string, SegmentColorOptions> = {
   },
   pizzaria: {
     option1: {
-      name: 'Verde Manjericão & Vermelho Tomate',
-      desc: 'Cores italianas tradicionais para pizzarias e esfiharias',
-      primary: '#059669',
-      accent: '#E11D48',
+      name: 'Vermelho Forno & Laranja Brasa',
+      desc: 'Tons quentes de forno à lenha e brasa artesanal em perfeita harmonia',
+      primary: '#991B1B',
+      accent: '#EA580C',
     },
     option2: {
-      name: 'Vermelho Forno & Amarelo Queijo',
-      desc: 'Estilo acolhedor de forno à lenha e pizzas crocantes',
-      primary: '#991B1B',
-      accent: '#F59E0B',
+      name: 'Vinho Italiano & Carmim Nobre',
+      desc: 'Tonalidades nobres bem próximas para uma vitrine gourmet sofisticada',
+      primary: '#881337',
+      accent: '#BE123C',
+    },
+    option3: {
+      name: 'Terracota Tradicional & Dourado Forno',
+      desc: 'Cores rústicas da massa dourada e forno artesanal',
+      primary: '#9A3412',
+      accent: '#D97706',
     },
   },
   restaurante_lanchonete: {

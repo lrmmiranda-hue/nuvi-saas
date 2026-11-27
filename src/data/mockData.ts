@@ -253,8 +253,8 @@ export const INITIAL_TENANTS: Tenant[] = [
     branding: {
       logoUrl: '',
       bannerUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80',
-      primaryColor: '#991B1B', // Vermelho Italiano
-      accentColor: '#10B981', // Verde Manjericão
+      primaryColor: '#991B1B', // Vermelho Italiano Forno à Lenha
+      accentColor: '#EA580C', // Laranja Brasa Quente (Harmonia de Tons Próximos)
       themeStyle: 'amber_pub',
       badgeNotice: 'Pizzas quentinhas com borda vulcão e refrigerante gelado',
       fontStyle: 'Outfit',

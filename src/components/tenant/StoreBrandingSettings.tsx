@@ -447,9 +447,14 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                                   <button
                                     type="button"
                                     onClick={() => setPreviewServiceType('delivery')}
+                                    style={previewServiceType === 'delivery' ? {
+                                      background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                      boxShadow: `0 2px 10px ${brandPrimary}45`,
+                                      color: '#ffffff',
+                                    } : {}}
                                     className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
                                       previewServiceType === 'delivery'
-                                        ? 'bg-sky-600 text-white shadow-xs'
+                                        ? 'text-white'
                                         : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                                     }`}
                                   >
@@ -460,9 +465,14 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                                   <button
                                     type="button"
                                     onClick={() => setPreviewServiceType('pickup')}
+                                    style={previewServiceType === 'pickup' ? {
+                                      background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                      boxShadow: `0 2px 10px ${brandPrimary}45`,
+                                      color: '#ffffff',
+                                    } : {}}
                                     className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
                                       previewServiceType === 'pickup'
-                                        ? 'bg-sky-600 text-white shadow-xs'
+                                        ? 'text-white'
                                         : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                                     }`}
                                   >
@@ -473,9 +483,14 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                                   <button
                                     type="button"
                                     onClick={() => setPreviewServiceType('dine_in')}
+                                    style={previewServiceType === 'dine_in' ? {
+                                      background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                      boxShadow: `0 2px 10px ${brandPrimary}45`,
+                                      color: '#ffffff',
+                                    } : {}}
                                     className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
                                       previewServiceType === 'dine_in'
-                                        ? 'bg-sky-600 text-white shadow-xs'
+                                        ? 'text-white'
                                         : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                                     }`}
                                   >
@@ -649,9 +664,14 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                               <button
                                 type="button"
                                 onClick={() => setPreviewServiceType('delivery')}
+                                style={previewServiceType === 'delivery' ? {
+                                  background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                  boxShadow: `0 2px 10px ${brandPrimary}45`,
+                                  color: '#ffffff',
+                                } : {}}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   previewServiceType === 'delivery'
-                                    ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                    ? 'text-white'
                                     : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                                 }`}
                               >
@@ -662,9 +682,14 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                               <button
                                 type="button"
                                 onClick={() => setPreviewServiceType('pickup')}
+                                style={previewServiceType === 'pickup' ? {
+                                  background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                  boxShadow: `0 2px 10px ${brandPrimary}45`,
+                                  color: '#ffffff',
+                                } : {}}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   previewServiceType === 'pickup'
-                                    ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                    ? 'text-white'
                                     : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                                 }`}
                               >
@@ -675,9 +700,14 @@ export const StoreBrandingSettings: React.FC<StoreBrandingSettingsProps> = ({ is
                               <button
                                 type="button"
                                 onClick={() => setPreviewServiceType('dine_in')}
+                                style={previewServiceType === 'dine_in' ? {
+                                  background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                                  boxShadow: `0 2px 10px ${brandPrimary}45`,
+                                  color: '#ffffff',
+                                } : {}}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   previewServiceType === 'dine_in'
-                                    ? 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50'
+                                    ? 'text-white'
                                     : isLight ? 'text-slate-700 hover:text-slate-950' : 'text-neutral-300 hover:text-white'
                                 }`}
                               >
