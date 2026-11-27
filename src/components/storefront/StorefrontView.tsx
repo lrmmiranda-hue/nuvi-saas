@@ -805,112 +805,96 @@ export const StorefrontView: React.FC = () => {
         );
       })()}
 
-      {/* Filter Toolbar & Category Navigation */}
-      <div className="space-y-3">
-        {/* Quick Filter Toggles */}
-        <div className="flex items-center gap-2">
-          {isAdega && (
-            <button
-              onClick={() => setFilterOnlyChilled(!filterOnlyChilled)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap cursor-pointer ${filterOnlyChilled
-                  ? 'bg-sky-500/15 border-sky-500/50 text-sky-600 dark:text-sky-400'
-                  : isLight
-                    ? 'bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
-                    : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
-                }`}
-            >
-              <Snowflake className="w-3.5 h-3.5" />
-              <span>Apenas Geladas</span>
-            </button>
-          )}
+      {/* Filter Toolbar & Category Navigation Tabs em Linha Única */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1.5 text-xs scrollbar-none">
+        {/* Filtro Em Promoção */}
+        <button
+          onClick={() => setFilterOnlyPromo(!filterOnlyPromo)}
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all whitespace-nowrap cursor-pointer shrink-0 ${filterOnlyPromo
+              ? 'bg-red-500/15 border-red-500/50 text-red-600 dark:text-red-400 shadow-2xs'
+              : isLight
+                ? 'bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
+                : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
+            }`}
+        >
+          <Flame className="w-3.5 h-3.5 text-red-500" />
+          <span>Em Promoção</span>
+        </button>
 
+        {/* Filtro Apenas Geladas (se for adega/bebidas) */}
+        {isAdega && (
           <button
-            onClick={() => setFilterOnlyPromo(!filterOnlyPromo)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap cursor-pointer ${filterOnlyPromo
-                ? 'bg-red-500/15 border-red-500/50 text-red-600 dark:text-red-400'
+            onClick={() => setFilterOnlyChilled(!filterOnlyChilled)}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap cursor-pointer shrink-0 ${filterOnlyChilled
+                ? 'bg-sky-500/15 border-sky-500/50 text-sky-600 dark:text-sky-400'
                 : isLight
                   ? 'bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
                   : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
               }`}
           >
-            <Flame className="w-3.5 h-3.5" />
-            <span>Em Promoção</span>
+            <Snowflake className="w-3.5 h-3.5 text-sky-500" />
+            <span>Apenas Geladas</span>
           </button>
-        </div>
+        )}
 
-        {/* Category Navigation Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs scrollbar-none">
-          <button
-            onClick={() => setSelectedCategory('todas')}
-            className={`px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${selectedCategory === 'todas'
-                ? 'shadow-sm font-extrabold text-white'
-                : isLight
-                  ? 'bg-white border border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
-                  : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
-              }`}
-            style={selectedCategory === 'todas' ? {
-              background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
-              boxShadow: `0 3px 12px ${brandPrimary}40`,
-              color: '#ffffff',
-            } : {}}
-          >
-            Todos os Produtos ({tenantProducts.length})
-          </button>
+        {/* Botão Todos os Produtos */}
+        <button
+          onClick={() => setSelectedCategory('todas')}
+          className={`px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 ${selectedCategory === 'todas'
+              ? 'shadow-sm font-extrabold text-white'
+              : isLight
+                ? 'bg-white border border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
+                : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
+            }`}
+          style={selectedCategory === 'todas' ? {
+            background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+            boxShadow: `0 3px 12px ${brandPrimary}40`,
+            color: '#ffffff',
+          } : {}}
+        >
+          Todos os Produtos ({tenantProducts.length})
+        </button>
 
-          {activeCategories.map((cat) => {
-            const isSelected = selectedCategory === cat.id;
+        {/* Abas das Categorias */}
+        {activeCategories.map((cat) => {
+          const isSelected = selectedCategory === cat.id;
 
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer ${isSelected
-                    ? 'shadow-sm font-extrabold text-white'
-                    : isLight
-                      ? 'bg-white border border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
-                      : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
-                  }`}
-                style={isSelected ? {
-                  background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
-                  boxShadow: `0 3px 12px ${brandPrimary}40`,
-                  color: '#ffffff',
-                } : {}}
-              >
-                {categoryIcons[cat.id] || <Sparkles className="w-3.5 h-3.5" />}
-                <span>{cat.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isSelected
-                    ? 'bg-white/20 text-white'
-                    : isLight
-                      ? 'bg-slate-100 text-slate-600'
-                      : 'bg-neutral-800 text-neutral-400'
-                  }`}>
-                  {cat.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 ${isSelected
+                  ? 'shadow-sm font-extrabold text-white'
+                  : isLight
+                    ? 'bg-white border border-slate-300 text-slate-700 hover:text-slate-900 hover:border-slate-400 shadow-2xs'
+                    : 'bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white'
+                }`}
+              style={isSelected ? {
+                background: `linear-gradient(135deg, ${brandPrimary}, ${brandAccent})`,
+                boxShadow: `0 3px 12px ${brandPrimary}40`,
+                color: '#ffffff',
+              } : {}}
+            >
+              {categoryIcons[cat.id] || <Sparkles className="w-3.5 h-3.5" />}
+              <span>{cat.label}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isSelected
+                  ? 'bg-white/20 text-white'
+                  : isLight
+                    ? 'bg-slate-100 text-slate-600'
+                    : 'bg-neutral-800 text-neutral-400'
+                }`}>
+                {cat.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* SEÇÃO PRINCIPAL DO CARDÁPIO: EXIBE TODOS OS ITENS DIRETAMENTE */}
       <div className="space-y-4">
         {selectedCategory !== 'todas' && (
-          <div className="flex items-center gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedCategory('todas');
-                setSearchQuery('');
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${isLight
-                  ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
-                  : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-800'
-                }`}
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Ver Todos os Itens</span>
-            </button>
-            <h2 className={`text-sm sm:text-base font-extrabold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+          <div className="pt-1">
+            <h2 className={`text-base sm:text-lg font-black tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
               {activeCategories.find((c) => c.id === selectedCategory)?.label || 'Produtos Selecionados'}
             </h2>
           </div>
