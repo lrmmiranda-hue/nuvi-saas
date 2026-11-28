@@ -1566,13 +1566,11 @@ export const PDVSalesView: React.FC = () => {
                   : 'bg-neutral-800 text-neutral-500 cursor-not-allowed border-0'
                 }`}
             >
-              <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
-                {paymentMethod === 'pix' ? (
-                  <QrCode className="w-4 h-4 text-white" />
-                ) : (
-                  <CheckCircle className="w-4 h-4 text-white stroke-[3]" />
-                )}
-              </div>
+              {paymentMethod === 'pix' ? (
+                <QrCode className="w-5 h-5 text-white shrink-0" />
+              ) : (
+                <CheckCircle className="w-5 h-5 text-white stroke-[2.5] shrink-0" />
+              )}
               <span className="text-white font-bold tracking-tight">
                 {paymentMethod === 'pix' ? 'Finalizar Venda (F12 / QR Code PIX)' : 'Finalizar Venda (F12)'}
               </span>
