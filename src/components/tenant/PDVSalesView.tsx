@@ -2006,7 +2006,7 @@ export const PDVSalesView: React.FC = () => {
 
               {/* Botões rápidos de desconto */}
               <div className="space-y-1.5">
-                <span className="text-[11px] font-semibold text-slate-400">Atalhos rápidos:</span>
+                <span className={`text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>Atalhos rápidos:</span>
                 <div className="grid grid-cols-4 gap-1.5">
                   {discountType === 'fixed' ? (
                     <>
@@ -2015,7 +2015,11 @@ export const PDVSalesView: React.FC = () => {
                           key={val}
                           type="button"
                           onClick={() => setDiscountInputVal(String(val))}
-                          className="py-1.5 rounded-lg border border-[#1E2B3A] text-xs font-bold text-slate-300 hover:border-emerald-500 hover:text-emerald-400 transition-all cursor-pointer"
+                          className={`py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                            isLight
+                              ? 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50'
+                              : 'bg-transparent border-[#1E2B3A] text-slate-300 hover:border-emerald-500 hover:text-emerald-400'
+                          }`}
                         >
                           R$ {val}
                         </button>
@@ -2028,7 +2032,11 @@ export const PDVSalesView: React.FC = () => {
                           key={val}
                           type="button"
                           onClick={() => setDiscountInputVal(String(val))}
-                          className="py-1.5 rounded-lg border border-[#1E2B3A] text-xs font-bold text-slate-300 hover:border-emerald-500 hover:text-emerald-400 transition-all cursor-pointer"
+                          className={`py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                            isLight
+                              ? 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50'
+                              : 'bg-transparent border-[#1E2B3A] text-slate-300 hover:border-emerald-500 hover:text-emerald-400'
+                          }`}
                         >
                           {val}%
                         </button>
@@ -2184,22 +2192,22 @@ export const PDVSalesView: React.FC = () => {
       )}
 
       {/* Barra de Atalhos Rápidos no Rodapé do Caixa */}
-      <div className={`mt-4 py-2.5 px-4 rounded-xl border flex items-center justify-between flex-wrap gap-2 text-xs font-mono ${
-        isLight ? 'bg-slate-100 border-slate-300 text-slate-700' : 'bg-[#0E1520] border-[#1E2B3A] text-slate-400'
+      <div className={`mt-4 py-2.5 px-4 rounded-xl border flex items-center justify-between flex-wrap gap-2 text-xs font-mono shadow-xs ${
+        isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-[#0E1520] border-[#1E2B3A] text-slate-400'
       }`}>
         <div className="flex items-center gap-2 text-[11px] font-bold">
-          <Keyboard className="w-4 h-4 text-sky-400" />
-          <span className="hidden sm:inline text-slate-300">Atalhos do Teclado:</span>
+          <Keyboard className="w-4 h-4 text-sky-500" />
+          <span className={`hidden sm:inline ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>Atalhos do Teclado:</span>
         </div>
         <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
-          <span className="px-2 py-0.5 rounded bg-black/40 border border-[#1E2B3A] text-sky-300"><strong className="text-white">F2</strong> Bipar</span>
-          <span className="px-2 py-0.5 rounded bg-black/40 border border-[#1E2B3A] text-slate-300"><strong className="text-white">F4</strong> Limpar</span>
-          <span className="px-2 py-0.5 rounded bg-black/40 border border-[#1E2B3A] text-amber-300"><strong className="text-white">F6</strong> Espera</span>
-          <span className="px-2 py-0.5 rounded bg-black/40 border border-[#1E2B3A] text-emerald-300"><strong className="text-white">F8</strong> Dinheiro</span>
-          <span className="px-2 py-0.5 rounded bg-black/40 border border-[#1E2B3A] text-purple-300"><strong className="text-white">F9</strong> PIX</span>
-          <span className="px-2 py-0.5 rounded bg-black/40 border border-[#1E2B3A] text-blue-300"><strong className="text-white">F10</strong> Débito</span>
-          <span className="px-2 py-0.5 rounded bg-black/40 border border-[#1E2B3A] text-indigo-300"><strong className="text-white">F11</strong> Crédito</span>
-          <span className="px-2 py-0.5 rounded bg-sky-600/30 border border-sky-500/50 text-sky-200 font-bold"><strong className="text-white">F12</strong> Finalizar</span>
+          <span className={`px-2 py-0.5 rounded border ${isLight ? 'bg-sky-50 border-sky-200 text-sky-700' : 'bg-black/40 border-[#1E2B3A] text-sky-300'}`}><strong className={isLight ? 'text-slate-900' : 'text-white'}>F2</strong> Bipar</span>
+          <span className={`px-2 py-0.5 rounded border ${isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-black/40 border-[#1E2B3A] text-slate-300'}`}><strong className={isLight ? 'text-slate-900' : 'text-white'}>F4</strong> Limpar</span>
+          <span className={`px-2 py-0.5 rounded border ${isLight ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-black/40 border-[#1E2B3A] text-amber-300'}`}><strong className={isLight ? 'text-slate-900' : 'text-white'}>F6</strong> Espera</span>
+          <span className={`px-2 py-0.5 rounded border ${isLight ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-black/40 border-[#1E2B3A] text-emerald-300'}`}><strong className={isLight ? 'text-slate-900' : 'text-white'}>F8</strong> Dinheiro</span>
+          <span className={`px-2 py-0.5 rounded border ${isLight ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-black/40 border-[#1E2B3A] text-purple-300'}`}><strong className={isLight ? 'text-slate-900' : 'text-white'}>F9</strong> PIX</span>
+          <span className={`px-2 py-0.5 rounded border ${isLight ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-black/40 border-[#1E2B3A] text-blue-300'}`}><strong className={isLight ? 'text-slate-900' : 'text-white'}>F10</strong> Débito</span>
+          <span className={`px-2 py-0.5 rounded border ${isLight ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-black/40 border-[#1E2B3A] text-indigo-300'}`}><strong className={isLight ? 'text-slate-900' : 'text-white'}>F11</strong> Crédito</span>
+          <span className={`px-2 py-0.5 rounded border font-bold ${isLight ? 'bg-sky-500 text-white border-sky-600 shadow-xs' : 'bg-sky-600/30 border-sky-500/50 text-sky-200'}`}><strong className="text-white">F12</strong> Finalizar</span>
         </div>
       </div>
 

@@ -74,6 +74,8 @@ import {
   Play,
   Lock,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   User,
   Bell
@@ -122,13 +124,15 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     'produtos' | 'vendas' | 'estoque' | 'pedidos' | 'mesas' | 'cozinha' | 'configuracoes' | 'visual' | 'whatsapp' | 'entrega' | 'metricas'
   >('produtos');
 
-  // Orders filter & Search & Som & Impressão
+  // Orders filter & Search & Som & Impressão & Paginação
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('todos');
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [orderSoundEnabled, setOrderSoundEnabled] = useState(true);
   const [lastKnownOrderCount, setLastKnownOrderCount] = useState(0);
   const [printingOrder, setPrintingOrder] = useState<Order | null>(null);
   const [thermalPaperWidth, setThermalPaperWidth] = useState<'80mm' | '58mm'>('80mm');
+  const [currentOrderPage, setCurrentOrderPage] = useState<number>(1);
+  const [ordersPerPage, setOrdersPerPage] = useState<number>(6);
 
   // Promo banner dismiss state
   const [isPromoDismissed, setIsPromoDismissed] = useState(false);
@@ -315,20 +319,48 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
   };
 
   // Filtered orders com suporte a busca rápida por nome, número ou telefone
-  const filteredOrders = tenantOrders.filter((order) => {
-    if (orderStatusFilter !== 'todos' && order.status !== orderStatusFilter) {
-      return false;
+  const filteredOrders = useMemo(() => {
+    return tenantOrders.filter((order) => {
+      if (orderStatusFilter !== 'todos' && order.status !== orderStatusFilter) {
+        return false;
+      }
+      if (orderSearchQuery.trim()) {
+        const q = orderSearchQuery.toLowerCase();
+        const matchId = order.id.toLowerCase().includes(q);
+        const matchName = order.customerName.toLowerCase().includes(q);
+        const matchPhone = order.customerPhone.includes(q);
+        const matchStreet = order.address?.street?.toLowerCase().includes(q);
+        return matchId || matchName || matchPhone || matchStreet;
+      }
+      return true;
+    });
+  }, [tenantOrders, orderStatusFilter, orderSearchQuery]);
+
+  // Contadores por status para os filtros rápidos
+  const orderCounts = useMemo(() => {
+    return {
+      todos: tenantOrders.length,
+      novo: tenantOrders.filter((o) => o.status === 'novo').length,
+      preparando: tenantOrders.filter((o) => o.status === 'preparando').length,
+      em_entrega: tenantOrders.filter((o) => o.status === 'em_entrega').length,
+      finalizado: tenantOrders.filter((o) => o.status === 'finalizado').length,
+      cancelado: tenantOrders.filter((o) => o.status === 'cancelado').length,
+    };
+  }, [tenantOrders]);
+
+  // Paginação dos pedidos
+  const totalOrderPages = Math.ceil(filteredOrders.length / ordersPerPage) || 1;
+  const currentOrdersOnPage = useMemo(() => {
+    const startIndex = (currentOrderPage - 1) * ordersPerPage;
+    return filteredOrders.slice(startIndex, startIndex + ordersPerPage);
+  }, [filteredOrders, currentOrderPage, ordersPerPage]);
+
+  // Ajusta a página se a lista diminuir
+  useEffect(() => {
+    if (currentOrderPage > totalOrderPages) {
+      setCurrentOrderPage(1);
     }
-    if (orderSearchQuery.trim()) {
-      const q = orderSearchQuery.toLowerCase();
-      const matchId = order.id.toLowerCase().includes(q);
-      const matchName = order.customerName.toLowerCase().includes(q);
-      const matchPhone = order.customerPhone.includes(q);
-      const matchStreet = order.address?.street?.toLowerCase().includes(q);
-      return matchId || matchName || matchPhone || matchStreet;
-    }
-    return true;
-  });
+  }, [totalOrderPages, currentOrderPage]);
 
   // Filtered products
   const filteredProducts = tenantProducts.filter((product) => {
@@ -788,17 +820,20 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
             }`}>
               {[
-                { id: 'todos', label: 'Todos' },
-                { id: 'novo', label: 'Novos' },
-                { id: 'preparando', label: 'Em Preparo' },
-                { id: 'em_entrega', label: 'Em Entrega' },
-                { id: 'finalizado', label: 'Finalizados' },
-                { id: 'cancelado', label: 'Cancelados' },
+                { id: 'todos', label: 'Todos', count: orderCounts.todos },
+                { id: 'novo', label: 'Novos', count: orderCounts.novo },
+                { id: 'preparando', label: 'Em Preparo', count: orderCounts.preparando },
+                { id: 'em_entrega', label: 'Em Entrega', count: orderCounts.em_entrega },
+                { id: 'finalizado', label: 'Finalizados', count: orderCounts.finalizado },
+                { id: 'cancelado', label: 'Cancelados', count: orderCounts.cancelado },
               ].map((st) => (
                 <button
                   key={st.id}
-                  onClick={() => setOrderStatusFilter(st.id)}
-                  className={`px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer text-xs ${
+                  onClick={() => {
+                    setOrderStatusFilter(st.id);
+                    setCurrentOrderPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap cursor-pointer text-xs flex items-center gap-1.5 ${
                     orderStatusFilter === st.id
                       ? isLight
                         ? 'bg-sky-500/15 text-sky-800 border-0 shadow-none'
@@ -808,7 +843,20 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                         : 'text-slate-400 hover:text-white hover:bg-[#161D24] font-semibold'
                   }`}
                 >
-                  {st.label}
+                  <span>{st.label}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                      orderStatusFilter === st.id
+                        ? isLight
+                          ? 'bg-sky-600 text-white'
+                          : 'bg-sky-500 text-slate-900'
+                        : isLight
+                        ? 'bg-slate-200 text-slate-700'
+                        : 'bg-neutral-800 text-neutral-400'
+                    }`}
+                  >
+                    {st.count}
+                  </span>
                 </button>
               ))}
             </div>
@@ -821,7 +869,10 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                   type="text"
                   placeholder="Buscar pedido, cliente, fone..."
                   value={orderSearchQuery}
-                  onChange={(e) => setOrderSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setOrderSearchQuery(e.target.value);
+                    setCurrentOrderPage(1);
+                  }}
                   className={`w-full pl-8 pr-3 py-1.5 rounded-xl text-xs outline-none border ${
                     isLight ? 'bg-white border-slate-300 text-slate-800 focus:border-sky-500' : 'bg-[#11161B] border-[#1C2631] text-white focus:border-sky-500'
                   }`}
@@ -829,7 +880,10 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 {orderSearchQuery && (
                   <button
                     type="button"
-                    onClick={() => setOrderSearchQuery('')}
+                    onClick={() => {
+                      setOrderSearchQuery('');
+                      setCurrentOrderPage(1);
+                    }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -848,10 +902,14 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                     variant: 'info'
                   });
                 }}
-                className="p-2 rounded-xl border border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-neutral-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all"
+                className={`p-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs ${
+                  isLight
+                    ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-700'
+                    : 'bg-neutral-800/80 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                }`}
                 title="Testar o sino de novo pedido"
               >
-                <Bell className="w-4 h-4 text-amber-400" />
+                <Bell className="w-4 h-4 text-amber-500" />
                 <span className="hidden sm:inline text-[11px]">Testar Som</span>
               </button>
 
@@ -867,10 +925,14 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                     stopContinuousOrderAlert();
                   }
                 }}
-                className={`p-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all ${
+                className={`p-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs ${
                   orderSoundEnabled
-                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-                    : 'bg-neutral-800/80 border-neutral-700 text-neutral-400'
+                    ? isLight
+                      ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-700'
+                      : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                    : isLight
+                    ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-500'
+                    : 'bg-neutral-800/80 hover:bg-neutral-700 border-neutral-700 text-neutral-400'
                 }`}
                 title={orderSoundEnabled ? 'Notificação sonora de novos pedidos ATIVADA (clique para silenciar)' : 'Notificação sonora DESATIVADA'}
               >
@@ -927,124 +989,184 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
             </div>
           )}
 
-          {/* Orders Cards List */}
+          {/* Orders Cards List (Compactado e com suporte a Tema Claro e Escuro) */}
           <div className="space-y-3">
-            {filteredOrders.map((order) => {
+            {currentOrdersOnPage.map((order) => {
               const statusInfo = orderStatusConfig[order.status] || orderStatusConfig.novo;
 
               return (
                 <div
                   key={order.id}
-                  className={`rounded-2xl border p-5 space-y-4 shadow-sm transition-colors ${
-                    isLight ? 'bg-white border-slate-200' : 'bg-[#11161B] border-[#1C2631]'
+                  className={`rounded-2xl border p-3.5 sm:p-4 space-y-3 shadow-xs transition-colors ${
+                    isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#11161B] border-[#1C2631] text-white'
                   }`}
                 >
-                  {/* Order Top Bar */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-800/80 pb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-white text-base">
+                  {/* Order Top Bar - Compacta com ID, Status, Canal, Horário e Cliente */}
+                  <div className={`flex flex-wrap items-center justify-between gap-2 border-b pb-2.5 ${
+                    isLight ? 'border-slate-100' : 'border-neutral-800/80'
+                  }`}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`font-mono font-bold text-sm sm:text-base ${isLight ? 'text-slate-900' : 'text-white'}`}>
                         #{order.id}
                       </span>
-                      <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${statusInfo.bg} ${statusInfo.text}`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusInfo.bg} ${statusInfo.text}`}>
                         {statusInfo.label}
                       </span>
-                      <span className="text-xs font-semibold text-neutral-400">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
+                        isLight ? 'bg-slate-100 text-slate-700' : 'bg-neutral-800/80 text-neutral-300'
+                      }`}>
                         {order.deliveryType === 'delivery' 
-                          ? '🛵 Entrega em Casa' 
+                          ? '🛵 Entrega' 
                           : order.deliveryType === 'mesa' 
-                          ? `🍽️ Mesa ${order.tableNumber || ''} (Salão)` 
-                          : '🏪 Retirada no Balcão'}
+                          ? `🍽️ Mesa ${order.tableNumber || ''}` 
+                          : '🏪 Balcão'}
                       </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
                       {order.deliveryType === 'mesa' && (
-                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                          👨‍🍳 Cozinha • Mesa {order.tableNumber || ''}
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">
+                          👨‍🍳 Cozinha
                         </span>
                       )}
-                      <span className="text-xs text-neutral-500">
-                        {new Date(order.createdAt).toLocaleDateString('pt-BR')} às{' '}
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className={isLight ? 'text-slate-500 font-medium' : 'text-neutral-400'}>
                         {new Date(order.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      <span className={`hidden sm:inline ${isLight ? 'text-slate-400' : 'text-neutral-600'}`}>•</span>
+                      <span className={`hidden sm:inline ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
+                        {new Date(order.createdAt).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
                   </div>
 
-                  {/* Customer & Address Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                    <div>
-                      <span className="text-neutral-500 uppercase text-[10px] block">Cliente</span>
-                      <p className="font-semibold text-white mt-0.5">{order.customerName}</p>
-                      <p className="text-neutral-400 font-mono">{order.customerPhone}</p>
-                    </div>
-
-                    <div>
-                      <span className="text-neutral-500 uppercase text-[10px] block">Endereço de Entrega</span>
-                      {order.address ? (
-                        <p className="text-neutral-300 mt-0.5">
-                          {order.address.street}, {order.address.number}
-                          {order.address.complement ? ` - ${order.address.complement}` : ''}
-                          <span className="block text-neutral-400">{order.address.neighborhood} - {order.address.city}</span>
+                  {/* Resumo em 2 Colunas: Cliente & Entrega / Itens e Total */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 text-xs">
+                    {/* Coluna 1: Dados do Cliente, Endereço e Pagamento */}
+                    <div className={`lg:col-span-4 p-2.5 rounded-xl border flex flex-col justify-between gap-2 ${
+                      isLight ? 'bg-slate-50/80 border-slate-200' : 'bg-[#0B1015] border-[#1C2631]'
+                    }`}>
+                      <div>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider block ${
+                          isLight ? 'text-slate-500' : 'text-neutral-500'
+                        }`}>
+                          Cliente & Contato
+                        </span>
+                        <p className={`font-bold mt-0.5 text-sm ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                          {order.customerName}
                         </p>
-                      ) : (
-                        <p className="text-neutral-300 mt-0.5">Retirada física no balcão</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <span className="text-neutral-500 uppercase text-[10px] block">Forma de Pagamento</span>
-                      <p className="font-medium text-white mt-0.5 capitalize">
-                        {order.paymentMethod === 'cartao_entrega' ? 'Cartão na Entrega (Maquininha)' : order.paymentMethod}
-                      </p>
-                      {order.cashChangeFor && (
-                        <p className="text-blue-400 text-[11px]">
-                          Troco para: R$ {order.cashChangeFor.toFixed(2)}
+                        <p className={`font-mono text-xs ${isLight ? 'text-slate-600' : 'text-neutral-400'}`}>
+                          {order.customerPhone}
                         </p>
-                      )}
-                    </div>
-                  </div>
+                      </div>
 
-                  {/* Itemized Order List */}
-                  <div className="rounded-xl bg-neutral-950 p-3 border border-neutral-800/70 space-y-2">
-                    <span className="text-[10px] uppercase font-semibold text-neutral-500 tracking-wider">
-                      Itens do Pedido ({order.items.length})
-                    </span>
-                    <div className="space-y-1.5 text-xs">
-                      {order.items.map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-neutral-300">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-white tabular-nums">{item.quantity}x</span>
-                            <span>{item.productName} ({item.volume})</span>
-                            {item.chilled && (
-                              <span className="text-[10px] text-sky-400 flex items-center gap-0.5 bg-sky-500/10 px-1 rounded">
-                                <Snowflake className="w-2.5 h-2.5" /> Gelada
-                              </span>
-                            )}
-                            {item.notes && (
-                              <span className="text-[11px] text-blue-400/90 italic">Obs: {item.notes}</span>
-                            )}
-                          </div>
-                          <span className="font-mono text-neutral-200 tabular-nums">
-                            R$ {(item.price * item.quantity).toFixed(2)}
+                      <div className={`border-t pt-2 ${isLight ? 'border-slate-200' : 'border-neutral-800'}`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider block ${
+                          isLight ? 'text-slate-500' : 'text-neutral-500'
+                        }`}>
+                          {order.deliveryType === 'delivery' ? 'Endereço de Entrega' : 'Tipo de Atendimento'}
+                        </span>
+                        {order.address ? (
+                          <p className={`mt-0.5 leading-snug ${isLight ? 'text-slate-700' : 'text-neutral-300'}`}>
+                            <strong>{order.address.street}, {order.address.number}</strong>
+                            {order.address.complement ? ` (${order.address.complement})` : ''}
+                            <span className={`block text-[11px] ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
+                              {order.address.neighborhood} - {order.address.city}
+                            </span>
+                          </p>
+                        ) : (
+                          <p className={`mt-0.5 font-medium ${isLight ? 'text-slate-600' : 'text-neutral-300'}`}>
+                            {order.deliveryType === 'mesa' ? `Atendimento na Mesa ${order.tableNumber}` : 'Retirada física no balcão'}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className={`border-t pt-1.5 flex items-center justify-between ${isLight ? 'border-slate-200' : 'border-neutral-800'}`}>
+                        <span className={`text-[10px] font-bold uppercase ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
+                          Pagamento:
+                        </span>
+                        <span className={`font-bold capitalize ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                          {order.paymentMethod === 'cartao_entrega' ? 'Cartão na Maquininha' : order.paymentMethod}
+                          {order.cashChangeFor && (
+                            <span className="text-sky-500 font-normal ml-1">
+                              (Troco p/ R${order.cashChangeFor.toFixed(0)})
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Coluna 2: Itens do Pedido Compactados */}
+                    <div className={`lg:col-span-8 p-2.5 rounded-xl border flex flex-col justify-between ${
+                      isLight ? 'bg-slate-50/80 border-slate-200' : 'bg-[#0B1015] border-[#1C2631]'
+                    }`}>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between pb-1 border-b border-inherit">
+                          <span className={`text-[10px] uppercase font-bold tracking-wider ${
+                            isLight ? 'text-slate-500' : 'text-neutral-500'
+                          }`}>
+                            Itens ({order.items.length})
+                          </span>
+                          <span className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
+                            Subtotal R$ {order.subtotal.toFixed(2)} + Frete R$ {order.deliveryFee.toFixed(2)}
                           </span>
                         </div>
-                      ))}
-                    </div>
 
-                    <div className="border-t border-neutral-800/80 pt-2 flex items-center justify-between text-xs">
-                      <div className="text-neutral-400 space-x-2">
-                        <span>Subtotal: R$ {order.subtotal.toFixed(2)}</span>
-                        <span>·</span>
-                        <span>Frete: R$ {order.deliveryFee.toFixed(2)}</span>
+                        <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
+                          {order.items.map((item, idx) => (
+                            <div key={idx} className={`flex items-center justify-between py-0.5 text-xs ${
+                              isLight ? 'text-slate-800' : 'text-neutral-300'
+                            }`}>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className={`font-bold px-1.5 py-0.2 rounded text-[11px] ${
+                                  isLight ? 'bg-sky-100 text-sky-800' : 'bg-sky-950/80 text-sky-400 border border-sky-800/40'
+                                }`}>
+                                  {item.quantity}x
+                                </span>
+                                <span className="font-semibold">{item.productName}</span>
+                                {item.volume && (
+                                  <span className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-neutral-500'}`}>
+                                    ({item.volume})
+                                  </span>
+                                )}
+                                {item.chilled && (
+                                  <span className="text-[10px] text-sky-500 flex items-center gap-0.5 bg-sky-500/10 px-1 rounded font-medium">
+                                    <Snowflake className="w-2.5 h-2.5" /> Gelada
+                                  </span>
+                                )}
+                                {item.notes && (
+                                  <span className="text-[10px] text-amber-600 dark:text-amber-400 italic">
+                                    • {item.notes}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="font-mono font-semibold tabular-nums ml-2 shrink-0">
+                                R$ {(item.price * item.quantity).toFixed(2)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div className="text-sm font-bold text-blue-400">
-                        TOTAL: R$ {order.total.toFixed(2)}
+
+                      {/* Total Bar */}
+                      <div className={`border-t pt-2 mt-2 flex items-center justify-between ${
+                        isLight ? 'border-slate-200' : 'border-neutral-800'
+                      }`}>
+                        <div className="text-[11px] text-neutral-400 flex items-center gap-2">
+                          <span className={isLight ? 'text-slate-600' : 'text-neutral-400'}>
+                            {order.deliveryType === 'delivery' ? 'Taxa de Entrega Inclusa' : 'Sem Taxa de Entrega'}
+                          </span>
+                        </div>
+                        <div className="text-sm sm:text-base font-black text-sky-600 dark:text-sky-400 font-mono">
+                          TOTAL: R$ {order.total.toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Action Controls: Status Ágil, Impressão, Rota GPS e WhatsApp */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-neutral-800/80">
+                  <div className={`flex flex-wrap items-center justify-between gap-2 pt-2 border-t ${
+                    isLight ? 'border-slate-100' : 'border-neutral-800/80'
+                  }`}>
                     {/* Botões Rápidos de Mudança de Status */}
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {order.status === 'novo' && (
@@ -1084,7 +1206,11 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                       <select
                         value={order.status}
                         onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
-                        className="px-2.5 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-xs text-neutral-300 focus:outline-none focus:border-blue-500 cursor-pointer"
+                        className={`px-2.5 py-1.5 rounded-lg border text-xs focus:outline-none focus:border-blue-500 cursor-pointer ${
+                          isLight
+                            ? 'bg-slate-100 border-slate-300 text-slate-800'
+                            : 'bg-neutral-800 border-neutral-700 text-neutral-300'
+                        }`}
                       >
                         <option value="novo">Novo</option>
                         <option value="preparando">Em Preparo</option>
@@ -1095,15 +1221,19 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                     </div>
 
                     {/* Ações: Imprimir Comanda, Abrir Rota GPS e WhatsApp */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {/* Botão Imprimir Comanda Térmica (80mm / 58mm / Cozinha / Entrega) */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {/* Botão Imprimir Comanda Térmica */}
                       <button
                         type="button"
                         onClick={() => setPrintingOrder(order)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-200 text-xs font-bold transition-colors cursor-pointer border border-neutral-700 shadow-xs"
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer border shadow-2xs ${
+                          isLight
+                            ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-700'
+                            : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-slate-200'
+                        }`}
                         title="Imprimir Cupom Térmico (80mm / 58mm / Cozinha / Entrega)"
                       >
-                        <Printer className="w-3.5 h-3.5 text-sky-400" />
+                        <Printer className="w-3.5 h-3.5 text-sky-500" />
                         <span>Imprimir Cupom</span>
                       </button>
 
@@ -1115,7 +1245,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                           )}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-sky-600/20 hover:bg-sky-600/30 text-sky-400 border border-sky-500/30 text-xs font-bold transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-sky-600/15 hover:bg-sky-600/25 text-sky-600 dark:text-sky-400 border border-sky-500/30 text-xs font-bold transition-colors cursor-pointer"
                           title="Abrir rota no Google Maps para o motoboy"
                         >
                           <Navigation className="w-3.5 h-3.5" />
@@ -1128,7 +1258,7 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                         href={generateWhatsAppStatusUpdateUrl(order, currentTenant, order.status)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                       >
                         <Send className="w-3.5 h-3.5" />
                         <span>Avisar no Zap</span>
@@ -1139,7 +1269,11 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                         href={`https://wa.me/55${order.customerPhone.replace(/\D/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs transition-colors cursor-pointer"
+                        className={`inline-flex items-center p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                          isLight
+                            ? 'bg-white hover:bg-slate-50 border-slate-300 text-slate-600'
+                            : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-300'
+                        }`}
                         title="Abrir chat direto com o cliente"
                       >
                         <Phone className="w-3.5 h-3.5" />
@@ -1152,15 +1286,126 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
             })}
 
             {filteredOrders.length === 0 && (
-              <div className="p-12 text-center rounded-2xl bg-neutral-900 border border-neutral-800 space-y-2">
-                <ShoppingBag className="w-8 h-8 text-neutral-600 mx-auto" />
-                <h4 className="text-sm font-bold text-white">Nenhum pedido encontrado</h4>
-                <p className="text-xs text-neutral-400">
-                  Os pedidos feitos por clientes na sua vitrine aparecerão instantaneamente aqui.
+              <div className={`p-10 text-center rounded-2xl border space-y-2 ${
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-neutral-900 border-neutral-800'
+              }`}>
+                <ShoppingBag className={`w-8 h-8 mx-auto ${isLight ? 'text-slate-400' : 'text-neutral-600'}`} />
+                <h4 className={`text-sm font-bold ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                  Nenhum pedido encontrado
+                </h4>
+                <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-neutral-400'}`}>
+                  {orderSearchQuery || orderStatusFilter !== 'todos'
+                    ? 'Nenhum pedido corresponde aos filtros selecionados.'
+                    : 'Os pedidos feitos por clientes na sua vitrine aparecerão instantaneamente aqui.'}
                 </p>
               </div>
             )}
           </div>
+
+          {/* BARRA DE PAGINAÇÃO DOS PEDIDOS */}
+          {filteredOrders.length > 0 && (
+            <div className={`p-3 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
+              isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-[#11161B] border-[#1C2631] text-neutral-300'
+            }`}>
+              {/* Informações da página e quantidade */}
+              <div className="flex items-center gap-3">
+                <span>
+                  Mostrando{' '}
+                  <strong>{(currentOrderPage - 1) * ordersPerPage + 1}</strong> a{' '}
+                  <strong>{Math.min(currentOrderPage * ordersPerPage, filteredOrders.length)}</strong> de{' '}
+                  <strong>{filteredOrders.length}</strong> {filteredOrders.length === 1 ? 'pedido' : 'pedidos'}
+                </span>
+
+                {/* Seletor de itens por página */}
+                <div className="flex items-center gap-1.5 ml-2">
+                  <span className="text-[11px] text-slate-400">Por página:</span>
+                  {[6, 10, 20].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => {
+                        setOrdersPerPage(num);
+                        setCurrentOrderPage(1);
+                      }}
+                      className={`px-2 py-0.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        ordersPerPage === num
+                          ? isLight
+                            ? 'bg-sky-500 text-white'
+                            : 'bg-sky-600 text-white'
+                          : isLight
+                          ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                          : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-400'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Controles de Navegação Entre Páginas */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={currentOrderPage <= 1}
+                  onClick={() => setCurrentOrderPage((prev) => Math.max(prev - 1, 1))}
+                  className={`px-2.5 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                    isLight
+                      ? 'bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-700'
+                      : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
+                  }`}
+                  title="Página Anterior"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Anterior</span>
+                </button>
+
+                {/* Números das Páginas */}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalOrderPages }, (_, i) => i + 1)
+                    .filter((p) => p === 1 || p === totalOrderPages || Math.abs(p - currentOrderPage) <= 1)
+                    .map((pageNumber, idx, arr) => {
+                      const showEllipsisBefore = idx > 0 && pageNumber - arr[idx - 1] > 1;
+                      return (
+                        <div key={pageNumber} className="flex items-center gap-1">
+                          {showEllipsisBefore && <span className="px-1 text-slate-400">...</span>}
+                          <button
+                            type="button"
+                            onClick={() => setCurrentOrderPage(pageNumber)}
+                            className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                              currentOrderPage === pageNumber
+                                ? isLight
+                                  ? 'bg-sky-500 text-white shadow-xs'
+                                  : 'bg-sky-600 text-white shadow-xs'
+                                : isLight
+                                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-400'
+                            }`}
+                          >
+                            {pageNumber}
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                <button
+                  type="button"
+                  disabled={currentOrderPage >= totalOrderPages}
+                  onClick={() => setCurrentOrderPage((prev) => Math.min(prev + 1, totalOrderPages))}
+                  className={`px-2.5 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                    isLight
+                      ? 'bg-slate-50 hover:bg-slate-100 border-slate-300 text-slate-700'
+                      : 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200'
+                  }`}
+                  title="Próxima Página"
+                >
+                  <span className="hidden sm:inline">Próxima</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
 
         </div>
       )}
