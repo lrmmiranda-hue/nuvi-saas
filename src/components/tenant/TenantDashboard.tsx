@@ -75,10 +75,13 @@ import {
   Lock,
   ChevronDown,
   Copy,
-  User
+  User,
+  Bell
 } from 'lucide-react';
 import { TableQRCodeModal } from './TableQRCodeModal';
 import { generatePixPayload, getQRCodeUrl } from '../../utils/pixPayload';
+import { playOrderAlertChime, startContinuousOrderAlert, stopContinuousOrderAlert } from '../../utils/audioAlert';
+import { printThermalReceipt } from '../../utils/thermalPrinter';
 
 interface TenantDashboardProps {
   onOpenOnboarding: () => void;
@@ -119,11 +122,13 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     'produtos' | 'vendas' | 'estoque' | 'pedidos' | 'mesas' | 'cozinha' | 'configuracoes' | 'visual' | 'whatsapp' | 'entrega' | 'metricas'
   >('produtos');
 
-  // Orders filter & Search & Som
+  // Orders filter & Search & Som & Impressão
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('todos');
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [orderSoundEnabled, setOrderSoundEnabled] = useState(true);
   const [lastKnownOrderCount, setLastKnownOrderCount] = useState(0);
+  const [printingOrder, setPrintingOrder] = useState<Order | null>(null);
+  const [thermalPaperWidth, setThermalPaperWidth] = useState<'80mm' | '58mm'>('80mm');
 
   // Promo banner dismiss state
   const [isPromoDismissed, setIsPromoDismissed] = useState(false);
@@ -288,125 +293,25 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
     );
   }
 
-  // Som de novo pedido com Web Audio API nativo (sem dependências externas)
-  const playNewOrderNotificationSound = () => {
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      
-      const now = ctx.currentTime;
-      const osc1 = ctx.createOscillator();
-      const gain1 = ctx.createGain();
-      osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(587.33, now); // D5
-      osc1.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
-      gain1.gain.setValueAtTime(0.3, now);
-      gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-      osc1.connect(gain1);
-      gain1.connect(ctx.destination);
-      osc1.start(now);
-      osc1.stop(now + 0.3);
+  // Novos pedidos pendentes de confirmação
+  const unacceptedOrders = tenantOrders.filter(o => o.status === 'novo');
+  const hasUnacceptedOrders = unacceptedOrders.length > 0;
 
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(880, now + 0.18);
-      osc2.frequency.exponentialRampToValueAtTime(1174.66, now + 0.4); // D6
-      gain2.gain.setValueAtTime(0.35, now + 0.18);
-      gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      osc2.start(now + 0.18);
-      osc2.stop(now + 0.55);
-    } catch { }
-  };
-
-  // Monitora novos pedidos que chegam e toca som de alerta
+  // Monitora novos pedidos que chegam e toca som de alerta de alta atenção estilo iFood até aceitar
   useEffect(() => {
-    const currentCount = tenantOrders.filter(o => o.status === 'novo').length;
-    if (lastKnownOrderCount > 0 && currentCount > lastKnownOrderCount && orderSoundEnabled) {
-      playNewOrderNotificationSound();
+    if (hasUnacceptedOrders && orderSoundEnabled) {
+      startContinuousOrderAlert(8);
+    } else {
+      stopContinuousOrderAlert();
     }
-    setLastKnownOrderCount(currentCount);
-  }, [tenantOrders, orderSoundEnabled]);
+    return () => {
+      stopContinuousOrderAlert();
+    };
+  }, [hasUnacceptedOrders, orderSoundEnabled]);
 
-  // Impressão da Comanda de Entrega para o Motoboy / Balcão
-  const handlePrintDeliveryTicket = (order: Order) => {
-    const printWindow = window.open('', '_blank', 'width=380,height=600');
-    if (!printWindow) return;
-
-    const channelText = order.deliveryType === 'delivery'
-      ? '🛵 ENTREGA / DELIVERY'
-      : order.deliveryType === 'mesa'
-      ? `🍽️ MESA ${order.tableNumber || 'S/N'}`
-      : '🛍️ RETIRADA NO BALCÃO';
-
-    const itemsHtml = order.items
-      .map(
-        (it) => `
-        <div style="margin-bottom: 6px; border-bottom: 1px dashed #ccc; padding-bottom: 3px; font-size: 13px;">
-          <div style="font-weight: bold;">${it.quantity}x ${it.productName}</div>
-          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #555;">
-            <span>${it.volume || 'Unidade'}${it.chilled ? ' ❄️ GELADA' : ''}</span>
-            <span>R$ ${(it.price * it.quantity).toFixed(2)}</span>
-          </div>
-          ${it.notes ? `<div style="font-size: 11px; font-style: italic; color: #b00;">Obs: ${it.notes}</div>` : ''}
-        </div>
-      `
-      )
-      .join('');
-
-    const addressHtml = order.address
-      ? `
-        <div style="background: #f4f4f4; border: 1px solid #ddd; padding: 6px; border-radius: 4px; margin: 8px 0; font-size: 12px;">
-          <div style="font-weight: bold; font-size: 13px;">📍 ENDEREÇO DE ENTREGA:</div>
-          <div>${order.address.street}, ${order.address.number}${order.address.complement ? ` - ${order.address.complement}` : ''}</div>
-          <div><b>Bairro:</b> ${order.address.neighborhood} - ${order.address.city}</div>
-          ${order.address.referencePoint ? `<div style="color: #444;">Ref: ${order.address.referencePoint}</div>` : ''}
-        </div>
-      `
-      : '<div style="font-weight: bold; padding: 6px 0;">🏪 RETIRADA FÍSICA NO BALCÃO</div>';
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Comanda - ${order.id}</title>
-          <style>
-            body { font-family: 'Courier New', monospace; padding: 10px; width: 280px; margin: 0 auto; color: #000; }
-            .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px; }
-            .title { font-size: 16px; font-weight: bold; }
-            .badge { font-size: 16px; font-weight: 900; background: #000; color: #fff; padding: 4px; margin: 6px 0; }
-            .meta { font-size: 12px; margin-bottom: 4px; }
-            .footer { font-size: 11px; text-align: center; border-top: 2px solid #000; padding-top: 6px; margin-top: 10px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="title">${currentTenant.name}</div>
-            <div class="badge">${channelText}</div>
-            <div class="meta">PEDIDO: <b>#${order.id}</b></div>
-            <div class="meta">HORA: ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-            <div class="meta"><b>CLIENTE:</b> ${order.customerName}</div>
-            <div class="meta"><b>FONE:</b> ${order.customerPhone}</div>
-          </div>
-          ${addressHtml}
-          <div>${itemsHtml}</div>
-          <div style="border-top: 1px solid #000; padding-top: 6px; margin-top: 6px; font-size: 12px;">
-            <div style="display: flex; justify-content: space-between;"><span>Subtotal:</span><span>R$ ${order.subtotal.toFixed(2)}</span></div>
-            <div style="display: flex; justify-content: space-between;"><span>Taxa de Entrega:</span><span>R$ ${order.deliveryFee.toFixed(2)}</span></div>
-            <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: bold; margin-top: 4px;">
-              <span>TOTAL A COBRAR:</span><span>R$ ${order.total.toFixed(2)}</span>
-            </div>
-            <div style="margin-top: 4px; font-size: 11px;"><b>PAGAMENTO:</b> ${order.paymentMethod.replace('_', ' ').toUpperCase()}${order.cashChangeFor ? ` (Troco para R$ ${order.cashChangeFor.toFixed(2)})` : ''}</div>
-          </div>
-          ${order.notes ? `<div style="background: #eee; padding: 4px; margin-top: 6px; font-size: 11px;"><b>OBS:</b> ${order.notes}</div>` : ''}
-          <div class="footer">NUVI SAAS • CUPOM DO MOTOBOY</div>
-          <script>window.onload = function() { window.print(); window.close(); }</script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+  // Impressão Térmica de Cupom Não-Fiscal (80mm ou 58mm)
+  const handlePrintDeliveryTicket = (order: Order, width: '80mm' | '58mm' = thermalPaperWidth, type: 'completa' | 'cozinha' | 'entrega' = 'completa') => {
+    printThermalReceipt(order, currentTenant, { paperWidth: width, copyType: type });
   };
 
   // Filtered orders com suporte a busca rápida por nome, número ou telefone
@@ -932,13 +837,35 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 )}
               </div>
 
+              {/* Botão Testar Som */}
+              <button
+                type="button"
+                onClick={() => {
+                  playOrderAlertChime();
+                  showAlert({
+                    title: 'Campainha Testada',
+                    message: 'O alerta sonoro foi tocado com sucesso!',
+                    variant: 'info'
+                  });
+                }}
+                className="p-2 rounded-xl border border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-neutral-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all"
+                title="Testar o sino de novo pedido"
+              >
+                <Bell className="w-4 h-4 text-amber-400" />
+                <span className="hidden sm:inline text-[11px]">Testar Som</span>
+              </button>
+
               {/* Botão de Som de Notificação */}
               <button
                 type="button"
                 onClick={() => {
                   const newState = !orderSoundEnabled;
                   setOrderSoundEnabled(newState);
-                  if (newState) playNewOrderNotificationSound();
+                  if (newState) {
+                    playOrderAlertChime();
+                  } else {
+                    stopContinuousOrderAlert();
+                  }
                 }}
                 className={`p-2 rounded-xl border text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all ${
                   orderSoundEnabled
@@ -952,6 +879,53 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
               </button>
             </div>
           </div>
+
+          {/* BANNER DE ALERTA URGENTE: NOVOS PEDIDOS AGUARDANDO ACEITE */}
+          {hasUnacceptedOrders && (
+            <div className="bg-gradient-to-r from-amber-500 via-rose-600 to-amber-500 text-white p-3.5 sm:p-4 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 animate-pulse border border-rose-400/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-white/20 text-white shrink-0">
+                  <Bell className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h4 className="font-black text-sm sm:text-base leading-tight">
+                    🔔 {unacceptedOrders.length} {unacceptedOrders.length === 1 ? 'Novo Pedido Aguardando Confirmação!' : 'Novos Pedidos Aguardando Confirmação!'}
+                  </h4>
+                  <p className="text-xs text-white/90">
+                    A campainha está tocando. Clique em "Aceitar Pedido" para iniciar o preparo e parar o alerta sonoro.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOrderSoundEnabled(false);
+                    stopContinuousOrderAlert();
+                  }}
+                  className="px-3 py-2 rounded-xl bg-black/30 hover:bg-black/40 text-white text-xs font-bold transition-all cursor-pointer"
+                >
+                  Silenciar Som 🔇
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    unacceptedOrders.forEach(o => updateOrderStatus(o.id, 'preparando'));
+                    stopContinuousOrderAlert();
+                    showAlert({
+                      title: 'Pedidos Aceitos!',
+                      message: `${unacceptedOrders.length} pedido(s) enviado(s) para preparo.`,
+                      variant: 'success'
+                    });
+                  }}
+                  className="px-4 py-2 rounded-xl bg-white text-slate-900 hover:bg-slate-100 text-xs font-black shadow-md transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+                >
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>Aceitar Todos ({unacceptedOrders.length}) →</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Orders Cards List */}
           <div className="space-y-3">
@@ -1122,15 +1096,15 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
 
                     {/* Ações: Imprimir Comanda, Abrir Rota GPS e WhatsApp */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      {/* Botão Imprimir Comanda do Motoboy */}
+                      {/* Botão Imprimir Comanda Térmica (80mm / 58mm / Cozinha / Entrega) */}
                       <button
                         type="button"
-                        onClick={() => handlePrintDeliveryTicket(order)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-200 text-xs font-bold transition-colors cursor-pointer border border-neutral-700"
-                        title="Imprimir Cupom do Motoboy / Balcão"
+                        onClick={() => setPrintingOrder(order)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-slate-200 text-xs font-bold transition-colors cursor-pointer border border-neutral-700 shadow-xs"
+                        title="Imprimir Cupom Térmico (80mm / 58mm / Cozinha / Entrega)"
                       >
-                        <Printer className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Imprimir</span>
+                        <Printer className="w-3.5 h-3.5 text-sky-400" />
+                        <span>Imprimir Cupom</span>
                       </button>
 
                       {/* Botão Rota GPS Google Maps para o Entregador */}
@@ -1516,6 +1490,135 @@ export const TenantDashboard: React.FC<TenantDashboardProps> = ({ onOpenOnboardi
                 }`}
               >
                 Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE IMPRESSÃO TÉRMICA (80mm / 58mm / Cozinha / Entrega) */}
+      {printingOrder && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="absolute inset-0" onClick={() => setPrintingOrder(null)} />
+          <div className={`relative max-w-md w-full rounded-3xl border p-5 sm:p-6 shadow-2xl space-y-4 ${
+            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#151c24] border-[#253342] text-white'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 rounded-xl bg-sky-600 text-white">
+                  <Printer className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold">Imprimir Comanda Térmica</h3>
+                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                    Pedido #{printingOrder.id} • {printingOrder.customerName}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPrintingOrder(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Largura da Bobina */}
+            <div>
+              <label className="text-xs font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block mb-2">
+                Largura da Bobina da Impressora:
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setThermalPaperWidth('80mm')}
+                  className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    thermalPaperWidth === '80mm'
+                      ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                      : isLight ? 'bg-slate-50 border-slate-300 text-slate-700' : 'bg-neutral-900 border-neutral-700 text-neutral-300'
+                  }`}
+                >
+                  <span>Bobina 80mm (Padrão)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setThermalPaperWidth('58mm')}
+                  className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    thermalPaperWidth === '58mm'
+                      ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                      : isLight ? 'bg-slate-50 border-slate-300 text-slate-700' : 'bg-neutral-900 border-neutral-700 text-neutral-300'
+                  }`}
+                >
+                  <span>Bobina 58mm (Mini)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Vias de Impressão */}
+            <div className="space-y-2 pt-1">
+              <label className="text-xs font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider block">
+                Escolha a Via para Imprimir:
+              </label>
+              
+              <button
+                type="button"
+                onClick={() => {
+                  handlePrintDeliveryTicket(printingOrder, thermalPaperWidth, 'completa');
+                  setPrintingOrder(null);
+                }}
+                className="w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer hover:border-sky-500 hover:bg-sky-500/10 group"
+              >
+                <div>
+                  <div className="text-xs font-black flex items-center gap-1.5 text-sky-600 dark:text-sky-400">
+                    <Printer className="w-4 h-4" />
+                    <span>Via Completa (Balcão / Caixa / Cliente)</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-0.5">
+                    Contém cabeçalho da loja, itens, valores, observações e forma de pagamento.
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-sky-500 group-hover:translate-x-1 transition-all shrink-0" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handlePrintDeliveryTicket(printingOrder, thermalPaperWidth, 'cozinha');
+                  setPrintingOrder(null);
+                }}
+                className="w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer hover:border-amber-500 hover:bg-amber-500/10 group"
+              >
+                <div>
+                  <div className="text-xs font-black flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                    <ChefHat className="w-4 h-4" />
+                    <span>Via da Cozinha / KDS (Produção)</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-0.5">
+                    Itens em tamanho grande e observações em destaque, sem valores.
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-amber-500 group-hover:translate-x-1 transition-all shrink-0" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handlePrintDeliveryTicket(printingOrder, thermalPaperWidth, 'entrega');
+                  setPrintingOrder(null);
+                }}
+                className="w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer hover:border-emerald-500 hover:bg-emerald-500/10 group"
+              >
+                <div>
+                  <div className="text-xs font-black flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                    <Navigation className="w-4 h-4" />
+                    <span>Via do Entregador (Motoboy)</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-0.5">
+                    Endereço completo em destaque, referência e total a receber.
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />
               </button>
             </div>
           </div>

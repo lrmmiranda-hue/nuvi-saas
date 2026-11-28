@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { Order, OrderStatus } from '../../types';
+import { printThermalReceipt } from '../../utils/thermalPrinter';
+import { playOrderAlertChime } from '../../utils/audioAlert';
 import {
   ChefHat,
   Clock,
@@ -84,54 +86,7 @@ export const KitchenKDSView: React.FC = () => {
   };
 
   const handlePrintKitchenTicket = (order: Order) => {
-    const printWindow = window.open('', '_blank', 'width=380,height=600');
-    if (!printWindow) return;
-
-    const channelText = order.deliveryType === 'mesa'
-      ? `🍽️ MESA ${order.tableNumber?.replace(/[^0-9]/g, '') || order.tableNumber || 'S/N'}`
-      : order.deliveryType === 'delivery'
-      ? '🛵 DELIVERY'
-      : '🛍️ BALCÃO';
-
-    const itemsHtml = order.items
-      .map(
-        (it) => `
-        <div style="margin-bottom: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 4px;">
-          <div style="font-size: 16px; font-weight: bold;">[ ${it.quantity}x ] ${it.productName}</div>
-          ${it.notes ? `<div style="font-size: 13px; font-weight: bold; color: #d00; margin-top: 2px;">⚠️ OBS: ${it.notes}</div>` : ''}
-        </div>
-      `
-      )
-      .join('');
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Comanda Cozinha - ${order.id}</title>
-          <style>
-            body { font-family: 'Courier New', monospace; padding: 10px; width: 280px; margin: 0 auto; color: #000; }
-            .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px; }
-            .title { font-size: 20px; font-weight: bold; }
-            .badge { font-size: 22px; font-weight: 900; background: #000; color: #fff; padding: 4px; margin: 6px 0; }
-            .meta { font-size: 12px; margin-bottom: 6px; }
-            .footer { font-size: 11px; text-align: center; border-top: 2px solid #000; padding-top: 6px; margin-top: 10px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="title">*** COZINHA / KDS ***</div>
-            <div class="badge">${channelText}</div>
-            <div class="meta">PEDIDO: <b>#${order.id}</b> | HORA: ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-            ${order.customerName ? `<div class="meta">CLIENTE: ${order.customerName}</div>` : ''}
-          </div>
-          <div>${itemsHtml}</div>
-          ${order.notes ? `<div style="background: #f0f0f0; padding: 5px; margin-top: 8px; font-size: 13px;"><b>OBS GERAL:</b> ${order.notes}</div>` : ''}
-          <div class="footer">NUVI SAAS • SISTEMA KDS DE COZINHA</div>
-          <script>window.onload = function() { window.print(); window.close(); }</script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+    printThermalReceipt(order, currentTenant, { paperWidth: '80mm', copyType: 'cozinha' });
   };
 
   return (
