@@ -1015,6 +1015,8 @@ export const StorefrontView: React.FC = () => {
                                 <img
                                   src={product.imageUrl}
                                   alt={product.name}
+                                  loading="lazy"
+                                  decoding="async"
                                   referrerPolicy="no-referrer"
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 />
@@ -1110,6 +1112,8 @@ export const StorefrontView: React.FC = () => {
                             <img
                               src={product.imageUrl}
                               alt={product.name}
+                              loading="lazy"
+                              decoding="async"
                               referrerPolicy="no-referrer"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
@@ -1143,6 +1147,8 @@ export const StorefrontView: React.FC = () => {
                       <img
                         src={product.imageUrl}
                         alt={product.name}
+                        loading="lazy"
+                        decoding="async"
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -1801,7 +1807,7 @@ export const StorefrontView: React.FC = () => {
                     >
                       <div className="w-full h-24 sm:h-32 rounded-xl bg-neutral-950/10 dark:bg-neutral-950 overflow-hidden mb-2">
                         {product.imageUrl ? (
-                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                          <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-neutral-400">
                             <Flame className="w-6 h-6" />

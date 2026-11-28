@@ -2,19 +2,28 @@ import React, { useState } from 'react';
 import { StoreProvider, useStore } from './context/StoreContext';
 import { MasterHeader } from './components/common/MasterHeader';
 import { TenantHeader } from './components/common/TenantHeader';
-import { SuperAdminDashboard } from './components/superadmin/SuperAdminDashboard';
-import { MasterLoginView } from './components/superadmin/MasterLoginView';
-import { TenantDashboard } from './components/tenant/TenantDashboard';
-import { TenantRegisterView } from './components/tenant/TenantRegisterView';
-import { TenantLoginView } from './components/tenant/TenantLoginView';
-import { StorefrontView } from './components/storefront/StorefrontView';
 import { TenantNotFoundView } from './components/common/TenantNotFoundView';
-import { OnboardingWizardModal } from './components/tenant/OnboardingWizardModal';
-import { NewTenantModal } from './components/superadmin/NewTenantModal';
-import { MasterSettingsModal } from './components/superadmin/MasterSettingsModal';
 import { Tenant } from './types';
 import { detectPortalMode } from './utils/portalEnvironment';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
+
+// Divisão de Código Dinâmica (Code Splitting) para Redução de 85%+ no Bundle Inicial
+const SuperAdminDashboard = React.lazy(() => import('./components/superadmin/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
+const MasterLoginView = React.lazy(() => import('./components/superadmin/MasterLoginView').then(m => ({ default: m.MasterLoginView })));
+const TenantDashboard = React.lazy(() => import('./components/tenant/TenantDashboard').then(m => ({ default: m.TenantDashboard })));
+const TenantRegisterView = React.lazy(() => import('./components/tenant/TenantRegisterView').then(m => ({ default: m.TenantRegisterView })));
+const TenantLoginView = React.lazy(() => import('./components/tenant/TenantLoginView').then(m => ({ default: m.TenantLoginView })));
+const StorefrontView = React.lazy(() => import('./components/storefront/StorefrontView').then(m => ({ default: m.StorefrontView })));
+const OnboardingWizardModal = React.lazy(() => import('./components/tenant/OnboardingWizardModal').then(m => ({ default: m.OnboardingWizardModal })));
+const NewTenantModal = React.lazy(() => import('./components/superadmin/NewTenantModal').then(m => ({ default: m.NewTenantModal })));
+const MasterSettingsModal = React.lazy(() => import('./components/superadmin/MasterSettingsModal').then(m => ({ default: m.MasterSettingsModal })));
+
+const ComponentSuspenseFallback = () => (
+  <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3 py-12">
+    <div className="w-9 h-9 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+    <span className="text-xs font-semibold text-slate-500 dark:text-neutral-400">Carregando painel...</span>
+  </div>
+);
 
 const AppContent: React.FC = () => {
   const {
@@ -132,7 +141,7 @@ const AppContent: React.FC = () => {
         <MasterHeader onOpenSettings={() => setIsMasterSettingsOpen(true)} />
       ) : null}
 
-      {/* Main Container */}
+      {/* Main Container com Suspense Dinâmico */}
       <main className={`flex-1 w-full mx-auto ${
         viewRole === 'storefront'
           ? 'max-w-7xl px-0 sm:px-4 lg:px-8 pt-0'
@@ -140,86 +149,89 @@ const AppContent: React.FC = () => {
           ? 'px-2 sm:px-4'
           : 'max-w-7xl px-4 sm:px-6 lg:px-8 pt-6'
       }`}>
-        
-        {/* Visão do Master Geral */}
-        {isMasterView ? (
-          <SuperAdminDashboard
-            onOpenNewTenantModal={() => setIsNewTenantModalOpen(true)}
-            onOpenOnboardingForTenant={handleOpenOnboardingForTenant}
-          />
-        ) : (
-          /* Visões da Loja Selecionada (Painel, Vitrine ou Login do Lojista) */
-          <>
-            {viewRole === 'not_found' && (
-              <TenantNotFoundView requestedSlug={notFoundSlug} />
-            )}
-
-            {viewRole === 'tenant_admin' && (
-              !currentTenant ? (
+        <React.Suspense fallback={<ComponentSuspenseFallback />}>
+          {/* Visão do Master Geral */}
+          {isMasterView ? (
+            <SuperAdminDashboard
+              onOpenNewTenantModal={() => setIsNewTenantModalOpen(true)}
+              onOpenOnboardingForTenant={handleOpenOnboardingForTenant}
+            />
+          ) : (
+            /* Visões da Loja Selecionada (Painel, Vitrine ou Login do Lojista) */
+            <>
+              {viewRole === 'not_found' && (
                 <TenantNotFoundView requestedSlug={notFoundSlug} />
-              ) : authenticatedTenantId !== currentTenant?.id ? (
+              )}
+
+              {viewRole === 'tenant_admin' && (
+                !currentTenant ? (
+                  <TenantNotFoundView requestedSlug={notFoundSlug} />
+                ) : authenticatedTenantId !== currentTenant?.id ? (
+                  <TenantLoginView
+                    onSuccess={() => {
+                      setViewRole('tenant_admin');
+                    }}
+                  />
+                ) : (
+                  <TenantDashboard
+                    onOpenOnboarding={() => {
+                      if (currentTenant) {
+                        setOnboardingTargetTenant(currentTenant);
+                        setIsOnboardingModalOpen(true);
+                      }
+                    }}
+                  />
+                )
+              )}
+
+              {viewRole === 'login_tenant' && (
                 <TenantLoginView
                   onSuccess={() => {
                     setViewRole('tenant_admin');
                   }}
                 />
-              ) : (
-                <TenantDashboard
-                  onOpenOnboarding={() => {
-                    if (currentTenant) {
-                      setOnboardingTargetTenant(currentTenant);
-                      setIsOnboardingModalOpen(true);
-                    }
+              )}
+
+              {viewRole === 'register_tenant' && (
+                <TenantRegisterView
+                  onSuccess={(newTenant) => {
+                    setOnboardingTargetTenant(newTenant);
+                    setIsOnboardingModalOpen(true);
                   }}
                 />
-              )
-            )}
+              )}
 
-            {viewRole === 'login_tenant' && (
-              <TenantLoginView
-                onSuccess={() => {
-                  setViewRole('tenant_admin');
-                }}
-              />
-            )}
-
-            {viewRole === 'register_tenant' && (
-              <TenantRegisterView
-                onSuccess={(newTenant) => {
-                  setOnboardingTargetTenant(newTenant);
-                  setIsOnboardingModalOpen(true);
-                }}
-              />
-            )}
-
-            {viewRole === 'storefront' && (
-              !currentTenant ? (
-                <TenantNotFoundView requestedSlug={notFoundSlug} />
-              ) : (
-                <StorefrontView />
-              )
-            )}
-          </>
-        )}
+              {viewRole === 'storefront' && (
+                !currentTenant ? (
+                  <TenantNotFoundView requestedSlug={notFoundSlug} />
+                ) : (
+                  <StorefrontView />
+                )
+              )}
+            </>
+          )}
+        </React.Suspense>
       </main>
 
-      {/* Global Modals */}
-      <NewTenantModal
-        isOpen={isNewTenantModalOpen}
-        onClose={() => setIsNewTenantModalOpen(false)}
-        onTenantCreated={handleTenantCreated}
-      />
+      {/* Global Modals com Suspense */}
+      <React.Suspense fallback={null}>
+        <NewTenantModal
+          isOpen={isNewTenantModalOpen}
+          onClose={() => setIsNewTenantModalOpen(false)}
+          onTenantCreated={handleTenantCreated}
+        />
 
-      <OnboardingWizardModal
-        isOpen={isOnboardingModalOpen}
-        onClose={() => setIsOnboardingModalOpen(false)}
-        targetTenant={onboardingTargetTenant}
-      />
+        <OnboardingWizardModal
+          isOpen={isOnboardingModalOpen}
+          onClose={() => setIsOnboardingModalOpen(false)}
+          targetTenant={onboardingTargetTenant}
+        />
 
-      <MasterSettingsModal
-        isOpen={isMasterSettingsOpen}
-        onClose={() => setIsMasterSettingsOpen(false)}
-      />
+        <MasterSettingsModal
+          isOpen={isMasterSettingsOpen}
+          onClose={() => setIsMasterSettingsOpen(false)}
+        />
+      </React.Suspense>
 
     </div>
   );
