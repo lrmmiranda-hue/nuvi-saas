@@ -832,7 +832,24 @@ export const StorefrontView: React.FC = () => {
       })()}
 
       {/* Container de Conteúdo com Margens Laterais Finas no Celular */}
-      <div className="px-1.5 sm:px-0 space-y-5">
+      <div className="px-1.5 sm:px-0 space-y-4">
+
+        {/* Banner Sutil de Clube de Fidelidade */}
+        <div
+          onClick={() => setIsMobileAccountModalOpen(true)}
+          className="p-2.5 px-3.5 rounded-2xl border border-amber-500/25 bg-gradient-to-r from-amber-500/10 via-rose-500/5 to-amber-500/10 flex items-center justify-between cursor-pointer hover:border-amber-500/40 transition-all shadow-2xs group"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-sm">🎁</span>
+            <div className="text-xs truncate">
+              <span className="font-extrabold text-slate-900 dark:text-white">Clube Fidelidade: </span>
+              <span className="text-amber-700 dark:text-amber-300 font-semibold">Peça no cardápio e ganhe até R$ 20 OFF</span>
+            </div>
+          </div>
+          <span className="text-[11px] font-black text-amber-600 dark:text-amber-400 shrink-0 group-hover:translate-x-0.5 transition-transform">
+            Ver Cartão →
+          </span>
+        </div>
 
       {/* Filter Toolbar & Category Navigation Tabs em Linha Única */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1.5 text-xs scrollbar-none">
@@ -1880,6 +1897,81 @@ export const StorefrontView: React.FC = () => {
               </p>
             </div>
           </div>
+
+          {/* Cartão Fidelidade do Cliente com Selos Visuais */}
+          {(() => {
+            const isLoyaltyEnabled = currentTenant.config?.enableLoyaltyProgram ?? true;
+            if (!isLoyaltyEnabled) return null;
+            const targetStamps = currentTenant.config?.loyaltyTargetOrders || 10;
+            const rewardValue = currentTenant.config?.loyaltyRewardValue || 20;
+            
+            const storageKey = `nuvi_loyalty_${currentTenant.id}`;
+            let currentStamps = 3;
+            try {
+              const saved = localStorage.getItem(storageKey);
+              currentStamps = saved ? Number(saved) : 3;
+            } catch {
+              currentStamps = 3;
+            }
+            const stampsDisplay = currentStamps % targetStamps;
+            const isRewardReady = currentStamps >= targetStamps;
+
+            return (
+              <div className="p-4 rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-rose-500/10 space-y-3 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-xl bg-amber-500/20 text-amber-500">
+                      <Sparkles className="w-4 h-4 fill-amber-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900 dark:text-white">
+                        Cartão Fidelidade {currentTenant.name}
+                      </h4>
+                      <p className="text-[10px] text-amber-700 dark:text-amber-300 font-semibold">
+                        Junte {targetStamps} pedidos e ganhe R$ {rewardValue.toFixed(2)} OFF!
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                    {stampsDisplay}/{targetStamps}
+                  </span>
+                </div>
+
+                {/* Selos / Estrelas Visuais */}
+                <div className="grid grid-cols-5 gap-1.5 pt-1">
+                  {Array.from({ length: targetStamps }).map((_, idx) => {
+                    const isEarned = idx < stampsDisplay;
+                    return (
+                      <div
+                        key={idx}
+                        className={`h-7 rounded-xl flex items-center justify-center text-[10px] font-black border transition-all ${
+                          isEarned
+                            ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white border-amber-500 shadow-xs'
+                            : isLight
+                            ? 'bg-white/80 border-slate-200 text-slate-400'
+                            : 'bg-neutral-900/80 border-neutral-800 text-neutral-600'
+                        }`}
+                      >
+                        {isEarned ? '★' : idx + 1}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="text-[10.5px] text-slate-500 dark:text-slate-400 text-center font-medium">
+                  {isRewardReady ? (
+                    <span className="text-emerald-500 font-bold">
+                      🎉 Parabéns! Sua recompensa de R$ {rewardValue.toFixed(2)} está pronta para ser usada no carrinho!
+                    </span>
+                  ) : (
+                    <span>
+                      Faltam apenas <b>{targetStamps - stampsDisplay} pedidos</b> para você resgatar seu desconto especial!
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* 2. Card de Mesa no Salão (Se estiver em uma mesa) */}
           {tableNumber && (

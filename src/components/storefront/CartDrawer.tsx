@@ -105,7 +105,21 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       ? 0
       : tenant.address.standardDeliveryFee || 0;
 
-  const total = subtotal + deliveryFee;
+  // Programa de Fidelidade & Recompensa
+  const isLoyaltyEnabled = tenant.config?.enableLoyaltyProgram ?? true;
+  const loyaltyTarget = tenant.config?.loyaltyTargetOrders || 10;
+  const loyaltyReward = tenant.config?.loyaltyRewardValue || 20;
+  
+  const loyaltyKey = `nuvi_loyalty_${tenant.id}`;
+  let clientStamps = 3;
+  try {
+    const saved = localStorage.getItem(loyaltyKey);
+    clientStamps = saved ? Number(saved) : 3;
+  } catch {}
+
+  const hasLoyaltyReward = isLoyaltyEnabled && clientStamps >= loyaltyTarget;
+  const loyaltyDiscount = hasLoyaltyReward ? Math.min(loyaltyReward, subtotal) : 0;
+  const total = Math.max(0, subtotal + deliveryFee - loyaltyDiscount);
 
   const remainingForFreeDelivery =
     tenant.address.freeDeliveryThreshold && subtotal < tenant.address.freeDeliveryThreshold
@@ -215,6 +229,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       status: 'novo',
       notes: orderNotes,
     });
+
+    // Registra selo no Cartão Fidelidade
+    if (isLoyaltyEnabled) {
+      try {
+        const nextStamps = hasLoyaltyReward ? 1 : clientStamps + 1;
+        localStorage.setItem(loyaltyKey, String(nextStamps));
+      } catch {}
+    }
 
     const isWhatsAppEnabled = tenant.whatsapp.enableWhatsAppOrders !== false;
 
@@ -843,6 +865,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     <span className={`font-bold ${deliveryFee === 0 ? 'text-emerald-500' : isLight ? 'text-slate-900' : 'text-neutral-200'}`}>
                       {deliveryFee === 0 ? 'Grátis' : `R$ ${deliveryFee.toFixed(2)}`}
                     </span>
+                  </div>
+                )}
+                {loyaltyDiscount > 0 && (
+                  <div className="flex justify-between items-center text-xs text-amber-500 font-bold bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/20">
+                    <span className="flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 fill-amber-400" />
+                      <span>Desconto Clube Fidelidade:</span>
+                    </span>
+                    <span>- R$ {loyaltyDiscount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className={`flex justify-between items-center text-sm font-extrabold pt-1 border-t ${

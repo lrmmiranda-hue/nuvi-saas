@@ -182,6 +182,12 @@ export interface StoreManagementConfig {
   acceptCash: boolean;
   allowOrdersWhenClosed: boolean;
   soundAlerts: boolean;
+  // Programa de Fidelidade & Recompensas para Clientes
+  enableLoyaltyProgram?: boolean; // Ativa programa de fidelidade na vitrine
+  loyaltyTargetOrders?: number; // Meta de pedidos para ganhar recompensa (padrão: 10 pedidos)
+  loyaltyRewardType?: 'discount_fixed' | 'free_delivery' | 'free_item';
+  loyaltyRewardValue?: number; // Valor do desconto em reais (padrão: R$ 20.00)
+  loyaltyRewardDescription?: string; // Ex: "R$ 20,00 OFF no seu pedido"
 }
 
 export type TenantPlan = 'balcao' | 'balcao_estoque' | 'vitrine' | 'hibrido' | 'starter' | 'pro' | 'enterprise';

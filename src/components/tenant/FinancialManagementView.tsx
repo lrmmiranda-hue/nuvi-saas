@@ -26,7 +26,10 @@ import {
   Check,
   Search,
   FileSpreadsheet,
-  Coins
+  Coins,
+  ShieldCheck,
+  Sparkles,
+  Calculator
 } from 'lucide-react';
 
 export const FinancialManagementView: React.FC = () => {
@@ -48,6 +51,9 @@ export const FinancialManagementView: React.FC = () => {
 
   // Filtro de Período: 'hoje' | '7dias' | 'mes' | 'todos'
   const [periodFilter, setPeriodFilter] = useState<'hoje' | '7dias' | 'mes' | 'todos'>('hoje');
+
+  // Simulador de Economia Anti-Marketplace
+  const [simulatedMonthlyRevenue, setSimulatedMonthlyRevenue] = useState<number>(25000);
 
   // Filtro de texto para busca
   const [searchFilter, setSearchFilter] = useState('');
@@ -587,6 +593,121 @@ export const FinancialManagementView: React.FC = () => {
         </div>
 
       </div>
+
+      {/* 💰 CARD DE DESTAQUE: ECONOMIA ANTI-MARKETPLACE (ANTI-IFOOD) */}
+      {(() => {
+        const marketplaceCommissionSaved = totalInflow * 0.23; // Média de 23% cobrado por marketplaces tradicionais
+        const nuviEstimatedCost = 99.0;
+        const simulatedCommissionMonth = simulatedMonthlyRevenue * 0.23;
+        const simulatedCommissionYear = simulatedCommissionMonth * 12;
+        const nuviAnnualCost = nuviEstimatedCost * 12;
+        const simulatedNetAnnualSavings = Math.max(0, simulatedCommissionYear - nuviAnnualCost);
+
+        return (
+          <div className="p-5 sm:p-6 rounded-3xl border border-emerald-500/35 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-sky-500/10 relative overflow-hidden shadow-sm">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+              
+              {/* Lado Esquerdo: Economia Real do Estabelecimento */}
+              <div className="space-y-2 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-black text-[10px] uppercase tracking-wider flex items-center gap-1 border border-emerald-500/30">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Vantagem Competitiva NUVI
+                  </span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    Zero comissões por venda sobre seu faturamento
+                  </span>
+                </div>
+
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>Economia em Comissões de Marketplace</span>
+                  <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
+                </h3>
+
+                <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                  Marketplaces tradicionais cobram em média <b>23% a 27%</b> de comissão sobre cada pedido. Com o seu sistema NUVI próprio, <b>100% do valor da venda fica com você</b>.
+                </p>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                  <div className="p-3 rounded-2xl bg-white/70 dark:bg-black/30 border border-emerald-500/20">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+                      Vendas no Período
+                    </span>
+                    <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white">
+                      R$ {totalInflow.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white/70 dark:bg-black/30 border border-emerald-500/20">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 block">
+                      Taxas Marketplaces (23%)
+                    </span>
+                    <span className="text-base sm:text-lg font-black font-mono text-rose-500">
+                      - R$ {marketplaceCommissionSaved.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 col-span-2 sm:col-span-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
+                      Economizado no seu Bolso
+                    </span>
+                    <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">
+                      + R$ {marketplaceCommissionSaved.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lado Direito: Simulador de Economia Anual */}
+              <div className="lg:w-80 shrink-0 p-4 rounded-2xl bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Calculator className="w-3.5 h-3.5 text-sky-500" />
+                    Simulador de Lucro
+                  </span>
+                  <span className="text-[10px] font-bold text-sky-500">Meta Mensal</span>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between text-xs font-bold mb-1">
+                    <span className="text-slate-500">Se vender por mês:</span>
+                    <span className="font-mono text-sky-600 dark:text-sky-400 text-sm">
+                      R$ {simulatedMonthlyRevenue.toLocaleString('pt-BR')}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="5000"
+                    max="80000"
+                    step="5000"
+                    value={simulatedMonthlyRevenue}
+                    onChange={(e) => setSimulatedMonthlyRevenue(Number(e.target.value))}
+                    className="w-full h-1.5 bg-slate-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                  />
+                  <div className="flex justify-between text-[9px] text-slate-400 font-mono mt-0.5">
+                    <span>R$ 5k</span>
+                    <span>R$ 40k</span>
+                    <span>R$ 80k</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-150 dark:border-neutral-800 space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500">Economia no Ano:</span>
+                    <span className="font-black font-mono text-emerald-600 dark:text-emerald-400 text-sm">
+                      R$ {simulatedNetAnnualSavings.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 text-center">
+                    💰 Isso paga sua assinatura NUVI por mais de 50 anos!
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
 
       {/* MODAL DE EDIÇÃO RÁPIDA DE TROCO INICIAL */}
       {isEditingFund && (
