@@ -1697,7 +1697,7 @@ export const StorefrontView: React.FC = () => {
 
       {/* TELA INTEIRA DE PESQUISA & MENU DE CATEGORIAS (MOBILE & DESKTOP) */}
       {isMobileSearchModalOpen && (
-        <div className={`fixed inset-x-0 top-0 bottom-[58px] sm:bottom-0 sm:inset-0 z-40 sm:z-50 p-4 sm:p-8 flex flex-col overflow-y-auto transition-colors ${isLight ? 'bg-white text-slate-900' : 'bg-[#0B0F12] text-white'
+        <div className={`fixed inset-x-0 top-0 bottom-0 z-40 sm:z-50 p-4 sm:p-8 pb-24 sm:pb-8 flex flex-col overflow-y-auto transition-colors ${isLight ? 'bg-white text-slate-900' : 'bg-[#0B0F12] text-white'
           }`}>
           <div className="max-w-4xl w-full mx-auto space-y-6">
             {/* Header da Busca - idêntico à imagem de referência */}
@@ -1824,7 +1824,7 @@ export const StorefrontView: React.FC = () => {
 
       {/* TELA INTEIRA DE CONTA NO CELULAR */}
       {isMobileAccountModalOpen && (
-        <div className={`sm:hidden fixed inset-x-0 top-0 bottom-[58px] z-40 overflow-y-auto p-4 space-y-4 transition-colors ${
+        <div className={`sm:hidden fixed inset-x-0 top-0 bottom-0 z-40 overflow-y-auto p-4 pb-24 space-y-4 transition-colors ${
           isLight ? 'bg-slate-50 text-slate-900' : 'bg-[#0B0F12] text-white'
         }`}>
           {/* Header da Tela de Conta */}
