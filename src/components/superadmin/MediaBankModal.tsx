@@ -18,7 +18,10 @@ import {
   Globe,
   ArrowLeft,
   Heart,
-  Store
+  Store,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid
 } from 'lucide-react';
 
 interface MediaBankModalProps {
@@ -43,6 +46,23 @@ export const MediaBankModal: React.FC<MediaBankModalProps> = ({ isOpen, onClose 
   const [selectedSegment, setSelectedSegment] = useState<'all' | BusinessSegmentType>('all');
   const [selectedUsage, setSelectedUsage] = useState<'all' | MediaUsageType>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isExpandedCategories, setIsExpandedCategories] = useState(false);
+
+  const categoriesRef = React.useRef<HTMLDivElement>(null);
+  const scrollCategories = (direction: 'left' | 'right') => {
+    if (categoriesRef.current) {
+      const scrollAmount = direction === 'left' ? -260 : 260;
+      categoriesRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const handleWheelCategories = (e: React.WheelEvent) => {
+    if (categoriesRef.current && !isExpandedCategories) {
+      if (e.deltaY !== 0) {
+        categoriesRef.current.scrollLeft += e.deltaY;
+      }
+    }
+  };
 
   // Modo de Adição
   const [isAddingOpen, setIsAddingOpen] = useState(false);
@@ -683,46 +703,145 @@ export const MediaBankModal: React.FC<MediaBankModalProps> = ({ isOpen, onClose 
             </div>
           </div>
 
-          {/* CHIPS HORIZONTAIS DE SEGMENTO DE COMÉRCIO */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
-            <button
-              type="button"
-              onClick={() => setSelectedSegment('all')}
-              className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
-                selectedSegment === 'all'
-                  ? 'bg-sky-600 text-white shadow-sm'
-                  : isLight ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100' : 'bg-[#18202b] border border-[#263445] text-slate-300 hover:bg-[#202b3a]'
-              }`}
-            >
-              <span>Todos os Comércios</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-black">
-                {segmentCounts.all}
+          {/* CABEÇALHO DE CATEGORIAS / SEGMENTOS COM BOTÕES DE NAVEGAÇÃO E EXPANDIR */}
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <span>Categorias de Comércio ({WALLPAPER_CATEGORIES.length + 1})</span>
               </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setIsExpandedCategories(!isExpandedCategories)}
+                className={`text-[11px] font-bold flex items-center gap-1.5 px-3 py-1 rounded-xl border transition-all cursor-pointer shadow-xs ${
+                  isExpandedCategories 
+                    ? 'bg-sky-600 text-white border-sky-600 shadow-sky-600/25' 
+                    : isLight 
+                    ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100' 
+                    : 'bg-[#18202b] border-[#263445] text-slate-300 hover:bg-[#202b3a]'
+                }`}
+                title={isExpandedCategories ? "Recolher para barra deslizante" : "Ver todas as categorias abertas"}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>{isExpandedCategories ? "Modo Linha Deslizante" : "Ver Todas Categorias"}</span>
+              </button>
+            </div>
 
-            {WALLPAPER_CATEGORIES.map((cat) => {
-              const count = segmentCounts[cat.id] || 0;
-              const isSelected = selectedSegment === cat.id;
-              return (
+            {/* BARRA DE CHIPS: EXPANDIDA EM GRADE OU DESLIZANTE COM SETAS */}
+            {isExpandedCategories ? (
+              <div className="flex flex-wrap gap-2 p-2.5 rounded-2xl border border-dashed border-sky-500/30 bg-sky-500/5 max-h-60 overflow-y-auto">
                 <button
-                  key={cat.id}
                   type="button"
-                  onClick={() => setSelectedSegment(cat.id)}
+                  onClick={() => setSelectedSegment('all')}
                   className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
-                    isSelected
+                    selectedSegment === 'all'
                       ? 'bg-sky-600 text-white shadow-sm'
                       : isLight ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100' : 'bg-[#18202b] border border-[#263445] text-slate-300 hover:bg-[#202b3a]'
                   }`}
                 >
-                  <span>{cat.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                    isSelected ? 'bg-white/20 text-white' : count > 0 ? 'bg-sky-500/15 text-sky-500' : 'bg-slate-500/15 text-slate-400'
-                  }`}>
-                    {count}
+                  <span>Todos os Comércios</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-black">
+                    {segmentCounts.all}
                   </span>
                 </button>
-              );
-            })}
+
+                {WALLPAPER_CATEGORIES.map((cat) => {
+                  const count = segmentCounts[cat.id] || 0;
+                  const isSelected = selectedSegment === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setSelectedSegment(cat.id)}
+                      className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                        isSelected
+                          ? 'bg-sky-600 text-white shadow-sm'
+                          : isLight ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100' : 'bg-[#18202b] border border-[#263445] text-slate-300 hover:bg-[#202b3a]'
+                      }`}
+                    >
+                      <span>{cat.label}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                        isSelected ? 'bg-white/20 text-white' : count > 0 ? 'bg-sky-500/15 text-sky-500' : 'bg-slate-500/15 text-slate-400'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="relative flex items-center gap-1.5">
+                {/* Seta para rolar para a esquerda */}
+                <button
+                  type="button"
+                  onClick={() => scrollCategories('left')}
+                  className={`p-1.5 sm:p-2 rounded-xl border shrink-0 transition-all cursor-pointer shadow-xs active:scale-95 ${
+                    isLight ? 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700' : 'bg-[#18202b] hover:bg-[#222e3d] border-[#29384b] text-slate-300'
+                  }`}
+                  title="Rolar categorias para esquerda"
+                >
+                  <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+                </button>
+
+                {/* Container de categorias com suporte a scroll, rodinha do mouse e shrink-0 */}
+                <div
+                  ref={categoriesRef}
+                  onWheel={handleWheelCategories}
+                  className="flex-1 flex items-center gap-2 overflow-x-auto pb-1 scroll-smooth text-xs"
+                  style={{ scrollbarWidth: 'thin' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSegment('all')}
+                    className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                      selectedSegment === 'all'
+                        ? 'bg-sky-600 text-white shadow-sm'
+                        : isLight ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100' : 'bg-[#18202b] border border-[#263445] text-slate-300 hover:bg-[#202b3a]'
+                    }`}
+                  >
+                    <span>Todos os Comércios</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-black">
+                      {segmentCounts.all}
+                    </span>
+                  </button>
+
+                  {WALLPAPER_CATEGORIES.map((cat) => {
+                    const count = segmentCounts[cat.id] || 0;
+                    const isSelected = selectedSegment === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedSegment(cat.id)}
+                        className={`px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                          isSelected
+                            ? 'bg-sky-600 text-white shadow-sm'
+                            : isLight ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100' : 'bg-[#18202b] border border-[#263445] text-slate-300 hover:bg-[#202b3a]'
+                        }`}
+                      >
+                        <span>{cat.label}</span>
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                          isSelected ? 'bg-white/20 text-white' : count > 0 ? 'bg-sky-500/15 text-sky-500' : 'bg-slate-500/15 text-slate-400'
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Seta para rolar para a direita */}
+                <button
+                  type="button"
+                  onClick={() => scrollCategories('right')}
+                  className={`p-1.5 sm:p-2 rounded-xl border shrink-0 transition-all cursor-pointer shadow-xs active:scale-95 ${
+                    isLight ? 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700' : 'bg-[#18202b] hover:bg-[#222e3d] border-[#29384b] text-slate-300'
+                  }`}
+                  title="Rolar categorias para direita"
+                >
+                  <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
